@@ -1,10 +1,10 @@
-package com.okta.sdk.client;
+package com.okta.sdk.api.client;
 
-import com.okta.sdk.model.AnswerChallengeRequest;
-import com.okta.sdk.model.Cancel;
-import com.okta.sdk.model.ChallengeRequest;
-import com.okta.sdk.model.IdentifyRequest;
-import com.okta.sdk.model.OktaIdentityEngineResponse;
+import com.okta.sdk.api.request.AnswerChallengeRequest;
+import com.okta.sdk.api.model.Cancel;
+import com.okta.sdk.api.request.ChallengeRequest;
+import com.okta.sdk.api.request.IdentifyRequest;
+import com.okta.sdk.api.response.OktaIdentityEngineResponse;
 
 public interface Client {
 

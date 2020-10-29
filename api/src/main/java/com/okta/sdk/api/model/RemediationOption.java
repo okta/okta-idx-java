@@ -1,7 +1,11 @@
-package com.okta.sdk.model;
+package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.okta.sdk.api.client.Client;
+import com.okta.sdk.api.request.AnswerChallengeRequest;
+import com.okta.sdk.api.request.ChallengeRequest;
+import com.okta.sdk.api.response.OktaIdentityEngineResponse;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -37,13 +41,24 @@ public class RemediationOption {
     /**
      * Allow you to continue the remediation with this option.
      *
-     * @param mixed The data returned from the enduser
-     *
+     * @param client
+     * @param request
      * @return OktaIdentityEngineResponse
      *
-     * @throws InvalidArgumentException MUST throw this exception when provided data does not contain all required data for the proceed call.
+     * @throws IllegalArgumentException MUST throw this exception when provided data does not contain all required data for the proceed call.
      */
-    //public OktaIdentityEngineResponse proceed($dataFromUi); //TODO: check how data from UI is passed here
+    public OktaIdentityEngineResponse proceed(Client client, Object request) throws IllegalArgumentException {
+        //TODO: refactor this piece
+        if (request != null) {
+            if (request instanceof ChallengeRequest) {
+                return client.challenge((ChallengeRequest) request);
+            }
+            else if (request instanceof AnswerChallengeRequest) {
+                return client.answerChallenge((AnswerChallengeRequest) request);
+            }
+        }
+        return null;
+    }
 
     /**
      * Call this function after all remediation options have been completed. This
@@ -52,11 +67,11 @@ public class RemediationOption {
      * Spec defines this method name as `finalize()` which we cannot use because its a reserved method name.
      * Therefore, named it `finish()`. //TODO: discuss this with team
      *
-     * @return String ??? TODO: discuss this with team
+     * @return String??
      */
     public String finish() {
         //TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -69,4 +84,7 @@ public class RemediationOption {
         return value;
     }
 
+    public String getName() {
+        return name;
+    }
 }

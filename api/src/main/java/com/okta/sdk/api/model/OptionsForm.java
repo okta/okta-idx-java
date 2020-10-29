@@ -1,15 +1,15 @@
-package com.okta.sdk.model;
+package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class CancelRequest {
+public class OptionsForm {
 
-    private String stateHandle;
+    private OptionsFormVal form;
 
-    public CancelRequest(String stateHandle) {
-        this.stateHandle = stateHandle;
+    public OptionsFormVal getForm() {
+        return form;
     }
 }

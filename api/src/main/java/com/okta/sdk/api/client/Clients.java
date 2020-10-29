@@ -1,4 +1,4 @@
-package com.okta.sdk.client;
+package com.okta.sdk.api.client;
 
 import com.okta.commons.lang.Classes;
 

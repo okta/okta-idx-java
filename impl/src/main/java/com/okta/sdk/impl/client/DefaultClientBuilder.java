@@ -3,8 +3,8 @@ package com.okta.sdk.impl.client;
 import com.okta.commons.configcheck.ConfigurationValidator;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Collections;
-import com.okta.sdk.client.Client;
-import com.okta.sdk.client.ClientBuilder;
+import com.okta.sdk.api.client.Client;
+import com.okta.sdk.api.client.ClientBuilder;
 
 import java.util.Set;
 

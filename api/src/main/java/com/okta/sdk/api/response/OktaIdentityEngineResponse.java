@@ -1,10 +1,16 @@
-package com.okta.sdk.model;
+package com.okta.sdk.api.response;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.okta.sdk.api.model.App;
+import com.okta.sdk.api.model.Cancel;
+import com.okta.sdk.api.model.Messages;
+import com.okta.sdk.api.model.Remediation;
+import com.okta.sdk.api.model.Success;
+import com.okta.sdk.api.model.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -88,4 +94,9 @@ public class OktaIdentityEngineResponse {
     public Success getSuccess() {
         return success;
     }
+
+    public Messages getMessages() {
+        return messages;
+    }
+
 }

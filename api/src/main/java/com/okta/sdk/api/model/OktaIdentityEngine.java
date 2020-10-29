@@ -1,4 +1,6 @@
-package com.okta.sdk.model;
+package com.okta.sdk.api.model;
+
+import com.okta.sdk.api.response.OktaIdentityEngineResponse;
 
 import java.util.List;
 

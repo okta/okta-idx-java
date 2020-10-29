@@ -1,4 +1,4 @@
-package com.okta.sdk.model;
+package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 

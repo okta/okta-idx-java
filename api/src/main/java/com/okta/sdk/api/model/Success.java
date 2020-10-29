@@ -1,21 +1,13 @@
-package com.okta.sdk.model;
+package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Options {
+public class Success {
 
-    private String label;
+    private String name;
 
-    private OptionsForm value;
-
-    public String getLabel() {
-        return label;
-    }
-
-    public OptionsForm getValue() {
-        return value;
-    }
+    private String href;
 }
