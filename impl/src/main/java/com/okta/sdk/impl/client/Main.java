@@ -1,5 +1,6 @@
 package com.okta.sdk.impl.client;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Sets;
@@ -33,7 +34,9 @@ public class Main {
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    private static final ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+        .enable(SerializationFeature.INDENT_OUTPUT)
+        .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     public static void main(String... args) throws Exception {
 
@@ -66,6 +69,8 @@ public class Main {
 
             // 2. invoke identify endpoint & get remediation options
             IdentifyRequest identifyRequest = new IdentifyRequest(identifier, stateHandle, false);
+            printInfo(objectMapper.writeValueAsString(identifyRequest), "Identify API Request");
+
             OktaIdentityEngineResponse identifyResponse = client.identify(identifyRequest);
             printInfo(objectMapper.writeValueAsString(identifyResponse), "Identify API Response");
 
@@ -85,10 +90,45 @@ public class Main {
                 // populate methodType -> id mapping
                 Map<String, String> authenticatorOptionsMap = getAuthenticatorOptions(identifyRemediationOptionOptional.get());
 
-                /* password authentication (step-1) */
+                // security_question authentication (step-1)
+
+                // challenge
+                ChallengeRequest secQnAuthenticatorChallengeRequest = new ChallengeRequest(stateHandle, new Authenticator(authenticatorOptionsMap.get("security_question"), "security_question"));
+                printInfo(objectMapper.writeValueAsString(secQnAuthenticatorChallengeRequest), "Challenge API Request (Security Question Authentication)");
+
+                OktaIdentityEngineResponse secQnAuthenticatorChallengeResponse = identifyRemediationOptionOptional.get().proceed(client, secQnAuthenticatorChallengeRequest);
+                printInfo(objectMapper.writeValueAsString(secQnAuthenticatorChallengeResponse), "Challenge API Response (Security Question Authentication)");
+
+                RemediationOption[] secQnAuthenticatorChallengeResponseRemediationOptions = secQnAuthenticatorChallengeResponse.remediation().remediationOptions();
+
+                Optional<RemediationOption> challengeAuthenticatorRemediationOption = Arrays.stream(secQnAuthenticatorChallengeResponseRemediationOptions)
+                    .filter(x -> "challenge-authenticator".equals(x.getName()))
+                    .findFirst();
+
+                // answer challenge
+                final String secQnAnswer = JOptionPane.showInputDialog("Enter Security Question Answer: ");
+
+                if (Strings.isEmpty(secQnAnswer)) {
+                    log.error("Missing Security Question Answer");
+                    return;
+                }
+
+                AnswerChallengeRequest secQnAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(null, secQnAnswer));
+                printInfo(objectMapper.writeValueAsString(secQnAuthenticatorAnswerChallengeRequest), "Answer Challenge API Request (Security Question Authentication)");
+
+                OktaIdentityEngineResponse secQnAuthenticatorAnswerChallengeResponse = challengeAuthenticatorRemediationOption.get().proceed(client, secQnAuthenticatorAnswerChallengeRequest);
+                printInfo(objectMapper.writeValueAsString(secQnAuthenticatorAnswerChallengeResponse), "Answer Challenge API Response (Security Question Authentication)");
+
+                RemediationOption[] secQnAuthenticatorAnswerChallengeResponseRemediationOptions = secQnAuthenticatorAnswerChallengeResponse.remediation().remediationOptions();
+
+/*
+                // below segment is commented out because, only either of security question or password authenticator is required, not both.
+
+                // password authentication (step 1)
 
                 // challenge
                 ChallengeRequest passwordAuthenticatorChallengeRequest = new ChallengeRequest(stateHandle, new Authenticator(authenticatorOptionsMap.get("password"), "password"));
+                printInfo(objectMapper.writeValueAsString(passwordAuthenticatorChallengeRequest), "Challenge API Request (Password Authentication)");
 
                 OktaIdentityEngineResponse passwordAuthenticatorChallengeResponse = identifyRemediationOptionOptional.get().proceed(client, passwordAuthenticatorChallengeRequest);
                 printInfo(objectMapper.writeValueAsString(passwordAuthenticatorChallengeResponse), "Challenge API Response (Password Authentication)");
@@ -107,21 +147,24 @@ public class Main {
                     return;
                 }
 
-                AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(password));
+                AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(password, null));
+                printInfo(objectMapper.writeValueAsString(passwordAuthenticatorAnswerChallengeRequest), "Answer Challenge API Request (Password Authentication)");
 
                 OktaIdentityEngineResponse passwordAuthenticatorAnswerChallengeResponse = challengeAuthenticatorRemediationOption.get().proceed(client, passwordAuthenticatorAnswerChallengeRequest);
                 printInfo(objectMapper.writeValueAsString(passwordAuthenticatorAnswerChallengeResponse), "Answer Challenge API Response (Password Authentication)");
 
                 RemediationOption[] passwordAuthenticatorAnswerChallengeResponseRemediationOptions = passwordAuthenticatorAnswerChallengeResponse.remediation().remediationOptions();
+*/
 
-                /* email authentication (step 2) */
+                // email authentication (step 2)
 
                 // challenge
-                Optional<RemediationOption> emailAuthenticatorRemediationOption = Arrays.stream(passwordAuthenticatorAnswerChallengeResponseRemediationOptions)
+                Optional<RemediationOption> emailAuthenticatorRemediationOption = Arrays.stream(secQnAuthenticatorAnswerChallengeResponseRemediationOptions)
                     .filter(x -> "select-authenticator-authenticate".equals(x.getName()))
                     .findFirst();
 
                 ChallengeRequest emailAuthenticatorChallengeRequest = new ChallengeRequest(stateHandle, new Authenticator(authenticatorOptionsMap.get("email"), "email"));
+                printInfo(objectMapper.writeValueAsString(emailAuthenticatorChallengeRequest), "Challenge API Request (Email Authentication)");
 
                 OktaIdentityEngineResponse emailAuthenticatorChallengeResponse = emailAuthenticatorRemediationOption.get().proceed(client, emailAuthenticatorChallengeRequest);
                 printInfo(objectMapper.writeValueAsString(emailAuthenticatorChallengeResponse), "Challenge API Response (Email Authentication)");
@@ -140,7 +183,8 @@ public class Main {
                     return;
                 }
 
-                AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(emailPasscode));
+                AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(emailPasscode, null));
+                printInfo(objectMapper.writeValueAsString(emailAuthenticatorAnswerChallengeRequest), "Answer Challenge API Request (Email Authentication)");
 
                 OktaIdentityEngineResponse emailAuthenticatorAnswerChallengeResponse = challengeAuthenticatorRemediationOption.get().proceed(client, emailAuthenticatorAnswerChallengeRequest);
                 printInfo(objectMapper.writeValueAsString(emailAuthenticatorAnswerChallengeResponse), "Answer Challenge API Response (Email Authentication)");
@@ -171,9 +215,7 @@ public class Main {
 
             for (Options option : options) {
                 String key = null, val = null;
-                //log.info("=== OPTION LABEL === {}", objectMapper.writeValueAsString(option.getLabel()));
                 FormValue[] optionFormValues = option.getValue().getForm().getValue();
-                //log.info("=== OPTION VALUE === {}", objectMapper.writeValueAsString(optionFormValues));
                 for (FormValue formValue : optionFormValues) {
                     if (formValue.getName().equals("methodType")) {
                         key = String.valueOf(formValue.getValue());

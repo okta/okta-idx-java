@@ -7,7 +7,10 @@ public class Credentials {
 
     public String passcode;
 
-    public Credentials(String passcode) {
+    public String answer;
+
+    public Credentials(String passcode, String answer) {
         this.passcode = passcode;
+        this.answer = answer;
     }
 }
