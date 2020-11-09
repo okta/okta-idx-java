@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020-Present Okta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.okta.sdk.api.client;
 
 import com.okta.commons.lang.Classes;
@@ -5,11 +20,11 @@ import com.okta.commons.lang.Classes;
 public final class Clients {
 
     /**
-     * Returns a new {@link ClientBuilder} instance, used to construct {@link Client} instances.
+     * Builds a {@link OktaIdentityEngineClientBuilder} instance used to construct {@link OktaIdentityEngineClient} instance.
      *
-     * @return a new {@link ClientBuilder} instance, used to construct {@link Client} instances.
+     * @return a new {@link OktaIdentityEngineClientBuilder} instance
      */
-    public static ClientBuilder builder() {
-        return Classes.newInstance("com.okta.sdk.impl.client.DefaultClientBuilder");
+    public static OktaIdentityEngineClientBuilder builder() {
+        return Classes.newInstance("com.okta.sdk.impl.client.DefaultOktaIdentityEngineClientBuilder");
     }
 }

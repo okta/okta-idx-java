@@ -1,9 +1,26 @@
+/*
+ * Copyright 2020-Present Okta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+import java.util.Arrays;
+import java.util.Optional;
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FormValue {
 
@@ -29,6 +46,11 @@ public class FormValue {
     public String type;
 
     /**
+     * Is the value a secret value
+     */
+    public boolean secret;
+
+    /**
      * Default value for the current form value
      */
     public Object value;
@@ -47,37 +69,27 @@ public class FormValue {
      */
     public boolean mutable;
 
-    /**
-     * Returns an object that is populated from the json path.
-     * Example: `$.authenticatorEnrollments.value[0]` would ralate to the jsonPath `OktaIdentityEngine->raw()->authenticatorEnrollments->value[0]`
-     *
-     * @return stdObj|null
-     */
-    public Object relatesTo() {
-        //TODO
-        return null;
+    public String relatesTo() {
+        //TODO: every option has a 'relatesTo` element, so this method should return an array?
+        return Arrays.stream(options).findFirst().get().getRelatesTo();
     }
 
     /**
-     * In the case of a nested object, this will give you the items in the nest.
-     * Example: if `$this->type == "object"`, form() will return an array of FormValue objects
+     * return an array of FormValue objects
      *
-     * @return array array of FormValue
+     * @return {@link OptionsFormVal} array of FormValue
      */
-    public Object form() {
-        //TODO
-        return value;
+    public OptionsFormVal form() {
+        return this.form;
     }
 
     /**
-     * A list of options that is described as an array of formValue.
-     * Will be null if $this->type == "object" but `options` key does not exist
+     * return a list of options that is described as an array of formValue
      *
-     * @return array|null array of FormValue OR null
+     * @return {@link Options} array
      */
     public Options[] options() {
-        //TODO
-        return options;
+        return this.options;
     }
 
     public String getName() {

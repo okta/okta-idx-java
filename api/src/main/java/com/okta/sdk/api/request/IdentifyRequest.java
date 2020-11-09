@@ -1,48 +1,32 @@
+/*
+ * Copyright 2020-Present Okta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.okta.sdk.api.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class IdentifyRequest {
+public class IdentifyRequest extends BaseRequest {
+
+    private String identifier;
+
+    private boolean rememberMe;
 
     public IdentifyRequest(String identifier, String stateHandle, boolean rememberMe) {
         this.identifier = identifier;
         this.stateHandle = stateHandle;
-        this.rememberMe = rememberMe;
-    }
-
-    public IdentifyRequest(String stateHandle, boolean rememberMe) {
-        this.stateHandle = stateHandle;
-        this.rememberMe = rememberMe;
-    }
-
-    private String identifier; // optional
-
-    private String stateHandle;
-
-    private boolean rememberMe;
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
-    public String getStateHandle() {
-        return stateHandle;
-    }
-
-    public void setStateHandle(String stateHandle) {
-        this.stateHandle = stateHandle;
-    }
-
-    public boolean isRememberMe() {
-        return rememberMe;
-    }
-
-    public void setRememberMe(boolean rememberMe) {
         this.rememberMe = rememberMe;
     }
 }

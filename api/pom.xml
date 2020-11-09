@@ -25,7 +25,7 @@
     </parent>
 
     <artifactId>okta-identity-engine-java-sdk-api</artifactId>
-    <name>Okta Identity Engine Java SDK :: API</name>
+    <name>Okta Identity Engine Java SDK :: Api</name>
     <description>
         The Okta Identity Engine Java SDK API .jar provides a Java API that your code can use to make calls to the Okta
         IDX API. This .jar is the only compile-time dependency within the Okta SDK project that your code should

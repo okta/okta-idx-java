@@ -1,22 +1,43 @@
+/*
+ * Copyright 2020-Present Okta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.okta.sdk.api.response;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.okta.sdk.api.client.OktaIdentityEngineClient;
+import com.okta.sdk.api.exception.ProcessingException;
 import com.okta.sdk.api.model.App;
 import com.okta.sdk.api.model.Cancel;
 import com.okta.sdk.api.model.Messages;
 import com.okta.sdk.api.model.Remediation;
 import com.okta.sdk.api.model.Success;
+import com.okta.sdk.api.model.SuccessResponse;
 import com.okta.sdk.api.model.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class OktaIdentityEngineResponse {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+        .enable(SerializationFeature.INDENT_OUTPUT)
+        .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     /**
      * The stateHandle is used for all calls for the flow.
@@ -42,7 +63,7 @@ public class OktaIdentityEngineResponse {
 
     private Messages messages;
 
-    // TODO: model below objects
+    // TODO: model below objects (they are not used for processing anyway)?
 
 /*
     currentAuthenticator
@@ -59,7 +80,9 @@ public class OktaIdentityEngineResponse {
 
     private App app;
 
-    private Success success;
+    private Success success; //TODO: remove this unused class
+
+    private SuccessResponse successWithInteractionCode;
 
     private Cancel cancel;
 
@@ -75,17 +98,37 @@ public class OktaIdentityEngineResponse {
     /**
      * The method to call when you want to cancel the Okta Identity Engine flow. This will return an OktaIdentityEngineResponse
      *
+     * @param client the {@link OktaIdentityEngineClient} instance
      * @return OktaIdentityEngineResponse
+     * @throws ProcessingException when the cancel operation encountered an execution/processing error.
      */
-    public OktaIdentityEngineResponse cancel() {
-        //TODO: do actual cancel from here? better for client to call client.cancel instead.
-        return null;
+    public OktaIdentityEngineResponse cancel(OktaIdentityEngineClient client) throws ProcessingException {
+        return client.cancel(this.stateHandle);
+    }
+
+    /**
+     * Return a success response object after `loginSuccess()` returns true.
+     *
+     * @return SuccessResponse
+     */
+    public SuccessResponse successWithInteractionCode() {
+        return successWithInteractionCode;
+    }
+
+    /**
+     * Check for the status of `successWithInteractionCode` indicating if the login was successful.
+     *
+     * @return boolean
+     */
+    public boolean loginSuccess() {
+        return successWithInteractionCode != null;
     }
 
     /**
      * Returns the raw JSON body of the Okta Identity Engine response.
      *
-     * @return stdObj JSON body
+     * @return String
+     * @throws JsonProcessingException json processing exception
      */
     public String raw() throws JsonProcessingException {
         return objectMapper.writeValueAsString(this);
@@ -98,5 +141,4 @@ public class OktaIdentityEngineResponse {
     public Messages getMessages() {
         return messages;
     }
-
 }

@@ -1,21 +1,33 @@
+/*
+ * Copyright 2020-Present Okta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.okta.sdk.impl.client;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Sets;
 import com.okta.commons.lang.Strings;
-import com.okta.sdk.api.request.AnswerChallengeRequest;
-import com.okta.sdk.api.model.Authenticator;
-import com.okta.sdk.api.request.ChallengeRequest;
-import com.okta.sdk.api.client.Client;
 import com.okta.sdk.api.client.Clients;
+import com.okta.sdk.api.client.OktaIdentityEngineClient;
+import com.okta.sdk.api.model.Authenticator;
 import com.okta.sdk.api.model.Credentials;
 import com.okta.sdk.api.model.FormValue;
-import com.okta.sdk.api.request.IdentifyRequest;
-import com.okta.sdk.api.response.OktaIdentityEngineResponse;
 import com.okta.sdk.api.model.Options;
 import com.okta.sdk.api.model.RemediationOption;
+import com.okta.sdk.api.request.AnswerChallengeRequest;
+import com.okta.sdk.api.request.ChallengeRequest;
+import com.okta.sdk.api.request.IdentifyRequest;
+import com.okta.sdk.api.response.OktaIdentityEngineResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,20 +40,20 @@ import java.util.Optional;
 /**
  * This is a Driver Application to exercise the Okta Identity Engine SDK Client to invoke the core backend APIs.
  *
- * TODO: This class MUST be removed from repo before merging to master.
+ * TODO: This class WILL BE REMOVED before merging to master.
  */
 public class Main {
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    private static final ObjectMapper objectMapper = new ObjectMapper()
-        .enable(SerializationFeature.INDENT_OUTPUT)
-        .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+//    private static final ObjectMapper objectMapper = new ObjectMapper()
+//        .enable(SerializationFeature.INDENT_OUTPUT)
+//        .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     public static void main(String... args) throws Exception {
 
         // build the Okta Identity Engine client
-        final Client client = Clients.builder()
+        final OktaIdentityEngineClient client = Clients.builder()
             .setIssuer("https://devex-idx-testing.oktapreview.com")
             .setClientId("test-client-id")
             .setScopes(Sets.newHashSet("test-scope-1", "test-scope-2"))
@@ -55,9 +67,15 @@ public class Main {
             return;
         }
 
+        runHappyPath(client, stateHandle);
+
+    }
+
+    static void runHappyPath(OktaIdentityEngineClient client, String stateHandle) throws Exception {
+
         // 1. invoke introspect endpoint with the state handle
         OktaIdentityEngineResponse introspectResponse = client.introspect(stateHandle);
-        printInfo(objectMapper.writeValueAsString(introspectResponse), "Introspect API Response");
+        //printInfo(objectMapper.writeValueAsString(introspectResponse), "Introspect API Response");
 
         if (introspectResponse != null) {
             final String identifier = JOptionPane.showInputDialog("Enter identifier (email): ");
@@ -69,15 +87,15 @@ public class Main {
 
             // 2. invoke identify endpoint & get remediation options
             IdentifyRequest identifyRequest = new IdentifyRequest(identifier, stateHandle, false);
-            printInfo(objectMapper.writeValueAsString(identifyRequest), "Identify API Request");
+            //printInfo(objectMapper.writeValueAsString(identifyRequest), "Identify API Request");
 
             OktaIdentityEngineResponse identifyResponse = client.identify(identifyRequest);
-            printInfo(objectMapper.writeValueAsString(identifyResponse), "Identify API Response");
+            //printInfo(objectMapper.writeValueAsString(identifyResponse), "Identify API Response");
 
             if (identifyResponse != null) {
                 if (identifyResponse.getMessages() != null && identifyResponse.getMessages().hasErrorValue()) {
-                    JOptionPane.showMessageDialog(null,
-                        objectMapper.writeValueAsString(identifyResponse.getMessages()), "Authentication Error", JOptionPane.ERROR_MESSAGE);
+                    //JOptionPane.showMessageDialog(null,
+                        //objectMapper.writeValueAsString(identifyResponse.getMessages()), "Authentication Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -94,10 +112,10 @@ public class Main {
 
                 // challenge
                 ChallengeRequest secQnAuthenticatorChallengeRequest = new ChallengeRequest(stateHandle, new Authenticator(authenticatorOptionsMap.get("security_question"), "security_question"));
-                printInfo(objectMapper.writeValueAsString(secQnAuthenticatorChallengeRequest), "Challenge API Request (Security Question Authentication)");
+                //printInfo(objectMapper.writeValueAsString(secQnAuthenticatorChallengeRequest), "Challenge API Request (Security Question Authentication)");
 
                 OktaIdentityEngineResponse secQnAuthenticatorChallengeResponse = identifyRemediationOptionOptional.get().proceed(client, secQnAuthenticatorChallengeRequest);
-                printInfo(objectMapper.writeValueAsString(secQnAuthenticatorChallengeResponse), "Challenge API Response (Security Question Authentication)");
+                //printInfo(objectMapper.writeValueAsString(secQnAuthenticatorChallengeResponse), "Challenge API Response (Security Question Authentication)");
 
                 RemediationOption[] secQnAuthenticatorChallengeResponseRemediationOptions = secQnAuthenticatorChallengeResponse.remediation().remediationOptions();
 
@@ -114,10 +132,10 @@ public class Main {
                 }
 
                 AnswerChallengeRequest secQnAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(null, secQnAnswer));
-                printInfo(objectMapper.writeValueAsString(secQnAuthenticatorAnswerChallengeRequest), "Answer Challenge API Request (Security Question Authentication)");
+                //printInfo(objectMapper.writeValueAsString(secQnAuthenticatorAnswerChallengeRequest), "Answer Challenge API Request (Security Question Authentication)");
 
                 OktaIdentityEngineResponse secQnAuthenticatorAnswerChallengeResponse = challengeAuthenticatorRemediationOption.get().proceed(client, secQnAuthenticatorAnswerChallengeRequest);
-                printInfo(objectMapper.writeValueAsString(secQnAuthenticatorAnswerChallengeResponse), "Answer Challenge API Response (Security Question Authentication)");
+                //printInfo(objectMapper.writeValueAsString(secQnAuthenticatorAnswerChallengeResponse), "Answer Challenge API Response (Security Question Authentication)");
 
                 RemediationOption[] secQnAuthenticatorAnswerChallengeResponseRemediationOptions = secQnAuthenticatorAnswerChallengeResponse.remediation().remediationOptions();
 
@@ -164,10 +182,10 @@ public class Main {
                     .findFirst();
 
                 ChallengeRequest emailAuthenticatorChallengeRequest = new ChallengeRequest(stateHandle, new Authenticator(authenticatorOptionsMap.get("email"), "email"));
-                printInfo(objectMapper.writeValueAsString(emailAuthenticatorChallengeRequest), "Challenge API Request (Email Authentication)");
+                //printInfo(objectMapper.writeValueAsString(emailAuthenticatorChallengeRequest), "Challenge API Request (Email Authentication)");
 
                 OktaIdentityEngineResponse emailAuthenticatorChallengeResponse = emailAuthenticatorRemediationOption.get().proceed(client, emailAuthenticatorChallengeRequest);
-                printInfo(objectMapper.writeValueAsString(emailAuthenticatorChallengeResponse), "Challenge API Response (Email Authentication)");
+                //printInfo(objectMapper.writeValueAsString(emailAuthenticatorChallengeResponse), "Challenge API Response (Email Authentication)");
 
                 RemediationOption[] emailAuthenticatorChallengeResponseRemediationOptions = emailAuthenticatorChallengeResponse.remediation().remediationOptions();
 
@@ -184,14 +202,14 @@ public class Main {
                 }
 
                 AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(emailPasscode, null));
-                printInfo(objectMapper.writeValueAsString(emailAuthenticatorAnswerChallengeRequest), "Answer Challenge API Request (Email Authentication)");
+                //printInfo(objectMapper.writeValueAsString(emailAuthenticatorAnswerChallengeRequest), "Answer Challenge API Request (Email Authentication)");
 
                 OktaIdentityEngineResponse emailAuthenticatorAnswerChallengeResponse = challengeAuthenticatorRemediationOption.get().proceed(client, emailAuthenticatorAnswerChallengeRequest);
-                printInfo(objectMapper.writeValueAsString(emailAuthenticatorAnswerChallengeResponse), "Answer Challenge API Response (Email Authentication)");
+                //printInfo(objectMapper.writeValueAsString(emailAuthenticatorAnswerChallengeResponse), "Answer Challenge API Response (Email Authentication)");
 
                 if (emailAuthenticatorAnswerChallengeResponse.getSuccess() != null && emailAuthenticatorAnswerChallengeResponse.remediation() == null) {
                     // no more remediation steps and we have completed successfully!
-                    printInfo(objectMapper.writeValueAsString(emailAuthenticatorAnswerChallengeResponse.getSuccess()), "Success");
+                    JOptionPane.showMessageDialog(null,"Success");
                 }
             }
         }
