@@ -30,6 +30,7 @@ import com.okta.sdk.api.model.Remediation;
 import com.okta.sdk.api.model.Success;
 import com.okta.sdk.api.model.SuccessResponse;
 import com.okta.sdk.api.model.User;
+import com.okta.sdk.api.model.AuthenticatorEnrollments;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -63,13 +64,14 @@ public class OktaIdentityEngineResponse {
 
     private Messages messages;
 
+    private AuthenticatorEnrollments authenticatorEnrollments;
+
     // TODO: model below objects (they are not used for processing anyway)?
 
 /*
     currentAuthenticator
     currentAuthenticatorEnrollment
     authenticators
-    authenticatorEnrollments
     recoveryAuthenticator
     enrollmentAuthenticator
     unenrollmentAuthenticator
