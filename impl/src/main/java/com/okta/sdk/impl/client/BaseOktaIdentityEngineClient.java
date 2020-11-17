@@ -94,7 +94,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
         InteractRequest interactRequest = new InteractRequest(this.clientId, this.scopes);
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Authorization", ""); //TODO
+        //httpHeaders.add("Authorization", ""); //TODO
         httpHeaders.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
         try {

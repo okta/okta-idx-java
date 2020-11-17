@@ -1,0 +1,42 @@
+{
+  "stateHandle": "02LRThgY82XGMsS6m9He9T2_OcvgMV_RPNsX-1hdxo",
+  "version": "1.0.0",
+  "expiresAt": "2020-11-05T17:25:21.000Z",
+  "intent": "LOGIN",
+  "user": {
+    "type": "object",
+    "value": {
+      "id": "00u3iyi3x06D2aWUR1d6"
+    }
+  },
+  "success": {
+    "name": "success-redirect",
+    "href": "https://devex-idx-testing.oktapreview.com/login/token/redirect?stateToken=02LRThgY82XGMsS6m9He9T2_OcvgMV_RPNsX-1hdxo"
+  },
+  "cancel": {
+    "rel": [
+      "create-form"
+    ],
+    "name": "cancel",
+    "href": "https://devex-idx-testing.oktapreview.com/idp/idx/cancel",
+    "method": "POST",
+    "value": [
+      {
+        "name": "stateHandle",
+        "required": true,
+        "value": "02LRThgY82XGMsS6m9He9T2_OcvgMV_RPNsX-1hdxo",
+        "visible": false,
+        "mutable": false
+      }
+    ],
+    "accepts": "application/ion+json; okta-version=1.0.0"
+  },
+  "app": {
+    "type": "object",
+    "value": {
+      "name": "okta_enduser",
+      "label": "okta_enduser",
+      "id": "DEFAULT_APP"
+    }
+  }
+}

@@ -15,7 +15,6 @@
  */
 package com.okta.sdk.impl.client;
 
-import com.okta.commons.configcheck.ConfigurationValidator;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Collections;
 import com.okta.sdk.api.client.OktaIdentityEngineClient;
@@ -56,7 +55,7 @@ public class DefaultOktaIdentityEngineClientBuilder implements OktaIdentityEngin
     }
 
     private void validate() throws IllegalArgumentException {
-        ConfigurationValidator.assertOrgUrl(issuer);
+        Assert.hasText(issuer, "issuer cannot be null");
         Assert.hasText(clientId, "clientId cannot be null");
         Assert.isTrue(!Collections.isEmpty(scopes), "At least one scope is required");
     }

@@ -17,6 +17,7 @@ package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.okta.commons.lang.Assert;
 import com.okta.sdk.api.client.OktaIdentityEngineClient;
 import com.okta.sdk.api.exception.ProcessingException;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
@@ -24,6 +25,11 @@ import com.okta.sdk.api.request.CancelRequest;
 import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
 import com.okta.sdk.api.response.OktaIdentityEngineResponse;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class RemediationOption {
@@ -99,5 +105,45 @@ public class RemediationOption {
 
     public String getName() {
         return name;
+    }
+
+    /**
+     * Get a key-value pair map of Authenticator options available for the current remediation option.
+     *
+     * where
+     * key - authenticator type (e.g. password, security_question, email)
+     * value - authenticator id (e.g. aut2ihzk2n15tsQnQ1d6)
+     *
+     * @return map of Authenticator type and id
+     */
+    public Map<String, String> getAuthenticatorOptions() {
+
+        // store methodType -> id mapping
+        Map<String, String> authenticatorOptionsMap = new HashMap<>();
+
+        FormValue[] formValues = this.form();
+
+        Optional<FormValue> formValueOptional = Arrays.stream(formValues)
+            .filter(x -> "authenticator".equals(x.getName()))
+            .findFirst();
+
+        if (formValueOptional.isPresent()) {
+            Options[] options = formValueOptional.get().options();
+
+            for (Options option : options) {
+                String key = null, val = null;
+                FormValue[] optionFormValues = option.getValue().getForm().getValue();
+                for (FormValue formValue : optionFormValues) {
+                    if (formValue.getName().equals("methodType")) {
+                        key = String.valueOf(formValue.getValue());
+                    }
+                    if (formValue.getName().equals("id")) {
+                        val = String.valueOf(formValue.getValue());
+                    }
+                }
+                authenticatorOptionsMap.put(key, val);
+            }
+        }
+        return authenticatorOptionsMap;
     }
 }

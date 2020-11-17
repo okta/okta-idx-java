@@ -15,13 +15,14 @@
  */
 package com.okta.sdk.tests.it
 
+import com.google.common.collect.Sets
+import com.okta.sdk.api.client.Clients
+import com.okta.sdk.api.client.OktaIdentityEngineClient
 import com.okta.sdk.api.model.*
 import com.okta.sdk.api.request.AnswerChallengeRequest
 import com.okta.sdk.api.request.ChallengeRequest
 import com.okta.sdk.api.request.IdentifyRequest
 import com.okta.sdk.api.response.OktaIdentityEngineResponse
-import com.okta.sdk.tests.it.util.ITSupport
-import org.testng.annotations.Test
 
 import javax.swing.*
 
@@ -29,90 +30,97 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.notNullValue
 import static org.hamcrest.Matchers.nullValue
 
-class ClientPasswordAndEmailIT extends ITSupport {
+class ClientPasswordAndEmailIT {
 
     //@Test
     void testHappyPath_SecurityQuestionAndEmailAuth() {
+
+        final OktaIdentityEngineClient client = Clients.builder()
+            .setIssuer("https://devex-idx-testing.oktapreview.com")
+            .setClientId("test-client-id")
+            .setScopes(Sets.newHashSet("test-scope-1", "test-scope-2"))
+            .build()
 
         def stateHandle = JOptionPane.showInputDialog("Enter stateHandle: ")
         assertThat(stateHandle, notNullValue())
 
         // 1. invoke introspect endpoint with the state handle
-        OktaIdentityEngineResponse introspectResponse = client.introspect(stateHandle);
+        OktaIdentityEngineResponse introspectResponse = client.introspect(stateHandle)
         assertThat(introspectResponse, notNullValue())
 
-        final String identifier = JOptionPane.showInputDialog("Enter identifier (email): ");
+        final String identifier = JOptionPane.showInputDialog("Enter identifier (email): ")
         assertThat(identifier, notNullValue())
 
         // 2. invoke identify endpoint & get remediation options
-        IdentifyRequest identifyRequest = new IdentifyRequest(identifier, stateHandle, false);
-        OktaIdentityEngineResponse identifyResponse = client.identify(identifyRequest);
+        IdentifyRequest identifyRequest = new IdentifyRequest(identifier, stateHandle, false)
+        OktaIdentityEngineResponse identifyResponse = client.identify(identifyRequest)
 
         assertThat(identifyResponse, notNullValue())
         assertThat(identifyResponse.remediation(), notNullValue())
         assertThat(identifyResponse.remediation().remediationOptions(), notNullValue())
 
-        RemediationOption[] identifyRemediationOptions = identifyResponse.remediation().remediationOptions();
+        RemediationOption[] identifyRemediationOptions = identifyResponse.remediation().remediationOptions()
         Optional<RemediationOption> identifyRemediationOptionOptional = Arrays.stream(identifyRemediationOptions)
-            .filter({ x -> "select-authenticator-authenticate".equals(x.getName()) })
-            .findFirst();
+            .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
+            .findFirst()
 
         // populate methodType -> id mapping
-        Map<String, String> authenticatorOptionsMap = getAuthenticatorOptions(identifyRemediationOptionOptional.get());
+        Map<String, String> authenticatorOptionsMap = getAuthenticatorOptions(identifyRemediationOptionOptional.get())
 
-        // security_question authentication (step-1)
+        // password authentication (step-1)
 
         // challenge
-        ChallengeRequest secQnAuthenticatorChallengeRequest = new ChallengeRequest(stateHandle, new Authenticator(authenticatorOptionsMap.get("security_question"), "security_question"));
-        OktaIdentityEngineResponse secQnAuthenticatorChallengeResponse = identifyRemediationOptionOptional.get().proceed(client, secQnAuthenticatorChallengeRequest);
+        ChallengeRequest passwordAuthenticatorChallengeRequest =
+            new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("password"), "password"))
+        OktaIdentityEngineResponse passwordAuthenticatorChallengeResponse = identifyRemediationOptionOptional.get().proceed(client, passwordAuthenticatorChallengeRequest)
 
-        assertThat(secQnAuthenticatorChallengeResponse, notNullValue())
-        assertThat(secQnAuthenticatorChallengeResponse.remediation(), notNullValue())
-        assertThat(secQnAuthenticatorChallengeResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(passwordAuthenticatorChallengeResponse, notNullValue())
+        assertThat(passwordAuthenticatorChallengeResponse.remediation(), notNullValue())
+        assertThat(passwordAuthenticatorChallengeResponse.remediation().remediationOptions(), notNullValue())
 
-        RemediationOption[] secQnAuthenticatorChallengeResponseRemediationOptions = secQnAuthenticatorChallengeResponse.remediation().remediationOptions();
-        Optional<RemediationOption> challengeAuthenticatorRemediationOption = Arrays.stream(secQnAuthenticatorChallengeResponseRemediationOptions)
-            .filter({ x -> "challenge-authenticator".equals(x.getName()) })
-            .findFirst();
+        RemediationOption[] passwordAuthenticatorChallengeResponseRemediationOptions = passwordAuthenticatorChallengeResponse.remediation().remediationOptions()
+        Optional<RemediationOption> challengeAuthenticatorRemediationOption = Arrays.stream(passwordAuthenticatorChallengeResponseRemediationOptions)
+            .filter({ x -> ("challenge-authenticator" == x.getName()) })
+            .findFirst()
 
         // answer challenge
-        def secQnAnswer = JOptionPane.showInputDialog("Enter Security Question Answer: ");
-        assertThat(secQnAnswer, notNullValue())
+        def password = JOptionPane.showInputDialog("Enter Password: ")
+        assertThat(password, notNullValue())
 
-        AnswerChallengeRequest secQnAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(null, secQnAnswer));
-        OktaIdentityEngineResponse secQnAuthenticatorAnswerChallengeResponse = challengeAuthenticatorRemediationOption.get().proceed(client, secQnAuthenticatorAnswerChallengeRequest);
+        AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(password, null))
+        OktaIdentityEngineResponse passwordAuthenticatorAnswerChallengeResponse = challengeAuthenticatorRemediationOption.get().proceed(client, passwordAuthenticatorAnswerChallengeRequest)
 
-        assertThat(secQnAuthenticatorAnswerChallengeResponse, notNullValue())
-        assertThat(secQnAuthenticatorAnswerChallengeResponse.remediation(), notNullValue())
-        assertThat(secQnAuthenticatorAnswerChallengeResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(passwordAuthenticatorAnswerChallengeResponse, notNullValue())
+        assertThat(passwordAuthenticatorAnswerChallengeResponse.remediation(), notNullValue())
+        assertThat(passwordAuthenticatorAnswerChallengeResponse.remediation().remediationOptions(), notNullValue())
 
-        RemediationOption[] secQnAuthenticatorAnswerChallengeResponseRemediationOptions = secQnAuthenticatorAnswerChallengeResponse.remediation().remediationOptions();
+        RemediationOption[] passwordAuthenticatorAnswerChallengeResponseRemediationOptions = passwordAuthenticatorAnswerChallengeResponse.remediation().remediationOptions()
 
         // email authentication (step 2)
 
         // challenge
-        Optional<RemediationOption> emailAuthenticatorRemediationOption = Arrays.stream(secQnAuthenticatorAnswerChallengeResponseRemediationOptions)
-            .filter({ x -> "select-authenticator-authenticate".equals(x.getName()) })
-            .findFirst();
+        Optional<RemediationOption> emailAuthenticatorRemediationOption = Arrays.stream(passwordAuthenticatorAnswerChallengeResponseRemediationOptions)
+            .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
+            .findFirst()
 
-        ChallengeRequest emailAuthenticatorChallengeRequest = new ChallengeRequest(stateHandle, new Authenticator(authenticatorOptionsMap.get("email"), "email"));
-        OktaIdentityEngineResponse emailAuthenticatorChallengeResponse = emailAuthenticatorRemediationOption.get().proceed(client, emailAuthenticatorChallengeRequest);
+        ChallengeRequest emailAuthenticatorChallengeRequest = new ChallengeRequest(stateHandle, new Authenticator(authenticatorOptionsMap.get("email"), "email"))
+        OktaIdentityEngineResponse emailAuthenticatorChallengeResponse = emailAuthenticatorRemediationOption.get().proceed(client, emailAuthenticatorChallengeRequest)
 
         assertThat(emailAuthenticatorChallengeResponse, notNullValue())
         assertThat(emailAuthenticatorChallengeResponse.remediation(), notNullValue())
         assertThat(emailAuthenticatorChallengeResponse.remediation().remediationOptions(), notNullValue())
 
-        RemediationOption[] emailAuthenticatorChallengeResponseRemediationOptions = emailAuthenticatorChallengeResponse.remediation().remediationOptions();
+        RemediationOption[] emailAuthenticatorChallengeResponseRemediationOptions = emailAuthenticatorChallengeResponse.remediation().remediationOptions()
         challengeAuthenticatorRemediationOption = Arrays.stream(emailAuthenticatorChallengeResponseRemediationOptions)
-            .filter({ x -> "challenge-authenticator".equals(x.getName()) })
-            .findFirst();
+            .filter({ x -> ("challenge-authenticator" == x.getName()) })
+            .findFirst()
 
         // answer challenge
-        def emailPasscode = JOptionPane.showInputDialog("Enter email passcode: ");
+        def emailPasscode = JOptionPane.showInputDialog("Enter email passcode: ")
         assertThat(emailPasscode, notNullValue())
 
-        AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(emailPasscode, null));
-        OktaIdentityEngineResponse emailAuthenticatorAnswerChallengeResponse = challengeAuthenticatorRemediationOption.get().proceed(client, emailAuthenticatorAnswerChallengeRequest);
+        AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = new AnswerChallengeRequest(stateHandle, new Credentials(emailPasscode, null))
+        OktaIdentityEngineResponse emailAuthenticatorAnswerChallengeResponse = challengeAuthenticatorRemediationOption.get().proceed(client, emailAuthenticatorAnswerChallengeRequest)
 
         assertThat(emailAuthenticatorAnswerChallengeResponse, notNullValue())
         // no more remediation steps and we have completed successfully!
@@ -130,7 +138,7 @@ class ClientPasswordAndEmailIT extends ITSupport {
         FormValue[] formValues = remediationOption.form()
 
         Optional<FormValue> formValueOptional = Arrays.stream(formValues)
-            .filter({ x -> "authenticator".equals(x.getName()) })
+            .filter({ x -> ("authenticator" == x.getName()) })
             .findFirst()
 
         if (formValueOptional.isPresent()) {
@@ -140,10 +148,10 @@ class ClientPasswordAndEmailIT extends ITSupport {
                 String key = null, val = null
                 FormValue[] optionFormValues = option.getValue().getForm().getValue()
                 for (FormValue formValue : optionFormValues) {
-                    if (formValue.getName().equals("methodType")) {
+                    if (formValue.getName() == "methodType") {
                         key = String.valueOf(formValue.getValue())
                     }
-                    if (formValue.getName().equals("id")) {
+                    if (formValue.getName() == "id") {
                         val = String.valueOf(formValue.getValue())
                     }
                 }
