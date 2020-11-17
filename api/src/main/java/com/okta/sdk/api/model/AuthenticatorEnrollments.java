@@ -23,4 +23,8 @@ public class AuthenticatorEnrollments {
     private String type;
 
     private AuthenticatorEnrollment[] value;
+
+    public AuthenticatorEnrollment[] getValue() {
+        return value;
+    }
 }

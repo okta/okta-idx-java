@@ -20,16 +20,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.http.HttpHeader
-import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.google.common.collect.Sets
 import com.okta.commons.http.MediaType
 import com.okta.sdk.api.client.Clients
 import com.okta.sdk.api.client.OktaIdentityEngineClient
 import com.okta.sdk.api.model.Authenticator
 import com.okta.sdk.api.model.Credentials
-import com.okta.sdk.api.model.Options
 import com.okta.sdk.api.model.RemediationOption
 import com.okta.sdk.api.request.AnswerChallengeRequest
 import com.okta.sdk.api.request.ChallengeRequest
@@ -40,19 +36,10 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import wiremock.org.apache.http.HttpStatus
 
-import javax.swing.JOptionPane
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.aMapWithSize
-import static org.hamcrest.Matchers.contains
-import static org.hamcrest.Matchers.hasEntry
-import static org.hamcrest.Matchers.hasSize
-import static org.hamcrest.Matchers.notNullValue
-import static org.hamcrest.Matchers.nullValue
+import static org.hamcrest.Matchers.*
 
 class EndToEndIT {
 
@@ -160,7 +147,7 @@ class EndToEndIT {
 
         ChallengeRequest passwordAuthenticatorChallengeRequest =
             new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("password"), "password"))
-        oktaIdentityEngineResponse = remediationOptionsOptional.get().proceed(oktaIdentityEngineClient, passwordAuthenticatorChallengeRequest)
+        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, passwordAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
@@ -175,6 +162,7 @@ class EndToEndIT {
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("challenge-authenticator" == x.getName()) })
             .findFirst()
+        remediationOption = remediationOptionsOptional.get()
 
         wireMockServer.stubFor(post(urlPathEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", containing("application/ion+json;okta-version=1.0.0"))
@@ -186,7 +174,7 @@ class EndToEndIT {
         AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest =
             new AnswerChallengeRequest("test-state-handle", new Credentials("some-password", null))
         oktaIdentityEngineResponse =
-            remediationOptionsOptional.get().proceed(oktaIdentityEngineClient, passwordAuthenticatorAnswerChallengeRequest)
+            remediationOption.proceed(oktaIdentityEngineClient, passwordAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
@@ -217,9 +205,9 @@ class EndToEndIT {
                 .withBodyFile("email-authenticator-challenge-response.json")))
 
         ChallengeRequest emailAuthenticatorChallengeRequest =
-            new ChallengeRequest("test-state-handle", new Authenticator("sample@sample.com", "email"))
+            new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
         oktaIdentityEngineResponse =
-            remediationOptionsOptional.get().proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
+            remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
@@ -234,6 +222,7 @@ class EndToEndIT {
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("challenge-authenticator" == x.getName()) })
             .findFirst()
+        remediationOption = remediationOptionsOptional.get()
 
         wireMockServer.stubFor(post(urlPathEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", containing("application/ion+json;okta-version=1.0.0"))
@@ -245,7 +234,7 @@ class EndToEndIT {
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest =
             new AnswerChallengeRequest("test-state-handle", new Credentials("some-email-passcode", null))
         oktaIdentityEngineResponse =
-            remediationOptionsOptional.get().proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
+            remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), nullValue()) // no more remediation steps
@@ -334,8 +323,8 @@ class EndToEndIT {
                 .withBodyFile("security-qn-authenticator-challenge-response.json")))
 
         ChallengeRequest secQnAuthenticatorChallengeRequest =
-            new ChallengeRequest("test-state-handle", new Authenticator("some security question", "security_question"))
-        oktaIdentityEngineResponse = remediationOptionsOptional.get().proceed(oktaIdentityEngineClient, secQnAuthenticatorChallengeRequest)
+            new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("security_question"), "security_question"))
+        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, secQnAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
@@ -350,6 +339,7 @@ class EndToEndIT {
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("challenge-authenticator" == x.getName()) })
             .findFirst()
+        remediationOption = remediationOptionsOptional.get()
 
         wireMockServer.stubFor(post(urlPathEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", containing("application/ion+json;okta-version=1.0.0"))
@@ -361,7 +351,7 @@ class EndToEndIT {
         AnswerChallengeRequest secQnAuthenticatorAnswerChallengeRequest =
             new AnswerChallengeRequest("test-state-handle", new Credentials(null, "security qn answer"))
         oktaIdentityEngineResponse =
-            remediationOptionsOptional.get().proceed(oktaIdentityEngineClient, secQnAuthenticatorAnswerChallengeRequest)
+            remediationOption.proceed(oktaIdentityEngineClient, secQnAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
@@ -392,9 +382,9 @@ class EndToEndIT {
                 .withBodyFile("email-authenticator-challenge-response.json")))
 
         ChallengeRequest emailAuthenticatorChallengeRequest =
-            new ChallengeRequest("test-state-handle", new Authenticator("sample@sample.com", "email"))
+            new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
         oktaIdentityEngineResponse =
-            remediationOptionsOptional.get().proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
+            remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
@@ -409,6 +399,7 @@ class EndToEndIT {
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("challenge-authenticator" == x.getName()) })
             .findFirst()
+        remediationOption = remediationOptionsOptional.get()
 
         wireMockServer.stubFor(post(urlPathEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", containing("application/ion+json;okta-version=1.0.0"))
@@ -420,7 +411,7 @@ class EndToEndIT {
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest =
             new AnswerChallengeRequest("test-state-handle", new Credentials("some-email-passcode", null))
         oktaIdentityEngineResponse =
-            remediationOptionsOptional.get().proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
+            remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), nullValue()) // no more remediation steps

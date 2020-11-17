@@ -143,4 +143,8 @@ public class OktaIdentityEngineResponse {
     public Messages getMessages() {
         return messages;
     }
+
+    public AuthenticatorEnrollments getAuthenticatorEnrollments() {
+        return authenticatorEnrollments;
+    }
 }
