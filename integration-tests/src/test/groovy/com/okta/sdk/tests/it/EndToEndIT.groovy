@@ -81,7 +81,7 @@ class EndToEndIT {
     }
 
     @Test
-    void testEndToEndWithPasswordAndEmailAuthenticators() {
+    void testWithPasswordAndEmailAuthenticators() {
 
         // interact
         wireMockServer.stubFor(post(urlPathEqualTo("/oauth2/v1/interact"))
@@ -256,7 +256,7 @@ class EndToEndIT {
     }
 
     @Test
-    void testEndToEndWithSecurityQnAndEmailAuthenticators() {
+    void testWithSecurityQnAndEmailAuthenticators() {
 
         // interact
         wireMockServer.stubFor(post(urlPathEqualTo("/oauth2/v1/interact"))
