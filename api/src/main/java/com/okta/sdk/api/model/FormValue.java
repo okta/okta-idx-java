@@ -16,10 +16,8 @@
 package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FormValue {
@@ -65,7 +63,7 @@ public class FormValue {
     public boolean visible;
 
     /**
-     * Should this form value be mutable in a UI. MAY relate to the form fields `diabled` property
+     * Should this form value be mutable in a UI. MAY relate to the form fields disabled property
      */
     public boolean mutable;
 
@@ -89,7 +87,7 @@ public class FormValue {
      * @return {@link Options} array
      */
     public Options[] options() {
-        return this.options;
+        return Arrays.copyOf(this.options, this.options.length);
     }
 
     public String getName() {
@@ -98,5 +96,9 @@ public class FormValue {
 
     public Object getValue() {
         return value;
+    }
+
+    public OptionsFormVal getForm() {
+        return form;
     }
 }

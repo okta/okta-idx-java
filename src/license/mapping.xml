@@ -18,61 +18,6 @@
   xsi:schemaLocation="https://source.jasig.org/schemas/maven-notice-plugin/license-lookup https://source.jasig.org/schemas/maven-notice-plugin/license-lookup/license-lookup-v1.0.xsd">
 
     <artifact>
-        <groupId>classworlds</groupId>
-        <artifactId>classworlds</artifactId>
-        <license>Apache License, Version 2.0</license>
-    </artifact>
-    <artifact>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-archiver</artifactId>
-        <license>Apache License, Version 2.0</license>
-    </artifact>
-    <artifact>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-container-default</artifactId>
-        <license>Apache License, Version 2.0</license>
-    </artifact>
-    <artifact>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-utils</artifactId>
-        <license>Apache License, Version 2.0</license>
-    </artifact>
-    <artifact>
-        <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.core</artifactId>
-        <license>Apache License, Version 2.0</license>
-    </artifact>
-    <artifact>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk15on</artifactId>
-        <license>Bouncy Castle/MIT License</license>
-    </artifact>
-    <artifact>
-        <groupId>antlr</groupId>
-        <artifactId>antlr</artifactId>
-        <license>BSD 3-clause license</license>
-    </artifact>
-    <artifact>
-        <groupId>commons-beanutils</groupId>
-        <artifactId>commons-beanutils</artifactId>
-        <license>Apache License, Version 2.0</license>
-    </artifact>
-    <artifact>
-        <groupId>dom4j</groupId>
-        <artifactId>dom4j</artifactId>
-        <license>BSD</license>
-    </artifact>
-    <artifact>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-i18n</artifactId>
-        <license>Apache License, Version 2.0</license>
-    </artifact>
-    <artifact>
-        <groupId>oro</groupId>
-        <artifactId>oro</artifactId>
-        <license>Apache License, Version 2.0</license>
-    </artifact>
-    <artifact>
         <groupId>com.google.auto.service</groupId>
         <artifactId>auto-service</artifactId>
         <license>Apache License, Version 2.0</license>

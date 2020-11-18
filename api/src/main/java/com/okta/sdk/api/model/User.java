@@ -16,7 +16,6 @@
 package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class User {
@@ -24,4 +23,12 @@ public class User {
     private String type;
 
     private UserValue value;
+
+    public String getType() {
+        return type;
+    }
+
+    public UserValue getValue() {
+        return value;
+    }
 }

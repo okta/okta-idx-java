@@ -16,7 +16,8 @@
 package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.Arrays;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Remediation {
@@ -34,6 +35,14 @@ public class Remediation {
      * @return array array of RemediationOptions objects
      */
     public RemediationOption[] remediationOptions() {
-        return value;
+        return Arrays.copyOf(value, value.length);
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public RemediationOption[] getValue() {
+        return Arrays.copyOf(value, value.length);
     }
 }

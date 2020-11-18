@@ -21,4 +21,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 public class MethodType {
 
     private String type;
+
+    public String getType() {
+        return type;
+    }
 }

@@ -87,7 +87,7 @@
     <!-- Migrated from rulesets/java/unusedcode.xml >-->
     <rule ref="category/java/bestpractices.xml/UnusedFormalParameter"/>
     <rule ref="category/java/bestpractices.xml/UnusedLocalVariable"/>
-    <rule ref="category/java/bestpractices.xml/UnusedPrivateField"/>
+    <!--<rule ref="category/java/bestpractices.xml/UnusedPrivateField"/>-->
     <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod"/>
 
     <!-- Migrated from rulesets/java/sunsecure.xml -->

@@ -17,6 +17,8 @@ package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import java.util.Arrays;
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuthenticatorEnrollment {
 
@@ -29,4 +31,24 @@ public class AuthenticatorEnrollment {
     private String displayName;
 
     private MethodType[] methods;
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public MethodType[] getMethods() {
+        return Arrays.copyOf(this.methods, this.methods.length);
+    }
 }

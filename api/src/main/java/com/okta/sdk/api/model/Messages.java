@@ -16,7 +16,6 @@
 package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.okta.commons.lang.Strings;
 
 import java.util.Arrays;
@@ -28,8 +27,12 @@ public class Messages {
 
     private MessageValue[] value;
 
+    public String getType() {
+        return type;
+    }
+
     public MessageValue[] getValue() {
-        return value;
+        return Arrays.copyOf(value, value.length);
     }
 
     public boolean hasErrorValue() {

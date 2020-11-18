@@ -35,13 +35,9 @@
 
     <properties>
         <jackson.version>2.11.3</jackson.version>
-        <snakeyaml.version>1.26</snakeyaml.version>
-        <bouncycastle.version>1.66</bouncycastle.version>
         <otka.commons.version>1.2.4</otka.commons.version>
-
         <github.slug>okta/okta-identity-engine-java</github.slug>
     </properties>
-
 
     <modules>
         <module>api</module>
@@ -64,12 +60,12 @@
             <dependency>
                 <groupId>com.okta.sdk</groupId>
                 <artifactId>okta-identity-engine-java-api</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.sdk</groupId>
                 <artifactId>okta-identity-engine-java-impl</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- Other Okta Projects -->
@@ -121,31 +117,6 @@
                 <version>1.2.2</version>
             </dependency>
 
-            <!-- Bouncy Castle -->
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>${bouncycastle.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk15on</artifactId>
-                <version>${bouncycastle.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.auto.service</groupId>
-                <artifactId>auto-service</artifactId>
-                <version>1.0-rc6</version>
-                <optional>true</optional>
-            </dependency>
-            
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
@@ -187,6 +158,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -219,19 +191,29 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
                     <configuration>
-                        <!-- TODO -->
+                        <rulesets>
+                            <ruleset>${basedir}/../src/pmd/ruleset.xml</ruleset>
+                        </rulesets>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <configuration>
-                        <!-- exclude generated enums coverage -->
-                        <excludes>
-                            <exclude>**/com/okta/sdk/resource/**/*</exclude>
-                            <exclude>**/quickstart/**/*</exclude>
-                        </excludes>
-                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>default-prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>jacoco-report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.owasp</groupId>
@@ -290,5 +272,5 @@
             </build>
         </profile>
     </profiles>
-</project>
 
+</project>

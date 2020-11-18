@@ -28,4 +28,12 @@ public class Authenticator {
         this.id = id;
         this.methodType = methodType;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getMethodType() {
+        return methodType;
+    }
 }

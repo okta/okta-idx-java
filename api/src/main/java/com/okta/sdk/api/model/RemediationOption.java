@@ -16,12 +16,9 @@
 package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.okta.commons.lang.Assert;
 import com.okta.sdk.api.client.OktaIdentityEngineClient;
 import com.okta.sdk.api.exception.ProcessingException;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
-import com.okta.sdk.api.request.CancelRequest;
 import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
 import com.okta.sdk.api.response.OktaIdentityEngineResponse;
@@ -72,7 +69,6 @@ public class RemediationOption {
      * @throws ProcessingException when the proceed operation encountered an execution/processing error.
      */
     public OktaIdentityEngineResponse proceed(OktaIdentityEngineClient client, Object request) throws IllegalArgumentException, ProcessingException {
-        //TODO: refactor this piece
         if (request != null) {
             if (request instanceof IdentifyRequest) return client.identify((IdentifyRequest) request);
             if (request instanceof ChallengeRequest) return client.challenge((ChallengeRequest) request);
@@ -100,7 +96,7 @@ public class RemediationOption {
      * @return array an array of FormValue
      */
     public FormValue[] form() {
-        return value;
+        return Arrays.copyOf(value, value.length);
     }
 
     public String getName() {
@@ -118,7 +114,6 @@ public class RemediationOption {
      */
     public Map<String, String> getAuthenticatorOptions() {
 
-        // store methodType -> id mapping
         Map<String, String> authenticatorOptionsMap = new HashMap<>();
 
         FormValue[] formValues = this.form();

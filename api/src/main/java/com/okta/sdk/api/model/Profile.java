@@ -25,4 +25,16 @@ public class Profile {
     private String questionKey;
 
     private String question;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getQuestionKey() {
+        return questionKey;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
 }

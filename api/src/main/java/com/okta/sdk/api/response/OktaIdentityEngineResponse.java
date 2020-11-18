@@ -16,7 +16,6 @@
 package com.okta.sdk.api.response;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,15 +23,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.okta.sdk.api.client.OktaIdentityEngineClient;
 import com.okta.sdk.api.exception.ProcessingException;
 import com.okta.sdk.api.model.App;
+import com.okta.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.sdk.api.model.Cancel;
 import com.okta.sdk.api.model.Messages;
 import com.okta.sdk.api.model.Remediation;
 import com.okta.sdk.api.model.Success;
 import com.okta.sdk.api.model.SuccessResponse;
 import com.okta.sdk.api.model.User;
-import com.okta.sdk.api.model.AuthenticatorEnrollments;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class OktaIdentityEngineResponse {
 

@@ -44,4 +44,24 @@ public class Token {
      * The type of Token the JWT is
      */
     public String tokenType;
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public Integer getExpiresIn() {
+        return expiresIn;
+    }
+
+    public String getIdToken() {
+        return idToken;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
 }

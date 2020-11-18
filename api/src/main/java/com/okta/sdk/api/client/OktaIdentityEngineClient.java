@@ -17,12 +17,9 @@ package com.okta.sdk.api.client;
 
 import com.okta.sdk.api.exception.ProcessingException;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
-import com.okta.sdk.api.model.Cancel;
 import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
 import com.okta.sdk.api.response.OktaIdentityEngineResponse;
-
-import java.io.IOException;
 
 public interface OktaIdentityEngineClient {
 

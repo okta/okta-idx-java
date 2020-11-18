@@ -16,7 +16,8 @@
 package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.Arrays;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Cancel {
@@ -48,7 +49,27 @@ public class Cancel {
      */
     private String accepts;
 
+    public String[] getRel() {
+        return Arrays.copyOf(this.rel, this.rel.length);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getHref() {
+        return href;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
     public FormValue[] getValue() {
-        return value;
+        return Arrays.copyOf(this.value, this.value.length);
+    }
+
+    public String getAccepts() {
+        return accepts;
     }
 }

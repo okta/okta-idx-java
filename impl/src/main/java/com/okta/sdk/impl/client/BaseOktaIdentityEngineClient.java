@@ -263,13 +263,13 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
         }
 
         //interact
-        oktaIdentityEngineResponse = this.interact();
+        //oktaIdentityEngineResponse = this.interact();
 
         //TODO - grab stataHandle from interact response
         //stateHandle =
 
         //introspect
-        oktaIdentityEngineResponse = this.introspect(stateHandle);
+        //oktaIdentityEngineResponse = this.introspect(stateHandle);
 
         return oktaIdentityEngineResponse;
     }
@@ -277,7 +277,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
     private HttpHeaders getHttpHeaders() {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/ion+json; okta-version=1.0.0");
-        httpHeaders.add("Content-Type", "application/ion+json; okta-version=1.0.0");
+        httpHeaders.add("Accept", "application/ion+json; okta-version=1.0.0");
         return httpHeaders;
     }
 }

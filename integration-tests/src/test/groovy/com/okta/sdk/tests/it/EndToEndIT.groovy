@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.google.common.collect.Sets
 import com.okta.commons.http.MediaType
 import com.okta.sdk.api.client.Clients
 import com.okta.sdk.api.client.OktaIdentityEngineClient
@@ -63,7 +62,7 @@ class EndToEndIT {
         oktaIdentityEngineClient = Clients.builder()
             .setIssuer("http://localhost:" + mockPort)
             .setClientId("test-client-id")
-            .setScopes(Sets.newHashSet("test-scope-1", "test-scope-2"))
+            .setScopes(["test-scope-1", "test-scope-2"] as Set)
             .build()
     }
 
@@ -123,7 +122,6 @@ class EndToEndIT {
         wireMockServer.resetAll()
 
         // get remediation options to go to the next step
-
         RemediationOption[] remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
         Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
@@ -132,6 +130,7 @@ class EndToEndIT {
 
         // get authenticator options
         Map<String, String> authenticatorOptionsMap = remediationOption.getAuthenticatorOptions()
+
         assertThat(authenticatorOptionsMap, aMapWithSize(3))
         assertThat(authenticatorOptionsMap, hasEntry("password", "aut2ihzk2n15tsQnQ1d6"))
         assertThat(authenticatorOptionsMap, hasEntry("security_question", "aut2ihzk4hgf9sIQa1d6"))
@@ -173,8 +172,7 @@ class EndToEndIT {
 
         AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest =
             new AnswerChallengeRequest("test-state-handle", new Credentials("some-password", null))
-        oktaIdentityEngineResponse =
-            remediationOption.proceed(oktaIdentityEngineClient, passwordAuthenticatorAnswerChallengeRequest)
+        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, passwordAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
@@ -185,7 +183,6 @@ class EndToEndIT {
         wireMockServer.resetAll()
 
         // get remediation options to go to the next step
-
         remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
@@ -193,6 +190,7 @@ class EndToEndIT {
         remediationOption = remediationOptionsOptional.get()
 
         authenticatorOptionsMap = remediationOption.getAuthenticatorOptions()
+
         assertThat(authenticatorOptionsMap, aMapWithSize(1))
         assertThat(authenticatorOptionsMap, hasEntry("email", "aut2ihzk1gHl7ynhd1d6"))
 
@@ -206,8 +204,7 @@ class EndToEndIT {
 
         ChallengeRequest emailAuthenticatorChallengeRequest =
             new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
-        oktaIdentityEngineResponse =
-            remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
+        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
@@ -233,8 +230,7 @@ class EndToEndIT {
 
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest =
             new AnswerChallengeRequest("test-state-handle", new Credentials("some-email-passcode", null))
-        oktaIdentityEngineResponse =
-            remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
+        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), nullValue()) // no more remediation steps
@@ -300,7 +296,6 @@ class EndToEndIT {
         wireMockServer.resetAll()
 
         // get remediation options to go to the next step
-
         RemediationOption[] remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
         Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
@@ -309,6 +304,7 @@ class EndToEndIT {
 
         // get authenticator options
         Map<String, String> authenticatorOptionsMap = remediationOption.getAuthenticatorOptions()
+
         assertThat(authenticatorOptionsMap, aMapWithSize(3))
         assertThat(authenticatorOptionsMap, hasEntry("password", "aut2ihzk2n15tsQnQ1d6"))
         assertThat(authenticatorOptionsMap, hasEntry("security_question", "aut2ihzk4hgf9sIQa1d6"))
@@ -350,8 +346,7 @@ class EndToEndIT {
 
         AnswerChallengeRequest secQnAuthenticatorAnswerChallengeRequest =
             new AnswerChallengeRequest("test-state-handle", new Credentials(null, "security qn answer"))
-        oktaIdentityEngineResponse =
-            remediationOption.proceed(oktaIdentityEngineClient, secQnAuthenticatorAnswerChallengeRequest)
+        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, secQnAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
@@ -362,7 +357,6 @@ class EndToEndIT {
         wireMockServer.resetAll()
 
         // get remediation options to go to the next step
-
         remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
@@ -370,6 +364,7 @@ class EndToEndIT {
         remediationOption = remediationOptionsOptional.get()
 
         authenticatorOptionsMap = remediationOption.getAuthenticatorOptions()
+
         assertThat(authenticatorOptionsMap, aMapWithSize(1))
         assertThat(authenticatorOptionsMap, hasEntry("email", "aut2ihzk1gHl7ynhd1d6"))
 
@@ -383,8 +378,7 @@ class EndToEndIT {
 
         ChallengeRequest emailAuthenticatorChallengeRequest =
             new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
-        oktaIdentityEngineResponse =
-            remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
+        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
@@ -410,8 +404,7 @@ class EndToEndIT {
 
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest =
             new AnswerChallengeRequest("test-state-handle", new Credentials("some-email-passcode", null))
-        oktaIdentityEngineResponse =
-            remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
+        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), nullValue()) // no more remediation steps
