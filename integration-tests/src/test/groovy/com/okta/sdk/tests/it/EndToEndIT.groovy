@@ -148,7 +148,7 @@ class EndToEndIT {
                 .withBodyFile("password-authenticator-challenge-response.json")))
 
         ChallengeRequest passwordAuthenticatorChallengeRequest =
-            new ChallengeRequest("introspectionHandle", new Authenticator(authenticatorOptionsMap.get("password"), "password"))
+            new ChallengeRequest("stateHandle", new Authenticator(authenticatorOptionsMap.get("password"), "password"))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, passwordAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -174,7 +174,7 @@ class EndToEndIT {
                 .withBodyFile("answer-password-authenticator-challenge-response.json")))
 
         AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("introspectionHandle", new Credentials("some-password", null))
+            new AnswerChallengeRequest("stateHandle", new Credentials("some-password", null))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, passwordAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -206,7 +206,7 @@ class EndToEndIT {
                 .withBodyFile("email-authenticator-challenge-response.json")))
 
         ChallengeRequest emailAuthenticatorChallengeRequest =
-            new ChallengeRequest("introspectionHandle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
+            new ChallengeRequest("stateHandle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -232,7 +232,7 @@ class EndToEndIT {
                 .withBodyFile("answer-email-authenticator-challenge-response.json")))
 
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("introspectionHandle", new Credentials("some-email-passcode", null))
+            new AnswerChallengeRequest("stateHandle", new Credentials("some-email-passcode", null))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -333,7 +333,7 @@ class EndToEndIT {
                 .withBodyFile("security-qn-authenticator-challenge-response.json")))
 
         ChallengeRequest secQnAuthenticatorChallengeRequest =
-            new ChallengeRequest("introspectionHandle", new Authenticator(authenticatorOptionsMap.get("security_question"), "security_question"))
+            new ChallengeRequest("stateHandle", new Authenticator(authenticatorOptionsMap.get("security_question"), "security_question"))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, secQnAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -359,7 +359,7 @@ class EndToEndIT {
                 .withBodyFile("answer-security-qn-authenticator-challenge-response.json")))
 
         AnswerChallengeRequest secQnAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("introspectionHandle", new Credentials(null, "security qn answer"))
+            new AnswerChallengeRequest("stateHandle", new Credentials(null, "security qn answer"))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, secQnAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -391,7 +391,7 @@ class EndToEndIT {
                 .withBodyFile("email-authenticator-challenge-response.json")))
 
         ChallengeRequest emailAuthenticatorChallengeRequest =
-            new ChallengeRequest("introspectionHandle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
+            new ChallengeRequest("stateHandle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -417,7 +417,7 @@ class EndToEndIT {
                 .withBodyFile("answer-email-authenticator-challenge-response.json")))
 
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("introspectionHandle", new Credentials("some-email-passcode", null))
+            new AnswerChallengeRequest("stateHandle", new Credentials("some-email-passcode", null))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())

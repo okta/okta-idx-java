@@ -31,6 +31,7 @@ import com.okta.commons.http.RequestExecutorFactory;
 import com.okta.commons.http.Response;
 import com.okta.commons.http.authc.DisabledAuthenticator;
 import com.okta.commons.http.config.HttpClientConfiguration;
+import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Classes;
 import com.okta.commons.lang.Strings;
 import com.okta.sdk.api.client.OktaIdentityEngineClient;
@@ -113,6 +114,9 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
             interactResponse = objectMapper.convertValue(responseJsonNode, InteractResponse.class);
+
+            Assert.notNull(interactResponse, "interact response cannot be null");
+            Assert.notNull(interactResponse.getInteractionHandle(), "interactionHandle cannot be null");
 
         } catch (IOException | IllegalArgumentException | HttpException e) {
             throw new ProcessingException(e);

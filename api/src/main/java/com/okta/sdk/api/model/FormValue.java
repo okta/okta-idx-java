@@ -94,6 +94,10 @@ public class FormValue {
         return name;
     }
 
+    public boolean isRequired() {
+        return required;
+    }
+
     public Object getValue() {
         return value;
     }

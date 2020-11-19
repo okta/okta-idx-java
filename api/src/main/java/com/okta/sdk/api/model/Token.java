@@ -69,4 +69,13 @@ public class Token {
     public String getTokenType() {
         return tokenType;
     }
+
+    @Override
+    public String toString() {
+        return "[\naccessToken=" + getAccessToken() +
+            ",\nexpiresIn=" + getExpiresIn() +
+            ",\nidToken=" + getIdToken() +
+            ",\nscope=" + getScope() +
+            "\ntokenType=" + getTokenType() + "]";
+    }
 }
