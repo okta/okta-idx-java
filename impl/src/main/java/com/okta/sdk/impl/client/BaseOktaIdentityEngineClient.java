@@ -35,20 +35,24 @@ import com.okta.commons.lang.Classes;
 import com.okta.commons.lang.Strings;
 import com.okta.sdk.api.client.OktaIdentityEngineClient;
 import com.okta.sdk.api.exception.ProcessingException;
+import com.okta.sdk.api.model.Token;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
 import com.okta.sdk.api.request.BaseRequest;
 import com.okta.sdk.api.request.CancelRequest;
 import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
-import com.okta.sdk.api.request.InteractRequest;
 import com.okta.sdk.api.request.IntrospectRequest;
+import com.okta.sdk.api.response.InteractResponse;
 import com.okta.sdk.api.response.OktaIdentityEngineResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
 
@@ -56,15 +60,17 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
 
     private final String issuer;
     private final String clientId;
+    private final String clientSecret;
     private final Set<String> scopes;
 
     private final ObjectMapper objectMapper;
     private final RequestExecutor requestExecutor;
 
-    public BaseOktaIdentityEngineClient(String issuer, String clientId, Set<String> scopes, RequestExecutor requestExecutor) {
+    public BaseOktaIdentityEngineClient(String issuer, String clientId, String clientSecret, Set<String> scopes, RequestExecutor requestExecutor) {
 
         this.issuer = issuer;
         this.clientId = clientId;
+        this.clientSecret = clientSecret;
         this.scopes = scopes;
 
         this.objectMapper = new ObjectMapper()
@@ -87,50 +93,47 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
     }
 
     @Override
-    public OktaIdentityEngineResponse interact() throws ProcessingException {
+    public InteractResponse interact() throws ProcessingException {
 
-        OktaIdentityEngineResponse oktaIdentityEngineResponse;
+        InteractResponse interactResponse;
 
-        InteractRequest interactRequest = new InteractRequest(this.clientId, this.scopes);
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        //httpHeaders.add("Authorization", ""); //TODO: is this header needed?
-        httpHeaders.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+        String urlParameters = "scope=" + scopes.stream().map(Object::toString).collect(Collectors.joining(" "));
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
                 issuer + "/oauth2/v1/interact",
                 null,
-                httpHeaders,
-                new ByteArrayInputStream(objectMapper.writeValueAsBytes(interactRequest)),
+                getJsonHttpHeaders(),
+                new ByteArrayInputStream(urlParameters.getBytes(StandardCharsets.UTF_8)),
                 -1L);
 
             Response response = requestExecutor.executeRequest(request);
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
-            oktaIdentityEngineResponse = objectMapper.convertValue(responseJsonNode, OktaIdentityEngineResponse.class);
+
+            interactResponse = objectMapper.convertValue(responseJsonNode, InteractResponse.class);
 
         } catch (IOException | IllegalArgumentException | HttpException e) {
             throw new ProcessingException(e);
         }
 
-        return oktaIdentityEngineResponse;
+        return interactResponse;
     }
 
     @Override
-    public OktaIdentityEngineResponse introspect(String stateHandle) throws ProcessingException {
+    public OktaIdentityEngineResponse introspect(String interactionHandle) throws ProcessingException {
 
         OktaIdentityEngineResponse oktaIdentityEngineResponse;
 
-        IntrospectRequest introspectRequest = new IntrospectRequest(stateHandle);
+        IntrospectRequest introspectRequest = new IntrospectRequest(interactionHandle);
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
                 issuer + "/idp/idx/introspect",
                 null,
-                getHttpHeaders(),
+                getIonJsonHttpHeaders(),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(introspectRequest)),
                 -1L);
 
@@ -156,7 +159,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
                 HttpMethod.POST,
                 issuer + "/idp/idx/identify",
                 null,
-                getHttpHeaders(),
+                getIonJsonHttpHeaders(),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(identifyRequest)),
                 -1L);
 
@@ -175,14 +178,14 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
     @Override
     public OktaIdentityEngineResponse challenge(ChallengeRequest challengeRequest) throws ProcessingException {
 
-        OktaIdentityEngineResponse oktaIdentityEngineResponse = null;
+        OktaIdentityEngineResponse oktaIdentityEngineResponse;
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
                 issuer + "/idp/idx/challenge",
                 null,
-                getHttpHeaders(),
+                getIonJsonHttpHeaders(),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(challengeRequest)),
                 -1L);
 
@@ -208,7 +211,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
                 HttpMethod.POST,
                 issuer + "/idp/idx/challenge/answer",
                 null,
-                getHttpHeaders(),
+                getIonJsonHttpHeaders(),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(answerChallengeRequest)),
                 -1L);
 
@@ -236,7 +239,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
                 HttpMethod.POST,
                 issuer + "/idp/idx/cancel",
                 null,
-                getHttpHeaders(),
+                getIonJsonHttpHeaders(),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(cancelRequest)),
                 -1L);
 
@@ -253,28 +256,74 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
     }
 
     @Override
-    public OktaIdentityEngineResponse start(String stateHandle) throws ProcessingException {
+    public OktaIdentityEngineResponse start() throws ProcessingException {
 
-        OktaIdentityEngineResponse oktaIdentityEngineResponse = null;
+        // get a new interaction handle
+        String interactionHandle = this.interact().getInteractionHandle();
 
-        if (Strings.hasText(stateHandle)) {
-            //get a new state handle
-            stateHandle = "";
-        }
+        return start(interactionHandle);
+    }
 
-        //interact
-        //oktaIdentityEngineResponse = this.interact();
+    @Override
+    public OktaIdentityEngineResponse start(String interactionHandle) throws ProcessingException {
 
-        //TODO - grab stataHandle from interact response
-        //stateHandle =
+        OktaIdentityEngineResponse oktaIdentityEngineResponse;
 
-        //introspect
-        //oktaIdentityEngineResponse = this.introspect(stateHandle);
+        // introspect
+        oktaIdentityEngineResponse = this.introspect(interactionHandle);
 
         return oktaIdentityEngineResponse;
     }
 
-    private HttpHeaders getHttpHeaders() {
+    @Override
+    public Token token(String grantType, String interactionCode) throws ProcessingException {
+
+        Token token;
+
+        String urlParameters = "grant_type=" + grantType + "&interaction_code=" + interactionCode;
+
+        try {
+            Request request = new DefaultRequest(
+                HttpMethod.POST,
+                issuer + "/oauth2/v1/token",
+                null,
+                getJsonHttpHeaders(),
+                new ByteArrayInputStream(urlParameters.getBytes(StandardCharsets.UTF_8)),
+                -1L);
+
+            Response response = requestExecutor.executeRequest(request);
+
+            JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+            token = objectMapper.convertValue(responseJsonNode, Token.class);
+
+        } catch (IOException | IllegalArgumentException | HttpException e) {
+            throw new ProcessingException(e);
+        }
+
+        return token;
+    }
+
+    private HttpHeaders getJsonHttpHeaders() {
+        HttpHeaders httpHeaders = new HttpHeaders();
+
+        String authHeaderStr;
+
+        if (Strings.hasText(clientSecret)) {
+            // confidential clients have clientSecret; Auth header is needed
+            authHeaderStr = clientId + ":" + clientSecret;
+            httpHeaders.add("Authorization", "Basic " + Base64.getEncoder().encodeToString(authHeaderStr.getBytes(StandardCharsets.UTF_8)));
+        }
+//        else {
+//            // public client
+//            //TODO: Auth header is needed?
+//        }
+
+        httpHeaders.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+        httpHeaders.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+        return httpHeaders;
+    }
+
+    private HttpHeaders getIonJsonHttpHeaders() {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/ion+json; okta-version=1.0.0");
         httpHeaders.add("Accept", "application/ion+json; okta-version=1.0.0");

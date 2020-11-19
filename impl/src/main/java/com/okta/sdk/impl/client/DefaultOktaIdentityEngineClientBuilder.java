@@ -28,6 +28,8 @@ public class DefaultOktaIdentityEngineClientBuilder implements OktaIdentityEngin
 
     private String clientId;
 
+    private String clientSecret;
+
     private Set<String> scopes;
 
     @Override
@@ -43,6 +45,12 @@ public class DefaultOktaIdentityEngineClientBuilder implements OktaIdentityEngin
     }
 
     @Override
+    public OktaIdentityEngineClientBuilder setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+        return this;
+    }
+
+    @Override
     public OktaIdentityEngineClientBuilder setScopes(Set<String> scopes) {
         this.scopes = scopes;
         return this;
@@ -51,7 +59,7 @@ public class DefaultOktaIdentityEngineClientBuilder implements OktaIdentityEngin
     @Override
     public OktaIdentityEngineClient build() {
         this.validate();
-        return new BaseOktaIdentityEngineClient(issuer, clientId, scopes, null);
+        return new BaseOktaIdentityEngineClient(issuer, clientId, clientSecret, scopes, null);
     }
 
     private void validate() throws IllegalArgumentException {

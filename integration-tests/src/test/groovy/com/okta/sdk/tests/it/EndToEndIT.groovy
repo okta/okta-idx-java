@@ -29,6 +29,7 @@ import com.okta.sdk.api.model.RemediationOption
 import com.okta.sdk.api.request.AnswerChallengeRequest
 import com.okta.sdk.api.request.ChallengeRequest
 import com.okta.sdk.api.request.IdentifyRequest
+import com.okta.sdk.api.response.InteractResponse
 import com.okta.sdk.api.response.OktaIdentityEngineResponse
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
@@ -62,6 +63,7 @@ class EndToEndIT {
         oktaIdentityEngineClient = Clients.builder()
             .setIssuer("http://localhost:" + mockPort)
             .setClientId("test-client-id")
+            .setClientSecret("test-client-secret")
             .setScopes(["test-scope-1", "test-scope-2"] as Set)
             .build()
     }
@@ -78,9 +80,10 @@ class EndToEndIT {
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("interact-response.json")))
 
-        OktaIdentityEngineResponse oktaIdentityEngineResponse = oktaIdentityEngineClient.interact()
+        InteractResponse interactResponse = oktaIdentityEngineClient.interact()
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
+        assertThat(interactResponse, notNullValue())
+        assertThat(interactResponse.getInteractionHandle(), is("003Q14X7li"))
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/oauth2/v1/interact"))
             .withHeader("Content-Type", equalTo(MediaType.APPLICATION_FORM_URLENCODED_VALUE)))
@@ -94,7 +97,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
                 .withBodyFile("introspect-response.json")))
 
-        oktaIdentityEngineResponse = oktaIdentityEngineClient.introspect("test-state-handle")
+        OktaIdentityEngineResponse oktaIdentityEngineResponse = oktaIdentityEngineClient.introspect("introspectionHandle")
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
 
@@ -110,7 +113,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
                 .withBodyFile("identify-response.json")))
 
-        IdentifyRequest identifyRequest = new IdentifyRequest("test@example.com", "test-state-handle", false)
+        IdentifyRequest identifyRequest = new IdentifyRequest("test@example.com", null, false, "introspectionHandle")
         oktaIdentityEngineResponse = oktaIdentityEngineClient.identify(identifyRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -145,7 +148,7 @@ class EndToEndIT {
                 .withBodyFile("password-authenticator-challenge-response.json")))
 
         ChallengeRequest passwordAuthenticatorChallengeRequest =
-            new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("password"), "password"))
+            new ChallengeRequest("introspectionHandle", new Authenticator(authenticatorOptionsMap.get("password"), "password"))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, passwordAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -171,7 +174,7 @@ class EndToEndIT {
                 .withBodyFile("answer-password-authenticator-challenge-response.json")))
 
         AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("test-state-handle", new Credentials("some-password", null))
+            new AnswerChallengeRequest("introspectionHandle", new Credentials("some-password", null))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, passwordAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -203,7 +206,7 @@ class EndToEndIT {
                 .withBodyFile("email-authenticator-challenge-response.json")))
 
         ChallengeRequest emailAuthenticatorChallengeRequest =
-            new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
+            new ChallengeRequest("introspectionHandle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -229,11 +232,21 @@ class EndToEndIT {
                 .withBodyFile("answer-email-authenticator-challenge-response.json")))
 
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("test-state-handle", new Credentials("some-email-passcode", null))
+            new AnswerChallengeRequest("introspectionHandle", new Credentials("some-email-passcode", null))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), nullValue()) // no more remediation steps
+
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode(), notNullValue())
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getRel(), notNullValue())
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getName(), notNullValue())
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getHref(), notNullValue())
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getMethod(), is("POST"))
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
@@ -252,9 +265,10 @@ class EndToEndIT {
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("interact-response.json")))
 
-        OktaIdentityEngineResponse oktaIdentityEngineResponse = oktaIdentityEngineClient.interact()
+        InteractResponse interactResponse = oktaIdentityEngineClient.interact()
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
+        assertThat(interactResponse, notNullValue())
+        assertThat(interactResponse.getInteractionHandle(), is("003Q14X7li"))
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/oauth2/v1/interact"))
             .withHeader("Content-Type", equalTo(MediaType.APPLICATION_FORM_URLENCODED_VALUE)))
@@ -268,7 +282,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
                 .withBodyFile("introspect-response.json")))
 
-        oktaIdentityEngineResponse = oktaIdentityEngineClient.introspect("test-state-handle")
+        OktaIdentityEngineResponse oktaIdentityEngineResponse = oktaIdentityEngineClient.introspect("introspectionHandle")
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
 
@@ -284,7 +298,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
                 .withBodyFile("identify-response.json")))
 
-        IdentifyRequest identifyRequest = new IdentifyRequest("test@example.com", "test-state-handle", false)
+        IdentifyRequest identifyRequest = new IdentifyRequest("test@example.com", null, false, "introspectionHandle")
         oktaIdentityEngineResponse = oktaIdentityEngineClient.identify(identifyRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -319,7 +333,7 @@ class EndToEndIT {
                 .withBodyFile("security-qn-authenticator-challenge-response.json")))
 
         ChallengeRequest secQnAuthenticatorChallengeRequest =
-            new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("security_question"), "security_question"))
+            new ChallengeRequest("introspectionHandle", new Authenticator(authenticatorOptionsMap.get("security_question"), "security_question"))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, secQnAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -345,7 +359,7 @@ class EndToEndIT {
                 .withBodyFile("answer-security-qn-authenticator-challenge-response.json")))
 
         AnswerChallengeRequest secQnAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("test-state-handle", new Credentials(null, "security qn answer"))
+            new AnswerChallengeRequest("introspectionHandle", new Credentials(null, "security qn answer"))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, secQnAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -377,7 +391,7 @@ class EndToEndIT {
                 .withBodyFile("email-authenticator-challenge-response.json")))
 
         ChallengeRequest emailAuthenticatorChallengeRequest =
-            new ChallengeRequest("test-state-handle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
+            new ChallengeRequest("introspectionHandle", new Authenticator(authenticatorOptionsMap.get("email"), "email"))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
@@ -403,11 +417,21 @@ class EndToEndIT {
                 .withBodyFile("answer-email-authenticator-challenge-response.json")))
 
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("test-state-handle", new Credentials("some-email-passcode", null))
+            new AnswerChallengeRequest("introspectionHandle", new Credentials("some-email-passcode", null))
         oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
 
         assertThat(oktaIdentityEngineResponse, notNullValue())
         assertThat(oktaIdentityEngineResponse.remediation(), nullValue()) // no more remediation steps
+
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode(), notNullValue())
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getRel(), notNullValue())
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getName(), notNullValue())
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getHref(), notNullValue())
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getMethod(), is("POST"))
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
+        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))

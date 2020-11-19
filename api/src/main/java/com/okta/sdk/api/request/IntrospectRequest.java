@@ -18,9 +18,11 @@ package com.okta.sdk.api.request;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class IntrospectRequest extends BaseRequest {
+public class IntrospectRequest {
 
-    public IntrospectRequest(String stateHandle) {
-        this.stateHandle = stateHandle;
+    private String interactionHandle;
+
+    public IntrospectRequest(String interactionHandle) {
+        this.interactionHandle = interactionHandle;
     }
 }

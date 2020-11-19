@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.sdk.api.model;
+package com.okta.sdk.api.response;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Success {
+public class InteractResponse {
 
-    private String name;
+    @JsonAlias("interaction_handle")
+    private String interactionHandle;
 
-    private String href;
-
-    public String getName() {
-        return name;
-    }
-
-    public String getHref() {
-        return href;
+    public String getInteractionHandle() {
+        return interactionHandle;
     }
 }

@@ -27,7 +27,6 @@ import com.okta.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.sdk.api.model.Cancel;
 import com.okta.sdk.api.model.Messages;
 import com.okta.sdk.api.model.Remediation;
-import com.okta.sdk.api.model.Success;
 import com.okta.sdk.api.model.SuccessResponse;
 import com.okta.sdk.api.model.User;
 
@@ -79,8 +78,6 @@ public class OktaIdentityEngineResponse {
     private User user;
 
     private App app;
-
-    private Success success; //TODO: remove this unused class
 
     private SuccessResponse successWithInteractionCode;
 
@@ -134,8 +131,8 @@ public class OktaIdentityEngineResponse {
         return objectMapper.writeValueAsString(this);
     }
 
-    public Success getSuccess() {
-        return success;
+    public String getStateHandle() {
+        return stateHandle;
     }
 
     public Messages getMessages() {
@@ -144,5 +141,9 @@ public class OktaIdentityEngineResponse {
 
     public AuthenticatorEnrollments getAuthenticatorEnrollments() {
         return authenticatorEnrollments;
+    }
+
+    public SuccessResponse getSuccessWithInteractionCode() {
+        return successWithInteractionCode;
     }
 }

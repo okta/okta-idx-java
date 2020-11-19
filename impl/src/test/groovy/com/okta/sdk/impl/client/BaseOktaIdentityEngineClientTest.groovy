@@ -30,10 +30,12 @@ import com.okta.sdk.api.model.RemediationOption
 import com.okta.sdk.api.request.AnswerChallengeRequest
 import com.okta.sdk.api.request.ChallengeRequest
 import com.okta.sdk.api.request.IdentifyRequest
+import com.okta.sdk.api.response.InteractResponse
 import com.okta.sdk.api.response.OktaIdentityEngineResponse
 
 import org.testng.annotations.Test
 
+import static org.hamcrest.Matchers.is
 import static org.mockito.Mockito.any
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
@@ -46,13 +48,13 @@ import static org.hamcrest.Matchers.nullValue
 
 class BaseOktaIdentityEngineClientTest {
 
-    //@Test //TODO: enable once interact() is fully implemented
+    @Test
     void testInteractResponse() {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
 
         final Response stubbedResponse = new DefaultResponse(
             200,
@@ -62,12 +64,10 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
 
-        OktaIdentityEngineResponse response = oktaIdentityEngineClient.interact()
+        InteractResponse response = oktaIdentityEngineClient.interact()
 
         assertThat(response, notNullValue())
-        assertThat(response.remediation(), nullValue())
-        assertThat(response.getMessages(), nullValue())
-        assertThat(response.remediation().remediationOptions(), nullValue())
+        assertThat(response.getInteractionHandle(), is("003Q14X7li"))
     }
 
     @Test
@@ -76,7 +76,7 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
 
         final Response stubbedResponse = new DefaultResponse(
             200,
@@ -86,7 +86,7 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
 
-        OktaIdentityEngineResponse response = oktaIdentityEngineClient.introspect("test-state-handle")
+        OktaIdentityEngineResponse response = oktaIdentityEngineClient.introspect("interactionHandle")
 
         assertThat(response, notNullValue())
         assertThat(response.remediation(), notNullValue())
@@ -144,7 +144,7 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
             200,
@@ -154,12 +154,12 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
-        OktaIdentityEngineResponse introspectResponse = oktaIdentityEngineClient.introspect("test-state-handle")
+        OktaIdentityEngineResponse introspectResponse = oktaIdentityEngineClient.introspect("interactionHandle")
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
         assertThat(introspectResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/identify"))
 
-        IdentifyRequest identifyRequest = new IdentifyRequest("test-identifier", "test-state-handle", false)
+        IdentifyRequest identifyRequest = new IdentifyRequest("test-identifier", null, false, "stateHandle")
 
         final Response stubbedIdentifyResponse = new DefaultResponse(
             200,
@@ -290,7 +290,7 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
             200,
@@ -300,12 +300,12 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
-        OktaIdentityEngineResponse introspectResponse = oktaIdentityEngineClient.introspect("test-state-handle")
+        OktaIdentityEngineResponse introspectResponse = oktaIdentityEngineClient.introspect("interactionHandle")
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
         assertThat(introspectResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/identify"))
 
-        IdentifyRequest identifyRequest = new IdentifyRequest("test-identifier", "test-state-handle", false)
+        IdentifyRequest identifyRequest = new IdentifyRequest("test-identifier", null, false, "stateHandle")
 
         final Response stubbedIdentifyResponse = new DefaultResponse(
             200,
@@ -336,7 +336,7 @@ class BaseOktaIdentityEngineClientTest {
 
         // proceed with password authenticator challenge
         ChallengeRequest passwordAuthenticatorChallengeRequest =
-            new ChallengeRequest("test-state-handle", new Authenticator("aut2ihzk2n15tsQnQ1d6", "password"))
+            new ChallengeRequest("stateHandle", new Authenticator("aut2ihzk2n15tsQnQ1d6", "password"))
 
         final Response stubbedChallengeResponse = new DefaultResponse(
             200,
@@ -462,10 +462,10 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
 
         ChallengeRequest passwordAuthenticatorChallengeRequest =
-            new ChallengeRequest("test-state-handle", new Authenticator("aut2ihzk2n15tsQnQ1d6", "password"))
+            new ChallengeRequest("stateHandle", new Authenticator("aut2ihzk2n15tsQnQ1d6", "password"))
 
         final Response stubbedChallengeResponse = new DefaultResponse(
             200,
@@ -481,7 +481,7 @@ class BaseOktaIdentityEngineClientTest {
         assertThat(passwordAuthenticatorChallengeResponse, notNullValue())
 
         AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("test-state-handle", new Credentials("some-password", null))
+            new AnswerChallengeRequest("stateHandle", new Credentials("some-password", null))
 
         final Response stubbedAnswerChallengeResponse = new DefaultResponse(
             200,
@@ -558,10 +558,10 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
 
         AnswerChallengeRequest secondFactorAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("test-state-handle", new Credentials("some-email-passcode", null))
+            new AnswerChallengeRequest("interactionHandle", new Credentials("some-email-passcode", null))
 
         final Response stubbedAnswerChallengeResponse = new DefaultResponse(
             200,
@@ -581,6 +581,14 @@ class BaseOktaIdentityEngineClientTest {
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.expiresAt, equalTo("2020-10-30T23:49:21.000Z"))
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.intent, equalTo("LOGIN"))
 
-        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.success, notNullValue())
+        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode(), notNullValue())
+        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().getRel(), notNullValue())
+        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().getName(), notNullValue())
+        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().getHref(), notNullValue())
+        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().getMethod(), is("POST"))
+        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
+        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
+        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
+        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
     }
 }

@@ -23,6 +23,8 @@ public interface OktaIdentityEngineClientBuilder {
 
     OktaIdentityEngineClientBuilder setClientId(String clientId);
 
+    OktaIdentityEngineClientBuilder setClientSecret(String clientSecret);
+
     OktaIdentityEngineClientBuilder setScopes(Set<String> scopes);
 
     OktaIdentityEngineClient build();

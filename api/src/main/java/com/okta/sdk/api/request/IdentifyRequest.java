@@ -16,17 +16,21 @@
 package com.okta.sdk.api.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.okta.sdk.api.model.Credentials;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class IdentifyRequest extends BaseRequest {
 
     private String identifier;
 
+    private Credentials credentials;
+
     private boolean rememberMe;
 
-    public IdentifyRequest(String identifier, String stateHandle, boolean rememberMe) {
+    public IdentifyRequest(String identifier, Credentials credentials, boolean rememberMe, String stateHandle) {
         this.identifier = identifier;
-        this.stateHandle = stateHandle;
+        this.credentials = credentials;
         this.rememberMe = rememberMe;
+        this.stateHandle = stateHandle;
     }
 }

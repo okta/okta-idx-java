@@ -85,7 +85,7 @@ public class RemediationOption {
      *
      * @return String the interaction code
      */
-    public String interactionCode() {
+    public String interactionCode(OktaIdentityEngineClient client) {
         //TODO
         return null;
     }

@@ -15,6 +15,7 @@
  */
 package com.okta.sdk.api.model;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -23,16 +24,19 @@ public class Token {
     /**
      * The Access Token JWT
      */
+    @JsonAlias("access_token")
     public String accessToken;
 
     /**
      * Seconds the token is valid for
      */
+    @JsonAlias("expires_in")
     public Integer expiresIn;
 
     /**
      * The ID Token JWT
      */
+    @JsonAlias("id_token")
     public String idToken;
 
     /**
@@ -43,6 +47,7 @@ public class Token {
     /**
      * The type of Token the JWT is
      */
+    @JsonAlias("token_type")
     public String tokenType;
 
     public String getAccessToken() {

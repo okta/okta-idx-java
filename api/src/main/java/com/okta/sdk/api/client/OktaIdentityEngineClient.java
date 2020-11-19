@@ -16,16 +16,21 @@
 package com.okta.sdk.api.client;
 
 import com.okta.sdk.api.exception.ProcessingException;
+import com.okta.sdk.api.model.Token;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
 import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
+import com.okta.sdk.api.response.InteractResponse;
 import com.okta.sdk.api.response.OktaIdentityEngineResponse;
 
+/**
+ * Client to interact with the IDX backend APIs.
+ */
 public interface OktaIdentityEngineClient {
 
-    OktaIdentityEngineResponse interact() throws ProcessingException;
+    InteractResponse interact() throws ProcessingException;
 
-    OktaIdentityEngineResponse introspect(String stateHandle) throws ProcessingException;
+    OktaIdentityEngineResponse introspect(String interactionHandle) throws ProcessingException;
 
     OktaIdentityEngineResponse identify(IdentifyRequest identifyRequest) throws ProcessingException;
 
@@ -35,5 +40,9 @@ public interface OktaIdentityEngineClient {
 
     OktaIdentityEngineResponse cancel(String stateHandle) throws ProcessingException;
 
-    OktaIdentityEngineResponse start(String stateHandle) throws ProcessingException;
+    OktaIdentityEngineResponse start() throws ProcessingException;
+
+    OktaIdentityEngineResponse start(String interactionHandle) throws ProcessingException;
+
+    Token token(String grantType, String interactionCode) throws ProcessingException;
 }
