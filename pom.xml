@@ -43,6 +43,7 @@
         <module>api</module>
         <module>impl</module>
         <module>integration-tests</module>
+        <module>examples</module>
     </modules>
 
     <dependencyManagement>
@@ -59,12 +60,12 @@
             <!-- Inter project dependencies -->
             <dependency>
                 <groupId>com.okta.sdk</groupId>
-                <artifactId>okta-identity-engine-java-api</artifactId>
+                <artifactId>okta-identity-engine-java-sdk-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.sdk</groupId>
-                <artifactId>okta-identity-engine-java-impl</artifactId>
+                <artifactId>okta-identity-engine-java-sdk-impl</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -214,6 +215,11 @@
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <excludes>
+                            <exclude>**/quickstart/**/*</exclude>
+                        </excludes>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.owasp</groupId>
