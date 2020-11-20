@@ -24,7 +24,6 @@ import com.okta.commons.http.DefaultRequest;
 import com.okta.commons.http.HttpException;
 import com.okta.commons.http.HttpHeaders;
 import com.okta.commons.http.HttpMethod;
-import com.okta.commons.http.MediaType;
 import com.okta.commons.http.Request;
 import com.okta.commons.http.RequestExecutor;
 import com.okta.commons.http.RequestExecutorFactory;
@@ -38,8 +37,8 @@ import com.okta.sdk.api.client.OktaIdentityEngineClient;
 import com.okta.sdk.api.exception.ProcessingException;
 import com.okta.sdk.api.model.Token;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
-import com.okta.sdk.api.request.BaseRequest;
 import com.okta.sdk.api.request.CancelRequest;
+import com.okta.sdk.api.request.CancelRequestBuilder;
 import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
 import com.okta.sdk.api.request.IntrospectRequest;
@@ -58,6 +57,8 @@ import java.util.stream.Collectors;
 public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
 
     private static final Logger log = LoggerFactory.getLogger(BaseOktaIdentityEngineClient.class);
+
+    private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/1.0.0";
 
     private final String issuer;
     private final String clientId;
@@ -236,7 +237,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
 
         OktaIdentityEngineResponse oktaIdentityEngineResponse;
 
-        BaseRequest cancelRequest = new CancelRequest(stateHandle);
+        CancelRequest cancelRequest = CancelRequestBuilder.builder().withStateHandle(stateHandle).build();
 
         try {
             Request request = new DefaultRequest(
@@ -319,11 +320,12 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
         }
 //        else {
 //            // public client
-//            //TODO: Auth header is needed?
+//            // TODO: Auth header is needed?
 //        }
 
-        httpHeaders.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-        httpHeaders.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+        httpHeaders.add("Accept", "application/json");
+        httpHeaders.add(HttpHeaders.USER_AGENT, USER_AGENT_HEADER_VALUE);
         return httpHeaders;
     }
 
@@ -331,6 +333,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/ion+json; okta-version=1.0.0");
         httpHeaders.add("Accept", "application/ion+json; okta-version=1.0.0");
+        httpHeaders.add(HttpHeaders.USER_AGENT, USER_AGENT_HEADER_VALUE);
         return httpHeaders;
     }
 }

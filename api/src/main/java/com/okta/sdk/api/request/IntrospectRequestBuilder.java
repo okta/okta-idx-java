@@ -15,16 +15,20 @@
  */
 package com.okta.sdk.api.request;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.okta.sdk.api.model.Authenticator;
+public class IntrospectRequestBuilder {
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ChallengeRequest extends BaseRequest {
+    private String stateHandle;
 
-    public Authenticator authenticator;
+    public static IntrospectRequestBuilder builder() {
+        return new IntrospectRequestBuilder();
+    }
 
-    ChallengeRequest(String stateHandle, Authenticator authenticator) {
+    public IntrospectRequestBuilder withStateHandle(String stateHandle) {
         this.stateHandle = stateHandle;
-        this.authenticator = authenticator;
+        return this;
+    }
+
+    public IntrospectRequest build() {
+        return new IntrospectRequest(stateHandle);
     }
 }

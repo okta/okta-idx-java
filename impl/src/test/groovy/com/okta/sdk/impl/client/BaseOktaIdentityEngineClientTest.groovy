@@ -28,8 +28,11 @@ import com.okta.sdk.api.model.FormValue
 import com.okta.sdk.api.model.Options
 import com.okta.sdk.api.model.RemediationOption
 import com.okta.sdk.api.request.AnswerChallengeRequest
+import com.okta.sdk.api.request.AnswerChallengeRequestBuilder
 import com.okta.sdk.api.request.ChallengeRequest
+import com.okta.sdk.api.request.ChallengeRequestBuilder
 import com.okta.sdk.api.request.IdentifyRequest
+import com.okta.sdk.api.request.IdentifyRequestBuilder
 import com.okta.sdk.api.response.InteractResponse
 import com.okta.sdk.api.response.OktaIdentityEngineResponse
 
@@ -159,7 +162,11 @@ class BaseOktaIdentityEngineClientTest {
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
         assertThat(introspectResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/identify"))
 
-        IdentifyRequest identifyRequest = new IdentifyRequest("test-identifier", null, false, "stateHandle")
+        IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
+            .withIdentifier("test-identifier")
+            .withRememberMe(false)
+            .withStateHandle("stateHandle")
+            .build()
 
         final Response stubbedIdentifyResponse = new DefaultResponse(
             200,
@@ -335,8 +342,14 @@ class BaseOktaIdentityEngineClientTest {
         assertThat(identifyResponse.remediation.value.first().form(), notNullValue())
 
         // proceed with password authenticator challenge
-        ChallengeRequest passwordAuthenticatorChallengeRequest =
-            new ChallengeRequest("stateHandle", new Authenticator("aut2ihzk2n15tsQnQ1d6", "password"))
+        Authenticator passwordAuthenticator = new Authenticator()
+        passwordAuthenticator.setId("")
+        passwordAuthenticator.setMethodType("password")
+
+        ChallengeRequest passwordAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
+            .withStateHandle("stateHandle")
+            .withAuthenticator(passwordAuthenticator)
+            .build()
 
         final Response stubbedChallengeResponse = new DefaultResponse(
             200,
@@ -464,8 +477,14 @@ class BaseOktaIdentityEngineClientTest {
         final OktaIdentityEngineClient oktaIdentityEngineClient =
             new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
 
-        ChallengeRequest passwordAuthenticatorChallengeRequest =
-            new ChallengeRequest("stateHandle", new Authenticator("aut2ihzk2n15tsQnQ1d6", "password"))
+        Authenticator passwordAuthenticator = new Authenticator()
+        passwordAuthenticator.setId("aut2ihzk2n15tsQnQ1d6")
+        passwordAuthenticator.setMethodType("password")
+
+        ChallengeRequest passwordAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
+            .withStateHandle("stateHandle")
+            .withAuthenticator(passwordAuthenticator)
+            .build()
 
         final Response stubbedChallengeResponse = new DefaultResponse(
             200,
@@ -480,8 +499,13 @@ class BaseOktaIdentityEngineClientTest {
 
         assertThat(passwordAuthenticatorChallengeResponse, notNullValue())
 
-        AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("stateHandle", new Credentials("some-password", null))
+        Credentials passwordCredentials = new Credentials()
+        passwordCredentials.setPasscode("some-password")
+
+        AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+            .withStateHandle("stateHandle")
+            .withCredentials(passwordCredentials)
+            .build()
 
         final Response stubbedAnswerChallengeResponse = new DefaultResponse(
             200,
@@ -560,8 +584,13 @@ class BaseOktaIdentityEngineClientTest {
         final OktaIdentityEngineClient oktaIdentityEngineClient =
             new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
 
-        AnswerChallengeRequest secondFactorAuthenticatorAnswerChallengeRequest =
-            new AnswerChallengeRequest("interactionHandle", new Credentials("some-email-passcode", null))
+        Credentials credentials = new Credentials()
+        credentials.setPasscode("some-email-passcode")
+
+        AnswerChallengeRequest secondFactorAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+            .withStateHandle("stateHandle")
+            .withCredentials(credentials)
+            .build()
 
         final Response stubbedAnswerChallengeResponse = new DefaultResponse(
             200,

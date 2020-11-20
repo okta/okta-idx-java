@@ -15,16 +15,29 @@
  */
 package com.okta.sdk.api.request;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.okta.sdk.api.model.Authenticator;
+import com.okta.sdk.api.model.Credentials;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ChallengeRequest extends BaseRequest {
+public class AnswerChallengeRequestBuilder {
 
-    public Authenticator authenticator;
+    private String stateHandle;
 
-    ChallengeRequest(String stateHandle, Authenticator authenticator) {
+    private Credentials credentials;
+
+    public static AnswerChallengeRequestBuilder builder() {
+        return new AnswerChallengeRequestBuilder();
+    }
+
+    public AnswerChallengeRequestBuilder withStateHandle(String stateHandle) {
         this.stateHandle = stateHandle;
-        this.authenticator = authenticator;
+        return this;
+    }
+
+    public AnswerChallengeRequestBuilder withCredentials(Credentials credentials) {
+        this.credentials = credentials;
+        return this;
+    }
+
+    public AnswerChallengeRequest build() {
+        return new AnswerChallengeRequest(stateHandle, credentials);
     }
 }

@@ -78,19 +78,6 @@ public class RemediationOption {
     }
 
     /**
-     * Call this function once the `successWithInteractionCode is present. This
-     * method uses the `successWithInteractionCode` property. This method will
-     * call to the resulting `href` to exchange the `interaction_code` value
-     * for an `access_token` object that can be used in future api calls.
-     *
-     * @return String the interaction code
-     */
-    public String interactionCode(OktaIdentityEngineClient client) {
-        //TODO
-        return null;
-    }
-
-    /**
      * Get all form values.
      *
      * @return array an array of FormValue

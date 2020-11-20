@@ -15,16 +15,20 @@
  */
 package com.okta.sdk.api.request;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.okta.sdk.api.model.Authenticator;
+public class CancelRequestBuilder {
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ChallengeRequest extends BaseRequest {
+    private String stateHandle;
 
-    public Authenticator authenticator;
+    public static CancelRequestBuilder builder() {
+        return new CancelRequestBuilder();
+    }
 
-    ChallengeRequest(String stateHandle, Authenticator authenticator) {
+    public CancelRequestBuilder withStateHandle(String stateHandle) {
         this.stateHandle = stateHandle;
-        this.authenticator = authenticator;
+        return this;
+    }
+
+    public CancelRequest build() {
+        return new CancelRequest(stateHandle);
     }
 }

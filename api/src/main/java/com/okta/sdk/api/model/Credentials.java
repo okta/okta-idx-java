@@ -24,8 +24,11 @@ public class Credentials {
 
     public String answer;
 
-    public Credentials(String passcode, String answer) {
+    public void setPasscode(String passcode) {
         this.passcode = passcode;
+    }
+
+    public void setAnswer(String answer) {
         this.answer = answer;
     }
 }

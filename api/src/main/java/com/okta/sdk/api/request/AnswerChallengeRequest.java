@@ -23,7 +23,7 @@ public class AnswerChallengeRequest extends BaseRequest {
 
     public Credentials credentials;
 
-    public AnswerChallengeRequest(String stateHandle, Credentials credentials) {
+    AnswerChallengeRequest(String stateHandle, Credentials credentials) {
         this.stateHandle = stateHandle;
         this.credentials = credentials;
     }

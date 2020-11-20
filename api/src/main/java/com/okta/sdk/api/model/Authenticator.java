@@ -24,16 +24,19 @@ public class Authenticator {
 
     private String methodType;
 
-    public Authenticator(String id, String methodType) {
-        this.id = id;
-        this.methodType = methodType;
-    }
-
     public String getId() {
         return id;
     }
 
     public String getMethodType() {
         return methodType;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setMethodType(String methodType) {
+        this.methodType = methodType;
     }
 }

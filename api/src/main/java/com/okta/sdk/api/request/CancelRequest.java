@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class CancelRequest extends BaseRequest {
 
-    public CancelRequest(String stateHandle) {
+    CancelRequest(String stateHandle) {
         this.stateHandle = stateHandle;
     }
 }
