@@ -51,6 +51,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -261,18 +262,17 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
     }
 
     @Override
-    public OktaIdentityEngineResponse start() throws ProcessingException {
-
-        // get a new interaction handle
-        String interactionHandle = this.interact().getInteractionHandle();
-
-        return start(interactionHandle);
-    }
-
-    @Override
-    public OktaIdentityEngineResponse start(String interactionHandle) throws ProcessingException {
+    public OktaIdentityEngineResponse start(Optional<String> interactionHandleOptional) throws ProcessingException {
 
         OktaIdentityEngineResponse oktaIdentityEngineResponse;
+
+        String interactionHandle;
+
+        if (!interactionHandleOptional.isPresent()) {
+            interactionHandle = this.interact().getInteractionHandle();
+        } else {
+            interactionHandle = interactionHandleOptional.get();
+        }
 
         // introspect
         oktaIdentityEngineResponse = this.introspect(interactionHandle);

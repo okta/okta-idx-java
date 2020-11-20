@@ -164,7 +164,6 @@ class BaseOktaIdentityEngineClientTest {
 
         IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
             .withIdentifier("test-identifier")
-            .withRememberMe(false)
             .withStateHandle("stateHandle")
             .build()
 

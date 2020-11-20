@@ -29,15 +29,15 @@ import static org.testng.Assert.fail
  */
 class QuickstartIT {
 
-    private static final Logger log = LoggerFactory.getLogger(QuickstartIT)
+    private static final Logger log = LoggerFactory.getLogger(QuickstartIT.class)
 
     @Test()
     void testCode() {
         try {
             String[] args={}
             Quickstart.main(args)
-        } catch(Exception e){
-            fail("Quick start threw exception", e)
+        } catch (Exception e){
+            fail("Quickstart threw exception", e)
         }
     }
 }
