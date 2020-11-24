@@ -35,7 +35,6 @@ import com.okta.commons.lang.Classes;
 import com.okta.commons.lang.Strings;
 import com.okta.sdk.api.client.OktaIdentityEngineClient;
 import com.okta.sdk.api.exception.ProcessingException;
-import com.okta.sdk.api.model.Token;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
 import com.okta.sdk.api.request.CancelRequest;
 import com.okta.sdk.api.request.CancelRequestBuilder;
@@ -44,6 +43,8 @@ import com.okta.sdk.api.request.IdentifyRequest;
 import com.okta.sdk.api.request.IntrospectRequest;
 import com.okta.sdk.api.response.InteractResponse;
 import com.okta.sdk.api.response.OktaIdentityEngineResponse;
+import com.okta.sdk.api.response.TokenResponse;
+import com.okta.sdk.impl.config.ClientConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
@@ -61,20 +61,14 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
 
     private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/1.0.0";
 
-    private final String issuer;
-    private final String clientId;
-    private final String clientSecret;
-    private final Set<String> scopes;
+    private final ClientConfiguration clientConfiguration;
 
     private final ObjectMapper objectMapper;
     private final RequestExecutor requestExecutor;
 
-    public BaseOktaIdentityEngineClient(String issuer, String clientId, String clientSecret, Set<String> scopes, RequestExecutor requestExecutor) {
+    public BaseOktaIdentityEngineClient(ClientConfiguration clientConfiguration, RequestExecutor requestExecutor) {
 
-        this.issuer = issuer;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-        this.scopes = scopes;
+        this.clientConfiguration = clientConfiguration;
 
         this.objectMapper = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT)
@@ -82,7 +76,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
             .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         HttpClientConfiguration httpClientConfiguration = new HttpClientConfiguration();
-        httpClientConfiguration.setBaseUrl(issuer);
+        httpClientConfiguration.setBaseUrl(clientConfiguration.getBaseUrl());
         httpClientConfiguration.setRequestAuthenticator(new DisabledAuthenticator());
 
         if (requestExecutor != null) {
@@ -100,12 +94,13 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
 
         InteractResponse interactResponse;
 
-        String urlParameters = "scope=" + scopes.stream().map(Object::toString).collect(Collectors.joining(" "));
+        String urlParameters = "scope=" + clientConfiguration.getScopes().stream()
+            .map(Object::toString).collect(Collectors.joining(" "));
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                issuer + "/oauth2/v1/interact",
+                clientConfiguration.getIssuer() + "/oauth2/v1/interact",
                 null,
                 getJsonHttpHeaders(),
                 new ByteArrayInputStream(urlParameters.getBytes(StandardCharsets.UTF_8)),
@@ -137,7 +132,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                issuer + "/idp/idx/introspect",
+                clientConfiguration.getIssuer() + "/idp/idx/introspect",
                 null,
                 getIonJsonHttpHeaders(),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(introspectRequest)),
@@ -163,7 +158,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                issuer + "/idp/idx/identify",
+                clientConfiguration.getIssuer() + "/idp/idx/identify",
                 null,
                 getIonJsonHttpHeaders(),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(identifyRequest)),
@@ -189,7 +184,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                issuer + "/idp/idx/challenge",
+                clientConfiguration.getIssuer() + "/idp/idx/challenge",
                 null,
                 getIonJsonHttpHeaders(),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(challengeRequest)),
@@ -215,7 +210,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                issuer + "/idp/idx/challenge/answer",
+                clientConfiguration.getIssuer() + "/idp/idx/challenge/answer",
                 null,
                 getIonJsonHttpHeaders(),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(answerChallengeRequest)),
@@ -243,7 +238,7 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                issuer + "/idp/idx/cancel",
+                clientConfiguration.getIssuer() + "/idp/idx/cancel",
                 null,
                 getIonJsonHttpHeaders(),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(cancelRequest)),
@@ -281,16 +276,16 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
     }
 
     @Override
-    public Token token(String grantType, String interactionCode) throws ProcessingException {
+    public TokenResponse token(String grantType, String interactionCode) throws ProcessingException {
 
-        Token token;
+        TokenResponse tokenResponse;
 
         String urlParameters = "grant_type=" + grantType + "&interaction_code=" + interactionCode;
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                issuer + "/oauth2/v1/token",
+                clientConfiguration.getIssuer() + "/oauth2/v1/token",
                 null,
                 getJsonHttpHeaders(),
                 new ByteArrayInputStream(urlParameters.getBytes(StandardCharsets.UTF_8)),
@@ -299,13 +294,13 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
             Response response = requestExecutor.executeRequest(request);
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
-            token = objectMapper.convertValue(responseJsonNode, Token.class);
+            tokenResponse = objectMapper.convertValue(responseJsonNode, TokenResponse.class);
 
         } catch (IOException | IllegalArgumentException | HttpException e) {
             throw new ProcessingException(e);
         }
 
-        return token;
+        return tokenResponse;
     }
 
     private HttpHeaders getJsonHttpHeaders() {
@@ -313,9 +308,9 @@ public class BaseOktaIdentityEngineClient implements OktaIdentityEngineClient {
 
         String authHeaderStr;
 
-        if (Strings.hasText(clientSecret)) {
+        if (Strings.hasText(clientConfiguration.getClientSecret())) {
             // confidential clients have clientSecret; Auth header is needed
-            authHeaderStr = clientId + ":" + clientSecret;
+            authHeaderStr = clientConfiguration.getClientId() + ":" + clientConfiguration.getClientSecret();
             httpHeaders.add("Authorization", "Basic " + Base64.getEncoder().encodeToString(authHeaderStr.getBytes(StandardCharsets.UTF_8)));
         }
 //        else {

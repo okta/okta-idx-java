@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.okta.commons.lang.Assert;
 import com.okta.sdk.api.client.OktaIdentityEngineClient;
 import com.okta.sdk.api.exception.ProcessingException;
+import com.okta.sdk.api.response.TokenResponse;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -112,9 +113,9 @@ public class SuccessResponse {
 
     /**
      *
-     * @return {@link Token} the token object
+     * @return {@link TokenResponse} the token object
      */
-    public Token exchangeCode(OktaIdentityEngineClient client) throws ProcessingException {
+    public TokenResponse exchangeCode(OktaIdentityEngineClient client) throws ProcessingException {
         String grantType = this.parseGrantType();
         Assert.notNull(grantType, "grant_type cannot be null");
 
@@ -124,7 +125,7 @@ public class SuccessResponse {
         String clientId = this.parseClientId();
         Assert.notNull(clientId, "client_id cannot be null");
 
-        Token token = client.token(grantType, interactionCode);
-        return token;
+        TokenResponse tokenResponse = client.token(grantType, interactionCode);
+        return tokenResponse;
     }
 }

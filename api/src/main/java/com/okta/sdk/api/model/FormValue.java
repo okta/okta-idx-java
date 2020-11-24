@@ -68,7 +68,6 @@ public class FormValue {
     public boolean mutable;
 
     public String relatesTo() {
-        //TODO: every option has a 'relatesTo` element, so this method should return an array?
         return Arrays.stream(options).findFirst().get().getRelatesTo();
     }
 

@@ -35,7 +35,7 @@ import com.okta.sdk.api.request.IdentifyRequest
 import com.okta.sdk.api.request.IdentifyRequestBuilder
 import com.okta.sdk.api.response.InteractResponse
 import com.okta.sdk.api.response.OktaIdentityEngineResponse
-
+import com.okta.sdk.impl.config.ClientConfiguration
 import org.testng.annotations.Test
 
 import static org.hamcrest.Matchers.is
@@ -57,7 +57,7 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
 
         final Response stubbedResponse = new DefaultResponse(
             200,
@@ -79,7 +79,7 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
 
         final Response stubbedResponse = new DefaultResponse(
             200,
@@ -147,7 +147,7 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
             200,
@@ -296,7 +296,7 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
             200,
@@ -474,7 +474,7 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
 
         Authenticator passwordAuthenticator = new Authenticator()
         passwordAuthenticator.setId("aut2ihzk2n15tsQnQ1d6")
@@ -581,7 +581,7 @@ class BaseOktaIdentityEngineClientTest {
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
         final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient("https://example.com", "test-client-id", "test-client-secret", ["test-scope"].toSet(), requestExecutor)
+            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
 
         Credentials credentials = new Credentials()
         credentials.setPasscode("some-email-passcode")
@@ -618,5 +618,14 @@ class BaseOktaIdentityEngineClientTest {
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
+    }
+
+    ClientConfiguration getClientConfiguration() {
+        ClientConfiguration clientConfiguration = new ClientConfiguration()
+        clientConfiguration.setIssuer("http://example.com")
+        clientConfiguration.setClientId("test-client-id")
+        clientConfiguration.setClientSecret("test-client-secret")
+        clientConfiguration.setScopes(["test-scope"] as Set)
+        return clientConfiguration
     }
 }

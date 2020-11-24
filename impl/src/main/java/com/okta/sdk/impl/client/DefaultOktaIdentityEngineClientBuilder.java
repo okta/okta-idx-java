@@ -15,56 +15,168 @@
  */
 package com.okta.sdk.impl.client;
 
+import com.okta.commons.configcheck.ConfigurationValidator;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Collections;
+import com.okta.commons.lang.Strings;
 import com.okta.sdk.api.client.OktaIdentityEngineClient;
 import com.okta.sdk.api.client.OktaIdentityEngineClientBuilder;
+import com.okta.sdk.impl.config.ClientConfiguration;
+import com.okta.sdk.impl.config.EnvironmentVariablesPropertiesSource;
+import com.okta.sdk.impl.config.OptionalPropertiesSource;
+import com.okta.sdk.impl.config.PropertiesSource;
+import com.okta.sdk.impl.config.ResourcePropertiesSource;
+import com.okta.sdk.impl.config.SystemPropertiesSource;
+import com.okta.sdk.impl.config.YAMLPropertiesSource;
+import com.okta.sdk.impl.io.ClasspathResource;
+import com.okta.sdk.impl.io.DefaultResourceFactory;
+import com.okta.sdk.impl.io.Resource;
+import com.okta.sdk.impl.io.ResourceFactory;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
+/**
+ * <p>The default {@link OktaIdentityEngineClientBuilder} implementation. This looks for configuration files
+ * in the following locations and order of precedence (last one wins).</p>
+ * <ul>
+ * <li>classpath:com/okta/sdk/config/okta.properties</li>
+ * <li>classpath:com/okta/sdk/config/okta.yaml</li>
+ * <li>classpath:okta.properties</li>
+ * <li>classpath:okta.yaml</li>
+ * <li>~/.okta/okta.yaml</li>
+ * <li>Environment Variables (with dot notation converted to uppercase + underscores)</li>
+ * <li>System Properties</li>
+ * <li>Programmatically</li>
+ * </ul>
+ */
 public class DefaultOktaIdentityEngineClientBuilder implements OktaIdentityEngineClientBuilder {
 
-    private String issuer;
+    private static final String ENVVARS_TOKEN   = "envvars";
+    private static final String SYSPROPS_TOKEN  = "sysprops";
+    private static final String OKTA_CONFIG_CP  = "com/okta/sdk/config/";
+    private static final String OKTA_YAML       = "okta.yaml";
+    private static final String OKTA_PROPERTIES = "okta.properties";
 
-    private String clientId;
+    private boolean allowNonHttpsForTesting = false;
 
-    private String clientSecret;
+    private ClientConfiguration clientConfig = new ClientConfiguration();
 
-    private Set<String> scopes;
+    public DefaultOktaIdentityEngineClientBuilder() {
+        this(new DefaultResourceFactory());
+    }
+
+    DefaultOktaIdentityEngineClientBuilder(ResourceFactory resourceFactory) {
+        Collection<PropertiesSource> sources = new ArrayList<>();
+
+        for (String location : configSources()) {
+
+            if (ENVVARS_TOKEN.equalsIgnoreCase(location)) {
+                sources.add(EnvironmentVariablesPropertiesSource.oktaFilteredPropertiesSource());
+            }
+            else if (SYSPROPS_TOKEN.equalsIgnoreCase(location)) {
+                sources.add(SystemPropertiesSource.oktaFilteredPropertiesSource());
+            }
+            else {
+                Resource resource = resourceFactory.createResource(location);
+
+                PropertiesSource wrappedSource;
+                if (Strings.endsWithIgnoreCase(location, ".yaml")) {
+                    wrappedSource = new YAMLPropertiesSource(resource);
+                } else {
+                    wrappedSource = new ResourcePropertiesSource(resource);
+                }
+
+                PropertiesSource propertiesSource = new OptionalPropertiesSource(wrappedSource);
+                sources.add(propertiesSource);
+            }
+        }
+
+        Map<String, String> props = new LinkedHashMap<>();
+
+        for (PropertiesSource source : sources) {
+            Map<String, String> srcProps = source.getProperties();
+            props.putAll(srcProps);
+        }
+
+        if (Strings.hasText(props.get(DEFAULT_CLIENT_ISSUER_PROPERTY_NAME))) {
+            clientConfig.setIssuer(props.get(DEFAULT_CLIENT_ISSUER_PROPERTY_NAME));
+        }
+
+        if (Strings.hasText(props.get(DEFAULT_CLIENT_ID_PROPERTY_NAME))) {
+            clientConfig.setClientId(props.get(DEFAULT_CLIENT_ID_PROPERTY_NAME));
+        }
+
+        if (Strings.hasText(props.get(DEFAULT_CLIENT_SECRET_PROPERTY_NAME))) {
+            clientConfig.setClientSecret(props.get(DEFAULT_CLIENT_SECRET_PROPERTY_NAME));
+        }
+
+        if (Strings.hasText(props.get(DEFAULT_CLIENT_SCOPES_PROPERTY_NAME))) {
+            Set<String> scopes = new HashSet<>(Arrays.asList(props.get(DEFAULT_CLIENT_SCOPES_PROPERTY_NAME).split("[\\s,]+")));
+            clientConfig.setScopes(scopes);
+        }
+
+        if (Strings.hasText(props.get(DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME))) {
+            allowNonHttpsForTesting = Boolean.parseBoolean(props.get(DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME));
+        }
+    }
 
     @Override
     public OktaIdentityEngineClientBuilder setIssuer(String issuer) {
-        this.issuer = issuer;
+        ConfigurationValidator.assertOrgUrl(issuer, allowNonHttpsForTesting);
+        this.clientConfig.setIssuer(issuer);
         return this;
     }
 
     @Override
     public OktaIdentityEngineClientBuilder setClientId(String clientId) {
-        this.clientId = clientId;
+        ConfigurationValidator.assertClientId(clientId);
+        this.clientConfig.setClientId(clientId);
         return this;
     }
 
     @Override
     public OktaIdentityEngineClientBuilder setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
+        this.clientConfig.setClientId(clientSecret);
         return this;
     }
 
     @Override
     public OktaIdentityEngineClientBuilder setScopes(Set<String> scopes) {
-        this.scopes = scopes;
+        Assert.isTrue(scopes != null && !scopes.isEmpty(), "At least one scope is required");
+        this.clientConfig.setScopes(scopes);
         return this;
     }
 
     @Override
     public OktaIdentityEngineClient build() {
         this.validate();
-        return new BaseOktaIdentityEngineClient(issuer, clientId, clientSecret, scopes, null);
+        return new BaseOktaIdentityEngineClient(this.clientConfig, null);
     }
 
     private void validate() throws IllegalArgumentException {
-        Assert.hasText(issuer, "issuer cannot be null");
-        Assert.hasText(clientId, "clientId cannot be null");
-        Assert.isTrue(!Collections.isEmpty(scopes), "At least one scope is required");
+        ConfigurationValidator.assertOrgUrl(clientConfig.getIssuer(), this.allowNonHttpsForTesting);
+        Assert.hasText(clientConfig.getClientId(), "clientId cannot be null");
+        Assert.isTrue(!Collections.isEmpty(clientConfig.getScopes()), "At least one scope is required");
+    }
+
+    private static String[] configSources() {
+
+        // lazy load the config sources as the user.home system prop could change for testing
+        return new String[] {
+            ClasspathResource.SCHEME_PREFIX + OKTA_CONFIG_CP + OKTA_PROPERTIES,
+            ClasspathResource.SCHEME_PREFIX + OKTA_CONFIG_CP + OKTA_YAML,
+            ClasspathResource.SCHEME_PREFIX + OKTA_PROPERTIES,
+            ClasspathResource.SCHEME_PREFIX + OKTA_YAML,
+            System.getProperty("user.home") + File.separatorChar + ".okta" + File.separatorChar + OKTA_YAML,
+            ENVVARS_TOKEN,
+            SYSPROPS_TOKEN
+        };
     }
 }

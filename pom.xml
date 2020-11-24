@@ -35,6 +35,7 @@
 
     <properties>
         <jackson.version>2.11.3</jackson.version>
+        <snakeyaml.version>1.27</snakeyaml.version>
         <otka.commons.version>1.2.4</otka.commons.version>
         <github.slug>okta/okta-identity-engine-java</github.slug>
     </properties>
@@ -55,6 +56,11 @@
                 <version>${jackson.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
             </dependency>
 
             <!-- Inter project dependencies -->

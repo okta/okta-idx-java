@@ -16,7 +16,7 @@
 package com.okta.sdk.api.client;
 
 import com.okta.sdk.api.exception.ProcessingException;
-import com.okta.sdk.api.model.Token;
+import com.okta.sdk.api.response.TokenResponse;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
 import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
@@ -44,5 +44,5 @@ public interface OktaIdentityEngineClient {
 
     OktaIdentityEngineResponse start(Optional<String> interactionHandleOptional) throws ProcessingException;
 
-    Token token(String grantType, String interactionCode) throws ProcessingException;
+    TokenResponse token(String grantType, String interactionCode) throws ProcessingException;
 }

@@ -19,6 +19,12 @@ import java.util.Set;
 
 public interface OktaIdentityEngineClientBuilder {
 
+    String DEFAULT_CLIENT_ISSUER_PROPERTY_NAME = "okta.idx.issuer";
+    String DEFAULT_CLIENT_ID_PROPERTY_NAME = "okta.idx.clientId";
+    String DEFAULT_CLIENT_SECRET_PROPERTY_NAME = "okta.idx.clientSecret";
+    String DEFAULT_CLIENT_SCOPES_PROPERTY_NAME = "okta.idx.scopes";
+    String DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME = "okta.testing.disableHttpsCheck";
+
     OktaIdentityEngineClientBuilder setIssuer(String issuer);
 
     OktaIdentityEngineClientBuilder setClientId(String clientId);

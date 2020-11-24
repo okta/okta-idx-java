@@ -15,15 +15,39 @@
  */
 package com.okta.sdk.impl.client
 
-import com.okta.sdk.impl.util.TestUtil
-import org.testng.annotations.Test
-
 import com.okta.sdk.api.client.Clients
+import com.okta.sdk.api.client.OktaIdentityEngineClientBuilder
+import com.okta.sdk.impl.io.DefaultResourceFactory
+import com.okta.sdk.impl.io.Resource
+import com.okta.sdk.impl.io.ResourceFactory
+import com.okta.sdk.impl.test.RestoreEnvironmentVariables
+import com.okta.sdk.impl.test.RestoreSystemProperties
+import com.okta.sdk.impl.util.TestUtil
+import org.mockito.invocation.InvocationOnMock
+import org.mockito.stubbing.Answer
+import org.testng.annotations.Listeners
+import org.testng.annotations.Test
 import org.testng.collections.Sets
 
+import static org.mockito.ArgumentMatchers.anyString
+import static org.mockito.Mockito.*
+import static org.testng.Assert.assertEquals
 import static org.testng.Assert.assertTrue
 
+@Listeners([RestoreSystemProperties, RestoreEnvironmentVariables])
 class DefaultOktaIdentityEngineClientBuilderTest {
+
+    void clearOktaEnvAndSysProps() {
+        System.clearProperty("okta.idx.issuer")
+        System.clearProperty("okta.client.clientId")
+        System.clearProperty("okta.client.clientSecret")
+        System.clearProperty("okta.client.scopes")
+
+        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_IDX_ISSUER", null)
+        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_CLIENT_CLIENTID", null)
+        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_CLIENT_CLIENTSECRET", null)
+        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_CLIENT_SCOPES", null)
+    }
 
     @Test
     void testBuilder() {
@@ -31,20 +55,42 @@ class DefaultOktaIdentityEngineClientBuilderTest {
     }
 
     @Test
-    void testMissingIssuer() {
+    void testConfigureBaseProperties() {
+        clearOktaEnvAndSysProps()
+        DefaultOktaIdentityEngineClientBuilder clientBuilder =
+            new DefaultOktaIdentityEngineClientBuilder(noDefaultYamlResourceFactory())
+        assertEquals clientBuilder.clientConfig.issuer, "https://idx.okta.com"
+        assertEquals clientBuilder.clientConfig.clientId, "idx-client-id"
+        assertEquals clientBuilder.clientConfig.scopes, ["idx-scope-1", "idx-scope-2"] as Set
+    }
+
+    @Test
+    void testHttpBaseUrlForTesting() {
+        clearOktaEnvAndSysProps()
+        System.setProperty(OktaIdentityEngineClientBuilder.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
+        // shouldn't throw IllegalArgumentException
+        new DefaultOktaIdentityEngineClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
+            .setIssuer("http://okta.example.com")
+            .setClientId("some-client-id")
+            .setScopes(Sets.newHashSet(["test-scope"]))
+            .build()
+    }
+
+    @Test
+    void testNullClientId() {
+        clearOktaEnvAndSysProps()
         TestUtil.expect(IllegalArgumentException) {
-            new DefaultOktaIdentityEngineClientBuilder()
-                .setClientId("test-client-id")
-                .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
+            new DefaultOktaIdentityEngineClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
+                .setIssuer("https://okta.example.com")
                 .build()
         }
     }
 
     @Test
-    void testMissingClientId() {
+    void testMissingIssuer() {
         TestUtil.expect(IllegalArgumentException) {
-            new DefaultOktaIdentityEngineClientBuilder()
-                .setIssuer("https://sample.com")
+            new DefaultOktaIdentityEngineClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
+                .setClientId("test-client-id")
                 .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
                 .build()
         }
@@ -53,7 +99,7 @@ class DefaultOktaIdentityEngineClientBuilderTest {
     @Test
     void testMissingScopes() {
         TestUtil.expect(IllegalArgumentException) {
-            new DefaultOktaIdentityEngineClientBuilder()
+            new DefaultOktaIdentityEngineClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
                 .setIssuer("https://sample.com")
                 .setClientId("test-client-id")
                 .build()
@@ -91,5 +137,38 @@ class DefaultOktaIdentityEngineClientBuilderTest {
                 .setScopes(Sets.newHashSet())
                 .build()
         }
+    }
+
+    static ResourceFactory noDefaultYamlNoAppYamlResourceFactory() {
+        def resourceFactory = spy(new DefaultResourceFactory())
+        doAnswer(new Answer<Resource>() {
+            @Override
+            Resource answer(InvocationOnMock invocation) throws Throwable {
+                String arg = invocation.arguments[0].toString();
+                if (arg.endsWith("/.okta/okta.yaml") || arg.equals("classpath:okta.yaml")) {
+                    return mock(Resource)
+                } else {
+                    return invocation.callRealMethod()
+                }
+            }
+        }).when(resourceFactory).createResource(anyString())
+
+        return resourceFactory
+    }
+
+    static ResourceFactory noDefaultYamlResourceFactory() {
+        def resourceFactory = spy(new DefaultResourceFactory())
+        doAnswer(new Answer<Resource>() {
+            @Override
+            Resource answer(InvocationOnMock invocation) throws Throwable {
+                if (invocation.arguments[0].toString().endsWith("/.okta/okta.yaml")) {
+                    return mock(Resource)
+                } else {
+                    return invocation.callRealMethod()
+                }
+            }
+        }).when(resourceFactory).createResource(anyString())
+
+        return resourceFactory
     }
 }

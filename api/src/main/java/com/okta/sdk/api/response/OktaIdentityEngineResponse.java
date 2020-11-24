@@ -117,7 +117,7 @@ public class OktaIdentityEngineResponse {
      *
      * @return boolean
      */
-    public boolean loginSuccess() {
+    public boolean isLoginSuccessful() {
         return successWithInteractionCode != null;
     }
 
