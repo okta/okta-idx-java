@@ -23,6 +23,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.commons.http.MediaType
 import com.okta.sdk.api.client.Clients
 import com.okta.sdk.api.client.OktaIdentityEngineClient
+import com.okta.sdk.api.client.OktaIdentityEngineClientBuilder
 import com.okta.sdk.api.model.Authenticator
 import com.okta.sdk.api.model.Credentials
 import com.okta.sdk.api.model.RemediationOption
@@ -62,6 +63,8 @@ class EndToEndIT {
             .enable(SerializationFeature.INDENT_OUTPUT)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+        System.setProperty(OktaIdentityEngineClientBuilder.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
 
         oktaIdentityEngineClient = Clients.builder()
             .setIssuer("http://localhost:" + mockPort)
