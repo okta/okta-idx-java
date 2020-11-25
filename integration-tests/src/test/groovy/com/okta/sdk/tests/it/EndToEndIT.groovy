@@ -102,7 +102,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
                 .withBodyFile("introspect-response.json")))
 
-        IDXResponse idxResponse = idxClient.introspect("introspectionHandle")
+        IDXResponse idxResponse = idxClient.introspect(Optional.of("interactionHandle"))
 
         assertThat(idxResponse, notNullValue())
 
@@ -312,7 +312,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
                 .withBodyFile("introspect-response.json")))
 
-        IDXResponse idxResponse = idxClient.introspect("introspectionHandle")
+        IDXResponse idxResponse = idxClient.introspect(Optional.of("interactionHandle"))
 
         assertThat(idxResponse, notNullValue())
 

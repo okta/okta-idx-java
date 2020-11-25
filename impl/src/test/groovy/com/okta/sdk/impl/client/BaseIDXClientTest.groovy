@@ -89,7 +89,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
 
-        IDXResponse response = idxClient.introspect("interactionHandle")
+        IDXResponse response = idxClient.introspect(Optional.of("interactionHandle"))
 
         assertThat(response, notNullValue())
         assertThat(response.remediation(), notNullValue())
@@ -157,7 +157,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
-        IDXResponse introspectResponse = idxClient.introspect("interactionHandle")
+        IDXResponse introspectResponse = idxClient.introspect(Optional.of("interactionHandle"))
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
         assertThat(introspectResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/identify"))
@@ -306,7 +306,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
-        IDXResponse introspectResponse = idxClient.introspect("interactionHandle")
+        IDXResponse introspectResponse = idxClient.introspect(Optional.of("interactionHandle"))
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
         assertThat(introspectResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/identify"))

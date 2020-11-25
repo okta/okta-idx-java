@@ -17,7 +17,7 @@ package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import con.okta.sdk.api.deserializers.OptionsValueDeserializer;
+import com.okta.sdk.api.deserializers.OptionsValueDeserializer;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Options {

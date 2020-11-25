@@ -31,9 +31,9 @@ import java.util.Optional;
  */
 public interface IDXClient {
 
-    InteractResponse interact(Optional<String> interactionHandleOptional) throws ProcessingException;
+    InteractResponse interact() throws ProcessingException;
 
-    IDXResponse introspect(String interactionHandle) throws ProcessingException;
+    IDXResponse introspect(Optional<String> interactionHandleOptional) throws ProcessingException;
 
     IDXResponse identify(IdentifyRequest identifyRequest) throws ProcessingException;
 

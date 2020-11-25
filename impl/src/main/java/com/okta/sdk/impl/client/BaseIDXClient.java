@@ -91,7 +91,7 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public InteractResponse interact(Optional<String> interactHandleOptional) throws ProcessingException {
+    public InteractResponse interact() throws ProcessingException {
 
         InteractResponse interactResponse;
 
@@ -124,9 +124,17 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXResponse introspect(String interactionHandle) throws ProcessingException {
+    public IDXResponse introspect(Optional<String> interactionHandleOptional) throws ProcessingException {
 
         IDXResponse idxResponse;
+
+        String interactionHandle;
+
+        if (!interactionHandleOptional.isPresent()) {
+            interactionHandle = this.interact().getInteractionHandle();
+        } else {
+            interactionHandle = interactionHandleOptional.get();
+        }
 
         IntrospectRequest introspectRequest = new IntrospectRequest(interactionHandle);
 
