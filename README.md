@@ -14,5 +14,15 @@ This library uses semantic versioning and follows Okta's [Library Version Policy
 
 The latest release can always be found on the [releases page][github-releases].
 
-[okta-library-versioning]: https://developer.okta.com/code/library-versions/
+## Building the SDK
+
+In most cases, you won't need to build the SDK from source. If you want to build it yourself, clone the repo and run `mvn install`.
+ 
+## Contributing
+ 
+We are happy to accept contributions and PRs! Please see the [contribution guide](CONTRIBUTING.md) to understand how to structure a contribution.
+
+[devforum]: https://devforum.okta.com/
 [github-issues]: https://github.com/okta/okta-idx-java/issues
+[github-releases]: https://github.com/okta/okta-idx-java/releases
+[okta-library-versioning]: https://developer.okta.com/code/library-versions
