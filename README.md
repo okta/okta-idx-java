@@ -10,7 +10,7 @@ This library uses semantic versioning and follows Okta's [Library Version Policy
 
 | Version | Status                             |
 | ------- | ---------------------------------- |
-| 0.x     | :construction: Work In Progress     |
+| 0.x.x     | :construction: Work In Progress     |
 
 The latest release can always be found on the [releases page][github-releases].
 
