@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.okta.sdk.api.client.OktaIdentityEngineClient;
+import com.okta.sdk.api.client.IDXClient;
 import com.okta.sdk.api.exception.ProcessingException;
 import com.okta.sdk.api.model.App;
 import com.okta.sdk.api.model.AuthenticatorEnrollments;
@@ -31,7 +31,7 @@ import com.okta.sdk.api.model.SuccessResponse;
 import com.okta.sdk.api.model.User;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class OktaIdentityEngineResponse {
+public class IDXResponse {
 
     private static final ObjectMapper objectMapper = new ObjectMapper()
         .enable(SerializationFeature.INDENT_OUTPUT)
@@ -93,13 +93,13 @@ public class OktaIdentityEngineResponse {
     }
 
     /**
-     * The method to call when you want to cancel the Okta Identity Engine flow. This will return an OktaIdentityEngineResponse
+     * The method to call when you want to cancel the Okta Identity Engine flow. This will return an IDXResponse
      *
-     * @param client the {@link OktaIdentityEngineClient} instance
-     * @return OktaIdentityEngineResponse
+     * @param client the {@link IDXClient} instance
+     * @return IDXResponse
      * @throws ProcessingException when the cancel operation encountered an execution/processing error.
      */
-    public OktaIdentityEngineResponse cancel(OktaIdentityEngineClient client) throws ProcessingException {
+    public IDXResponse cancel(IDXClient client) throws ProcessingException {
         return client.cancel(this.stateHandle);
     }
 

@@ -16,12 +16,12 @@
 package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.okta.sdk.api.client.OktaIdentityEngineClient;
+import com.okta.sdk.api.client.IDXClient;
 import com.okta.sdk.api.exception.ProcessingException;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
 import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
-import com.okta.sdk.api.response.OktaIdentityEngineResponse;
+import com.okta.sdk.api.response.IDXResponse;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,14 +61,14 @@ public class RemediationOption {
     /**
      * Allow you to continue the remediation with this option.
      *
-     * @param client the {@link OktaIdentityEngineClient} instance
+     * @param client the {@link IDXClient} instance
      * @param request the request to Okta Identity Engine
-     * @return OktaIdentityEngineResponse the response from Okta Identity Engine
+     * @return IDXResponse the response from Okta Identity Engine
      *
      * @throws IllegalArgumentException MUST throw this exception when provided data does not contain all required data for the proceed call.
      * @throws ProcessingException when the proceed operation encountered an execution/processing error.
      */
-    public OktaIdentityEngineResponse proceed(OktaIdentityEngineClient client, Object request) throws IllegalArgumentException, ProcessingException {
+    public IDXResponse proceed(IDXClient client, Object request) throws IllegalArgumentException, ProcessingException {
         if (request != null) {
             if (request instanceof IdentifyRequest) return client.identify((IdentifyRequest) request);
             if (request instanceof ChallengeRequest) return client.challenge((ChallengeRequest) request);
@@ -114,7 +114,7 @@ public class RemediationOption {
 
             for (Options option : options) {
                 String key = null, val = null;
-                FormValue[] optionFormValues = option.getValue().getForm().getValue();
+                FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
                 for (FormValue formValue : optionFormValues) {
                     if (formValue.getName().equals("methodType")) {
                         key = String.valueOf(formValue.getValue());
@@ -123,7 +123,9 @@ public class RemediationOption {
                         val = String.valueOf(formValue.getValue());
                     }
                 }
-                authenticatorOptionsMap.put(key, val);
+                if (key != null) {
+                    authenticatorOptionsMap.put(key, val);
+                }
             }
         }
         return authenticatorOptionsMap;

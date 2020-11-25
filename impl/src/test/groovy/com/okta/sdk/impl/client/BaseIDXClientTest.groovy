@@ -20,7 +20,7 @@ import com.okta.commons.http.MediaType
 import com.okta.commons.http.Request
 import com.okta.commons.http.RequestExecutor
 import com.okta.commons.http.Response
-import com.okta.sdk.api.client.OktaIdentityEngineClient
+import com.okta.sdk.api.client.IDXClient
 import com.okta.sdk.api.model.Authenticator
 import com.okta.sdk.api.model.AuthenticatorEnrollment
 import com.okta.sdk.api.model.Credentials
@@ -34,7 +34,7 @@ import com.okta.sdk.api.request.ChallengeRequestBuilder
 import com.okta.sdk.api.request.IdentifyRequest
 import com.okta.sdk.api.request.IdentifyRequestBuilder
 import com.okta.sdk.api.response.InteractResponse
-import com.okta.sdk.api.response.OktaIdentityEngineResponse
+import com.okta.sdk.api.response.IDXResponse
 import com.okta.sdk.impl.config.ClientConfiguration
 import org.testng.annotations.Test
 
@@ -49,15 +49,15 @@ import static org.hamcrest.Matchers.hasItemInArray
 import static org.hamcrest.Matchers.notNullValue
 import static org.hamcrest.Matchers.nullValue
 
-class BaseOktaIdentityEngineClientTest {
+class BaseIDXClientTest {
 
     @Test
     void testInteractResponse() {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
-        final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
+        final IDXClient idxClient =
+            new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
         final Response stubbedResponse = new DefaultResponse(
             200,
@@ -67,7 +67,7 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
 
-        InteractResponse response = oktaIdentityEngineClient.interact()
+        InteractResponse response = idxClient.interact()
 
         assertThat(response, notNullValue())
         assertThat(response.getInteractionHandle(), is("003Q14X7li"))
@@ -78,8 +78,8 @@ class BaseOktaIdentityEngineClientTest {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
-        final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
+        final IDXClient idxClient =
+            new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
         final Response stubbedResponse = new DefaultResponse(
             200,
@@ -89,7 +89,7 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
 
-        OktaIdentityEngineResponse response = oktaIdentityEngineClient.introspect("interactionHandle")
+        IDXResponse response = idxClient.introspect("interactionHandle")
 
         assertThat(response, notNullValue())
         assertThat(response.remediation(), notNullValue())
@@ -146,8 +146,8 @@ class BaseOktaIdentityEngineClientTest {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
-        final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
+        final IDXClient idxClient =
+            new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
             200,
@@ -157,7 +157,7 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
-        OktaIdentityEngineResponse introspectResponse = oktaIdentityEngineClient.introspect("interactionHandle")
+        IDXResponse introspectResponse = idxClient.introspect("interactionHandle")
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
         assertThat(introspectResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/identify"))
@@ -175,8 +175,8 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIdentifyResponse)
 
-        OktaIdentityEngineResponse identifyResponse =
-            introspectResponse.remediation().remediationOptions().first().proceed(oktaIdentityEngineClient, identifyRequest)
+        IDXResponse identifyResponse =
+            introspectResponse.remediation().remediationOptions().first().proceed(idxClient, identifyRequest)
 
         assertThat(identifyResponse, notNullValue())
         assertThat(identifyResponse.stateHandle, notNullValue())
@@ -295,8 +295,8 @@ class BaseOktaIdentityEngineClientTest {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
-        final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
+        final IDXClient idxClient =
+            new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
             200,
@@ -306,7 +306,7 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
-        OktaIdentityEngineResponse introspectResponse = oktaIdentityEngineClient.introspect("interactionHandle")
+        IDXResponse introspectResponse = idxClient.introspect("interactionHandle")
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
         assertThat(introspectResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/identify"))
@@ -321,8 +321,8 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIdentifyResponse)
 
-        OktaIdentityEngineResponse identifyResponse =
-            introspectResponse.remediation().remediationOptions().first().proceed(oktaIdentityEngineClient, identifyRequest)
+        IDXResponse identifyResponse =
+            introspectResponse.remediation().remediationOptions().first().proceed(idxClient, identifyRequest)
 
         assertThat(identifyResponse, notNullValue())
         assertThat(identifyResponse.stateHandle, notNullValue())
@@ -358,8 +358,8 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedChallengeResponse)
 
-        OktaIdentityEngineResponse passwordAuthenticatorChallengeResponse =
-            identifyResponse.remediation().remediationOptions().first().proceed(oktaIdentityEngineClient, passwordAuthenticatorChallengeRequest)
+        IDXResponse passwordAuthenticatorChallengeResponse =
+            identifyResponse.remediation().remediationOptions().first().proceed(idxClient, passwordAuthenticatorChallengeRequest)
 
         assertThat(passwordAuthenticatorChallengeResponse.stateHandle, notNullValue())
         assertThat(passwordAuthenticatorChallengeResponse.version, notNullValue())
@@ -473,8 +473,8 @@ class BaseOktaIdentityEngineClientTest {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
-        final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
+        final IDXClient idxClient =
+            new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
         Authenticator passwordAuthenticator = new Authenticator()
         passwordAuthenticator.setId("aut2ihzk2n15tsQnQ1d6")
@@ -493,8 +493,8 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedChallengeResponse)
 
-        OktaIdentityEngineResponse passwordAuthenticatorChallengeResponse =
-            oktaIdentityEngineClient.challenge(passwordAuthenticatorChallengeRequest)
+        IDXResponse passwordAuthenticatorChallengeResponse =
+            idxClient.challenge(passwordAuthenticatorChallengeRequest)
 
         assertThat(passwordAuthenticatorChallengeResponse, notNullValue())
 
@@ -514,8 +514,8 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedAnswerChallengeResponse)
 
-        OktaIdentityEngineResponse passwordAuthenticatorAnswerChallengeResponse =
-            passwordAuthenticatorChallengeResponse.remediation().remediationOptions().first().proceed(oktaIdentityEngineClient, passwordAuthenticatorAnswerChallengeRequest)
+        IDXResponse passwordAuthenticatorAnswerChallengeResponse =
+            passwordAuthenticatorChallengeResponse.remediation().remediationOptions().first().proceed(idxClient, passwordAuthenticatorAnswerChallengeRequest)
 
         assertThat(passwordAuthenticatorAnswerChallengeResponse.stateHandle, notNullValue())
         assertThat(passwordAuthenticatorAnswerChallengeResponse.version, notNullValue())
@@ -580,8 +580,8 @@ class BaseOktaIdentityEngineClientTest {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
-        final OktaIdentityEngineClient oktaIdentityEngineClient =
-            new BaseOktaIdentityEngineClient(getClientConfiguration(), requestExecutor)
+        final IDXClient idxClient =
+            new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
         Credentials credentials = new Credentials()
         credentials.setPasscode("some-email-passcode")
@@ -599,8 +599,8 @@ class BaseOktaIdentityEngineClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedAnswerChallengeResponse)
 
-        OktaIdentityEngineResponse secondFactorAuthenticatorAnswerChallengeResponse =
-            oktaIdentityEngineClient.answerChallenge(secondFactorAuthenticatorAnswerChallengeRequest)
+        IDXResponse secondFactorAuthenticatorAnswerChallengeResponse =
+            idxClient.answerChallenge(secondFactorAuthenticatorAnswerChallengeRequest)
 
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse, notNullValue())
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.remediation(), nullValue())

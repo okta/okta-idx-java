@@ -19,8 +19,8 @@ import com.okta.commons.configcheck.ConfigurationValidator;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Collections;
 import com.okta.commons.lang.Strings;
-import com.okta.sdk.api.client.OktaIdentityEngineClient;
-import com.okta.sdk.api.client.OktaIdentityEngineClientBuilder;
+import com.okta.sdk.api.client.IDXClient;
+import com.okta.sdk.api.client.IDXClientBuilder;
 import com.okta.sdk.impl.config.ClientConfiguration;
 import com.okta.sdk.impl.config.EnvironmentVariablesPropertiesSource;
 import com.okta.sdk.impl.config.OptionalPropertiesSource;
@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>The default {@link OktaIdentityEngineClientBuilder} implementation. This looks for configuration files
+ * <p>The default {@link IDXClientBuilder} implementation. This looks for configuration files
  * in the following locations and order of precedence (last one wins).</p>
  * <ul>
  * <li>classpath:com/okta/sdk/config/okta.properties</li>
@@ -56,7 +56,7 @@ import java.util.Set;
  * <li>Programmatically</li>
  * </ul>
  */
-public class DefaultOktaIdentityEngineClientBuilder implements OktaIdentityEngineClientBuilder {
+public class DefaultIDXClientBuilder implements IDXClientBuilder {
 
     private static final String ENVVARS_TOKEN   = "envvars";
     private static final String SYSPROPS_TOKEN  = "sysprops";
@@ -68,11 +68,11 @@ public class DefaultOktaIdentityEngineClientBuilder implements OktaIdentityEngin
 
     private ClientConfiguration clientConfig = new ClientConfiguration();
 
-    public DefaultOktaIdentityEngineClientBuilder() {
+    public DefaultIDXClientBuilder() {
         this(new DefaultResourceFactory());
     }
 
-    DefaultOktaIdentityEngineClientBuilder(ResourceFactory resourceFactory) {
+    DefaultIDXClientBuilder(ResourceFactory resourceFactory) {
         Collection<PropertiesSource> sources = new ArrayList<>();
 
         for (String location : configSources()) {
@@ -128,36 +128,36 @@ public class DefaultOktaIdentityEngineClientBuilder implements OktaIdentityEngin
     }
 
     @Override
-    public OktaIdentityEngineClientBuilder setIssuer(String issuer) {
+    public IDXClientBuilder setIssuer(String issuer) {
         ConfigurationValidator.assertOrgUrl(issuer, allowNonHttpsForTesting);
         this.clientConfig.setIssuer(issuer);
         return this;
     }
 
     @Override
-    public OktaIdentityEngineClientBuilder setClientId(String clientId) {
+    public IDXClientBuilder setClientId(String clientId) {
         ConfigurationValidator.assertClientId(clientId);
         this.clientConfig.setClientId(clientId);
         return this;
     }
 
     @Override
-    public OktaIdentityEngineClientBuilder setClientSecret(String clientSecret) {
-        this.clientConfig.setClientId(clientSecret);
+    public IDXClientBuilder setClientSecret(String clientSecret) {
+        this.clientConfig.setClientSecret(clientSecret);
         return this;
     }
 
     @Override
-    public OktaIdentityEngineClientBuilder setScopes(Set<String> scopes) {
+    public IDXClientBuilder setScopes(Set<String> scopes) {
         Assert.isTrue(scopes != null && !scopes.isEmpty(), "At least one scope is required");
         this.clientConfig.setScopes(scopes);
         return this;
     }
 
     @Override
-    public OktaIdentityEngineClient build() {
+    public IDXClient build() {
         this.validate();
-        return new BaseOktaIdentityEngineClient(this.clientConfig, null);
+        return new BaseIDXClient(this.clientConfig, null);
     }
 
     private void validate() throws IllegalArgumentException {

@@ -16,33 +16,34 @@
 package com.okta.sdk.api.client;
 
 import com.okta.sdk.api.exception.ProcessingException;
+import com.okta.sdk.api.request.EnrollRequest;
 import com.okta.sdk.api.response.TokenResponse;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
 import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
 import com.okta.sdk.api.response.InteractResponse;
-import com.okta.sdk.api.response.OktaIdentityEngineResponse;
+import com.okta.sdk.api.response.IDXResponse;
 
 import java.util.Optional;
 
 /**
  * Client to interact with the IDX backend APIs.
  */
-public interface OktaIdentityEngineClient {
+public interface IDXClient {
 
-    InteractResponse interact() throws ProcessingException;
+    InteractResponse interact(Optional<String> interactionHandleOptional) throws ProcessingException;
 
-    OktaIdentityEngineResponse introspect(String interactionHandle) throws ProcessingException;
+    IDXResponse introspect(String interactionHandle) throws ProcessingException;
 
-    OktaIdentityEngineResponse identify(IdentifyRequest identifyRequest) throws ProcessingException;
+    IDXResponse identify(IdentifyRequest identifyRequest) throws ProcessingException;
 
-    OktaIdentityEngineResponse challenge(ChallengeRequest challengeRequest) throws ProcessingException;
+    IDXResponse enroll(EnrollRequest enrollRequest) throws ProcessingException;
 
-    OktaIdentityEngineResponse answerChallenge(AnswerChallengeRequest answerChallengeRequest) throws ProcessingException;
+    IDXResponse challenge(ChallengeRequest challengeRequest) throws ProcessingException;
 
-    OktaIdentityEngineResponse cancel(String stateHandle) throws ProcessingException;
+    IDXResponse answerChallenge(AnswerChallengeRequest answerChallengeRequest) throws ProcessingException;
 
-    OktaIdentityEngineResponse start(Optional<String> interactionHandleOptional) throws ProcessingException;
+    IDXResponse cancel(String stateHandle) throws ProcessingException;
 
     TokenResponse token(String grantType, String interactionCode) throws ProcessingException;
 }

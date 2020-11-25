@@ -18,7 +18,7 @@ package com.okta.sdk.impl.config;
 
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Strings;
-import com.okta.sdk.impl.client.DefaultOktaIdentityEngineClientBuilder;
+import com.okta.sdk.impl.client.DefaultIDXClientBuilder;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -31,10 +31,10 @@ public class DefaultEnvVarNameConverter implements EnvVarNameConverter {
     public DefaultEnvVarNameConverter() {
 
         this.envToDotPropMap = buildReverseLookupToMap(
-            DefaultOktaIdentityEngineClientBuilder.DEFAULT_CLIENT_ISSUER_PROPERTY_NAME,
-            DefaultOktaIdentityEngineClientBuilder.DEFAULT_CLIENT_ID_PROPERTY_NAME,
-            DefaultOktaIdentityEngineClientBuilder.DEFAULT_CLIENT_SECRET_PROPERTY_NAME,
-            DefaultOktaIdentityEngineClientBuilder.DEFAULT_CLIENT_SCOPES_PROPERTY_NAME);
+            DefaultIDXClientBuilder.DEFAULT_CLIENT_ISSUER_PROPERTY_NAME,
+            DefaultIDXClientBuilder.DEFAULT_CLIENT_ID_PROPERTY_NAME,
+            DefaultIDXClientBuilder.DEFAULT_CLIENT_SECRET_PROPERTY_NAME,
+            DefaultIDXClientBuilder.DEFAULT_CLIENT_SCOPES_PROPERTY_NAME);
     }
 
     private Map<String, String> buildReverseLookupToMap(String... dottedPropertyNames) {

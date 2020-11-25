@@ -22,8 +22,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.commons.http.MediaType
 import com.okta.sdk.api.client.Clients
-import com.okta.sdk.api.client.OktaIdentityEngineClient
-import com.okta.sdk.api.client.OktaIdentityEngineClientBuilder
+import com.okta.sdk.api.client.IDXClient
+import com.okta.sdk.api.client.IDXClientBuilder
 import com.okta.sdk.api.model.Authenticator
 import com.okta.sdk.api.model.Credentials
 import com.okta.sdk.api.model.RemediationOption
@@ -34,7 +34,7 @@ import com.okta.sdk.api.request.ChallengeRequestBuilder
 import com.okta.sdk.api.request.IdentifyRequest
 import com.okta.sdk.api.request.IdentifyRequestBuilder
 import com.okta.sdk.api.response.InteractResponse
-import com.okta.sdk.api.response.OktaIdentityEngineResponse
+import com.okta.sdk.api.response.IDXResponse
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
@@ -51,7 +51,7 @@ class EndToEndIT {
     int mockPort
 
     ObjectMapper objectMapper
-    OktaIdentityEngineClient oktaIdentityEngineClient
+    IDXClient idxClient
 
     @BeforeClass
     void setup() {
@@ -64,9 +64,9 @@ class EndToEndIT {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-        System.setProperty(OktaIdentityEngineClientBuilder.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
+        System.setProperty(IDXClientBuilder.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
 
-        oktaIdentityEngineClient = Clients.builder()
+        idxClient = Clients.builder()
             .setIssuer("http://localhost:" + mockPort)
             .setClientId("test-client-id")
             .setClientSecret("test-client-secret")
@@ -79,14 +79,13 @@ class EndToEndIT {
 
         // interact
         wireMockServer.stubFor(post(urlPathEqualTo("/oauth2/v1/interact"))
-            //TODO: check for Authorization Header's presence?
             .withHeader("Content-Type", containing(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.SC_OK)
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("interact-response.json")))
 
-        InteractResponse interactResponse = oktaIdentityEngineClient.interact()
+        InteractResponse interactResponse = idxClient.interact()
 
         assertThat(interactResponse, notNullValue())
         assertThat(interactResponse.getInteractionHandle(), is("003Q14X7li"))
@@ -103,9 +102,9 @@ class EndToEndIT {
                 .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
                 .withBodyFile("introspect-response.json")))
 
-        OktaIdentityEngineResponse oktaIdentityEngineResponse = oktaIdentityEngineClient.introspect("introspectionHandle")
+        IDXResponse idxResponse = idxClient.introspect("introspectionHandle")
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
+        assertThat(idxResponse, notNullValue())
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/introspect"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
@@ -124,18 +123,18 @@ class EndToEndIT {
             .withRememberMe(false)
             .withStateHandle("stateHandle")
             .build()
-        oktaIdentityEngineResponse = oktaIdentityEngineClient.identify(identifyRequest)
+        idxResponse = idxClient.identify(identifyRequest)
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(idxResponse, notNullValue())
+        assertThat(idxResponse.remediation(), notNullValue())
+        assertThat(idxResponse.remediation().remediationOptions(), notNullValue())
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/identify"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
         wireMockServer.resetAll()
 
         // get remediation options to go to the next step
-        RemediationOption[] remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
+        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions()
         Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
             .findFirst()
@@ -165,18 +164,18 @@ class EndToEndIT {
             .withStateHandle("stateHandle")
             .withAuthenticator(passwordAuthenticator)
             .build()
-        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, passwordAuthenticatorChallengeRequest)
+        idxResponse = remediationOption.proceed(idxClient, passwordAuthenticatorChallengeRequest)
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(idxResponse, notNullValue())
+        assertThat(idxResponse.remediation(), notNullValue())
+        assertThat(idxResponse.remediation().remediationOptions(), notNullValue())
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
         wireMockServer.resetAll()
 
         // answer password authenticator challenge
-        remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
+        remediationOptions = idxResponse.remediation().remediationOptions()
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("challenge-authenticator" == x.getName()) })
             .findFirst()
@@ -196,18 +195,18 @@ class EndToEndIT {
             .withStateHandle("stateHandle")
             .withCredentials(passwordCredentials)
             .build()
-        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, passwordAuthenticatorAnswerChallengeRequest)
+        idxResponse = remediationOption.proceed(idxClient, passwordAuthenticatorAnswerChallengeRequest)
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(idxResponse, notNullValue())
+        assertThat(idxResponse.remediation(), notNullValue())
+        assertThat(idxResponse.remediation().remediationOptions(), notNullValue())
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
         wireMockServer.resetAll()
 
         // get remediation options to go to the next step
-        remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
+        remediationOptions = idxResponse.remediation().remediationOptions()
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
             .findFirst()
@@ -234,18 +233,18 @@ class EndToEndIT {
             .withStateHandle("stateHandle")
             .withAuthenticator(emailAuthenticator)
             .build()
-        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
+        idxResponse = remediationOption.proceed(idxClient, emailAuthenticatorChallengeRequest)
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(idxResponse, notNullValue())
+        assertThat(idxResponse.remediation(), notNullValue())
+        assertThat(idxResponse.remediation().remediationOptions(), notNullValue())
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
         wireMockServer.resetAll()
 
         // answer email authenticator challenge
-        remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
+        remediationOptions = idxResponse.remediation().remediationOptions()
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("challenge-authenticator" == x.getName()) })
             .findFirst()
@@ -265,20 +264,20 @@ class EndToEndIT {
             .withStateHandle("stateHandle")
             .withCredentials(emailPasscodeCredentials)
             .build()
-        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
+        idxResponse = remediationOption.proceed(idxClient, emailAuthenticatorAnswerChallengeRequest)
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation(), nullValue()) // no more remediation steps
+        assertThat(idxResponse, notNullValue())
+        assertThat(idxResponse.remediation(), nullValue()) // no more remediation steps
 
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getRel(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getName(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getHref(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getMethod(), is("POST"))
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
+        assertThat(idxResponse.getSuccessWithInteractionCode(), notNullValue())
+        assertThat(idxResponse.getSuccessWithInteractionCode().getRel(), notNullValue())
+        assertThat(idxResponse.getSuccessWithInteractionCode().getName(), notNullValue())
+        assertThat(idxResponse.getSuccessWithInteractionCode().getHref(), notNullValue())
+        assertThat(idxResponse.getSuccessWithInteractionCode().getMethod(), is("POST"))
+        assertThat(idxResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
+        assertThat(idxResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
+        assertThat(idxResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
+        assertThat(idxResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
@@ -290,14 +289,13 @@ class EndToEndIT {
 
         // interact
         wireMockServer.stubFor(post(urlPathEqualTo("/oauth2/v1/interact"))
-        //TODO: check for Authorization Header's presence?
             .withHeader("Content-Type", containing(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.SC_OK)
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("interact-response.json")))
 
-        InteractResponse interactResponse = oktaIdentityEngineClient.interact()
+        InteractResponse interactResponse = idxClient.interact()
 
         assertThat(interactResponse, notNullValue())
         assertThat(interactResponse.getInteractionHandle(), is("003Q14X7li"))
@@ -314,9 +312,9 @@ class EndToEndIT {
                 .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
                 .withBodyFile("introspect-response.json")))
 
-        OktaIdentityEngineResponse oktaIdentityEngineResponse = oktaIdentityEngineClient.introspect("introspectionHandle")
+        IDXResponse idxResponse = idxClient.introspect("introspectionHandle")
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
+        assertThat(idxResponse, notNullValue())
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/introspect"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
@@ -335,18 +333,18 @@ class EndToEndIT {
             .withRememberMe(false)
             .withStateHandle("stateHandle")
             .build()
-        oktaIdentityEngineResponse = oktaIdentityEngineClient.identify(identifyRequest)
+        idxResponse = idxClient.identify(identifyRequest)
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(idxResponse, notNullValue())
+        assertThat(idxResponse.remediation(), notNullValue())
+        assertThat(idxResponse.remediation().remediationOptions(), notNullValue())
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/identify"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
         wireMockServer.resetAll()
 
         // get remediation options to go to the next step
-        RemediationOption[] remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
+        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions()
         Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
             .findFirst()
@@ -376,18 +374,18 @@ class EndToEndIT {
             .withStateHandle("stateHandle")
             .withAuthenticator(secQnAuthenticator)
             .build()
-        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, secQnAuthenticatorChallengeRequest)
+        idxResponse = remediationOption.proceed(idxClient, secQnAuthenticatorChallengeRequest)
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(idxResponse, notNullValue())
+        assertThat(idxResponse.remediation(), notNullValue())
+        assertThat(idxResponse.remediation().remediationOptions(), notNullValue())
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
         wireMockServer.resetAll()
 
         // answer security question authenticator challenge
-        remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
+        remediationOptions = idxResponse.remediation().remediationOptions()
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("challenge-authenticator" == x.getName()) })
             .findFirst()
@@ -407,18 +405,18 @@ class EndToEndIT {
             .withStateHandle("stateHandle")
             .withCredentials(secQnAnswerCredentials)
             .build()
-        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, secQnAuthenticatorAnswerChallengeRequest)
+        idxResponse = remediationOption.proceed(idxClient, secQnAuthenticatorAnswerChallengeRequest)
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(idxResponse, notNullValue())
+        assertThat(idxResponse.remediation(), notNullValue())
+        assertThat(idxResponse.remediation().remediationOptions(), notNullValue())
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
         wireMockServer.resetAll()
 
         // get remediation options to go to the next step
-        remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
+        remediationOptions = idxResponse.remediation().remediationOptions()
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
             .findFirst()
@@ -445,18 +443,18 @@ class EndToEndIT {
             .withStateHandle("stateHandle")
             .withAuthenticator(emailAuthenticator)
             .build()
-        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorChallengeRequest)
+        idxResponse = remediationOption.proceed(idxClient, emailAuthenticatorChallengeRequest)
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(idxResponse, notNullValue())
+        assertThat(idxResponse.remediation(), notNullValue())
+        assertThat(idxResponse.remediation().remediationOptions(), notNullValue())
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
         wireMockServer.resetAll()
 
         // answer email authenticator challenge
-        remediationOptions = oktaIdentityEngineResponse.remediation().remediationOptions()
+        remediationOptions = idxResponse.remediation().remediationOptions()
         remediationOptionsOptional = Arrays.stream(remediationOptions)
             .filter({ x -> ("challenge-authenticator" == x.getName()) })
             .findFirst()
@@ -476,20 +474,20 @@ class EndToEndIT {
             .withStateHandle("stateHandle")
             .withCredentials(emailPasscodeCredentials)
             .build()
-        oktaIdentityEngineResponse = remediationOption.proceed(oktaIdentityEngineClient, emailAuthenticatorAnswerChallengeRequest)
+        idxResponse = remediationOption.proceed(idxClient, emailAuthenticatorAnswerChallengeRequest)
 
-        assertThat(oktaIdentityEngineResponse, notNullValue())
-        assertThat(oktaIdentityEngineResponse.remediation(), nullValue()) // no more remediation steps
+        assertThat(idxResponse, notNullValue())
+        assertThat(idxResponse.remediation(), nullValue()) // no more remediation steps
 
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getRel(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getName(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getHref(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getMethod(), is("POST"))
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
-        assertThat(oktaIdentityEngineResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
+        assertThat(idxResponse.getSuccessWithInteractionCode(), notNullValue())
+        assertThat(idxResponse.getSuccessWithInteractionCode().getRel(), notNullValue())
+        assertThat(idxResponse.getSuccessWithInteractionCode().getName(), notNullValue())
+        assertThat(idxResponse.getSuccessWithInteractionCode().getHref(), notNullValue())
+        assertThat(idxResponse.getSuccessWithInteractionCode().getMethod(), is("POST"))
+        assertThat(idxResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
+        assertThat(idxResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
+        assertThat(idxResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
+        assertThat(idxResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))

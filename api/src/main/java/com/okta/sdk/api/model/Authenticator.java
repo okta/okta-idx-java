@@ -24,6 +24,8 @@ public class Authenticator {
 
     private String methodType;
 
+    private String phoneNumber;
+
     public String getId() {
         return id;
     }
@@ -32,11 +34,19 @@ public class Authenticator {
         return methodType;
     }
 
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
     public void setId(String id) {
         this.id = id;
     }
 
     public void setMethodType(String methodType) {
         this.methodType = methodType;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

@@ -13,31 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.sdk.api.model;
+package com.okta.sdk.api.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import con.okta.sdk.api.deserializers.OptionsValueDeserializer;
+import com.okta.sdk.api.model.Authenticator;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Options {
+public class EnrollRequest extends BaseRequest {
 
-    private String label;
+    public Authenticator authenticator;
 
-    @JsonDeserialize(using = OptionsValueDeserializer.class)
-    private Object value;
-
-    private String relatesTo;
-
-    public String getLabel() {
-        return label;
-    }
-
-    public Object getValue() {
-        return value;
-    }
-
-    public String getRelatesTo() {
-        return relatesTo;
+    EnrollRequest(String stateHandle, Authenticator authenticator) {
+        this.stateHandle = stateHandle;
+        this.authenticator = authenticator;
     }
 }

@@ -20,11 +20,11 @@ import com.okta.commons.lang.Classes;
 public final class Clients {
 
     /**
-     * Builds a {@link OktaIdentityEngineClientBuilder} instance used to construct {@link OktaIdentityEngineClient} instance.
+     * Builds a {@link IDXClientBuilder} instance used to construct {@link IDXClient} instance.
      *
-     * @return a new {@link OktaIdentityEngineClientBuilder} instance
+     * @return a new {@link IDXClientBuilder} instance
      */
-    public static OktaIdentityEngineClientBuilder builder() {
-        return Classes.newInstance("com.okta.sdk.impl.client.DefaultOktaIdentityEngineClientBuilder");
+    public static IDXClientBuilder builder() {
+        return Classes.newInstance("com.okta.sdk.impl.client.DefaultIDXClientBuilder");
     }
 }

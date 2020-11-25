@@ -17,7 +17,7 @@ package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.okta.commons.lang.Assert;
-import com.okta.sdk.api.client.OktaIdentityEngineClient;
+import com.okta.sdk.api.client.IDXClient;
 import com.okta.sdk.api.exception.ProcessingException;
 import com.okta.sdk.api.response.TokenResponse;
 
@@ -85,6 +85,10 @@ public class SuccessResponse {
         return getValue();
     }
 
+    /**
+     * Parse grant_type from success response
+     * @return grant_type
+     */
     private String parseGrantType() {
         Optional<FormValue> grantTypeForm = Arrays.stream(this.value)
             .filter(x -> "grant_type".equals(x.getName()))
@@ -93,6 +97,10 @@ public class SuccessResponse {
         return String.valueOf(grantTypeForm.get().getValue());
     }
 
+    /**
+     * Parse interaction_code from success response
+     * @return interaction_code
+     */
     private String parseInteractionCode() {
         String interactionCodeLookupKey = this.parseGrantType();
         Optional<FormValue> interactionCodeForm = Arrays.stream(this.value)
@@ -103,6 +111,10 @@ public class SuccessResponse {
         return interactionCode;
     }
 
+    /**
+     * Parse client_id from success response
+     * @return client_id
+     */
     private String parseClientId() {
         Optional<FormValue> clientIdForm = Arrays.stream(this.value)
             .filter(x -> "client_id".equals(x.getName()))
@@ -112,10 +124,12 @@ public class SuccessResponse {
     }
 
     /**
+     * Exchange interaction code for token
      *
-     * @return {@link TokenResponse} the token object
+     * @param client the idx client instance
+     * @return TokenResponse
      */
-    public TokenResponse exchangeCode(OktaIdentityEngineClient client) throws ProcessingException {
+    public TokenResponse exchangeCode(IDXClient client) throws ProcessingException {
         String grantType = this.parseGrantType();
         Assert.notNull(grantType, "grant_type cannot be null");
 

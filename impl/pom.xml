@@ -20,14 +20,14 @@
 
     <parent>
         <groupId>com.okta.sdk</groupId>
-        <artifactId>okta-identity-engine-java-sdk-root</artifactId>
+        <artifactId>okta-idx-java-root</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>okta-identity-engine-java-sdk-impl</artifactId>
-    <name>Okta Identity Engine Java SDK :: Impl</name>
+    <artifactId>okta-idx-java-impl</artifactId>
+    <name>Okta IDX Java SDK :: Impl</name>
     <description>
-        The Okta Identity Engine Java SDK core implementation .jar is used at runtime to support API invocations.  This
+        The Okta IDX Java SDK core implementation .jar is used at runtime to support API invocations.  This
         implementation jar should be a runtime dependency only and should NOT be depended on at compile time by
         your code.  The implementations within this jar can change at any time without warning - use it with runtime
         scope only.
@@ -37,7 +37,7 @@
     <dependencies>
         <dependency>
             <groupId>com.okta.sdk</groupId>
-            <artifactId>okta-identity-engine-java-sdk-api</artifactId>
+            <artifactId>okta-idx-java-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

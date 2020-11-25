@@ -16,7 +16,7 @@
 package com.okta.sdk.impl.client
 
 import com.okta.sdk.api.client.Clients
-import com.okta.sdk.api.client.OktaIdentityEngineClientBuilder
+import com.okta.sdk.api.client.IDXClientBuilder
 import com.okta.sdk.impl.io.DefaultResourceFactory
 import com.okta.sdk.impl.io.Resource
 import com.okta.sdk.impl.io.ResourceFactory
@@ -35,7 +35,7 @@ import static org.testng.Assert.assertEquals
 import static org.testng.Assert.assertTrue
 
 @Listeners([RestoreSystemProperties, RestoreEnvironmentVariables])
-class DefaultOktaIdentityEngineClientBuilderTest {
+class DefaultIDXClientBuilderTest {
 
     void clearOktaEnvAndSysProps() {
         System.clearProperty("okta.idx.issuer")
@@ -51,14 +51,14 @@ class DefaultOktaIdentityEngineClientBuilderTest {
 
     @Test
     void testBuilder() {
-        assertTrue(Clients.builder() instanceof DefaultOktaIdentityEngineClientBuilder)
+        assertTrue(Clients.builder() instanceof DefaultIDXClientBuilder)
     }
 
     @Test
     void testConfigureBaseProperties() {
         clearOktaEnvAndSysProps()
-        DefaultOktaIdentityEngineClientBuilder clientBuilder =
-            new DefaultOktaIdentityEngineClientBuilder(noDefaultYamlResourceFactory())
+        DefaultIDXClientBuilder clientBuilder =
+            new DefaultIDXClientBuilder(noDefaultYamlResourceFactory())
         assertEquals clientBuilder.clientConfig.issuer, "https://idx.okta.com"
         assertEquals clientBuilder.clientConfig.clientId, "idx-client-id"
         assertEquals clientBuilder.clientConfig.scopes, ["idx-scope-1", "idx-scope-2"] as Set
@@ -67,9 +67,9 @@ class DefaultOktaIdentityEngineClientBuilderTest {
     @Test
     void testHttpBaseUrlForTesting() {
         clearOktaEnvAndSysProps()
-        System.setProperty(OktaIdentityEngineClientBuilder.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
+        System.setProperty(IDXClientBuilder.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
         // shouldn't throw IllegalArgumentException
-        new DefaultOktaIdentityEngineClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
+        new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
             .setIssuer("http://okta.example.com")
             .setClientId("some-client-id")
             .setScopes(Sets.newHashSet(["test-scope"]))
@@ -80,7 +80,7 @@ class DefaultOktaIdentityEngineClientBuilderTest {
     void testNullClientId() {
         clearOktaEnvAndSysProps()
         TestUtil.expect(IllegalArgumentException) {
-            new DefaultOktaIdentityEngineClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
+            new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
                 .setIssuer("https://okta.example.com")
                 .build()
         }
@@ -89,7 +89,7 @@ class DefaultOktaIdentityEngineClientBuilderTest {
     @Test
     void testMissingIssuer() {
         TestUtil.expect(IllegalArgumentException) {
-            new DefaultOktaIdentityEngineClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
+            new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
                 .setClientId("test-client-id")
                 .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
                 .build()
@@ -99,7 +99,7 @@ class DefaultOktaIdentityEngineClientBuilderTest {
     @Test
     void testMissingScopes() {
         TestUtil.expect(IllegalArgumentException) {
-            new DefaultOktaIdentityEngineClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
+            new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
                 .setIssuer("https://sample.com")
                 .setClientId("test-client-id")
                 .build()
@@ -109,7 +109,7 @@ class DefaultOktaIdentityEngineClientBuilderTest {
     @Test
     void testEmptyIssuer() {
         TestUtil.expect(IllegalArgumentException) {
-            new DefaultOktaIdentityEngineClientBuilder()
+            new DefaultIDXClientBuilder()
                 .setIssuer(" ")
                 .setClientId("test-client-id")
                 .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
@@ -120,7 +120,7 @@ class DefaultOktaIdentityEngineClientBuilderTest {
     @Test
     void testEmptyClientId() {
         TestUtil.expect(IllegalArgumentException) {
-            new DefaultOktaIdentityEngineClientBuilder()
+            new DefaultIDXClientBuilder()
                 .setIssuer("https://sample.com")
                 .setClientId(" ")
                 .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
@@ -131,7 +131,7 @@ class DefaultOktaIdentityEngineClientBuilderTest {
     @Test
     void testEmptyScopes() {
         TestUtil.expect(IllegalArgumentException) {
-            new DefaultOktaIdentityEngineClientBuilder()
+            new DefaultIDXClientBuilder()
                 .setIssuer("https://sample.com")
                 .setClientId("test-client-id")
                 .setScopes(Sets.newHashSet())
