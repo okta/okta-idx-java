@@ -189,7 +189,7 @@ class EndToEndIT {
                 .withBodyFile("answer-password-authenticator-challenge-response.json")))
 
         Credentials passwordCredentials = new Credentials()
-        passwordCredentials.setPasscode("some=password")
+        passwordCredentials.setPasscode("some=password".toCharArray())
 
         AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
             .withStateHandle("stateHandle")
@@ -258,7 +258,7 @@ class EndToEndIT {
                 .withBodyFile("answer-email-authenticator-challenge-response.json")))
 
         Credentials emailPasscodeCredentials = new Credentials()
-        emailPasscodeCredentials.setPasscode("some-email-passcode")
+        emailPasscodeCredentials.setPasscode("some-email-passcode".toCharArray())
 
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
             .withStateHandle("stateHandle")
@@ -399,7 +399,7 @@ class EndToEndIT {
                 .withBodyFile("answer-security-qn-authenticator-challenge-response.json")))
 
         Credentials secQnAnswerCredentials = new Credentials()
-        secQnAnswerCredentials.setAnswer("answer to security question")
+        secQnAnswerCredentials.setAnswer("answer to security question".toCharArray())
 
         AnswerChallengeRequest secQnAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
             .withStateHandle("stateHandle")
@@ -468,7 +468,7 @@ class EndToEndIT {
                 .withBodyFile("answer-email-authenticator-challenge-response.json")))
 
         Credentials emailPasscodeCredentials = new Credentials()
-        emailPasscodeCredentials.setPasscode("some-email-passcode")
+        emailPasscodeCredentials.setPasscode("some-email-passcode".toCharArray())
 
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
             .withStateHandle("stateHandle")

@@ -101,7 +101,7 @@ class BaseIDXClientTest {
         assertThat(response.remediation.type, equalTo("array"))
         assertThat(response.remediation.value.first().rel, hasItemInArray("create-form"))
         assertThat(response.remediation.value.first().name, equalTo("identify"))
-        assertThat(response.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/identify"))
+        assertThat(response.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/identify"))
         assertThat(response.remediation.value.first().method, equalTo("POST"))
         assertThat(response.remediation.value.first().accepts, equalTo("application/ion+json; okta-version=1.0.0"))
 
@@ -160,7 +160,7 @@ class BaseIDXClientTest {
         IDXResponse introspectResponse = idxClient.introspect(Optional.of("interactionHandle"))
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
-        assertThat(introspectResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/identify"))
+        assertThat(introspectResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/identify"))
 
         IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
             .withIdentifier("test-identifier")
@@ -309,7 +309,7 @@ class BaseIDXClientTest {
         IDXResponse introspectResponse = idxClient.introspect(Optional.of("interactionHandle"))
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
-        assertThat(introspectResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/identify"))
+        assertThat(introspectResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/identify"))
 
         IdentifyRequest identifyRequest = new IdentifyRequest("test-identifier", null, false, "stateHandle")
 
@@ -334,7 +334,7 @@ class BaseIDXClientTest {
         assertThat(identifyResponse.remediation().remediationOptions(), notNullValue())
         assertThat(identifyResponse.remediation.value.first().rel, hasItemInArray("create-form"))
         assertThat(identifyResponse.remediation.value.first().name, equalTo("select-authenticator-authenticate"))
-        assertThat(identifyResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/challenge"))
+        assertThat(identifyResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/challenge"))
         assertThat(identifyResponse.remediation.value.first().method, equalTo("POST"))
         assertThat(identifyResponse.remediation.value.first().accepts, equalTo("application/ion+json; okta-version=1.0.0"))
 
@@ -370,7 +370,7 @@ class BaseIDXClientTest {
         assertThat(passwordAuthenticatorChallengeResponse.remediation().remediationOptions(), notNullValue())
         assertThat(passwordAuthenticatorChallengeResponse.remediation.value.first().rel, hasItemInArray("create-form"))
         assertThat(passwordAuthenticatorChallengeResponse.remediation.value.first().name, equalTo("challenge-authenticator"))
-        assertThat(passwordAuthenticatorChallengeResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/challenge/answer"))
+        assertThat(passwordAuthenticatorChallengeResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/challenge/answer"))
         assertThat(passwordAuthenticatorChallengeResponse.remediation.value.first().method, equalTo("POST"))
         assertThat(passwordAuthenticatorChallengeResponse.remediation.value.first().accepts, equalTo("application/ion+json; okta-version=1.0.0"))
 
@@ -412,7 +412,7 @@ class BaseIDXClientTest {
 
         assertThat(authenticatorOption, notNullValue())
         assertThat(authenticatorOption.rel, hasItemInArray("create-form"))
-        assertThat(authenticatorOption.href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/challenge"))
+        assertThat(authenticatorOption.href, equalTo("https://foo.oktapreview.com/idp/idx/challenge"))
         assertThat(authenticatorOption.method, equalTo("POST"))
         assertThat(authenticatorOption.form(), notNullValue())
 
@@ -499,7 +499,7 @@ class BaseIDXClientTest {
         assertThat(passwordAuthenticatorChallengeResponse, notNullValue())
 
         Credentials passwordCredentials = new Credentials()
-        passwordCredentials.setPasscode("some-password")
+        passwordCredentials.setPasscode("some-password".toCharArray())
 
         AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
             .withStateHandle("stateHandle")
@@ -526,7 +526,7 @@ class BaseIDXClientTest {
         assertThat(passwordAuthenticatorAnswerChallengeResponse.remediation().remediationOptions(), notNullValue())
         assertThat(passwordAuthenticatorAnswerChallengeResponse.remediation.value.first().rel, hasItemInArray("create-form"))
         assertThat(passwordAuthenticatorAnswerChallengeResponse.remediation.value.first().name, equalTo("select-authenticator-authenticate"))
-        assertThat(passwordAuthenticatorAnswerChallengeResponse.remediation.value.first().href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/challenge"))
+        assertThat(passwordAuthenticatorAnswerChallengeResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/challenge"))
         assertThat(passwordAuthenticatorAnswerChallengeResponse.remediation.value.first().method, equalTo("POST"))
         assertThat(passwordAuthenticatorAnswerChallengeResponse.remediation.value.first().accepts, equalTo("application/ion+json; okta-version=1.0.0"))
 
@@ -550,7 +550,7 @@ class BaseIDXClientTest {
             .find {it.name == "select-authenticator-authenticate"}
 
         assertThat(authenticatorOption.rel, hasItemInArray("create-form"))
-        assertThat(authenticatorOption.href, equalTo("https://devex-idx-testing.oktapreview.com/idp/idx/challenge"))
+        assertThat(authenticatorOption.href, equalTo("https://foo.oktapreview.com/idp/idx/challenge"))
         assertThat(authenticatorOption.method, equalTo("POST"))
         assertThat(authenticatorOption.form(), notNullValue())
 
@@ -584,7 +584,7 @@ class BaseIDXClientTest {
             new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
         Credentials credentials = new Credentials()
-        credentials.setPasscode("some-email-passcode")
+        credentials.setPasscode("some-email-passcode".toCharArray())
 
         AnswerChallengeRequest secondFactorAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
             .withStateHandle("stateHandle")

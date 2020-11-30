@@ -14,7 +14,7 @@
         "relatesTo": [
           "$.currentAuthenticatorEnrollment"
         ],
-        "href": "https://devex-idx-testing.oktapreview.com/idp/idx/challenge/answer",
+        "href": "https://foo.oktapreview.com/idp/idx/challenge/answer",
         "method": "POST",
         "value": [
           {
@@ -46,14 +46,14 @@
     "type": "object",
     "value": {
       "profile": {
-        "email": "a*************s@g***l.com"
+        "email": "*****"
       },
       "resend": {
         "rel": [
           "create-form"
         ],
         "name": "resend",
-        "href": "https://devex-idx-testing.oktapreview.com/idp/idx/challenge/resend",
+        "href": "https://foo.oktapreview.com/idp/idx/challenge/resend",
         "method": "POST",
         "value": [
           {
@@ -71,7 +71,7 @@
           "create-form"
         ],
         "name": "poll",
-        "href": "https://devex-idx-testing.oktapreview.com/idp/idx/challenge/poll",
+        "href": "https://foo.oktapreview.com/idp/idx/challenge/poll",
         "method": "POST",
         "refresh": 4000,
         "value": [
@@ -115,7 +115,7 @@
     "value": [
       {
         "profile": {
-          "email": "a*************s@g***l.com"
+          "email": "*****"
         },
         "type": "email",
         "id": "eae3iyi3yzHZN4Cji1d6",
@@ -139,7 +139,7 @@
       "create-form"
     ],
     "name": "cancel",
-    "href": "https://devex-idx-testing.oktapreview.com/idp/idx/cancel",
+    "href": "https://foo.oktapreview.com/idp/idx/cancel",
     "method": "POST",
     "value": [
       {

@@ -11,7 +11,7 @@
           "create-form"
         ],
         "name": "select-authenticator-authenticate",
-        "href": "https://devex-idx-testing.oktapreview.com/idp/idx/challenge",
+        "href": "https://foo.oktapreview.com/idp/idx/challenge",
         "method": "POST",
         "value": [
           {
@@ -138,7 +138,7 @@
     "value": [
       {
         "profile": {
-          "email": "a*************s@g***l.com"
+          "email": "*****"
         },
         "type": "email",
         "id": "eae3iyi3yzHZN4Cji1d6",
@@ -186,7 +186,7 @@
       "create-form"
     ],
     "name": "cancel",
-    "href": "https://devex-idx-testing.oktapreview.com/idp/idx/cancel",
+    "href": "https://foo.oktapreview.com/idp/idx/cancel",
     "method": "POST",
     "value": [
       {

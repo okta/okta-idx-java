@@ -15,7 +15,6 @@
  */
 package com.okta.sdk.impl.util;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -24,20 +23,34 @@ import java.util.Base64;
 
 public class PkceUtil {
 
-    public static String generateCodeVerifier() throws UnsupportedEncodingException {
+    public static final String CODE_CHALLENGE_METHOD = "S256";
 
-        SecureRandom secureRandom = new SecureRandom();
-        byte[] codeVerifier = new byte[32];
-        secureRandom.nextBytes(codeVerifier);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
-    }
+    /**
+     * Generate Code Challenge (Base64 URL-encoded SHA-256 hash of the generated code verifier).
+     *
+     * @return generated code challenge
+     * @throws NoSuchAlgorithmException
+     */
+    public static String generateCodeChallenge() throws NoSuchAlgorithmException {
 
-    public static String generateCodeChallenge(String codeVerifier) throws NoSuchAlgorithmException {
-
+        String codeVerifier = generateCodeVerifier();
         byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(bytes, 0, bytes.length);
         byte[] digest = messageDigest.digest();
         return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+    }
+
+    /**
+     * Generate Code Verifier (Random URL-safe string with a minimum length of 43 characters).
+     *
+     * @return generated code verifier
+     */
+    private static String generateCodeVerifier() {
+
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] codeVerifier = new byte[32];
+        secureRandom.nextBytes(codeVerifier);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
     }
 }

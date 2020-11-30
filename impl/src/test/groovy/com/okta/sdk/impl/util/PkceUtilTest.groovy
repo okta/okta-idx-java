@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.sdk.api.model;
+package com.okta.sdk.impl.util
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import org.testng.annotations.Test
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Credentials {
+import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.Matchers.notNullValue
 
-    public char[] passcode;
+class PkceUtilTest {
 
-    public char[] answer;
-
-    public void setPasscode(char[] passcode) {
-        this.passcode = passcode;
-    }
-
-    public void setAnswer(char[] answer) {
-        this.answer = answer;
+    @Test
+    void testGenerateCodeChallenge() {
+        String codeChallenge = PkceUtil.generateCodeChallenge()
+        assertThat codeChallenge, notNullValue()
     }
 }

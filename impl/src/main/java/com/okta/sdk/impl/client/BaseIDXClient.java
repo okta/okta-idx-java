@@ -46,12 +46,14 @@ import com.okta.sdk.api.response.InteractResponse;
 import com.okta.sdk.api.response.IDXResponse;
 import com.okta.sdk.api.response.TokenResponse;
 import com.okta.sdk.impl.config.ClientConfiguration;
+import com.okta.sdk.impl.util.PkceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -95,16 +97,19 @@ public class BaseIDXClient implements IDXClient {
 
         InteractResponse interactResponse;
 
-        String urlParameters = "scope=" + clientConfiguration.getScopes().stream()
-            .map(Object::toString).collect(Collectors.joining(" "));
-
         try {
+            StringBuilder urlParameters = new StringBuilder();
+            urlParameters.append("scope=" + clientConfiguration.getScopes().stream()
+                    .map(Object::toString).collect(Collectors.joining(" ")));
+            urlParameters.append("&code_challenge=" + PkceUtil.generateCodeChallenge());
+            urlParameters.append("&code_challenge_method=" + PkceUtil.CODE_CHALLENGE_METHOD);
+
             Request request = new DefaultRequest(
                 HttpMethod.POST,
                 clientConfiguration.getIssuer() + "/oauth2/v1/interact",
                 null,
                 getJsonHttpHeaders(),
-                new ByteArrayInputStream(urlParameters.getBytes(StandardCharsets.UTF_8)),
+                new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
                 -1L);
 
             Response response = requestExecutor.executeRequest(request);
@@ -116,7 +121,7 @@ public class BaseIDXClient implements IDXClient {
             Assert.notNull(interactResponse, "interact response cannot be null");
             Assert.notNull(interactResponse.getInteractionHandle(), "interactionHandle cannot be null");
 
-        } catch (IOException | IllegalArgumentException | HttpException e) {
+        } catch (IOException | IllegalArgumentException | HttpException | NoSuchAlgorithmException e) {
             throw new ProcessingException(e);
         }
 
@@ -290,25 +295,6 @@ public class BaseIDXClient implements IDXClient {
 
         return idxResponse;
     }
-
-//    @Override
-//    public IDXResponse start(Optional<String> interactionHandleOptional) throws ProcessingException {
-//
-//        IDXResponse idxResponse;
-//
-//        String interactionHandle;
-//
-//        if (!interactionHandleOptional.isPresent()) {
-//            interactionHandle = this.interact().getInteractionHandle();
-//        } else {
-//            interactionHandle = interactionHandleOptional.get();
-//        }
-//
-//        // introspect
-//        idxResponse = this.introspect(interactionHandle);
-//
-//        return idxResponse;
-//    }
 
     @Override
     public TokenResponse token(String grantType, String interactionCode) throws ProcessingException {
