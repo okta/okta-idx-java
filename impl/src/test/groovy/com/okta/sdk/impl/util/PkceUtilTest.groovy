@@ -23,6 +23,12 @@ import static org.hamcrest.Matchers.notNullValue
 class PkceUtilTest {
 
     @Test
+    void testGenerateCodeVerifier() {
+        String codeVerifier = PkceUtil.generateCodeVerifier()
+        assertThat codeVerifier, notNullValue()
+    }
+
+    @Test
     void testGenerateCodeChallenge() {
         String codeChallenge = PkceUtil.generateCodeChallenge()
         assertThat codeChallenge, notNullValue()

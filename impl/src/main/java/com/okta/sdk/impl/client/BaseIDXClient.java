@@ -42,8 +42,8 @@ import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.EnrollRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
 import com.okta.sdk.api.request.IntrospectRequest;
-import com.okta.sdk.api.response.InteractResponse;
 import com.okta.sdk.api.response.IDXResponse;
+import com.okta.sdk.api.response.InteractResponse;
 import com.okta.sdk.api.response.TokenResponse;
 import com.okta.sdk.impl.config.ClientConfiguration;
 import com.okta.sdk.impl.util.PkceUtil;
@@ -54,7 +54,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -99,17 +98,21 @@ public class BaseIDXClient implements IDXClient {
 
         try {
             StringBuilder urlParameters = new StringBuilder();
-            urlParameters.append("scope=" + clientConfiguration.getScopes().stream()
+            urlParameters.append("client_id=").append(clientConfiguration.getClientId());
+            if (Strings.hasText(clientConfiguration.getClientSecret())) {
+                urlParameters.append("&client_secret=").append(clientConfiguration.getClientSecret());
+            }
+            urlParameters.append("&scope=").append(clientConfiguration.getScopes().stream()
                     .map(Object::toString).collect(Collectors.joining(" ")));
-            urlParameters.append("&code_challenge=" + PkceUtil.generateCodeChallenge());
-            urlParameters.append("&code_challenge_method=" + PkceUtil.CODE_CHALLENGE_METHOD);
-            urlParameters.append("&redirect_uri=" + clientConfiguration.getRedirectUri());
+            urlParameters.append("&code_challenge=").append(PkceUtil.generateCodeChallenge());
+            urlParameters.append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD);
+            urlParameters.append("&redirect_uri=").append(clientConfiguration.getRedirectUri());
 
             Request request = new DefaultRequest(
                 HttpMethod.POST,
                 clientConfiguration.getIssuer() + "/oauth2/v1/interact",
                 null,
-                getJsonHttpHeaders(),
+                getHttpHeaders(true),
                 new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
                 -1L);
 
@@ -118,9 +121,9 @@ public class BaseIDXClient implements IDXClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
             if (response.getHttpStatus() != 200) {
-                log.error("Interact Request Failed with HTTP status: {}, Error: {}",
+                log.error("Interact request failed with HTTP status: {}, Error: {}",
                         response.getHttpStatus(), responseJsonNode);
-                throw new ProcessingException("Interact Request Failed with error: " + responseJsonNode);
+                throw new ProcessingException("Interact request failed with error: " + responseJsonNode);
             }
 
             interactResponse = objectMapper.convertValue(responseJsonNode, InteractResponse.class);
@@ -155,7 +158,7 @@ public class BaseIDXClient implements IDXClient {
                 HttpMethod.POST,
                 clientConfiguration.getIssuer() + "/idp/idx/introspect",
                 null,
-                getIonJsonHttpHeaders(),
+                getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(introspectRequest)),
                 -1L);
 
@@ -164,9 +167,9 @@ public class BaseIDXClient implements IDXClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
             if (response.getHttpStatus() != 200) {
-                log.error("Introspect Request Failed with HTTP status: {}, Error: {}",
+                log.error("Introspect request failed with HTTP status: {}, Error: {}",
                         response.getHttpStatus(), responseJsonNode);
-                throw new ProcessingException("Introspect Request Failed with error: " + responseJsonNode);
+                throw new ProcessingException("Introspect request failed with error: " + responseJsonNode);
             }
 
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
@@ -188,7 +191,7 @@ public class BaseIDXClient implements IDXClient {
                 HttpMethod.POST,
                 clientConfiguration.getIssuer() + "/idp/idx/identify",
                 null,
-                getIonJsonHttpHeaders(),
+                getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(identifyRequest)),
                 -1L);
 
@@ -197,9 +200,9 @@ public class BaseIDXClient implements IDXClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
             if (response.getHttpStatus() != 200) {
-                log.error("Identify Request Failed with HTTP status: {}, Error: {}",
+                log.error("Identify request failed with HTTP status: {}, Error: {}",
                         response.getHttpStatus(), responseJsonNode);
-                throw new ProcessingException("Identify Request Failed with error: " + responseJsonNode);
+                throw new ProcessingException("Identify request failed with error: " + responseJsonNode);
             }
 
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
@@ -221,7 +224,7 @@ public class BaseIDXClient implements IDXClient {
                 HttpMethod.POST,
                 clientConfiguration.getIssuer() + "/idp/idx/credential/enroll",
                 null,
-                getIonJsonHttpHeaders(),
+                getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(enrollRequest)),
                 -1L);
 
@@ -230,9 +233,9 @@ public class BaseIDXClient implements IDXClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
             if (response.getHttpStatus() != 200) {
-                log.error("Enroll Request Failed with HTTP status: {}, Error: {}",
+                log.error("Enroll request failed with HTTP status: {}, Error: {}",
                         response.getHttpStatus(), responseJsonNode);
-                throw new ProcessingException("Enroll Request Failed with error: " + responseJsonNode);
+                throw new ProcessingException("Enroll request failed with error: " + responseJsonNode);
             }
 
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
@@ -254,7 +257,7 @@ public class BaseIDXClient implements IDXClient {
                 HttpMethod.POST,
                 clientConfiguration.getIssuer() + "/idp/idx/challenge",
                 null,
-                getIonJsonHttpHeaders(),
+                getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(challengeRequest)),
                 -1L);
 
@@ -263,9 +266,9 @@ public class BaseIDXClient implements IDXClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
             if (response.getHttpStatus() != 200) {
-                log.error("Challenge Request Failed with HTTP status: {}, Error: {}",
+                log.error("Challenge request failed with HTTP status: {}, Error: {}",
                         response.getHttpStatus(), responseJsonNode);
-                throw new ProcessingException("Challenge Request Failed with error: " + responseJsonNode);
+                throw new ProcessingException("Challenge request failed with error: " + responseJsonNode);
             }
 
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
@@ -287,7 +290,7 @@ public class BaseIDXClient implements IDXClient {
                 HttpMethod.POST,
                 clientConfiguration.getIssuer() + "/idp/idx/challenge/answer",
                 null,
-                getIonJsonHttpHeaders(),
+                getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(answerChallengeRequest)),
                 -1L);
 
@@ -296,9 +299,9 @@ public class BaseIDXClient implements IDXClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
             if (response.getHttpStatus() != 200) {
-                log.error("Answer Challenge Request Failed with HTTP status: {}, Error: {}",
+                log.error("Answer Challenge request failed with HTTP status: {}, Error: {}",
                         response.getHttpStatus(), responseJsonNode);
-                throw new ProcessingException("Enroll Request Failed with error: " + responseJsonNode);
+                throw new ProcessingException("Enroll request failed with error: " + responseJsonNode);
             }
 
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
@@ -322,7 +325,7 @@ public class BaseIDXClient implements IDXClient {
                 HttpMethod.POST,
                 clientConfiguration.getIssuer() + "/idp/idx/cancel",
                 null,
-                getIonJsonHttpHeaders(),
+                getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(cancelRequest)),
                 -1L);
 
@@ -331,9 +334,9 @@ public class BaseIDXClient implements IDXClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
             if (response.getHttpStatus() != 200) {
-                log.error("Cancel Request Failed with HTTP status: {}, Error: {}",
+                log.error("Cancel request failed with HTTP status: {}, Error: {}",
                         response.getHttpStatus(), responseJsonNode);
-                throw new ProcessingException("Cancel Request Failed with error: " + responseJsonNode);
+                throw new ProcessingException("Cancel request failed with error: " + responseJsonNode);
             }
 
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
@@ -350,15 +353,19 @@ public class BaseIDXClient implements IDXClient {
 
         TokenResponse tokenResponse;
 
-        String urlParameters = "grant_type=" + grantType + "&interaction_code=" + interactionCode;
+        StringBuilder urlParameters = new StringBuilder();
+        urlParameters.append("grant_type=").append(grantType);
+        urlParameters.append("&interaction_code=").append(interactionCode);
+        urlParameters.append("&client_id=").append(clientConfiguration.getClientId());
+        urlParameters.append("&code_verifier=").append(PkceUtil.generateCodeVerifier());
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
                 clientConfiguration.getIssuer() + "/oauth2/v1/token",
                 null,
-                getJsonHttpHeaders(),
-                new ByteArrayInputStream(urlParameters.getBytes(StandardCharsets.UTF_8)),
+                getHttpHeaders(true),
+                new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
                 -1L);
 
             Response response = requestExecutor.executeRequest(request);
@@ -366,9 +373,9 @@ public class BaseIDXClient implements IDXClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
             if (response.getHttpStatus() != 200) {
-                log.error("Token Request Failed with HTTP status: {}, Error: {}",
+                log.error("Token request failed with HTTP status: {}, Error: {}",
                         response.getHttpStatus(), responseJsonNode);
-                throw new ProcessingException("Token Request Failed with error: " + responseJsonNode);
+                throw new ProcessingException("Token request failed with error: " + responseJsonNode);
             }
 
             tokenResponse = objectMapper.convertValue(responseJsonNode, TokenResponse.class);
@@ -380,30 +387,29 @@ public class BaseIDXClient implements IDXClient {
         return tokenResponse;
     }
 
-    private HttpHeaders getJsonHttpHeaders() {
+    private HttpHeaders getHttpHeaders(boolean isOAuth2Endpoint) {
+
         HttpHeaders httpHeaders = new HttpHeaders();
 
-        String authHeaderStr;
-
-        if (Strings.hasText(clientConfiguration.getClientSecret())) {
-            // confidential clients have clientSecret; Auth header is needed
-            authHeaderStr = clientConfiguration.getClientId() + ":" + clientConfiguration.getClientSecret();
-            httpHeaders.add("Authorization", "Basic " + Base64.getEncoder().encodeToString(authHeaderStr.getBytes(StandardCharsets.UTF_8)));
-        }
-//        else {
-//            // public client
+//        String authHeaderStr;
+//
+//        if (Strings.hasText(clientConfiguration.getClientSecret())) {
+//            // confidential clients have clientSecret; Auth header is needed
+//            authHeaderStr = clientConfiguration.getClientId() + ":" + clientConfiguration.getClientSecret();
+//            httpHeaders.add("Authorization", "Basic " + Base64.getEncoder().encodeToString(authHeaderStr.getBytes(StandardCharsets.UTF_8)));
 //        }
+////        else {
+////            // public client
+////        }
 
-        httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
-        httpHeaders.add("Accept", "application/json");
-        httpHeaders.add(HttpHeaders.USER_AGENT, USER_AGENT_HEADER_VALUE);
-        return httpHeaders;
-    }
+        if (isOAuth2Endpoint) {
+            httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+            httpHeaders.add("Accept", "application/json");
+        } else {
+            httpHeaders.add("Content-Type", "application/ion+json; okta-version=1.0.0");
+            httpHeaders.add("Accept", "application/ion+json; okta-version=1.0.0");
+        }
 
-    private HttpHeaders getIonJsonHttpHeaders() {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-Type", "application/ion+json; okta-version=1.0.0");
-        httpHeaders.add("Accept", "application/ion+json; okta-version=1.0.0");
         httpHeaders.add(HttpHeaders.USER_AGENT, USER_AGENT_HEADER_VALUE);
         return httpHeaders;
     }

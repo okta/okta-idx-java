@@ -46,7 +46,7 @@ public class PkceUtil {
      *
      * @return generated code verifier
      */
-    private static String generateCodeVerifier() {
+    public static String generateCodeVerifier() {
 
         SecureRandom secureRandom = new SecureRandom();
         byte[] codeVerifier = new byte[32];
