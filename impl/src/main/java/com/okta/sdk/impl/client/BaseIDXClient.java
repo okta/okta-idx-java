@@ -103,6 +103,7 @@ public class BaseIDXClient implements IDXClient {
                     .map(Object::toString).collect(Collectors.joining(" ")));
             urlParameters.append("&code_challenge=" + PkceUtil.generateCodeChallenge());
             urlParameters.append("&code_challenge_method=" + PkceUtil.CODE_CHALLENGE_METHOD);
+            urlParameters.append("&redirect_uri=" + clientConfiguration.getRedirectUri());
 
             Request request = new DefaultRequest(
                 HttpMethod.POST,
@@ -115,6 +116,12 @@ public class BaseIDXClient implements IDXClient {
             Response response = requestExecutor.executeRequest(request);
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            if (response.getHttpStatus() != 200) {
+                log.error("Interact Request Failed with HTTP status: {}, Error: {}",
+                        response.getHttpStatus(), responseJsonNode);
+                throw new ProcessingException("Interact Request Failed with error: " + responseJsonNode);
+            }
 
             interactResponse = objectMapper.convertValue(responseJsonNode, InteractResponse.class);
 
@@ -155,6 +162,13 @@ public class BaseIDXClient implements IDXClient {
             Response response = requestExecutor.executeRequest(request);
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            if (response.getHttpStatus() != 200) {
+                log.error("Introspect Request Failed with HTTP status: {}, Error: {}",
+                        response.getHttpStatus(), responseJsonNode);
+                throw new ProcessingException("Introspect Request Failed with error: " + responseJsonNode);
+            }
+
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
 
         } catch (IOException | IllegalArgumentException | HttpException e) {
@@ -181,6 +195,13 @@ public class BaseIDXClient implements IDXClient {
             Response response = requestExecutor.executeRequest(request);
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            if (response.getHttpStatus() != 200) {
+                log.error("Identify Request Failed with HTTP status: {}, Error: {}",
+                        response.getHttpStatus(), responseJsonNode);
+                throw new ProcessingException("Identify Request Failed with error: " + responseJsonNode);
+            }
+
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
 
         } catch (IOException | IllegalArgumentException | HttpException e) {
@@ -207,6 +228,13 @@ public class BaseIDXClient implements IDXClient {
             Response response = requestExecutor.executeRequest(request);
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            if (response.getHttpStatus() != 200) {
+                log.error("Enroll Request Failed with HTTP status: {}, Error: {}",
+                        response.getHttpStatus(), responseJsonNode);
+                throw new ProcessingException("Enroll Request Failed with error: " + responseJsonNode);
+            }
+
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
 
         } catch (IOException | IllegalArgumentException | HttpException e) {
@@ -233,6 +261,13 @@ public class BaseIDXClient implements IDXClient {
             Response response = requestExecutor.executeRequest(request);
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            if (response.getHttpStatus() != 200) {
+                log.error("Challenge Request Failed with HTTP status: {}, Error: {}",
+                        response.getHttpStatus(), responseJsonNode);
+                throw new ProcessingException("Challenge Request Failed with error: " + responseJsonNode);
+            }
+
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
 
         } catch (IOException | IllegalArgumentException | HttpException e) {
@@ -259,6 +294,13 @@ public class BaseIDXClient implements IDXClient {
             Response response = requestExecutor.executeRequest(request);
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            if (response.getHttpStatus() != 200) {
+                log.error("Answer Challenge Request Failed with HTTP status: {}, Error: {}",
+                        response.getHttpStatus(), responseJsonNode);
+                throw new ProcessingException("Enroll Request Failed with error: " + responseJsonNode);
+            }
+
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
 
         } catch (IOException | IllegalArgumentException | HttpException e) {
@@ -287,6 +329,13 @@ public class BaseIDXClient implements IDXClient {
             Response response = requestExecutor.executeRequest(request);
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            if (response.getHttpStatus() != 200) {
+                log.error("Cancel Request Failed with HTTP status: {}, Error: {}",
+                        response.getHttpStatus(), responseJsonNode);
+                throw new ProcessingException("Cancel Request Failed with error: " + responseJsonNode);
+            }
+
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
 
         } catch (IOException | IllegalArgumentException | HttpException e) {
@@ -315,6 +364,13 @@ public class BaseIDXClient implements IDXClient {
             Response response = requestExecutor.executeRequest(request);
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            if (response.getHttpStatus() != 200) {
+                log.error("Token Request Failed with HTTP status: {}, Error: {}",
+                        response.getHttpStatus(), responseJsonNode);
+                throw new ProcessingException("Token Request Failed with error: " + responseJsonNode);
+            }
+
             tokenResponse = objectMapper.convertValue(responseJsonNode, TokenResponse.class);
 
         } catch (IOException | IllegalArgumentException | HttpException e) {

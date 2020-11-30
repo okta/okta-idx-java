@@ -38,6 +38,7 @@ public class ClientConfiguration extends HttpClientConfiguration {
     private String clientId;
     private String clientSecret;
     private Set<String> scopes = new HashSet<>();
+    private String redirectUri;
 
     public String getIssuer() {
         return issuer;
@@ -71,6 +72,14 @@ public class ClientConfiguration extends HttpClientConfiguration {
         this.scopes = scopes;
     }
 
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+    }
+
     @Override
     public RequestAuthenticator getRequestAuthenticator() {
         return new DisabledAuthenticator();
@@ -84,8 +93,9 @@ public class ClientConfiguration extends HttpClientConfiguration {
     @Override
     public String toString() {
         return "ClientConfiguration {issuer=" + getBaseUrl() +
-            ", clientId=" + getClientId() +
-            ", clientSecret=" + "*****" +
-            ", scopes=" + getScopes() + " }";
+                ", clientId=" + getClientId() +
+                ", clientSecret=" + "*****" +
+                ", scopes=" + getScopes() +
+                ", redirectUri=" + getRedirectUri() + " }";
     }
 }

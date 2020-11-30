@@ -23,6 +23,7 @@ public interface IDXClientBuilder {
     String DEFAULT_CLIENT_ID_PROPERTY_NAME = "okta.idx.clientId";
     String DEFAULT_CLIENT_SECRET_PROPERTY_NAME = "okta.idx.clientSecret";
     String DEFAULT_CLIENT_SCOPES_PROPERTY_NAME = "okta.idx.scopes";
+    String DEFAULT_CLIENT_REDIRECT_URI_PROPERTY_NAME = "okta.idx.redirectUri";
     String DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME = "okta.testing.disableHttpsCheck";
 
     IDXClientBuilder setIssuer(String issuer);
@@ -32,6 +33,8 @@ public interface IDXClientBuilder {
     IDXClientBuilder setClientSecret(String clientSecret);
 
     IDXClientBuilder setScopes(Set<String> scopes);
+
+    IDXClientBuilder setRedirectUri(String redirectUri);
 
     IDXClient build();
 }

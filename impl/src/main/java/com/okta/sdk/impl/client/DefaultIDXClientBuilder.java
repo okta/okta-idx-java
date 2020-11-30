@@ -122,6 +122,10 @@ public class DefaultIDXClientBuilder implements IDXClientBuilder {
             clientConfig.setScopes(scopes);
         }
 
+        if (Strings.hasText(props.get(DEFAULT_CLIENT_REDIRECT_URI_PROPERTY_NAME))) {
+            clientConfig.setRedirectUri(props.get(DEFAULT_CLIENT_REDIRECT_URI_PROPERTY_NAME));
+        }
+
         if (Strings.hasText(props.get(DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME))) {
             allowNonHttpsForTesting = Boolean.parseBoolean(props.get(DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME));
         }
@@ -129,14 +133,12 @@ public class DefaultIDXClientBuilder implements IDXClientBuilder {
 
     @Override
     public IDXClientBuilder setIssuer(String issuer) {
-        ConfigurationValidator.assertOrgUrl(issuer, allowNonHttpsForTesting);
         this.clientConfig.setIssuer(issuer);
         return this;
     }
 
     @Override
     public IDXClientBuilder setClientId(String clientId) {
-        ConfigurationValidator.assertClientId(clientId);
         this.clientConfig.setClientId(clientId);
         return this;
     }
@@ -149,8 +151,13 @@ public class DefaultIDXClientBuilder implements IDXClientBuilder {
 
     @Override
     public IDXClientBuilder setScopes(Set<String> scopes) {
-        Assert.isTrue(scopes != null && !scopes.isEmpty(), "At least one scope is required");
         this.clientConfig.setScopes(scopes);
+        return this;
+    }
+
+    @Override
+    public IDXClientBuilder setRedirectUri(String redirectUri) {
+        this.clientConfig.setRedirectUri(redirectUri);
         return this;
     }
 
@@ -162,8 +169,9 @@ public class DefaultIDXClientBuilder implements IDXClientBuilder {
 
     private void validate() throws IllegalArgumentException {
         ConfigurationValidator.assertOrgUrl(clientConfig.getIssuer(), this.allowNonHttpsForTesting);
-        Assert.hasText(clientConfig.getClientId(), "clientId cannot be null");
+        ConfigurationValidator.assertClientId(clientConfig.getClientId());
         Assert.isTrue(!Collections.isEmpty(clientConfig.getScopes()), "At least one scope is required");
+        Assert.hasText(clientConfig.getRedirectUri(), "redirectUri is required");
     }
 
     private static String[] configSources() {

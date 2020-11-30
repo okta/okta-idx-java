@@ -72,7 +72,8 @@ class DefaultIDXClientBuilderTest {
         new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
             .setIssuer("http://okta.example.com")
             .setClientId("some-client-id")
-            .setScopes(Sets.newHashSet(["test-scope"]))
+            .setScopes(["test-scope"] as Set)
+            .setRedirectUri("http://okta.com")
             .build()
     }
 

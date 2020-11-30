@@ -71,6 +71,7 @@ class EndToEndIT {
             .setClientId("test-client-id")
             .setClientSecret("test-client-secret")
             .setScopes(["test-scope-1", "test-scope-2"] as Set)
+            .setRedirectUri("http://okta.com")
             .build()
     }
 
