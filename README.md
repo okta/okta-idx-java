@@ -1,4 +1,8 @@
 [<img src="https://aws1.discourse-cdn.com/standard14/uploads/oktadev/original/1X/0c6402653dfb70edc661d4976a43a46f33e5e919.png" align="right" width="256px"/>](https://devforum.okta.com/)
+[![Maven Central](https://img.shields.io/maven-central/v/com.okta.sdk/okta-idx-java-api.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.okta.sdk%22%20a%3A%22okta-idx-java-api%22)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Support](https://img.shields.io/badge/support-Developer%20Forum-blue.svg)][devforum]
+[![API Reference](https://img.shields.io/badge/docs-reference-lightgrey.svg)][javadocs]
 
 # Okta Identity Engine Java SDK
 
