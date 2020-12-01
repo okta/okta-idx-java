@@ -314,7 +314,7 @@ In most cases, you won't need to build the SDK from source. If you want to build
 We are happy to accept contributions and PRs! Please see the [contribution guide](CONTRIBUTING.md) to understand how to structure a contribution.
 
 [devforum]: https://devforum.okta.com/
-[javadocs]: https://developer.okta.com/okta-sdk-java/
+[javadocs]: https://developer.okta.com/okta-idx-java/
 [lang-landing]: https://developer.okta.com/code/java/
 [github-issues]: https://github.com/okta/okta-idx-java/issues
 [github-releases]: https://github.com/okta/okta-idx-java/releases
