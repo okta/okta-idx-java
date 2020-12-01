@@ -109,8 +109,8 @@ String interactHandle = interactResponse.getInteractionHandle();
 
 [//]: # (method: exchangeInteractionHandleForStateHandle)
 ```java
-// or an empty optional; if left empty, a new interactionHandle will be fetched
-IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
+// optional with interactionHandle or empty; if empty, a new interactionHandle will be obtained
+idxResponse = client.introspect(Optional.of("{interactHandle}"));
 String stateHandle = idxResponse.getStateHandle();
 ```
 [//]: # (end: exchangeInteractionHandleForStateHandle)
@@ -211,7 +211,7 @@ idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChalleng
 [//]: # (method: cancel)
 ```java
 // invalidates the supplied stateHandle and obtains a fresh one
-client.cancel("{stateHandle}");
+idxResponse = client.cancel("{stateHandle}");
 ```
 [//]: # (end: cancel)
 
@@ -246,7 +246,7 @@ if (idxResponse.isLoginSuccessful()) {
 
 [//]: # (method: printRawIdxResponse)
 ```java
-idxResponse.raw();
+String rawResponse = idxResponse.raw();
 ```
 [//]: # (end: printRawIdxResponse)
 

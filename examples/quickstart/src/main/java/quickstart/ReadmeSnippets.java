@@ -70,12 +70,12 @@ public class ReadmeSnippets {
 
     private void exchangeInteractionHandleForStateHandle() throws ProcessingException {
         // optional with interactionHandle or empty; if empty, a new interactionHandle will be obtained
-        IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
+        idxResponse = client.introspect(Optional.of("{interactHandle}"));
         String stateHandle = idxResponse.getStateHandle();
     }
 
     private void printRawIdxResponse() throws JsonProcessingException {
-        idxResponse.raw();
+        String rawResponse = idxResponse.raw();
     }
 
     private void checkRemediationOptions() {
@@ -149,7 +149,7 @@ public class ReadmeSnippets {
 
     private void cancel() throws ProcessingException {
         // invalidates the supplied stateHandle and obtains a fresh one
-        client.cancel("{stateHandle}");
+        idxResponse = client.cancel("{stateHandle}");
     }
 
     private void checkForLoginSuccess() {
