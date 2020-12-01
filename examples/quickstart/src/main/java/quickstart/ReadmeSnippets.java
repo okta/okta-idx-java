@@ -69,7 +69,8 @@ public class ReadmeSnippets {
     }
 
     private void exchangeInteractionHandleForStateHandle() throws ProcessingException {
-        IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}")); // or an empty optional; if left empty, a new interactionHandle will be fetched
+        // optional with interactionHandle or empty; if empty, a new interactionHandle will be obtained
+        IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
         String stateHandle = idxResponse.getStateHandle();
     }
 
