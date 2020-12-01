@@ -140,20 +140,47 @@ FormValue[] formValues = remediationOption.form();
 ```
 [//]: # (end: checkRemediationOptions)
 
-### Identify
+### Identify with or without Credentials
 
-[//]: # (method: invokeIdentify)
+[//]: # (method: invokeIdentifyWithOrWithoutCredentials)
 ```java
-// construct credentials
-Credentials credentials = new Credentials();
-credentials.setPasscode("{password}".toCharArray());
-idxResponse = client.identify(IdentifyRequestBuilder.builder()
-        .withIdentifier("{identifier}") // email identifier
-        .withCredentials(credentials)
-        .withStateHandle("{stateHandle}")
-        .build());
+idxResponse = client.introspect(Optional.of("{interactHandle}"));
+String stateHandle = idxResponse.getStateHandle();
+
+// check remediation options to continue the flow
+RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+        .findFirst();
+RemediationOption remediationOption = remediationOptionsOptional.get();
+FormValue[] formValues = remediationOption.form();
+
+// check if 'credentials' is required to be sent in identify API request (next step)
+Optional<FormValue> credentialsFormValueOptional = Arrays.stream(formValues)
+        .filter(x -> "credentials".equals(x.getName()))
+        .findFirst();
+if (credentialsFormValueOptional.isPresent()) {
+    FormValue credentialsFormValue = credentialsFormValueOptional.get();
+
+    if (credentialsFormValue.isRequired()) {
+        // credentials are REQUIRED
+        Credentials credentials = new Credentials();
+        credentials.setPasscode("{password}".toCharArray());
+
+        idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                .withIdentifier("{identifier}") // email
+                .withCredentials(credentials)
+                .withStateHandle(stateHandle)
+                .build());
+    }
+} else {
+    // credentials are not necessary; so sending just the identifier
+    idxResponse = client.identify(IdentifyRequestBuilder.builder()
+            .withIdentifier("{identifier}") // email
+            .withStateHandle(stateHandle)
+            .build());
+}
 ```
-[//]: # (end: invokeIdentify)
+[//]: # (end: invokeIdentifyWithOrWithoutCredentials)
 
 ### Check Remediation Options and select Authenticator
 

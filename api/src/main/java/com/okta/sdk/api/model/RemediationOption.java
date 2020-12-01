@@ -16,10 +16,12 @@
 package com.okta.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.okta.commons.lang.Assert;
 import com.okta.sdk.api.client.IDXClient;
 import com.okta.sdk.api.exception.ProcessingException;
 import com.okta.sdk.api.request.AnswerChallengeRequest;
 import com.okta.sdk.api.request.ChallengeRequest;
+import com.okta.sdk.api.request.EnrollRequest;
 import com.okta.sdk.api.request.IdentifyRequest;
 import com.okta.sdk.api.response.IDXResponse;
 
@@ -66,15 +68,19 @@ public class RemediationOption {
      * @return IDXResponse the response from Okta Identity Engine
      *
      * @throws IllegalArgumentException MUST throw this exception when provided data does not contain all required data for the proceed call.
+     * @throws IllegalStateException MUST throw this exception when proceed is called with an invalid/unsupported request type.
      * @throws ProcessingException when the proceed operation encountered an execution/processing error.
      */
-    public IDXResponse proceed(IDXClient client, Object request) throws IllegalArgumentException, ProcessingException {
-        if (request != null) {
-            if (request instanceof IdentifyRequest) return client.identify((IdentifyRequest) request);
-            if (request instanceof ChallengeRequest) return client.challenge((ChallengeRequest) request);
-            if (request instanceof AnswerChallengeRequest) return client.answerChallenge((AnswerChallengeRequest) request);
-        }
-        return null;
+    public IDXResponse proceed(IDXClient client, Object request) throws IllegalStateException, IllegalArgumentException, ProcessingException {
+        Assert.notNull(request, "request cannot be null");
+
+        if (request instanceof IdentifyRequest) return client.identify((IdentifyRequest) request);
+        else if (request instanceof ChallengeRequest) return client.challenge((ChallengeRequest) request);
+        else if (request instanceof AnswerChallengeRequest)
+            return client.answerChallenge((AnswerChallengeRequest) request);
+        else if (request instanceof EnrollRequest) return client.enroll((EnrollRequest) request);
+        else
+            throw new IllegalStateException("Cannot invoke proceed with the supplied request type " + request.getClass().getSimpleName());
     }
 
     /**

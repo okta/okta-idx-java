@@ -103,6 +103,8 @@ public class BaseIDXClient implements IDXClient {
             codeVerifier = PkceUtil.generateCodeVerifier();
             String codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
 
+            log.info("=========== codeVerifier: {}", codeVerifier); //TODO: remove
+
             StringBuilder urlParameters = new StringBuilder();
             urlParameters.append("client_id=").append(clientConfiguration.getClientId());
             if (Strings.hasText(clientConfiguration.getClientSecret())) {
