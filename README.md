@@ -243,11 +243,13 @@ AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = AnswerChalleng
         .withStateHandle("{stateHandle}")
         .withCredentials(credentials)
         .build();
+
+// proceed
 idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChallengeRequest);
 ```
 [//]: # (end: invokeAnswerChallengeAuthenticator)
 
-### Cancel the flow
+### Cancel Flow
 
 [//]: # (method: cancel)
 ```java
@@ -255,6 +257,37 @@ idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChalleng
 idxResponse = client.cancel("{stateHandle}");
 ```
 [//]: # (end: cancel)
+
+### Enroll Authenticator
+
+[//]: # (method: enrollAuthenticator)
+```java
+// check remediation options to continue the flow
+RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+        .filter(x -> "select-authenticator-enroll".equals(x.getName()))
+        .findFirst();
+RemediationOption remediationOption = remediationOptionsOptional.get();
+
+// select an authenticator
+Authenticator authenticator = new Authenticator();
+
+// authenticator's 'id' value from remediation option above
+authenticator.setId("{id}");
+
+// authenticator's 'methodType' value from remediation option above
+authenticator.setMethodType("{methodType}");
+
+// build enroll request
+EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+        .withAuthenticator(authenticator)
+        .withStateHandle("{stateHandle}")
+        .build();
+
+// proceed
+idxResponse = remediationOption.proceed(client, enrollRequest);
+```
+[//]: # (end: enrollAuthenticator)
 
 ### Check Login Success
 
@@ -273,7 +306,9 @@ if (idxResponse.isLoginSuccessful()) {
 [//]: # (method: getTokenWithInteractionCode)
 ```java
 if (idxResponse.isLoginSuccessful()) {
+    // exchange interaction code for token
     TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+
     String accessToken = tokenResponse.getAccessToken();
     String idToken = tokenResponse.getIdToken();
     Integer expiresIn = tokenResponse.getExpiresIn();

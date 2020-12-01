@@ -27,6 +27,8 @@ import com.okta.sdk.api.request.AnswerChallengeRequest;
 import com.okta.sdk.api.request.AnswerChallengeRequestBuilder;
 import com.okta.sdk.api.request.ChallengeRequest;
 import com.okta.sdk.api.request.ChallengeRequestBuilder;
+import com.okta.sdk.api.request.EnrollRequest;
+import com.okta.sdk.api.request.EnrollRequestBuilder;
 import com.okta.sdk.api.request.IdentifyRequestBuilder;
 import com.okta.sdk.api.response.IDXResponse;
 import com.okta.sdk.api.response.InteractResponse;
@@ -154,6 +156,7 @@ public class ReadmeSnippets {
                 .withStateHandle("{stateHandle}")
                 .build();
 
+        // proceed
         idxResponse = remediationOption.proceed(client, passwordAuthenticatorChallengeRequest); // remediationOption object is a reference to the previous step's remediation options
     }
 
@@ -174,12 +177,36 @@ public class ReadmeSnippets {
                 .withCredentials(credentials)
                 .build();
 
+        // proceed
         idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChallengeRequest);
     }
 
     private void cancel() throws ProcessingException {
         // invalidates the supplied stateHandle and obtains a fresh one
         idxResponse = client.cancel("{stateHandle}");
+    }
+
+    private void enrollAuthenticator() {
+        // check remediation options to continue the flow
+        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+        Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                .filter(x -> "select-authenticator-enroll".equals(x.getName()))
+                .findFirst();
+        RemediationOption remediationOption = remediationOptionsOptional.get();
+
+        // select an authenticator
+        Authenticator authenticator = new Authenticator();
+        authenticator.setId("{id}");                 // authenticator's 'id' value from remediation option above
+        authenticator.setMethodType("{methodType}"); // authenticator's 'methodType' value from remediation option above
+
+        // build enroll request
+        EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                .withAuthenticator(authenticator)
+                .withStateHandle("{stateHandle}")
+                .build();
+
+        // proceed
+        idxResponse = remediationOption.proceed(client, enrollRequest);
     }
 
     private void checkForLoginSuccess() {
@@ -192,7 +219,9 @@ public class ReadmeSnippets {
 
     private void getTokenWithInteractionCode() throws ProcessingException {
         if (idxResponse.isLoginSuccessful()) {
+            // exchange interaction code for token
             TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+
             String accessToken = tokenResponse.getAccessToken();
             String idToken = tokenResponse.getIdToken();
             Integer expiresIn = tokenResponse.getExpiresIn();
