@@ -20,6 +20,8 @@ import com.okta.commons.http.authc.DisabledAuthenticator;
 import com.okta.commons.http.authc.RequestAuthenticator;
 import com.okta.commons.http.config.HttpClientConfiguration;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -87,7 +89,14 @@ public class ClientConfiguration extends HttpClientConfiguration {
 
     @Override
     public String getBaseUrl() {
-        return getIssuer();
+        try {
+            URL url = new URL(getIssuer());
+            String protocol = url.getProtocol();
+            String authority = url.getAuthority();
+            return String.format("%s://%s", protocol, authority);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("baseUrl could not be parsed");
+        }
     }
 
     @Override

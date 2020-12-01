@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class BaseIDXClient implements IDXClient {
@@ -67,6 +68,8 @@ public class BaseIDXClient implements IDXClient {
 
     private final ObjectMapper objectMapper;
     private final RequestExecutor requestExecutor;
+
+    private String codeVerifier;
 
     public BaseIDXClient(ClientConfiguration clientConfiguration, RequestExecutor requestExecutor) {
 
@@ -97,6 +100,9 @@ public class BaseIDXClient implements IDXClient {
         InteractResponse interactResponse;
 
         try {
+            codeVerifier = PkceUtil.generateCodeVerifier();
+            String codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
+
             StringBuilder urlParameters = new StringBuilder();
             urlParameters.append("client_id=").append(clientConfiguration.getClientId());
             if (Strings.hasText(clientConfiguration.getClientSecret())) {
@@ -104,13 +110,14 @@ public class BaseIDXClient implements IDXClient {
             }
             urlParameters.append("&scope=").append(clientConfiguration.getScopes().stream()
                     .map(Object::toString).collect(Collectors.joining(" ")));
-            urlParameters.append("&code_challenge=").append(PkceUtil.generateCodeChallenge());
+            urlParameters.append("&code_challenge=").append(codeChallenge);
             urlParameters.append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD);
             urlParameters.append("&redirect_uri=").append(clientConfiguration.getRedirectUri());
+            urlParameters.append("&state=").append(UUID.randomUUID().toString());
 
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/oauth2/v1/interact",
+                clientConfiguration.getIssuer() + "/v1/interact",
                 null,
                 getHttpHeaders(true),
                 new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
@@ -156,7 +163,7 @@ public class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/idp/idx/introspect",
+                clientConfiguration.getBaseUrl() + "/idp/idx/introspect",
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(introspectRequest)),
@@ -189,7 +196,7 @@ public class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/idp/idx/identify",
+                clientConfiguration.getBaseUrl() + "/idp/idx/identify",
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(identifyRequest)),
@@ -222,7 +229,7 @@ public class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/idp/idx/credential/enroll",
+                clientConfiguration.getBaseUrl() + "/idp/idx/credential/enroll",
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(enrollRequest)),
@@ -255,7 +262,7 @@ public class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/idp/idx/challenge",
+                clientConfiguration.getBaseUrl() + "/idp/idx/challenge",
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(challengeRequest)),
@@ -288,7 +295,7 @@ public class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/idp/idx/challenge/answer",
+                clientConfiguration.getBaseUrl() + "/idp/idx/challenge/answer",
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(answerChallengeRequest)),
@@ -323,7 +330,7 @@ public class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/idp/idx/cancel",
+                clientConfiguration.getBaseUrl() + "/idp/idx/cancel",
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(cancelRequest)),
@@ -355,14 +362,17 @@ public class BaseIDXClient implements IDXClient {
 
         StringBuilder urlParameters = new StringBuilder();
         urlParameters.append("grant_type=").append(grantType);
-        urlParameters.append("&interaction_code=").append(interactionCode);
         urlParameters.append("&client_id=").append(clientConfiguration.getClientId());
-        urlParameters.append("&code_verifier=").append(PkceUtil.generateCodeVerifier());
+        if (Strings.hasText(clientConfiguration.getClientSecret())) {
+            urlParameters.append("&client_secret=").append(clientConfiguration.getClientSecret());
+        }
+        urlParameters.append("&interaction_code=").append(interactionCode);
+        urlParameters.append("&code_verifier=").append(codeVerifier);
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/oauth2/v1/token",
+                clientConfiguration.getIssuer() + "/v1/token",
                 null,
                 getHttpHeaders(true),
                 new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
@@ -390,17 +400,6 @@ public class BaseIDXClient implements IDXClient {
     private HttpHeaders getHttpHeaders(boolean isOAuth2Endpoint) {
 
         HttpHeaders httpHeaders = new HttpHeaders();
-
-//        String authHeaderStr;
-//
-//        if (Strings.hasText(clientConfiguration.getClientSecret())) {
-//            // confidential clients have clientSecret; Auth header is needed
-//            authHeaderStr = clientConfiguration.getClientId() + ":" + clientConfiguration.getClientSecret();
-//            httpHeaders.add("Authorization", "Basic " + Base64.getEncoder().encodeToString(authHeaderStr.getBytes(StandardCharsets.UTF_8)));
-//        }
-////        else {
-////            // public client
-////        }
 
         if (isOAuth2Endpoint) {
             httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");

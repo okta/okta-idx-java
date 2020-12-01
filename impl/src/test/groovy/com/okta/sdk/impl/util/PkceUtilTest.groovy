@@ -19,6 +19,7 @@ import org.testng.annotations.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.notNullValue
+import static org.hamcrest.Matchers.is
 
 class PkceUtilTest {
 
@@ -29,8 +30,15 @@ class PkceUtilTest {
     }
 
     @Test
+    void testGenerateCodeChallenge_NullCodeVerifier() {
+        def exception = TestUtil.expect IllegalArgumentException, { PkceUtil.generateCodeChallenge(null) }
+        assertThat exception.getMessage(), is("codeVerifier is required")
+    }
+
+    @Test
     void testGenerateCodeChallenge() {
-        String codeChallenge = PkceUtil.generateCodeChallenge()
+        String codeVerifier = PkceUtil.generateCodeVerifier()
+        String codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier)
         assertThat codeChallenge, notNullValue()
     }
 }

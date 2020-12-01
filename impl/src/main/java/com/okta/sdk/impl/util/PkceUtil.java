@@ -15,6 +15,8 @@
  */
 package com.okta.sdk.impl.util;
 
+import com.okta.commons.lang.Assert;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -28,12 +30,13 @@ public class PkceUtil {
     /**
      * Generate Code Challenge (Base64 URL-encoded SHA-256 hash of the generated code verifier).
      *
+     * @param codeVerifier the code verifier
      * @return generated code challenge
      * @throws NoSuchAlgorithmException
      */
-    public static String generateCodeChallenge() throws NoSuchAlgorithmException {
+    public static String generateCodeChallenge(String codeVerifier) throws NoSuchAlgorithmException {
 
-        String codeVerifier = generateCodeVerifier();
+        Assert.hasText(codeVerifier, "codeVerifier is required");
         byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(bytes, 0, bytes.length);
