@@ -155,7 +155,7 @@ if (credentialsFormValueOptional.isPresent()) {
     FormValue credentialsFormValue = credentialsFormValueOptional.get();
 
     if (credentialsFormValue.isRequired()) {
-        // credentials are REQUIRED
+        // credentials required
         Credentials credentials = new Credentials();
         credentials.setPasscode("{password}".toCharArray());
 
@@ -166,7 +166,7 @@ if (credentialsFormValueOptional.isPresent()) {
                 .build());
     }
 } else {
-    // credentials are not necessary; so populating just the identifier
+    // credentials is not required
     idxResponse = client.identify(IdentifyRequestBuilder.builder()
             .withIdentifier("{identifier}") // email
             .withStateHandle(stateHandle)

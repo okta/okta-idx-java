@@ -272,7 +272,7 @@ public class ReadmeSnippets {
             FormValue credentialsFormValue = credentialsFormValueOptional.get();
 
             if (credentialsFormValue.isRequired()) {
-                // credentials are REQUIRED
+                // credentials required
                 Credentials credentials = new Credentials();
                 credentials.setPasscode("{password}".toCharArray());
 
@@ -283,7 +283,7 @@ public class ReadmeSnippets {
                         .build());
             }
         } else {
-            // credentials are not necessary; so populating just the identifier
+            // credentials is not required
             idxResponse = client.identify(IdentifyRequestBuilder.builder()
                     .withIdentifier("{identifier}") // email
                     .withStateHandle(stateHandle)
