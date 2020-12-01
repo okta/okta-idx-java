@@ -87,9 +87,7 @@ public class BaseIDXClient implements IDXClient {
         if (requestExecutor != null) {
             this.requestExecutor = requestExecutor;
         } else {
-            String msg = "Unable to find a '" + RequestExecutorFactory.class.getName() + "' " +
-                "implementation on the classpath.  Please ensure you have added the " +
-                "okta-sdk-httpclient.jar file to your runtime classpath."; // TODO fix jar name
+            String msg = "Unable to find a '" + RequestExecutorFactory.class.getName() + "' " + "implementation on the classpath.";
             this.requestExecutor = Classes.loadFromService(RequestExecutorFactory.class, msg).create(httpClientConfiguration);
         }
     }
@@ -102,8 +100,7 @@ public class BaseIDXClient implements IDXClient {
         try {
             codeVerifier = PkceUtil.generateCodeVerifier();
             String codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
-
-            log.info("=========== codeVerifier: {}", codeVerifier); //TODO: remove
+            String state = UUID.randomUUID().toString();
 
             StringBuilder urlParameters = new StringBuilder();
             urlParameters.append("client_id=").append(clientConfiguration.getClientId());
@@ -115,7 +112,7 @@ public class BaseIDXClient implements IDXClient {
             urlParameters.append("&code_challenge=").append(codeChallenge);
             urlParameters.append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD);
             urlParameters.append("&redirect_uri=").append(clientConfiguration.getRedirectUri());
-            urlParameters.append("&state=").append(UUID.randomUUID().toString());
+            urlParameters.append("&state=").append(state);
 
             Request request = new DefaultRequest(
                 HttpMethod.POST,

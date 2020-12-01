@@ -186,7 +186,7 @@ public class ReadmeSnippets {
         idxResponse = client.cancel("{stateHandle}");
     }
 
-    private void enrollAuthenticator() {
+    private void enrollAuthenticator() throws ProcessingException {
         // check remediation options to continue the flow
         RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
         Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)

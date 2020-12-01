@@ -55,12 +55,6 @@ For Apache Maven:
     <version>${okta.sdk.version}</version>
     <scope>runtime</scope>
 </dependency>
-<dependency>
-    <groupId>com.okta.sdk</groupId>
-    <artifactId>okta-sdk-httpclient</artifactId>
-    <version>${okta.sdk.version}</version>
-    <scope>runtime</scope>
-</dependency>
 ```
 
 For Gradle:
@@ -68,7 +62,6 @@ For Gradle:
 ```groovy
 compile "com.okta.sdk:okta-idx-java-api:${okta.sdk.version}"
 runtime "com.okta.sdk:okta-idx-java-impl:${okta.sdk.version}"
-runtime "com.okta.sdk:okta-sdk-httpclient:${okta.sdk.version}"
 ```
 
 ### SNAPSHOT Dependencies
@@ -330,7 +323,7 @@ String rawResponse = idxResponse.raw();
 
 Every instance of the SDK `Client` is thread-safe. You **should** use the same instance throughout the entire lifecycle of your application. Each instance has its own Connection pool and Caching resources that are automatically released when the instance is garbage collected.
 
-## Configuration reference
+## Configuration Reference
   
 This library looks for configuration in the following sources:
 

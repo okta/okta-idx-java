@@ -48,7 +48,7 @@
             <groupId>com.okta.commons</groupId>
             <artifactId>okta-http-api</artifactId>
         </dependency>
-        <dependency> <!-- TODO: REMOVE BEFORE COMMITTING -->
+        <dependency>
             <groupId>com.okta.commons</groupId>
             <artifactId>okta-http-okhttp</artifactId>
             <scope>runtime</scope>
