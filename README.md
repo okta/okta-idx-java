@@ -196,7 +196,7 @@ RemediationOption remediationOption = remediationOptionsOptional.get();
 // select an authenticator
 Authenticator authenticator = new Authenticator();
 
-// use respective authenticator's 'id' and 'methodType' values from remediation option above
+// authenticator's id value from remediation option above
 authenticator.setId("{id}");
 authenticator.setMethodType("{methodType}");
 ```
