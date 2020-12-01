@@ -22,7 +22,7 @@ This library uses semantic versioning and follows Okta's [Library Version Policy
 
 | Version | Status                             |
 | ------- | ---------------------------------- |
-| 0.x.x (beta)    | :construction: Work In Progress     |
+| 0.x.x (closed beta)    | :construction: Work In Progress     |
 
 The latest release can always be found on the [releases page][github-releases].
 
@@ -182,7 +182,7 @@ if (credentialsFormValueOptional.isPresent()) {
 ```
 [//]: # (end: invokeIdentifyWithOrWithoutCredentials)
 
-### Check Remediation Options and select Authenticator
+### Check Remediation Options and Pick Authenticator
 
 [//]: # (method: checkRemediationOptionsAndSelectAuthenticator)
 ```java
@@ -196,7 +196,7 @@ RemediationOption remediationOption = remediationOptionsOptional.get();
 // select an authenticator
 Authenticator authenticator = new Authenticator();
 
-// authenticator's id value from remediation option above
+// use respective authenticator's 'id' and 'methodType' values from remediation option above
 authenticator.setId("{id}");
 authenticator.setMethodType("{methodType}");
 ```
