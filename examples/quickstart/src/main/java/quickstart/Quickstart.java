@@ -53,7 +53,7 @@ public class Quickstart {
     private static final String IDENTIFIER = "mailme@example.com"; // replace
     private static final String PASSWORD = "secret";               // replace
 
-    private static final String ISSUER = "https://{yourOktaDomain}/oauth2/v1/{{authorizationServerId}}"; // replace
+    private static final String ISSUER = "https://{yourOktaDomain}/oauth2/{{authorizationServerId}}";    // replace
     private static final String CLIENT_ID = "{clientId}";                                                // replace
     private static final String CLIENT_SECRET = "{clientSecret}";                                        // replace
     private static final Set<String> SCOPES = new HashSet<>(Arrays.asList("openid", "profile"));         // replace
