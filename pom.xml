@@ -223,7 +223,7 @@
                     </executions>
                     <configuration>
                         <excludes>
-                            <exclude>**/quickstart/**/*</exclude>
+                            <exclude>**/examples/**/*</exclude>
                         </excludes>
                     </configuration>
                 </plugin>
@@ -239,7 +239,7 @@
                     <groupId>com.okta</groupId>
                     <artifactId>okta-code-snippet-maven-plugin</artifactId>
                     <configuration>
-                        <sourceFile>examples/quickstart/src/main/java/quickstart/ReadmeSnippets.java</sourceFile>
+                        <sourceFile>examples/src/main/java/ReadmeSnippets.java</sourceFile>
                     </configuration>
                 </plugin>
             </plugins>

@@ -166,7 +166,7 @@ if (credentialsFormValueOptional.isPresent()) {
                 .build());
     }
 } else {
-    // credentials are not necessary; so sending just the identifier
+    // credentials are not necessary; so populating just the identifier
     idxResponse = client.identify(IdentifyRequestBuilder.builder()
             .withIdentifier("{identifier}") // email
             .withStateHandle(stateHandle)
