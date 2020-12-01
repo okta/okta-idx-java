@@ -250,6 +250,57 @@ String rawResponse = idxResponse.raw();
 ```
 [//]: # (end: printRawIdxResponse)
 
+### Thread Safety
+
+Every instance of the SDK `Client` is thread-safe. You **should** use the same instance throughout the entire lifecycle of your application. Each instance has its own Connection pool and Caching resources that are automatically released when the instance is garbage collected.
+
+## Configuration reference
+  
+This library looks for configuration in the following sources:
+
+0. An `okta.yaml` at the root of the applications classpath
+0. An `okta.yaml` file in a `.okta` folder in the current user's home directory (`~/.okta/okta.yaml` or `%userprofile%\.okta\okta.yaml`)
+0. Environment variables
+0. Java System Properties
+0. Configuration explicitly set programmatically (see the example in [Getting started](#getting-started))
+ 
+Higher numbers win. In other words, configuration passed via the constructor will override configuration found in environment variables, which will override configuration in `okta.yaml` (if any), and so on.
+ 
+### YAML configuration
+ 
+The full YAML configuration looks like:
+ 
+```yaml
+okta:
+  idx:
+    issuer: "https://{yourOktaDomain}/oauth2/{authorizationServerId}" // e.g. https://foo.okta.com/oauth2/default, https://foo.okta.com/oauth2/ausar5vgt5TSDsfcJ0h7
+    clientId: "{clientId}"
+    clientSecret: "{clientSecret}"
+    scopes:
+    - "{scope1}"
+    - "{scope2}"
+    redirectUri: "{redirectUri}"
+```
+ 
+### Environment variables
+ 
+Each one of the configuration values above can be turned into an environment variable name with the `_` (underscore) character:
+
+* `OKTA_IDX_ISSUER`
+* `OKTA_IDX_CLIENTID`
+* `OKTA_IDX_CLIENTSECRET`
+* `OKTA_IDX_SCOPES`
+* `OKTA_IDX_REDIRECTURI`
+
+### System properties
+
+Each one of the configuration values written in 'dot' notation to be used as a Java system property:
+* `okta.idx.issuer`
+* `okta.idx.clientId`
+* `okta.idx.clientSecret`
+* `okta.idx.scopes`
+* `okta.idx.redirectUri`
+
 ## Building the SDK
 
 In most cases, you won't need to build the SDK from source. If you want to build it yourself, clone the repo and run `mvn install`.
