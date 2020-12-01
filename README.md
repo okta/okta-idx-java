@@ -1,6 +1,6 @@
 [<img src="https://aws1.discourse-cdn.com/standard14/uploads/oktadev/original/1X/0c6402653dfb70edc661d4976a43a46f33e5e919.png" align="right" width="256px"/>](https://devforum.okta.com/)
 
-# okta-idx-java
+# Okta Identity Engine Java SDK
 
 This repository contains the Okta Identity Engine SDK for Java. This SDK can be used in your server-side code to assist in authenticating users against the Okta Identity Engine.
 
