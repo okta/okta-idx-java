@@ -139,8 +139,8 @@ public class ReadmeSnippets {
 
         // select an authenticator
         Authenticator authenticator = new Authenticator();
-        authenticator.setId("{id}"); // authenticator's id value from remediation option above
-        authenticator.setMethodType("{methodType}");
+        authenticator.setId("{id}"); // authenticator's 'id' value from remediation option above
+        authenticator.setMethodType("{methodType}"); // authenticator's 'methodType' value from remediation option above
     }
 
     private void invokeChallengeAuthenticator() throws ProcessingException {

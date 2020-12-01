@@ -182,7 +182,7 @@ if (credentialsFormValueOptional.isPresent()) {
 ```
 [//]: # (end: invokeIdentifyWithOrWithoutCredentials)
 
-### Check Remediation Options and Pick Authenticator
+### Check Remediation Options and Select Authenticator
 
 [//]: # (method: checkRemediationOptionsAndSelectAuthenticator)
 ```java
@@ -196,8 +196,10 @@ RemediationOption remediationOption = remediationOptionsOptional.get();
 // select an authenticator
 Authenticator authenticator = new Authenticator();
 
-// authenticator's id value from remediation option above
+// authenticator's 'id' value from remediation option above
 authenticator.setId("{id}");
+
+// authenticator's 'methodType' value from remediation option above
 authenticator.setMethodType("{methodType}");
 ```
 [//]: # (end: checkRemediationOptionsAndSelectAuthenticator)
