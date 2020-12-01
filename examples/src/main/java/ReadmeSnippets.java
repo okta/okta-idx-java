@@ -303,6 +303,8 @@ public class ReadmeSnippets {
         Authenticator authenticator = new Authenticator();
         authenticator.setId("{id}"); // authenticator's 'id' value from remediation option above
         authenticator.setMethodType("{methodType}"); // authenticator's 'methodType' value from remediation option above
+
+        // now proceed to challenge authenticator
     }
 
     private void invokeChallengeAuthenticator() throws ProcessingException {
