@@ -15,17 +15,26 @@
  */
 package com.okta.sdk.api.exception;
 
+import com.okta.sdk.api.response.ErrorResponse;
+
 public class ProcessingException extends Exception {
 
-    public ProcessingException(Throwable cause) {
-        super(cause);
-    }
+    private transient ErrorResponse errorResponse;
 
     public ProcessingException(String message) {
         super(message);
     }
 
-    public ProcessingException(String message, Throwable cause) {
-        super(message, cause);
+    public ProcessingException(Throwable cause) {
+        super(cause);
+    }
+
+    public ProcessingException(String message, ErrorResponse errorResponse) {
+        super(message);
+        this.errorResponse = errorResponse;
+    }
+
+    public ErrorResponse getErrorResponse() {
+        return errorResponse;
     }
 }
