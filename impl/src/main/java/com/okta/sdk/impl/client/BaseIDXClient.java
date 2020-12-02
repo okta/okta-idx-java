@@ -105,9 +105,6 @@ public class BaseIDXClient implements IDXClient {
 
             StringBuilder urlParameters = new StringBuilder();
             urlParameters.append("client_id=").append(clientConfiguration.getClientId());
-            if (Strings.hasText(clientConfiguration.getClientSecret())) {
-                urlParameters.append("&client_secret=").append(clientConfiguration.getClientSecret());
-            }
             urlParameters.append("&scope=").append(clientConfiguration.getScopes().stream()
                     .map(Object::toString).collect(Collectors.joining(" ")));
             urlParameters.append("&code_challenge=").append(codeChallenge);
