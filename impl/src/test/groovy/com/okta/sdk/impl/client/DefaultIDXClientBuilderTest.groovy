@@ -39,14 +39,16 @@ class DefaultIDXClientBuilderTest {
 
     void clearOktaEnvAndSysProps() {
         System.clearProperty("okta.idx.issuer")
-        System.clearProperty("okta.client.clientId")
-        System.clearProperty("okta.client.clientSecret")
-        System.clearProperty("okta.client.scopes")
+        System.clearProperty("okta.idx.clientId")
+        System.clearProperty("okta.idx.clientSecret")
+        System.clearProperty("okta.idx.scopes")
+        System.clearProperty("okta.idx.redirectUri")
 
         RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_IDX_ISSUER", null)
-        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_CLIENT_CLIENTID", null)
-        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_CLIENT_CLIENTSECRET", null)
+        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_IDX_CLIENTID", null)
+        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_IDX_CLIENTSECRET", null)
         RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_CLIENT_SCOPES", null)
+        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_IDX_REDIRECTURI", null)
     }
 
     @Test
@@ -58,10 +60,12 @@ class DefaultIDXClientBuilderTest {
     void testConfigureBaseProperties() {
         clearOktaEnvAndSysProps()
         DefaultIDXClientBuilder clientBuilder =
-            new DefaultIDXClientBuilder(noDefaultYamlResourceFactory())
+                new DefaultIDXClientBuilder(noDefaultYamlResourceFactory())
         assertEquals clientBuilder.clientConfig.issuer, "https://idx.okta.com"
         assertEquals clientBuilder.clientConfig.clientId, "idx-client-id"
+        assertEquals clientBuilder.clientConfig.clientSecret, "idx-client-secret"
         assertEquals clientBuilder.clientConfig.scopes, ["idx-scope-1", "idx-scope-2"] as Set
+        assertEquals clientBuilder.clientConfig.redirectUri, "https://okta.com"
     }
 
     @Test
@@ -70,11 +74,11 @@ class DefaultIDXClientBuilderTest {
         System.setProperty(IDXClientBuilder.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
         // shouldn't throw IllegalArgumentException
         new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
-            .setIssuer("http://okta.example.com")
-            .setClientId("some-client-id")
-            .setScopes(["test-scope"] as Set)
-            .setRedirectUri("http://okta.com")
-            .build()
+                .setIssuer("http://okta.example.com")
+                .setClientId("some-client-id")
+                .setScopes(["test-scope"] as Set)
+                .setRedirectUri("http://okta.com")
+                .build()
     }
 
     @Test
@@ -82,8 +86,8 @@ class DefaultIDXClientBuilderTest {
         clearOktaEnvAndSysProps()
         TestUtil.expect(IllegalArgumentException) {
             new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
-                .setIssuer("https://okta.example.com")
-                .build()
+                    .setIssuer("https://okta.example.com")
+                    .build()
         }
     }
 
@@ -91,9 +95,11 @@ class DefaultIDXClientBuilderTest {
     void testMissingIssuer() {
         TestUtil.expect(IllegalArgumentException) {
             new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
-                .setClientId("test-client-id")
-                .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
-                .build()
+                    .setClientId("test-client-id")
+                    .setClientSecret("test-client-secret")
+                    .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
+                    .setRedirectUri("https://redirect.com")
+                    .build()
         }
     }
 
@@ -101,9 +107,11 @@ class DefaultIDXClientBuilderTest {
     void testMissingScopes() {
         TestUtil.expect(IllegalArgumentException) {
             new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
-                .setIssuer("https://sample.com")
-                .setClientId("test-client-id")
-                .build()
+                    .setIssuer("https://sample.com")
+                    .setClientId("test-client-id")
+                    .setClientSecret("test-client-secret")
+                    .setRedirectUri("https://redirect.com")
+                    .build()
         }
     }
 
@@ -111,10 +119,12 @@ class DefaultIDXClientBuilderTest {
     void testEmptyIssuer() {
         TestUtil.expect(IllegalArgumentException) {
             new DefaultIDXClientBuilder()
-                .setIssuer(" ")
-                .setClientId("test-client-id")
-                .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
-                .build()
+                    .setIssuer(" ")
+                    .setClientId("test-client-id")
+                    .setClientSecret("test-client-secret")
+                    .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
+                    .setRedirectUri("https://redirect.com")
+                    .build()
         }
     }
 
@@ -122,10 +132,12 @@ class DefaultIDXClientBuilderTest {
     void testEmptyClientId() {
         TestUtil.expect(IllegalArgumentException) {
             new DefaultIDXClientBuilder()
-                .setIssuer("https://sample.com")
-                .setClientId(" ")
-                .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
-                .build()
+                    .setIssuer("https://sample.com")
+                    .setClientId(" ")
+                    .setClientSecret("test-client-secret")
+                    .setScopes([["test-scope-1", "test-scope-2"]] as Set<String>)
+                    .setRedirectUri("https://redirect.com")
+                    .build()
         }
     }
 
@@ -133,10 +145,24 @@ class DefaultIDXClientBuilderTest {
     void testEmptyScopes() {
         TestUtil.expect(IllegalArgumentException) {
             new DefaultIDXClientBuilder()
-                .setIssuer("https://sample.com")
-                .setClientId("test-client-id")
-                .setScopes(Sets.newHashSet())
-                .build()
+                    .setIssuer("https://sample.com")
+                    .setClientId("test-client-id")
+                    .setClientSecret("test-client-secret")
+                    .setScopes(Sets.newHashSet())
+                    .setRedirectUri("https://redirect.com")
+                    .build()
+        }
+    }
+
+    @Test
+    void testEmptyRedirectUri() {
+        TestUtil.expect(IllegalArgumentException) {
+            new DefaultIDXClientBuilder()
+                    .setIssuer("https://sample.com")
+                    .setClientId("test-client-id")
+                    .setClientSecret("test-client-secret")
+                    .setScopes(Sets.newHashSet())
+                    .build()
         }
     }
 

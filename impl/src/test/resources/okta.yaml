@@ -22,3 +22,4 @@ okta:
     scopes:
       - idx-scope-1
       - idx-scope-2
+    redirectUri: https://okta.com
