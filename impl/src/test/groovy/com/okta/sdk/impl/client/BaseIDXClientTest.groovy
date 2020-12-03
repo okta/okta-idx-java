@@ -16,11 +16,13 @@
 package com.okta.sdk.impl.client
 
 import com.okta.commons.http.DefaultResponse
+import com.okta.commons.http.HttpException
 import com.okta.commons.http.MediaType
 import com.okta.commons.http.Request
 import com.okta.commons.http.RequestExecutor
 import com.okta.commons.http.Response
 import com.okta.sdk.api.client.IDXClient
+import com.okta.sdk.api.exception.ProcessingException
 import com.okta.sdk.api.model.Authenticator
 import com.okta.sdk.api.model.AuthenticatorEnrollment
 import com.okta.sdk.api.model.Credentials
@@ -35,10 +37,14 @@ import com.okta.sdk.api.request.IdentifyRequest
 import com.okta.sdk.api.request.IdentifyRequestBuilder
 import com.okta.sdk.api.response.InteractResponse
 import com.okta.sdk.api.response.IDXResponse
+import com.okta.sdk.api.response.TokenResponse
 import com.okta.sdk.impl.config.ClientConfiguration
+import com.okta.sdk.impl.util.TestUtil
 import org.testng.annotations.Test
 
 import static org.hamcrest.Matchers.is
+import static org.mockito.ArgumentMatchers.contains
+import static org.mockito.ArgumentMatchers.notNull
 import static org.mockito.Mockito.any
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
@@ -576,6 +582,75 @@ class BaseIDXClientTest {
     }
 
     @Test
+    void testCancel() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        final Response stubbedCancelResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("cancel-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedCancelResponse)
+
+        IDXResponse cancelResponse = idxClient.cancel("stateHandle")
+
+        assertThat(cancelResponse.stateHandle, notNullValue())
+        assertThat(cancelResponse.version, notNullValue())
+        assertThat(cancelResponse.expiresAt, notNullValue())
+        assertThat(cancelResponse.intent, is("LOGIN"))
+
+        assertThat(cancelResponse.remediation().type, is("array"))
+        assertThat(cancelResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(cancelResponse.remediation.value.first().rel, hasItemInArray("create-form"))
+        assertThat(cancelResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/identify"))
+        assertThat(cancelResponse.remediation.value.first().name, equalTo("identify"))
+        assertThat(cancelResponse.remediation.value.first().accepts, equalTo("application/ion+json; okta-version=1.0.0"))
+
+        assertThat(cancelResponse.cancel, notNullValue())
+        assertThat(cancelResponse.cancel.rel, hasItemInArray("create-form"))
+        assertThat(cancelResponse.cancel.href, equalTo("https://foo.oktapreview.com/idp/idx/cancel"))
+        assertThat(cancelResponse.cancel.name, equalTo("cancel"))
+        assertThat(cancelResponse.cancel.accepts, equalTo("application/ion+json; okta-version=1.0.0"))
+
+        assertThat(cancelResponse.app, notNullValue())
+        assertThat(cancelResponse.app.type, is("object"))
+        assertThat(cancelResponse.app.value.name, is("oidc_client"))
+        assertThat(cancelResponse.app.value.label, is("test-app"))
+        assertThat(cancelResponse.app.value.id, is("0oazsmpxZpVEg4chS2o4"))
+    }
+
+    @Test
+    void testToken() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        final Response stubbedTokenResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/json"),
+                new FileInputStream(getClass().getClassLoader().getResource("token-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedTokenResponse)
+
+        TokenResponse tokenResponse = idxClient.token("grantType", "interactionCode")
+
+        assertThat(tokenResponse, notNullValue())
+        assertThat(tokenResponse.tokenType, is("Bearer"))
+        assertThat(tokenResponse.expiresIn, is(3600))
+        assertThat(tokenResponse.accessToken, notNullValue())
+        assertThat(tokenResponse.idToken, notNullValue())
+        assertThat(tokenResponse.scope, is("openid email"))
+    }
+
+    @Test
     void testSecondFactorSuccessResponse() {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
@@ -618,6 +693,124 @@ class BaseIDXClientTest {
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
+    }
+
+    @Test
+    void testInteractErrorResponse() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        final Response stubbedInteractResponse = new DefaultResponse(
+                400,
+                MediaType.valueOf("application/json"),
+                new FileInputStream(getClass().getClassLoader().getResource("interact-error-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
+
+        try {
+            idxClient.interact()
+        } catch (ProcessingException e) {
+            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getIssuer() + "/v1/interact failed with HTTP status 400"))
+            assertThat(e.getErrorResponse(), notNullValue())
+            assertThat(e.getErrorResponse().getError(), is("invalid_request"))
+            assertThat(e.getErrorResponse().getErrorDescription(), is("PKCE code challenge is required when the token endpoint authentication method is 'NONE'."))
+        }
+    }
+
+    @Test
+    void testIntrospectErrorResponse() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        final Response stubbedIntrospectResponse = new DefaultResponse(
+                401,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("introspect-error-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
+
+        try {
+            idxClient.introspect(Optional.of("expiredInteractionHandle"))
+        } catch (ProcessingException e) {
+            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/idp/idx/introspect failed with HTTP status 401"))
+            assertThat(e.getErrorResponse(), notNullValue())
+            assertThat(e.getErrorResponse().getMessages().getValue().first().message, is("The session has expired."))
+            assertThat(e.getErrorResponse().getMessages().getValue().first().value, is("ERROR"))
+        }
+    }
+
+    @Test
+    void testTokenErrorResponse() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        final Response stubbedTokenResponse = new DefaultResponse(
+                400,
+                MediaType.valueOf("application/json"),
+                new FileInputStream(getClass().getClassLoader().getResource("token-error-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedTokenResponse)
+
+        try {
+            idxClient.token("grantType", "interactionCode")
+        } catch (ProcessingException e) {
+            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/v1/token failed with HTTP status 400"))
+            assertThat(e.getErrorResponse(), notNullValue())
+            assertThat(e.getErrorResponse().getError(), is("invalid_grant"))
+            assertThat(e.getErrorResponse().getErrorDescription(), is("PKCE verification failed."))
+        }
+    }
+
+    @Test
+    void testServiceUnavailableErrorResponse() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        final Response stubbedTokenResponse = new DefaultResponse(
+                500,
+                MediaType.valueOf("text/plain"),
+                new ByteArrayInputStream("Service Unavailable".getBytes()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedTokenResponse)
+
+        try {
+            idxClient.interact()
+        } catch (ProcessingException e) {
+            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/v1/interact failed with HTTP status 500"))
+        }
+    }
+
+    @Test
+    void testClientHttpException() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenThrow(new HttpException("Connection failed!"))
+
+        try {
+            idxClient.interact()
+        } catch (ProcessingException e) {
+            assertThat(e.getMessage(), is("com.okta.commons.http.HttpException: Connection failed!"))
+        }
     }
 
     ClientConfiguration getClientConfiguration() {
