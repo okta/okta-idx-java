@@ -283,18 +283,6 @@ idxResponse = remediationOption.proceed(client, enrollRequest);
 ```
 [//]: # (end: enrollAuthenticator)
 
-### Check Login Success
-
-[//]: # (method: checkForLoginSuccess)
-```java
-if (idxResponse.isLoginSuccessful()) {
-    // login successful
-} else {
-    // check remediation options and continue the flow
-}
-```
-[//]: # (end: checkForLoginSuccess)
-
 ### Get Token with Interaction Code
 
 [//]: # (method: getTokenWithInteractionCode)
@@ -345,7 +333,7 @@ okta:
   idx:
     issuer: "https://{yourOktaDomain}/oauth2/{authorizationServerId}" // e.g. https://foo.okta.com/oauth2/default, https://foo.okta.com/oauth2/ausar5vgt5TSDsfcJ0h7
     clientId: "{clientId}"
-    clientSecret: "{clientSecret}"
+    clientSecret: "{clientSecret}" // Required for confidential clients
     scopes:
     - "{scope1}"
     - "{scope2}"

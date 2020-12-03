@@ -208,14 +208,6 @@ public class ReadmeSnippets {
         idxResponse = remediationOption.proceed(client, enrollRequest);
     }
 
-    private void checkForLoginSuccess() {
-        if (idxResponse.isLoginSuccessful()) {
-            // login successful
-        } else {
-            // check remediation options and continue the flow
-        }
-    }
-
     private void getTokenWithInteractionCode() throws ProcessingException {
         if (idxResponse.isLoginSuccessful()) {
             // exchange interaction code for token
