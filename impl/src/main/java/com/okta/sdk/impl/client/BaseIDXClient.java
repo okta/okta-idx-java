@@ -380,7 +380,8 @@ public class BaseIDXClient implements IDXClient {
 
     private void handleErrorResponse(Request request, Response response) throws IOException, ProcessingException {
 
-        String errorMsg = "Request to " + request.getResourceUrl() + " failed with HTTP status " + response.getHttpStatus();
+        int httpStatus = response.getHttpStatus();
+        String errorMsg = "Request to " + request.getResourceUrl() + " failed.";
 
         JsonNode errorResponseJson;
 
@@ -389,9 +390,9 @@ public class BaseIDXClient implements IDXClient {
                 response.getHeaders().getContentType().toString().contains("application/ion+json")) {
             errorResponseJson = objectMapper.readTree(response.getBody());
             ErrorResponse errorResponseDetails = objectMapper.convertValue(errorResponseJson, ErrorResponse.class);
-            throw new ProcessingException(errorMsg, errorResponseDetails);
+            throw new ProcessingException(httpStatus, errorMsg, errorResponseDetails);
         } else {
-            throw new ProcessingException(errorMsg);
+            throw new ProcessingException(httpStatus, errorMsg);
         }
     }
 

@@ -714,7 +714,8 @@ class BaseIDXClientTest {
         try {
             idxClient.interact()
         } catch (ProcessingException e) {
-            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getIssuer() + "/v1/interact failed with HTTP status 400"))
+            assertThat(e.getHttpStatus(), is(400))
+            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getIssuer() + "/v1/interact failed. HTTP status: 400"))
             assertThat(e.getErrorResponse(), notNullValue())
             assertThat(e.getErrorResponse().getError(), is("invalid_request"))
             assertThat(e.getErrorResponse().getErrorDescription(), is("PKCE code challenge is required when the token endpoint authentication method is 'NONE'."))
@@ -740,7 +741,8 @@ class BaseIDXClientTest {
         try {
             idxClient.introspect(Optional.of("expiredInteractionHandle"))
         } catch (ProcessingException e) {
-            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/idp/idx/introspect failed with HTTP status 401"))
+            assertThat(e.getHttpStatus(), is(401))
+            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/idp/idx/introspect failed. HTTP status: 401"))
             assertThat(e.getErrorResponse(), notNullValue())
             assertThat(e.getErrorResponse().getMessages().getValue().first().message, is("The session has expired."))
             assertThat(e.getErrorResponse().getMessages().getValue().first().value, is("ERROR"))
@@ -766,7 +768,8 @@ class BaseIDXClientTest {
         try {
             idxClient.token("grantType", "interactionCode")
         } catch (ProcessingException e) {
-            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/v1/token failed with HTTP status 400"))
+            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/v1/token failed. HTTP status: 400"))
+            assertThat(e.getHttpStatus(), is(400))
             assertThat(e.getErrorResponse(), notNullValue())
             assertThat(e.getErrorResponse().getError(), is("invalid_grant"))
             assertThat(e.getErrorResponse().getErrorDescription(), is("PKCE verification failed."))
@@ -792,7 +795,8 @@ class BaseIDXClientTest {
         try {
             idxClient.interact()
         } catch (ProcessingException e) {
-            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/v1/interact failed with HTTP status 500"))
+            assertThat(e.getHttpStatus(), is(500))
+            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/v1/interact failed. HTTP status: 500"))
         }
     }
 

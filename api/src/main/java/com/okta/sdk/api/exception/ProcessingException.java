@@ -19,22 +19,29 @@ import com.okta.sdk.api.response.ErrorResponse;
 
 public class ProcessingException extends Exception {
 
+    private int httpStatus;
     private transient ErrorResponse errorResponse;
 
-    public ProcessingException(String message) {
-        super(message);
+    public ProcessingException(int httpStatus, String message) {
+        super(message + " HTTP status: " + httpStatus);
+        this.httpStatus = httpStatus;
     }
 
     public ProcessingException(Throwable cause) {
         super(cause);
     }
 
-    public ProcessingException(String message, ErrorResponse errorResponse) {
-        super(message);
+    public ProcessingException(int httpStatus, String message, ErrorResponse errorResponse) {
+        super(message + " HTTP status: " + httpStatus);
+        this.httpStatus = httpStatus;
         this.errorResponse = errorResponse;
     }
 
     public ErrorResponse getErrorResponse() {
         return errorResponse;
+    }
+
+    public int getHttpStatus() {
+        return httpStatus;
     }
 }
