@@ -107,7 +107,7 @@ public class BaseIDXClient implements IDXClient {
             urlParameters.append("client_id=").append(clientConfiguration.getClientId());
             urlParameters.append("&scope=").append(clientConfiguration.getScopes().stream()
                     .map(Object::toString).collect(Collectors.joining(" ")));
-            urlParameters.append("&code_challenges=").append(codeChallenge);
+            urlParameters.append("&code_challenge=").append(codeChallenge);
             urlParameters.append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD);
             urlParameters.append("&redirect_uri=").append(clientConfiguration.getRedirectUri());
             urlParameters.append("&state=").append(state);
