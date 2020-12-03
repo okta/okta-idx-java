@@ -64,6 +64,7 @@ compile "com.okta.sdk:okta-idx-java-api:${okta.sdk.version}"
 runtime "com.okta.sdk:okta-idx-java-impl:${okta.sdk.version}"
 ```
 
+where `okta.sdk.version` is the latest stable release version listed [here](#release-status).
 ### SNAPSHOT Dependencies
 
 Snapshots are deployed off of the 'master' branch to [OSSRH](https://oss.sonatype.org/) and can be consumed using the following repository configured for Apache Maven or Gradle:
