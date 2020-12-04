@@ -339,7 +339,7 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public TokenResponse token(String grantType, String interactionCode) throws ProcessingException {
+    public TokenResponse token(String url, String grantType, String interactionCode) throws ProcessingException {
 
         TokenResponse tokenResponse;
 
@@ -355,7 +355,7 @@ public class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/v1/token",
+                url,
                 null,
                 getHttpHeaders(true),
                 new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),

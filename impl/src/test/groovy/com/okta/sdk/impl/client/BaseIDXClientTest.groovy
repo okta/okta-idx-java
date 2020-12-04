@@ -640,7 +640,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedTokenResponse)
 
-        TokenResponse tokenResponse = idxClient.token("grantType", "interactionCode")
+        TokenResponse tokenResponse = idxClient.token("tokenUrl","grantType", "interactionCode")
 
         assertThat(tokenResponse, notNullValue())
         assertThat(tokenResponse.tokenType, is("Bearer"))
@@ -766,9 +766,9 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedTokenResponse)
 
         try {
-            idxClient.token("grantType", "interactionCode")
+            idxClient.token("tokenUrl", "grantType", "interactionCode")
         } catch (ProcessingException e) {
-            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/v1/token failed. HTTP status: 400"))
+            assertThat(e.getMessage(), is("Request to tokenUrl failed. HTTP status: 400"))
             assertThat(e.getHttpStatus(), is(400))
             assertThat(e.getErrorResponse(), notNullValue())
             assertThat(e.getErrorResponse().getError(), is("invalid_grant"))

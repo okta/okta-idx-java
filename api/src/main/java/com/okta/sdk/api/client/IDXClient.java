@@ -45,5 +45,5 @@ public interface IDXClient {
 
     IDXResponse cancel(String stateHandle) throws ProcessingException;
 
-    TokenResponse token(String grantType, String interactionCode) throws ProcessingException;
+    TokenResponse token(String url, String grantType, String interactionCode) throws ProcessingException;
 }
