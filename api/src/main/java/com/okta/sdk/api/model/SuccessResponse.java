@@ -107,20 +107,7 @@ public class SuccessResponse {
             .filter(x -> interactionCodeLookupKey.equals(x.getName()))
             .findAny();
         Assert.isTrue(interactionCodeForm.isPresent());
-        String interactionCode = String.valueOf(interactionCodeForm.get().getValue());
-        return interactionCode;
-    }
-
-    /**
-     * Parse client_id from success response
-     * @return client_id
-     */
-    private String parseClientId() {
-        Optional<FormValue> clientIdForm = Arrays.stream(this.value)
-            .filter(x -> "client_id".equals(x.getName()))
-            .findAny();
-        Assert.isTrue(clientIdForm.isPresent());
-        return String.valueOf(clientIdForm.get().getValue());
+        return String.valueOf(interactionCodeForm.get().getValue());
     }
 
     /**
@@ -133,7 +120,6 @@ public class SuccessResponse {
         String grantType = this.parseGrantType();
         String interactionCode = this.parseInteractionCode();
         String tokenUrl = this.getHref();
-        TokenResponse tokenResponse = client.token(tokenUrl, grantType, interactionCode);
-        return tokenResponse;
+        return client.token(tokenUrl, grantType, interactionCode);
     }
 }

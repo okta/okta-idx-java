@@ -692,7 +692,6 @@ class BaseIDXClientTest {
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
-        assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
     }
 
     @Test

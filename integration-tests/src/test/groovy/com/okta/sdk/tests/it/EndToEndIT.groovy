@@ -278,7 +278,6 @@ class EndToEndIT {
         assertThat(idxResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
         assertThat(idxResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
         assertThat(idxResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
-        assertThat(idxResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
@@ -488,7 +487,6 @@ class EndToEndIT {
         assertThat(idxResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
         assertThat(idxResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
         assertThat(idxResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
-        assertThat(idxResponse.getSuccessWithInteractionCode().parseClientId(), is("0oa3jxy2kpqZs9fOU0g7"))
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge/answer"))
             .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0")))
