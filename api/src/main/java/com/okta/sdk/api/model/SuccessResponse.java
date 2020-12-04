@@ -131,17 +131,8 @@ public class SuccessResponse {
      */
     public TokenResponse exchangeCode(IDXClient client) throws ProcessingException {
         String grantType = this.parseGrantType();
-        Assert.hasText(grantType, "grant_type cannot be empty");
-
         String interactionCode = this.parseInteractionCode();
-        Assert.hasText(interactionCode, "interaction_code cannot be empty");
-
-        String clientId = this.parseClientId();
-        Assert.hasText(clientId, "client_id cannot be null");
-
         String tokenUrl = this.getHref();
-        Assert.hasText(tokenUrl, "token url (href) cannot be empty");
-
         TokenResponse tokenResponse = client.token(tokenUrl, grantType, interactionCode);
         return tokenResponse;
     }
