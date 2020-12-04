@@ -53,12 +53,10 @@ public class Quickstart {
 
     public static void main(String... args) throws JsonProcessingException {
 
-        /**
-         * Any of the below flows could be run depending on how the Authenticators are setup in your org.
-         */
+        // One of the below flows could be chosen depending on how the Authenticators are setup in your org.
 
         // complete login flow with Password & Email Authenticators
-        runLoginFlowWithPasswordAndEmailAuthenticators();
+        //runLoginFlowWithPasswordAndEmailAuthenticators();
 
         // complete login flow with Security question & Email Authenticators
         runLoginFlowWithSecurityQnAndEmailAuthenticators();
@@ -163,10 +161,15 @@ public class Quickstart {
                 // check if we landed success on login
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
-                    log.info("Exchanged interaction code for token {}",
-                            idxResponse.getSuccessWithInteractionCode().exchangeCode(client));
+                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                            tokenResponse.getAccessToken(),
+                            tokenResponse.getIdToken(),
+                            tokenResponse.getTokenType(),
+                            tokenResponse.getScope(),
+                            tokenResponse.getExpiresIn());
                 } else {
-                    // logon is not successful yet; we need to follow more remediation steps.
+                    // login is not successful yet; we need to follow more remediation steps.
                     log.info("Login not successful yet!: {}", idxResponse.raw());
 
                     // check remediation options to continue the flow
@@ -218,8 +221,13 @@ public class Quickstart {
                     if (idxResponse.isLoginSuccessful()) {
                         log.info("Login Successful!");
                         // exchange the received interaction code for a token
-                        log.info("Exchanged interaction code for token {}",
-                                idxResponse.getSuccessWithInteractionCode().exchangeCode(client));
+                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                                tokenResponse.getAccessToken(),
+                                tokenResponse.getIdToken(),
+                                tokenResponse.getTokenType(),
+                                tokenResponse.getScope(),
+                                tokenResponse.getExpiresIn());
                     }
                 }
             }
@@ -280,7 +288,7 @@ public class Quickstart {
                 TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
                 log.info("Token: {}", tokenResponse);
             } else {
-                // logon is not successful yet; we need to follow more remediation steps.
+                // login is not successful yet; we need to follow more remediation steps.
                 log.info("Login not successful yet!: {}", idxResponse.raw());
 
                 // get remediation options to go to the next step
@@ -327,10 +335,15 @@ public class Quickstart {
                 // check if we landed success on login
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
-                    log.info("Exchanged interaction code for token {}",
-                            idxResponse.getSuccessWithInteractionCode().exchangeCode(client));
+                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                            tokenResponse.getAccessToken(),
+                            tokenResponse.getIdToken(),
+                            tokenResponse.getTokenType(),
+                            tokenResponse.getScope(),
+                            tokenResponse.getExpiresIn());
                 } else {
-                    // logon is not successful yet; we need to follow more remediation steps.
+                    // login is not successful yet; we need to follow more remediation steps.
                     log.info("Login not successful yet!: {}", idxResponse.raw());
 
                     // check remediation options to continue the flow
@@ -382,8 +395,13 @@ public class Quickstart {
                     if (idxResponse.isLoginSuccessful()) {
                         log.info("Login Successful!");
                         // exchange the received interaction code for a token
-                        log.info("Exchanged interaction code for token {}",
-                                idxResponse.getSuccessWithInteractionCode().exchangeCode(client));
+                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                                tokenResponse.getAccessToken(),
+                                tokenResponse.getIdToken(),
+                                tokenResponse.getTokenType(),
+                                tokenResponse.getScope(),
+                                tokenResponse.getExpiresIn());
                     }
                 }
             }
