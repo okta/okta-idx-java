@@ -4,7 +4,7 @@
 [![Support](https://img.shields.io/badge/support-Developer%20Forum-blue.svg)][devforum]
 [![API Reference](https://img.shields.io/badge/docs-reference-lightgrey.svg)][javadocs]
 
-# Okta Identity Engine Java SDK
+# Okta IDX Java SDK
 
 * [Release status](#release-status)
 * [Need help?](#need-help)
