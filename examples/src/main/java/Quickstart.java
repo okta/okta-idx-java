@@ -80,7 +80,7 @@ public class Quickstart {
             RemediationOption remediationOption = remediationOptionsOptional.get();
             FormValue[] formValues = remediationOption.form();
 
-            // check of credentials are required to move on to next step
+            // check if credentials are required to move on to next step
             Optional<FormValue> credentialsFormValueOptional = Arrays.stream(formValues)
                     .filter(x -> "credentials".equals(x.getName()))
                     .findFirst();
@@ -254,7 +254,7 @@ public class Quickstart {
             RemediationOption remediationOption = remediationOptionsOptional.get();
             FormValue[] formValues = remediationOption.form();
 
-            // check of credentials are required to move on to next step
+            // check if credentials are required to move on to next step
             Optional<FormValue> credentialsFormValueOptional = Arrays.stream(formValues)
                     .filter(x -> "credentials".equals(x.getName()))
                     .findFirst();
