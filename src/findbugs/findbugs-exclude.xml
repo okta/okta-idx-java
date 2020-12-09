@@ -16,19 +16,19 @@
 <FindBugsFilter>
 
     <Match>
-        <Class name="~com\.okta\.sdk\.api\.model.*">
+        <Class name="~com\.okta\.idx\.sdk\.api\.model.*">
             <Bug pattern="UWF_UNWRITTEN_FIELD" />
         </Class>
     </Match>
 
     <Match>
-        <Class name="~com\.okta\.sdk\.api\.request.*">
+        <Class name="~com\.okta\.idx\.sdk\.api\.request.*">
             <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
         </Class>
     </Match>
 
     <Match>
-        <Class name="~com\.okta\.sdk\.api\.response.*">
+        <Class name="~com\.okta\.idx\.sdk\.api\.response.*">
             <Bug pattern="UUF_UNUSED_FIELD" />
         </Class>
     </Match>

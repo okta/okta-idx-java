@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.okta.sdk</groupId>
+        <groupId>com.okta.idx.sdk</groupId>
         <artifactId>okta-idx-java-root</artifactId>
         <version>0.1.0-beta.1-SNAPSHOT</version>
     </parent>
