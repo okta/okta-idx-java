@@ -15,21 +15,21 @@
  */
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.okta.sdk.api.client.Clients;
-import com.okta.sdk.api.client.IDXClient;
-import com.okta.sdk.api.exception.ProcessingException;
-import com.okta.sdk.api.model.Authenticator;
-import com.okta.sdk.api.model.Credentials;
-import com.okta.sdk.api.model.FormValue;
-import com.okta.sdk.api.model.RemediationOption;
-import com.okta.sdk.api.request.AnswerChallengeRequest;
-import com.okta.sdk.api.request.AnswerChallengeRequestBuilder;
-import com.okta.sdk.api.request.ChallengeRequest;
-import com.okta.sdk.api.request.ChallengeRequestBuilder;
-import com.okta.sdk.api.request.IdentifyRequestBuilder;
-import com.okta.sdk.api.response.IDXResponse;
-import com.okta.sdk.api.response.InteractResponse;
-import com.okta.sdk.api.response.TokenResponse;
+import com.okta.idx.sdk.api.client.Clients;
+import com.okta.idx.sdk.api.client.IDXClient;
+import com.okta.idx.sdk.api.exception.ProcessingException;
+import com.okta.idx.sdk.api.model.Authenticator;
+import com.okta.idx.sdk.api.model.Credentials;
+import com.okta.idx.sdk.api.model.FormValue;
+import com.okta.idx.sdk.api.model.RemediationOption;
+import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
+import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
+import com.okta.idx.sdk.api.request.ChallengeRequest;
+import com.okta.idx.sdk.api.request.ChallengeRequestBuilder;
+import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
+import com.okta.idx.sdk.api.response.IDXResponse;
+import com.okta.idx.sdk.api.response.InteractResponse;
+import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
