@@ -116,7 +116,7 @@ String interactHandle = interactResponse.getInteractionHandle();
 [//]: # (method: exchangeInteractionHandleForStateHandle)
 ```java
 // optional with interactionHandle or empty; if empty, a new interactionHandle will be obtained
-idxResponse = client.introspect(Optional.of("{interactHandle}"));
+IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
 String stateHandle = idxResponse.getStateHandle();
 ```
 [//]: # (end: exchangeInteractionHandleForStateHandle)
@@ -138,7 +138,7 @@ FormValue[] formValues = remediationOption.form();
 
 [//]: # (method: invokeIdentifyWithOrWithoutCredentials)
 ```java
-idxResponse = client.introspect(Optional.of("{interactHandle}"));
+IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
 String stateHandle = idxResponse.getStateHandle();
 
 // check remediation options to continue the flow
@@ -213,7 +213,7 @@ ChallengeRequest passwordAuthenticatorChallengeRequest = ChallengeRequestBuilder
         .build();
 
 // remediationOption object is a reference to the previous step's remediation options
-idxResponse = remediationOption.proceed(client, passwordAuthenticatorChallengeRequest);
+IDXResponse idxResponse = remediationOption.proceed(client, passwordAuthenticatorChallengeRequest);
 ```
 [//]: # (end: invokeChallengeAuthenticator)
 
@@ -239,7 +239,7 @@ AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = AnswerChalleng
         .build();
 
 // proceed
-idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChallengeRequest);
+IDXResponse idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChallengeRequest);
 ```
 [//]: # (end: invokeAnswerChallengeAuthenticator)
 
@@ -248,7 +248,7 @@ idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChalleng
 [//]: # (method: cancel)
 ```java
 // invalidates the supplied stateHandle and obtains a fresh one
-idxResponse = client.cancel("{stateHandle}");
+IDXResponse idxResponse = client.cancel("{stateHandle}");
 ```
 [//]: # (end: cancel)
 
@@ -279,7 +279,7 @@ EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
         .build();
 
 // proceed
-idxResponse = remediationOption.proceed(client, enrollRequest);
+IDXResponse idxResponse = remediationOption.proceed(client, enrollRequest);
 ```
 [//]: # (end: enrollAuthenticator)
 

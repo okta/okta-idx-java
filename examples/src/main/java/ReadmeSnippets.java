@@ -71,7 +71,7 @@ public class ReadmeSnippets {
 
     private void exchangeInteractionHandleForStateHandle() throws ProcessingException {
         // optional with interactionHandle or empty; if empty, a new interactionHandle will be obtained
-        idxResponse = client.introspect(Optional.of("{interactHandle}"));
+        IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
         String stateHandle = idxResponse.getStateHandle();
     }
 
@@ -90,7 +90,7 @@ public class ReadmeSnippets {
 
     private void invokeIdentifyWithOrWithoutCredentials() throws ProcessingException {
 
-        idxResponse = client.introspect(Optional.of("{interactHandle}"));
+        IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
         String stateHandle = idxResponse.getStateHandle();
 
         // check remediation options to continue the flow
@@ -154,7 +154,7 @@ public class ReadmeSnippets {
                 .build();
 
         // proceed
-        idxResponse = remediationOption.proceed(client, passwordAuthenticatorChallengeRequest); // remediationOption object is a reference to the previous step's remediation options
+        IDXResponse idxResponse = remediationOption.proceed(client, passwordAuthenticatorChallengeRequest); // remediationOption object is a reference to the previous step's remediation options
     }
 
     private void invokeAnswerChallengeAuthenticator() throws ProcessingException {
@@ -175,12 +175,12 @@ public class ReadmeSnippets {
                 .build();
 
         // proceed
-        idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChallengeRequest);
+        IDXResponse idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChallengeRequest);
     }
 
     private void cancel() throws ProcessingException {
         // invalidates the supplied stateHandle and obtains a fresh one
-        idxResponse = client.cancel("{stateHandle}");
+        IDXResponse idxResponse = client.cancel("{stateHandle}");
     }
 
     private void enrollAuthenticator() throws ProcessingException {
@@ -203,7 +203,7 @@ public class ReadmeSnippets {
                 .build();
 
         // proceed
-        idxResponse = remediationOption.proceed(client, enrollRequest);
+        IDXResponse idxResponse = remediationOption.proceed(client, enrollRequest);
     }
 
     private void getTokenWithInteractionCode() throws ProcessingException {
