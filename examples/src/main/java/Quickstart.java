@@ -59,7 +59,14 @@ public class Quickstart {
         //runLoginFlowWithPasswordAndEmailAuthenticators();
 
         // complete login flow with Security question & Email Authenticators
-        runLoginFlowWithSecurityQnAndEmailAuthenticators();
+        //runLoginFlowWithSecurityQnAndEmailAuthenticators();
+
+        // enroll authenticator
+        runEnrollAuthenticatorFlow();
+    }
+
+    private static void runEnrollAuthenticatorFlow() {
+
     }
 
     private static void runLoginFlowWithPasswordAndEmailAuthenticators() throws JsonProcessingException {
