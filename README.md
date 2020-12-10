@@ -16,13 +16,15 @@
 
 This repository contains the Okta IDX SDK for Java. This SDK can be used in your server-side code to assist in authenticating users against the Okta Identity Engine.
 
+> :warning: Beta alert! This library is in beta. See [release status](#release-status) for more information.
+
 ## Release status
 
 This library uses semantic versioning and follows Okta's [Library Version Policy][okta-library-versioning].
 
 | Version | Status                             |
 | ------- | ---------------------------------- |
-| 0.1.0-beta.1 | closed beta      |
+| 0.1.0 | :warning: Beta      |
 
 The latest release can always be found on the [releases page][github-releases].
 
