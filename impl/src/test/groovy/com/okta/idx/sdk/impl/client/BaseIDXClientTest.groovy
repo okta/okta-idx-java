@@ -33,6 +33,8 @@ import com.okta.idx.sdk.api.request.AnswerChallengeRequest
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
 import com.okta.idx.sdk.api.request.ChallengeRequest
 import com.okta.idx.sdk.api.request.ChallengeRequestBuilder
+import com.okta.idx.sdk.api.request.EnrollRequest
+import com.okta.idx.sdk.api.request.EnrollRequestBuilder
 import com.okta.idx.sdk.api.request.IdentifyRequest
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder
 import com.okta.idx.sdk.api.response.InteractResponse
@@ -41,6 +43,9 @@ import com.okta.idx.sdk.api.response.TokenResponse
 import com.okta.idx.sdk.impl.config.ClientConfiguration
 import org.testng.annotations.Test
 
+import static org.hamcrest.Matchers.arrayWithSize
+import static org.hamcrest.Matchers.hasLength
+import static org.hamcrest.Matchers.hasSize
 import static org.hamcrest.Matchers.is
 import static org.mockito.Mockito.any
 import static org.mockito.Mockito.mock
@@ -689,6 +694,94 @@ class BaseIDXClientTest {
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
+    }
+
+    @Test
+    void testEnrollAuthenticatorResponse() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        Authenticator secQnEnrollAuthenticator = new Authenticator()
+        secQnEnrollAuthenticator.setId("autzvyil7o5nQqC5j2o4")
+        secQnEnrollAuthenticator.setMethodType("security_question")
+
+        EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                .withStateHandle("02JwRcw6oq-uS3iIMT9uikGHNiD0DDkyGsp6aPNYMA")
+                .withAuthenticator(secQnEnrollAuthenticator)
+                .build()
+
+        final Response stubbedEnrollAuthenticatorResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("enroll-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedEnrollAuthenticatorResponse)
+
+        IDXResponse enrollSecQnAuthenticatorResponse = idxClient.enroll(enrollRequest)
+
+        assertThat(enrollSecQnAuthenticatorResponse, notNullValue())
+        assertThat(enrollSecQnAuthenticatorResponse.stateHandle, equalTo("02JwRcw6oq-uS3iIMT9uikGHNiD0DDkyGsp6aPNYMA"))
+        assertThat(enrollSecQnAuthenticatorResponse.version, equalTo("1.0.0"))
+        assertThat(enrollSecQnAuthenticatorResponse.expiresAt, equalTo("2020-12-10T19:06:34.000Z"))
+        assertThat(enrollSecQnAuthenticatorResponse.intent, equalTo("LOGIN"))
+
+        assertThat(enrollSecQnAuthenticatorResponse.remediation(), notNullValue())
+        assertThat(enrollSecQnAuthenticatorResponse.remediation.value.first().rel, hasItemInArray("create-form"))
+        assertThat(enrollSecQnAuthenticatorResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/challenge/answer"))
+        assertThat(enrollSecQnAuthenticatorResponse.remediation.value.first().name, equalTo("enroll-authenticator"))
+        assertThat(enrollSecQnAuthenticatorResponse.remediation.value.first().accepts, equalTo("application/ion+json; okta-version=1.0.0"))
+
+        RemediationOption[] remediationOptions = enrollSecQnAuthenticatorResponse.remediation().remediationOptions()
+        assertThat(remediationOptions, notNullValue())
+
+        Optional<RemediationOption> remediationOptionsEnrollAuthenticatorOptional = Arrays.stream(remediationOptions)
+                .filter({ x -> ("enroll-authenticator" == x.getName()) })
+                .findFirst()
+        RemediationOption remediationOptionsEnrollAuthenticatorOption = remediationOptionsEnrollAuthenticatorOptional.get()
+        assertThat(remediationOptionsEnrollAuthenticatorOption, notNullValue())
+
+        FormValue[] enrollAuthenticatorFormValues = remediationOptionsEnrollAuthenticatorOption.form()
+        Optional<FormValue> enrollAuthenticatorFormOptional = Arrays.stream(enrollAuthenticatorFormValues)
+                .filter({ x -> ("credentials" == x.getName()) })
+                .findFirst()
+        FormValue enrollAuthenticatorForm = enrollAuthenticatorFormOptional.get()
+        assertThat(enrollAuthenticatorForm, notNullValue())
+        assertThat(enrollAuthenticatorForm.options(), arrayWithSize(2))
+
+        Options[] enrollmentAuthenticatorOptions = enrollAuthenticatorForm.options()
+        Optional<Options> chooseSecQnOptionOptional = Arrays.stream(enrollmentAuthenticatorOptions)
+                .filter({ x -> ("Choose a security question" == x.getLabel()) })
+                .findFirst()
+        Options chooseSecQnOption = chooseSecQnOptionOptional.get()
+        assertThat(chooseSecQnOption, notNullValue())
+        assertThat(chooseSecQnOption.value.form.value, arrayWithSize(2))
+        assertThat(chooseSecQnOption.value.form.value[0].name, is("questionKey"))
+        assertThat(chooseSecQnOption.value.form.value[0].label, is("Choose a security question"))
+        assertThat(chooseSecQnOption.value.form.value[0].required, equalTo(true))
+        assertThat(chooseSecQnOption.value.form.value[0].options, arrayWithSize(19)) // default sec qn list
+        assertThat(chooseSecQnOption.value.form.value[1].name, is("answer"))
+        assertThat(chooseSecQnOption.value.form.value[1].label, is("Answer"))
+        assertThat(chooseSecQnOption.value.form.value[1].required, equalTo(true))
+
+        Optional<Options> createOwnSecQnOptionOptional = Arrays.stream(enrollmentAuthenticatorOptions)
+                .filter({ x -> ("Create my own security question" == x.getLabel()) })
+                .findFirst()
+        Options createOwnSecQnOption = createOwnSecQnOptionOptional.get()
+        assertThat(createOwnSecQnOption, notNullValue())
+        assertThat(createOwnSecQnOption.value.form.value[0].name, is("questionKey"))
+        assertThat(createOwnSecQnOption.value.form.value[0].label, nullValue())
+        assertThat(createOwnSecQnOption.value.form.value[0].required, equalTo(true))
+        assertThat(createOwnSecQnOption.value.form.value[1].name, is("question"))
+        assertThat(createOwnSecQnOption.value.form.value[1].label, equalTo("Create a security question"))
+        assertThat(createOwnSecQnOption.value.form.value[1].required, equalTo(true))
+        assertThat(createOwnSecQnOption.value.form.value[2].name, is("answer"))
+        assertThat(createOwnSecQnOption.value.form.value[2].label, equalTo("Answer"))
+        assertThat(createOwnSecQnOption.value.form.value[2].required, equalTo(true))
+        assertThat(createOwnSecQnOption.value.form.value, arrayWithSize(3))
     }
 
     @Test

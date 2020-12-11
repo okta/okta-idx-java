@@ -22,10 +22,22 @@ public class Credentials {
 
     public char[] passcode;
 
+    public String questionKey;
+
+    public String question;
+
     public char[] answer;
 
     public void setPasscode(char[] passcode) {
         this.passcode = passcode;
+    }
+
+    public void setQuestionKey(String questionKey) {
+        this.questionKey = questionKey;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
     }
 
     public void setAnswer(char[] answer) {
