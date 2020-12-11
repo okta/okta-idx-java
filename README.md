@@ -315,7 +315,7 @@ if (idxResponse.isLoginSuccessful()) {
 ```
 [//]: # (end: cancelAndStartNew)
 
-### Enroll in a new factor
+### Enroll Authenticator
 
 [//]: # (method: enrollAuthenticator)
 ```java
