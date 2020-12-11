@@ -59,13 +59,13 @@ public class Quickstart {
         // One of the below flows could be chosen depending on how the Authenticators are setup in your org.
 
         // complete login flow with Password & Email Authenticators
-        //runLoginFlowWithPasswordAndEmailAuthenticators();
+        runLoginFlowWithPasswordAndEmailAuthenticators();
 
         // complete login flow with Security question & Email Authenticators
         //runLoginFlowWithSecurityQnAndEmailAuthenticators();
 
-        // enroll authenticator
-        runEnrollSecurityQnAuthenticatorFlow();
+        // enroll security authenticator flow (new user with no authenticators enrolled yet)
+        //runEnrollSecurityQnAuthenticatorFlow();
     }
 
     private static void runEnrollSecurityQnAuthenticatorFlow() throws JsonProcessingException {

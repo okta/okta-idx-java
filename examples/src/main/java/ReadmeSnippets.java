@@ -252,4 +252,94 @@ public class ReadmeSnippets {
             String tokenType = tokenResponse.getTokenType();
         }
     }
+
+    private void cancelAndStartNew() throws ProcessingException {
+        // build client
+        IDXClient client = Clients.builder()
+                .setIssuer("https://{yourOktaDomain}/oauth2/{authorizationServerId}") // e.g. https://foo.okta.com/oauth2/default, https://foo.okta.com/oauth2/ausar5vgt5TSDsfcJ0h7
+                .setClientId("{clientId}")
+                .setClientSecret("{clientSecret}")
+                .setScopes(new HashSet<>(Arrays.asList("openid", "profile", "offline_access")))
+                .setRedirectUri("{redirectUri}") // must match the redirect uri in client app settings/console
+                .build();
+
+        // get interactionHandle
+        InteractResponse interactResponse = client.interact();
+        String interactHandle = interactResponse.getInteractionHandle();
+
+        // exchange interactHandle for stateHandle
+        IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+        String stateHandle = idxResponse.getStateHandle();
+
+        // check remediation options to continue the flow
+        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+        Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                .findFirst();
+        RemediationOption remediationOption = remediationOptionsOptional.get();
+        FormValue[] formValues = remediationOption.form();
+
+        // identify
+        idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                .withIdentifier("{identifier}")
+                .withStateHandle(stateHandle)
+                .build());
+
+        // check if we landed success on login
+        if (idxResponse.isLoginSuccessful()) {
+            log.info("Login Successful!");
+            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+            log.info("Token: {}", tokenResponse);
+        } else {
+            // logon is not successful yet; we need to follow more remediation steps.
+            log.info("Login not successful yet!");
+
+            // get remediation options to go to the next step
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "select-authenticator-authenticate".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsOptional.get();
+
+            // select password authenticator
+            Authenticator passwordAuthenticator = new Authenticator();
+            passwordAuthenticator.setId("{id}");                 // authenticator's 'id' value from remediation option above
+            passwordAuthenticator.setMethodType("{methodType}"); // authenticator's 'methodType' value from remediation option above
+
+            // build password authenticator challenge request
+            ChallengeRequest passwordAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
+                    .withAuthenticator(passwordAuthenticator)
+                    .withStateHandle(stateHandle)
+                    .build();
+            idxResponse = remediationOption.proceed(client, passwordAuthenticatorChallengeRequest);
+
+            // check remediation options to continue the flow
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "challenge-authenticator".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsOptional.get();
+
+            // answer password authenticator challenge
+            Credentials credentials = new Credentials();
+            credentials.setPasscode("{password}".toCharArray());
+
+            // build answer password authenticator challenge request
+            AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .withCredentials(credentials)
+                    .build();
+            idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+
+            // cancel
+            idxResponse = client.cancel("{stateHandle}");
+            // cancel returns new state handle
+            String newStateHandle = idxResponse.getStateHandle();
+
+            // check remediation options to continue the flow for new transaction (with new state handle)
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .findFirst();
+            remediationOption = remediationOptionsOptional.get();
+        }
+    }
 }
