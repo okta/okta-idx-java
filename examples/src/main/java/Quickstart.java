@@ -21,11 +21,14 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
+import com.okta.idx.sdk.api.model.Options;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
 import com.okta.idx.sdk.api.request.ChallengeRequest;
 import com.okta.idx.sdk.api.request.ChallengeRequestBuilder;
+import com.okta.idx.sdk.api.request.EnrollRequest;
+import com.okta.idx.sdk.api.request.EnrollRequestBuilder;
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
@@ -62,11 +65,238 @@ public class Quickstart {
         //runLoginFlowWithSecurityQnAndEmailAuthenticators();
 
         // enroll authenticator
-        runEnrollAuthenticatorFlow();
+        runEnrollSecurityQnAuthenticatorFlow();
     }
 
-    private static void runEnrollAuthenticatorFlow() {
+    private static void runEnrollSecurityQnAuthenticatorFlow() throws JsonProcessingException {
 
+        try {
+            // get interactionHandle
+            InteractResponse interactResponse = client.interact();
+            String interactHandle = interactResponse.getInteractionHandle();
+
+            // exchange interactHandle for stateHandle
+            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            String stateHandle = idxResponse.getStateHandle();
+
+            // check remediation options to continue the flow
+            RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+            Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .findFirst();
+            RemediationOption remediationOption = remediationOptionsOptional.get();
+            FormValue[] formValues = remediationOption.form();
+
+            // check if credentials are required to move on to next step
+            Optional<FormValue> credentialsFormValueOptional = Arrays.stream(formValues)
+                    .filter(x -> "credentials".equals(x.getName()))
+                    .findFirst();
+
+            if (credentialsFormValueOptional.isPresent()) {
+                FormValue credentialsFormValue = credentialsFormValueOptional.get();
+
+                // check if credentials are required to be sent in identify API
+                if (credentialsFormValue.isRequired()) {
+                    log.info("Credentials are REQUIRED to be sent in identify request (next step)");
+                    Credentials credentials = new Credentials();
+                    credentials.setPasscode(PASSWORD);
+
+                    idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                            .withIdentifier(IDENTIFIER)
+                            .withCredentials(credentials)
+                            .withStateHandle(stateHandle)
+                            .build());
+                }
+            } else {
+                // credentials are not necessary; so sending just the identifier
+                idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                        .withIdentifier(IDENTIFIER)
+                        .withStateHandle(stateHandle)
+                        .build());
+            }
+
+            // check if we landed success on login
+            if (idxResponse.isLoginSuccessful()) {
+                log.info("Login Successful!");
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                log.info("Token: {}", tokenResponse);
+            } else {
+                // logon is not successful yet; we need to follow more remediation steps.
+                log.info("Login not successful yet!: {}", idxResponse.raw());
+
+                // get remediation options to go to the next step
+                remediationOptions = idxResponse.remediation().remediationOptions();
+                remediationOptionsOptional = Arrays.stream(remediationOptions)
+                        .filter(x -> "select-authenticator-authenticate".equals(x.getName()))
+                        .findFirst();
+                remediationOption = remediationOptionsOptional.get();
+
+                // get authenticator options
+                Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+                log.info("Authenticator Options: {}", authenticatorOptions);
+
+                // select password authenticator
+                Authenticator passwordAuthenticator = new Authenticator();
+                passwordAuthenticator.setId(authenticatorOptions.get("password"));
+                passwordAuthenticator.setMethodType("password");
+
+                // build password authenticator challenge request
+                ChallengeRequest passwordAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
+                        .withAuthenticator(passwordAuthenticator)
+                        .withStateHandle(stateHandle)
+                        .build();
+                idxResponse = remediationOption.proceed(client, passwordAuthenticatorChallengeRequest);
+
+                // check remediation options to continue the flow
+                remediationOptions = idxResponse.remediation().remediationOptions();
+                remediationOptionsOptional = Arrays.stream(remediationOptions)
+                        .filter(x -> "challenge-authenticator".equals(x.getName()))
+                        .findFirst();
+                remediationOption = remediationOptionsOptional.get();
+
+                // answer password authenticator challenge
+                Credentials credentials = new Credentials();
+                credentials.setPasscode(PASSWORD);
+
+                // build answer password authenticator challenge request
+                AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                        .withStateHandle(stateHandle)
+                        .withCredentials(credentials)
+                        .build();
+                idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+
+                // check if we landed success on login
+                if (idxResponse.isLoginSuccessful()) {
+                    log.info("Login Successful!");
+                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                            tokenResponse.getAccessToken(),
+                            tokenResponse.getIdToken(),
+                            tokenResponse.getTokenType(),
+                            tokenResponse.getScope(),
+                            tokenResponse.getExpiresIn());
+                } else {
+                    // login is not successful yet; we need to follow more remediation steps.
+                    log.info("Login not successful yet!: {}", idxResponse.raw());
+
+                    // check remediation options to continue the flow
+                    remediationOptions = idxResponse.remediation().remediationOptions();
+                    remediationOptionsOptional = Arrays.stream(remediationOptions)
+                            .filter(x -> "select-authenticator-authenticate".equals(x.getName()))
+                            .findFirst();
+                    remediationOption = remediationOptionsOptional.get();
+
+                    // get authenticator options
+                    authenticatorOptions = remediationOption.getAuthenticatorOptions();
+                    log.info("Authenticator Options: {}", authenticatorOptions);
+
+                    // select email authenticator
+                    Authenticator emailAuthenticator = new Authenticator();
+                    emailAuthenticator.setId(authenticatorOptions.get("email"));
+                    emailAuthenticator.setMethodType("email");
+
+                    // build email authenticator challenge request
+                    ChallengeRequest emailAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
+                            .withAuthenticator(emailAuthenticator)
+                            .withStateHandle(stateHandle)
+                            .build();
+                    idxResponse = remediationOption.proceed(client, emailAuthenticatorChallengeRequest);
+
+                    // answer email authenticator challenge
+                    remediationOptions = idxResponse.remediation().remediationOptions();
+                    remediationOptionsOptional = Arrays.stream(remediationOptions)
+                            .filter(x -> "challenge-authenticator".equals(x.getName()))
+                            .findFirst();
+                    remediationOption = remediationOptionsOptional.get();
+
+                    // enter passcode received in email
+                    Scanner in = new Scanner(System.in, "UTF-8");
+                    log.info("Enter Email Passcode: ");
+                    String emailPasscode = in.nextLine();
+
+                    credentials = new Credentials();
+                    credentials.setPasscode(emailPasscode.toCharArray());
+
+                    // build answer email authenticator challenge request
+                    AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                            .withStateHandle(stateHandle)
+                            .withCredentials(credentials)
+                            .build();
+                    idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChallengeRequest);
+
+                    // check if we landed success on login
+                    if (idxResponse.isLoginSuccessful()) {
+                        log.info("Login Successful!");
+                        // exchange the received interaction code for a token
+                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                                tokenResponse.getAccessToken(),
+                                tokenResponse.getIdToken(),
+                                tokenResponse.getTokenType(),
+                                tokenResponse.getScope(),
+                                tokenResponse.getExpiresIn());
+                    } else {
+
+                        // check remediation options to go to the next step
+                        remediationOptions = idxResponse.remediation().remediationOptions();
+                        Optional<RemediationOption> remediationOptionsSelectAuthenticatorOptional = Arrays.stream(remediationOptions)
+                                .filter(x -> "select-authenticator-enroll".equals(x.getName()))
+                                .findFirst();
+                        RemediationOption remediationOptionsSelectAuthenticatorOption = remediationOptionsSelectAuthenticatorOptional.get();
+
+                        authenticatorOptions = remediationOptionsSelectAuthenticatorOption.getAuthenticatorOptions();
+
+                        // select an authenticator
+                        Authenticator secQnEnrollmentAuthenticator = new Authenticator();
+                        secQnEnrollmentAuthenticator.setId(authenticatorOptions.get("security_question"));
+                        secQnEnrollmentAuthenticator.setMethodType("security_question");
+
+                        // build enroll request
+                        EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                                .withAuthenticator(secQnEnrollmentAuthenticator)
+                                .withStateHandle(stateHandle)
+                                .build();
+
+                        // proceed
+                        idxResponse = remediationOptionsSelectAuthenticatorOption.proceed(client, enrollRequest);
+
+                        // get remediation options to go to the next step
+                        remediationOptions = idxResponse.remediation().remediationOptions();
+                        Optional<RemediationOption> remediationOptionsEnrollAuthenticatorOptional = Arrays.stream(remediationOptions)
+                                .filter(x -> "enroll-authenticator".equals(x.getName()))
+                                .findFirst();
+                        RemediationOption remediationOptionsEnrollAuthenticatorOption = remediationOptionsEnrollAuthenticatorOptional.get();
+
+                        FormValue[] enrollAuthenticatorFormValues = remediationOptionsEnrollAuthenticatorOption.form();
+                        Optional<FormValue> enrollAuthenticatorFormOptional = Arrays.stream(enrollAuthenticatorFormValues)
+                                .filter(x -> "credentials".equals(x.getName()))
+                                .findFirst();
+                        FormValue enrollAuthenticatorForm = enrollAuthenticatorFormOptional.get();
+
+                        Options[] enrollmentAuthenticatorOptions = enrollAuthenticatorForm.options();
+                        Optional<Options> chooseSecQnOptionOptional = Arrays.stream(enrollmentAuthenticatorOptions)
+                                .filter(x -> "Choose a security question".equals(x.getLabel()))
+                                .findFirst();
+
+                        Options choseSecQnOption = chooseSecQnOptionOptional.get(); // view default security questions list
+
+                        Credentials secQnEnrollmentCredentials = new Credentials();
+                        secQnEnrollmentCredentials.setQuestionKey("my_own_sec_qn_key");
+                        secQnEnrollmentCredentials.setQuestion("Which is your most favorite pet?");
+                        secQnEnrollmentCredentials.setAnswer(SECURITY_QUESTION_ANSWER);
+
+                        AnswerChallengeRequest answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                                .withStateHandle(stateHandle)
+                                .withCredentials(secQnEnrollmentCredentials)
+                                .build();
+
+                        // proceed
+                        idxResponse = remediationOptionsEnrollAuthenticatorOption.proceed(client, answerChallengeRequest);
+                    }
+                }
+            }
+        } catch (ProcessingException e) {
+            log.error("Something went wrong! {}, {}", e.getMessage(), e.getErrorResponse().raw());
+        }
     }
 
     private static void runLoginFlowWithPasswordAndEmailAuthenticators() throws JsonProcessingException {
