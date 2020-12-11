@@ -40,6 +40,7 @@ import com.okta.idx.sdk.api.request.CancelRequest;
 import com.okta.idx.sdk.api.request.CancelRequestBuilder;
 import com.okta.idx.sdk.api.request.ChallengeRequest;
 import com.okta.idx.sdk.api.request.EnrollRequest;
+import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IntrospectRequest;
 import com.okta.idx.sdk.api.response.ErrorResponse;
@@ -320,6 +321,37 @@ public class BaseIDXClient implements IDXClient {
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(cancelRequest)),
                 -1L);
+
+            Response response = requestExecutor.executeRequest(request);
+
+            if (response.getHttpStatus() != 200) {
+                handleErrorResponse(request, response);
+            }
+
+            JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
+
+        } catch (IOException | HttpException e) {
+            throw new ProcessingException(e);
+        }
+
+        return idxResponse;
+    }
+
+    @Override
+    public IDXResponse enrollUpdateUserProfile(EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest) throws ProcessingException {
+
+        IDXResponse idxResponse;
+
+        try {
+            Request request = new DefaultRequest(
+                    HttpMethod.POST,
+                    clientConfiguration.getBaseUrl() + "/idp/idx/enroll/update",
+                    null,
+                    getHttpHeaders(false),
+                    new ByteArrayInputStream(objectMapper.writeValueAsBytes(enrollUserProfileUpdateRequest)),
+                    -1L);
 
             Response response = requestExecutor.executeRequest(request);
 
