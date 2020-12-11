@@ -22,6 +22,7 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.ChallengeRequest;
 import com.okta.idx.sdk.api.request.EnrollRequest;
+import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.response.IDXResponse;
 
@@ -79,6 +80,7 @@ public class RemediationOption {
         else if (request instanceof AnswerChallengeRequest)
             return client.answerChallenge((AnswerChallengeRequest) request);
         else if (request instanceof EnrollRequest) return client.enroll((EnrollRequest) request);
+        else if (request instanceof EnrollUserProfileUpdateRequest) return client.enrollUpdateUserProfile((EnrollUserProfileUpdateRequest) request);
         else
             throw new IllegalStateException("Cannot invoke proceed with the supplied request type " + request.getClass().getSimpleName());
     }

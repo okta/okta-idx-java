@@ -23,12 +23,15 @@ import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Options;
 import com.okta.idx.sdk.api.model.RemediationOption;
+import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
 import com.okta.idx.sdk.api.request.ChallengeRequest;
 import com.okta.idx.sdk.api.request.ChallengeRequestBuilder;
 import com.okta.idx.sdk.api.request.EnrollRequest;
 import com.okta.idx.sdk.api.request.EnrollRequestBuilder;
+import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
+import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequestBuilder;
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
@@ -341,5 +344,18 @@ public class ReadmeSnippets {
                     .findFirst();
             remediationOption = remediationOptionsOptional.get();
         }
+    }
+
+    private void enrollUserProfileUpdate() throws ProcessingException {
+        UserProfile userProfile = new UserProfile();
+        userProfile.addAttribute("key-1", "value-1");
+        userProfile.addAttribute("key-2", "value-2");
+
+        EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest = EnrollUserProfileUpdateRequestBuilder.builder()
+                .withStateHandle("{stateHandle}")
+                .withUserProfile(userProfile)
+                .build();
+
+        IDXResponse idxResponse = remediationOption.proceed(client, enrollUserProfileUpdateRequest);
     }
 }

@@ -384,6 +384,23 @@ idxResponse = remediationOptionsEnrollAuthenticatorOption.proceed(client, answer
 ```
 [//]: # (end: enrollAuthenticator)
 
+### Registration and progressive profiling
+
+Enroll a user with additional profile attributes.
+
+[//]: # (method: enrollUserProfileUpdate)
+```java
+UserProfile userProfile = new UserProfile();
+userProfile.addAttribute("key-1", "value-1");
+userProfile.addAttribute("key-2", "value-2");
+EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest = EnrollUserProfileUpdateRequestBuilder.builder()
+        .withStateHandle("{stateHandle}")
+        .withUserProfile(userProfile)
+        .build();
+IDXResponse idxResponse = remediationOption.proceed(client, enrollUserProfileUpdateRequest);
+```
+[//]: # (end: enrollUserProfileUpdate)
+
 ### Get Token with Interaction Code
 
 [//]: # (method: getTokenWithInteractionCode)

@@ -29,12 +29,15 @@ import com.okta.idx.sdk.api.model.Credentials
 import com.okta.idx.sdk.api.model.FormValue
 import com.okta.idx.sdk.api.model.Options
 import com.okta.idx.sdk.api.model.RemediationOption
+import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
 import com.okta.idx.sdk.api.request.ChallengeRequest
 import com.okta.idx.sdk.api.request.ChallengeRequestBuilder
 import com.okta.idx.sdk.api.request.EnrollRequest
 import com.okta.idx.sdk.api.request.EnrollRequestBuilder
+import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest
+import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequestBuilder
 import com.okta.idx.sdk.api.request.IdentifyRequest
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder
 import com.okta.idx.sdk.api.response.InteractResponse
@@ -782,6 +785,50 @@ class BaseIDXClientTest {
         assertThat(createOwnSecQnOption.value.form.value[2].label, equalTo("Answer"))
         assertThat(createOwnSecQnOption.value.form.value[2].required, equalTo(true))
         assertThat(createOwnSecQnOption.value.form.value, arrayWithSize(3))
+    }
+
+    @Test
+    void testEnrollUpdateUserProfile() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        UserProfile userProfile = new UserProfile()
+        userProfile.getFields().put("test-key-1", "test-val-1")
+        userProfile.getFields().put("test-key-2", "test-val-2")
+
+        EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest = EnrollUserProfileUpdateRequestBuilder.builder()
+                .withStateHandle("02JwRcw6oq-uS3iIMT9uikGHNiD0DDkyGsp6aPNYMA")
+                .withUserProfile(userProfile)
+                .build()
+
+        final Response stubbedEnrollUserProfileUpdateResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("enroll-update-user-profile-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedEnrollUserProfileUpdateResponse)
+
+        IDXResponse enrollUpdateUserProfileResponse = idxClient.enrollUpdateUserProfile(enrollUserProfileUpdateRequest)
+
+        assertThat(enrollUpdateUserProfileResponse, notNullValue())
+        assertThat(enrollUpdateUserProfileResponse.remediation(), nullValue())
+        assertThat(enrollUpdateUserProfileResponse.stateHandle, notNullValue())
+        assertThat(enrollUpdateUserProfileResponse.version, notNullValue())
+        assertThat(enrollUpdateUserProfileResponse.expiresAt, equalTo("2020-12-11T18:42:30.000Z"))
+        assertThat(enrollUpdateUserProfileResponse.intent, equalTo("LOGIN"))
+
+        assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode(), notNullValue())
+        assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode().getRel(), notNullValue())
+        assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode().getName(), notNullValue())
+        assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode().getHref(), notNullValue())
+        assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode().getMethod(), is("POST"))
+        assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
+        assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
+        assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("ygc5TLrx6a8AXAnxliW9Xd50ZODCTxO3imJ_I4-tmcg"))
     }
 
     @Test
