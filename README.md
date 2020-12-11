@@ -1,5 +1,5 @@
 [<img src="https://aws1.discourse-cdn.com/standard14/uploads/oktadev/original/1X/0c6402653dfb70edc661d4976a43a46f33e5e919.png" align="right" width="256px"/>](https://devforum.okta.com/)
-[![Maven Central](https://img.shields.io/maven-central/v/com.okta.sdk/okta-idx-java-api.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.okta.sdk%22%20a%3A%22okta-idx-java-api%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.okta.idx.sdk/okta-idx-java-api.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.okta.idx.sdk%22%20a%3A%22okta-idx-java-api%22)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Support](https://img.shields.io/badge/support-Developer%20Forum-blue.svg)][devforum]
 [![API Reference](https://img.shields.io/badge/docs-reference-lightgrey.svg)][javadocs]
@@ -49,12 +49,12 @@ For Apache Maven:
 
 ``` xml
 <dependency>
-    <groupId>com.okta.sdk</groupId>
+    <groupId>com.okta.idx.sdk</groupId>
     <artifactId>okta-idx-java-api</artifactId>
     <version>${okta.sdk.version}</version>
 </dependency>
 <dependency>
-    <groupId>com.okta.sdk</groupId>
+    <groupId>com.okta.idx.sdk</groupId>
     <artifactId>okta-idx-java-impl</artifactId>
     <version>${okta.sdk.version}</version>
     <scope>runtime</scope>
@@ -64,8 +64,8 @@ For Apache Maven:
 For Gradle:
 
 ```groovy
-compile "com.okta.sdk:okta-idx-java-api:${okta.sdk.version}"
-runtime "com.okta.sdk:okta-idx-java-impl:${okta.sdk.version}"
+compile "com.okta.idx.sdk:okta-idx-java-api:${okta.sdk.version}"
+runtime "com.okta.idx.sdk:okta-idx-java-impl:${okta.sdk.version}"
 ```
 
 where `okta.sdk.version` is the latest stable release version listed [here](#release-status).
