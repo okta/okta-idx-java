@@ -17,13 +17,18 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.okta.idx.sdk.api.serializers.UserProfileSerializer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonSerialize(using = UserProfileSerializer.class)
 public class UserProfile {
 
+    @JsonIgnore
     private Map<String, Object> fields = new LinkedHashMap<>();
 
     public Map<String, Object> getFields() {
