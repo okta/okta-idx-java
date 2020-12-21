@@ -40,6 +40,8 @@ import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequestBuilder
 import com.okta.idx.sdk.api.request.IdentifyRequest
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder
+import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest
+import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder
 import com.okta.idx.sdk.api.response.InteractResponse
 import com.okta.idx.sdk.api.response.IDXResponse
 import com.okta.idx.sdk.api.response.TokenResponse
@@ -829,6 +831,45 @@ class BaseIDXClientTest {
         assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
         assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
         assertThat(enrollUpdateUserProfileResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("ygc5TLrx6a8AXAnxliW9Xd50ZODCTxO3imJ_I4-tmcg"))
+    }
+
+    @Test
+    void testSkipOptionalAuthenticatorEnrollment() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest = SkipAuthenticatorEnrollmentRequestBuilder.builder()
+                .withStateHandle("02EPfpFV_56cDmc4r1BQNhYFW_WEbViA6rd1YRwCRH")
+                .build()
+
+        final Response stubbedSkipAuthEnrollmentResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("skip-optional-authenticator-enrollment-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedSkipAuthEnrollmentResponse)
+
+        IDXResponse skipAuthEnrollmentResponse = idxClient.skip(skipAuthenticatorEnrollmentRequest)
+
+        assertThat(skipAuthEnrollmentResponse, notNullValue())
+        assertThat(skipAuthEnrollmentResponse.remediation(), nullValue())
+        assertThat(skipAuthEnrollmentResponse.stateHandle, notNullValue())
+        assertThat(skipAuthEnrollmentResponse.version, notNullValue())
+        assertThat(skipAuthEnrollmentResponse.expiresAt, equalTo("2020-12-21T20:41:27.000Z"))
+        assertThat(skipAuthEnrollmentResponse.intent, equalTo("LOGIN"))
+
+        assertThat(skipAuthEnrollmentResponse.getSuccessWithInteractionCode(), notNullValue())
+        assertThat(skipAuthEnrollmentResponse.getSuccessWithInteractionCode().getRel(), notNullValue())
+        assertThat(skipAuthEnrollmentResponse.getSuccessWithInteractionCode().getName(), notNullValue())
+        assertThat(skipAuthEnrollmentResponse.getSuccessWithInteractionCode().getHref(), notNullValue())
+        assertThat(skipAuthEnrollmentResponse.getSuccessWithInteractionCode().getMethod(), is("POST"))
+        assertThat(skipAuthEnrollmentResponse.getSuccessWithInteractionCode().getValue(), notNullValue())
+        assertThat(skipAuthEnrollmentResponse.getSuccessWithInteractionCode().parseGrantType(), is("interaction_code"))
+        assertThat(skipAuthEnrollmentResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
     }
 
     @Test
