@@ -998,20 +998,10 @@ public class Quickstart {
                 Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
                 log.info("Authenticator Options: {}", authenticatorOptions);
 
-                // enter authenticator id (see authenticator options above)
-                Scanner in = new Scanner(System.in, "UTF-8");
-                log.info("Enter Authenticator ID: ");
-                String authenticatorId = in.nextLine();
-
-                // enter authenticator enrollment id (look at the raw response and enter this)
-                in = new Scanner(System.in, "UTF-8");
-                log.info("Enter Authenticator Enrollment ID: ");
-                String authenticatorEnrollmentId = in.nextLine();
-
-                // select phone authenticator
+                // select phone authenticator (sms or voice)
                 Authenticator phoneAuthenticator = new Authenticator();
-                phoneAuthenticator.setId(authenticatorId);
-                phoneAuthenticator.setEnrollmentId(authenticatorEnrollmentId);
+                phoneAuthenticator.setId(authenticatorOptions.get("sms,voice")); /* id is the same for both sms and voice */
+                phoneAuthenticator.setEnrollmentId(authenticatorOptions.get("enrollmentId"));
                 phoneAuthenticator.setMethodType("sms"); /* or "voice" */
 
                 // build password authenticator challenge request
@@ -1029,7 +1019,7 @@ public class Quickstart {
                 remediationOption = remediationOptionsOptional.get();
 
                 // enter sms code received on phone (via sms or voice)
-                in = new Scanner(System.in, "UTF-8");
+                Scanner in = new Scanner(System.in, "UTF-8");
                 log.info("Enter SMS or Voice Code: ");
                 String smsCode = in.nextLine();
 
