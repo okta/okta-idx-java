@@ -22,6 +22,8 @@ public class Authenticator {
 
     private String id;
 
+    private String enrollmentId;
+
     private String methodType;
 
     private String phoneNumber;
@@ -40,6 +42,10 @@ public class Authenticator {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public void setEnrollmentId(String enrollmentId) {
+        this.enrollmentId = enrollmentId;
     }
 
     public void setMethodType(String methodType) {
