@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class RemediationOption {
@@ -128,9 +129,22 @@ public class RemediationOption {
                 for (FormValue formValue : optionFormValues) {
                     if (formValue.getName().equals("methodType")) {
                         key = String.valueOf(formValue.getValue());
+                        StringBuilder nestedKeys = new StringBuilder();
+                        if (key.equals("null")) {
+                            // parse value from children
+                            for (Options children : formValue.options()) {
+                                nestedKeys.append(children.getValue());
+                                nestedKeys.append(",");
+                            }
+                            nestedKeys = nestedKeys.deleteCharAt(nestedKeys.length() - 1);
+                            key = nestedKeys.toString();
+                        }
                     }
                     if (formValue.getName().equals("id")) {
                         val = String.valueOf(formValue.getValue());
+                    }
+                    if (formValue.getName().equals("enrollmentId")) {
+                        authenticatorOptionsMap.put("enrollmentId", String.valueOf(formValue.getValue()));
                     }
                 }
                 if (key != null) {
