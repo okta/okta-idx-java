@@ -43,7 +43,8 @@ public class YAMLPropertiesSource implements PropertiesSource {
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, String> getProperties() {
-        try (InputStream in = resource.getInputStream()) {
+        try {
+            InputStream in = resource.getInputStream();
             // check to see if file exists
             if (in != null) { // if we have a yaml file.
                 if (Classes.isAvailable("org.yaml.snakeyaml.Yaml")) {
