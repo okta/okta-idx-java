@@ -489,13 +489,10 @@ remediationOptionsOptional = Arrays.stream(remediationOptions)
         .filter(x -> "challenge-authenticator".equals(x.getName()))
         .findFirst();
 remediationOption = remediationOptionsOptional.get();
-
-// enter passcode received in email
-Scanner in = new Scanner(System.in, "UTF-8");
-log.info("Enter Email Passcode: ");
-String emailPasscode = in.nextLine();
 credentials = new Credentials();
-credentials.setPasscode(emailPasscode.toCharArray());
+
+// passcode received in email
+credentials.setPasscode("{passcode}".toCharArray());
 
 // build answer email authenticator challenge request
 AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
@@ -574,14 +571,11 @@ remediationOptionsOptional = Arrays.stream(remediationOptions)
         .findFirst();
 remediationOption = remediationOptionsOptional.get();
 
-// enter sms code received on phone (via sms or voice)
-Scanner in = new Scanner(System.in, "UTF-8");
-log.info("Enter SMS or Voice Code: ");
-String smsCode = in.nextLine();
-
 // answer password authenticator challenge
 Credentials credentials = new Credentials();
-credentials.setPasscode(smsCode.toCharArray());
+
+// code received via sms or voice
+credentials.setPasscode("code".toCharArray());
 
 // build answer password authenticator challenge request
 AnswerChallengeRequest phoneSmsCodeAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()

@@ -250,7 +250,7 @@ public class ReadmeSnippets {
         RemediationOption remediationOption = remediationOptionsOptional.get();
 
         Credentials credentials = new Credentials();
-        credentials.setPasscode("{emailPasscode}".toCharArray());  // passcode received in email
+        credentials.setPasscode("{passcode}".toCharArray());  // passcode received in email
 
         // build answer email authenticator challenge request
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
@@ -430,13 +430,8 @@ public class ReadmeSnippets {
                 .findFirst();
         remediationOption = remediationOptionsOptional.get();
 
-        // enter passcode received in email
-        Scanner in = new Scanner(System.in, "UTF-8");
-        log.info("Enter Email Passcode: ");
-        String emailPasscode = in.nextLine();
-
         credentials = new Credentials();
-        credentials.setPasscode(emailPasscode.toCharArray());
+        credentials.setPasscode("{passcode}".toCharArray()); // passcode received in email
 
         // build answer email authenticator challenge request
         AnswerChallengeRequest emailAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
@@ -505,14 +500,9 @@ public class ReadmeSnippets {
                 .findFirst();
         remediationOption = remediationOptionsOptional.get();
 
-        // enter sms code received on phone (via sms or voice)
-        Scanner in = new Scanner(System.in, "UTF-8");
-        log.info("Enter SMS or Voice Code: ");
-        String smsCode = in.nextLine();
-
         // answer password authenticator challenge
         Credentials credentials = new Credentials();
-        credentials.setPasscode(smsCode.toCharArray());
+        credentials.setPasscode("code".toCharArray()); // code received via sms or voice
 
         // build answer password authenticator challenge request
         AnswerChallengeRequest phoneSmsCodeAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
