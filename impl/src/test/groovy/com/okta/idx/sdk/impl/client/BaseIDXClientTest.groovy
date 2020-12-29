@@ -653,6 +653,7 @@ class BaseIDXClientTest {
         assertThat(tokenResponse.tokenType, is("Bearer"))
         assertThat(tokenResponse.expiresIn, is(3600))
         assertThat(tokenResponse.accessToken, notNullValue())
+        assertThat(tokenResponse.refreshToken, notNullValue())
         assertThat(tokenResponse.idToken, notNullValue())
         assertThat(tokenResponse.scope, is("openid email"))
     }

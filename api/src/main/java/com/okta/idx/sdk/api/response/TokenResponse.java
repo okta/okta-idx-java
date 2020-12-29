@@ -40,6 +40,12 @@ public class TokenResponse {
     public String idToken;
 
     /**
+     * The Refresh Token JWT
+     */
+    @JsonAlias("refresh_token")
+    public String refreshToken;
+
+    /**
      * The scope of the JWT
      */
     public String scope;
@@ -60,6 +66,10 @@ public class TokenResponse {
 
     public String getIdToken() {
         return idToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
     }
 
     public String getScope() {
