@@ -182,9 +182,10 @@ public class Quickstart {
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
                     TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
+                            tokenResponse.getRefreshToken(),
                             tokenResponse.getTokenType(),
                             tokenResponse.getScope(),
                             tokenResponse.getExpiresIn());
@@ -242,9 +243,10 @@ public class Quickstart {
                         log.info("Login Successful!");
                         // exchange the received interaction code for a token
                         TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                                 tokenResponse.getAccessToken(),
                                 tokenResponse.getIdToken(),
+                                tokenResponse.getRefreshToken(),
                                 tokenResponse.getTokenType(),
                                 tokenResponse.getScope(),
                                 tokenResponse.getExpiresIn());
@@ -413,9 +415,10 @@ public class Quickstart {
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
                     TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
+                            tokenResponse.getRefreshToken(),
                             tokenResponse.getTokenType(),
                             tokenResponse.getScope(),
                             tokenResponse.getExpiresIn());
@@ -473,9 +476,10 @@ public class Quickstart {
                         log.info("Login Successful!");
                         // exchange the received interaction code for a token
                         TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                                 tokenResponse.getAccessToken(),
                                 tokenResponse.getIdToken(),
+                                tokenResponse.getRefreshToken(),
                                 tokenResponse.getTokenType(),
                                 tokenResponse.getScope(),
                                 tokenResponse.getExpiresIn());
@@ -535,13 +539,13 @@ public class Quickstart {
             if (idxResponse.isLoginSuccessful()) {
                 log.info("Login Successful!");
                 TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                         tokenResponse.getAccessToken(),
                         tokenResponse.getIdToken(),
+                        tokenResponse.getRefreshToken(),
                         tokenResponse.getTokenType(),
                         tokenResponse.getScope(),
                         tokenResponse.getExpiresIn());
-
             } else {
                 // check remediation options to continue the flow
                 remediationOptions = idxResponse.remediation().remediationOptions();
@@ -572,9 +576,10 @@ public class Quickstart {
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
                     TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
+                            tokenResponse.getRefreshToken(),
                             tokenResponse.getTokenType(),
                             tokenResponse.getScope(),
                             tokenResponse.getExpiresIn());
@@ -662,9 +667,10 @@ public class Quickstart {
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
                     TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
+                            tokenResponse.getRefreshToken(),
                             tokenResponse.getTokenType(),
                             tokenResponse.getScope(),
                             tokenResponse.getExpiresIn());
@@ -745,9 +751,10 @@ public class Quickstart {
                     if (idxResponse.isLoginSuccessful()) {
                         log.info("Login Successful!");
                         TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                                 tokenResponse.getAccessToken(),
                                 tokenResponse.getIdToken(),
+                                tokenResponse.getRefreshToken(),
                                 tokenResponse.getTokenType(),
                                 tokenResponse.getScope(),
                                 tokenResponse.getExpiresIn());
@@ -859,9 +866,10 @@ public class Quickstart {
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
                     TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
+                            tokenResponse.getRefreshToken(),
                             tokenResponse.getTokenType(),
                             tokenResponse.getScope(),
                             tokenResponse.getExpiresIn());
@@ -919,9 +927,10 @@ public class Quickstart {
                         log.info("Login Successful!");
                         // exchange the received interaction code for a token
                         TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                                 tokenResponse.getAccessToken(),
                                 tokenResponse.getIdToken(),
+                                tokenResponse.getRefreshToken(),
                                 tokenResponse.getTokenType(),
                                 tokenResponse.getScope(),
                                 tokenResponse.getExpiresIn());
@@ -1080,9 +1089,10 @@ public class Quickstart {
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
                     TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
+                            tokenResponse.getRefreshToken(),
                             tokenResponse.getTokenType(),
                             tokenResponse.getScope(),
                             tokenResponse.getExpiresIn());

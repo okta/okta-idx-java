@@ -145,9 +145,10 @@ public class ReadmeSnippets {
 
         // exchange interaction code for token
         TokenResponse tokenResponse=idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+        log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                 tokenResponse.getAccessToken(),
                 tokenResponse.getIdToken(),
+                tokenResponse.getRefreshToken(),
                 tokenResponse.getTokenType(),
                 tokenResponse.getScope(),
                 tokenResponse.getExpiresIn());
@@ -445,9 +446,10 @@ public class ReadmeSnippets {
             log.info("Login Successful!");
             // exchange the received interaction code for a token
             TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-            log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+            log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                     tokenResponse.getAccessToken(),
                     tokenResponse.getIdToken(),
+                    tokenResponse.getRefreshToken(),
                     tokenResponse.getTokenType(),
                     tokenResponse.getScope(),
                     tokenResponse.getExpiresIn());
@@ -556,9 +558,10 @@ public class ReadmeSnippets {
         if (idxResponse.isLoginSuccessful()) {
             log.info("Login Successful!");
             TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
-            log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+            log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                     tokenResponse.getAccessToken(),
                     tokenResponse.getIdToken(),
+                    tokenResponse.getRefreshToken(),
                     tokenResponse.getTokenType(),
                     tokenResponse.getScope(),
                     tokenResponse.getExpiresIn());
