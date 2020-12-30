@@ -25,7 +25,7 @@
 
     <groupId>com.okta.idx.sdk</groupId>
     <artifactId>okta-idx-java-root</artifactId>
-    <version>0.1.0-beta.4-SNAPSHOT</version>
+    <version>0.1.0-beta.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Okta IDX Java SDK</name>
