@@ -79,16 +79,13 @@ https://oss.sonatype.org/content/repositories/snapshots/
 
 You will also need:
 
-* An Okta account, called an _organization_ (sign up for a free [developer organization](https://developer.okta.com/signup) if you need one)
-* An [API token](https://developer.okta.com/docs/api/getting_started/getting_a_token)
- 
-Construct a client instance by passing it your Okta domain name and API token:
+* An Okta account, called an _organization_ (sign up for a free [developer organization](https://developer.okta.com/signup) if you need one). 
 
 [//]: # (NOTE: code snippets in this README are updated automatically via a Maven plugin by running: mvn okta-code-snippet:snip)
 
 ## Usage guide
 
-These examples will help you understand how to use this library.
+The below code snippets will help you understand how to use this library. Alternatively, you can look at [Quickstart](examples/src/main/java/Quickstart.java) to help get started.
 
 Once you initialize a `Client`, you can call methods to make requests to the Okta API.
 
