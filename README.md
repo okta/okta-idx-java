@@ -688,13 +688,26 @@ The full YAML configuration looks like:
 ```yaml
 okta:
   idx:
-    issuer: "https://{yourOktaDomain}/oauth2/{authorizationServerId}" // e.g. https://foo.okta.com/oauth2/default, https://foo.okta.com/oauth2/ausar5vgt5TSDsfcJ0h7
+    issuer: "https://{yourOktaDomain}/oauth2/{authorizationServerId}" # e.g. https://foo.okta.com/oauth2/default, https://foo.okta.com/oauth2/ausar5vgt5TSDsfcJ0h7
     clientId: "{clientId}"
-    clientSecret: "{clientSecret}" // Required for confidential clients
+    clientSecret: "{clientSecret}" # Required for confidential clients
     scopes:
     - "{scope1}"
     - "{scope2}"
     redirectUri: "{redirectUri}"
+```
+Here's an example config file 
+```yaml
+okta:
+  idx:
+    issuer: "https://dev-1234.okta.com/oauth2/default"
+    clientId: "123xyz"
+    clientSecret: "123456abcxyz" # Required for confidential clients
+    scopes:
+    - "openid"
+    - "profile"
+    - "offline_access"
+    redirectUri: "https://loginredirect.com"
 ```
  
 ### Environment variables
