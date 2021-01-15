@@ -643,7 +643,7 @@ if (idxResponse.isLoginSuccessful()) {
 
 In this example, the Org is configured with fingerprint as a second authenticator. After answering the password challenge, users have to provide their fingerprint to finish the process.
 
-Refer [here](https://developer.okta.com/docs/reference/api/authn/#get-the-signed-assertion-from-the-webauthn-authenticator1) for information on how to extract the assertion data from browser.
+Refer [here](https://developer.okta.com/docs/reference/api/authn/#get-the-signed-assertion-from-the-webauthn-authenticator) for information on how to extract the assertion data from browser.
 
 > Note: Steps to identify the user might change based on your Org configuration.
 
