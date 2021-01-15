@@ -28,6 +28,12 @@ public class Credentials {
 
     public char[] answer;
 
+    public String authenticatorData;
+
+    public String clientData;
+
+    public String signatureData;
+
     public void setPasscode(char[] passcode) {
         this.passcode = passcode;
     }
@@ -42,5 +48,17 @@ public class Credentials {
 
     public void setAnswer(char[] answer) {
         this.answer = answer;
+    }
+
+    public void setAuthenticatorData(String authenticatorData) {
+        this.authenticatorData = authenticatorData;
+    }
+
+    public void setClientData(String clientData) {
+        this.clientData = clientData;
+    }
+
+    public void setSignatureData(String signatureData) {
+        this.signatureData = signatureData;
     }
 }

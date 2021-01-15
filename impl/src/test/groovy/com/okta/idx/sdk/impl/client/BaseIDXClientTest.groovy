@@ -835,6 +835,42 @@ class BaseIDXClientTest {
     }
 
     @Test
+    void testWebAuthnAnswerChallengeResponse() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        // build answer fingerprint authenticator challenge request
+        Credentials credentials = new Credentials()
+        credentials.setAuthenticatorData("5vIi/yA..")
+        credentials.setClientData("eyJjaGFsbGVuZ2UiO...")
+        credentials.setSignatureData("jaZSjGS6+jiVH...")
+
+        AnswerChallengeRequest fingerprintAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                .withStateHandle("uS3iIMT9uikGHNiD0DDkyGsp6aMKIOPOK")
+                .withCredentials(credentials)
+                .build()
+
+        final Response stubbedAnswerChallengeResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("answer-challenge-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedAnswerChallengeResponse)
+
+        IDXResponse fingerprintAuthenticatorAnswerChallengeResponse = idxClient.answerChallenge(fingerprintAuthenticatorAnswerChallengeRequest)
+
+        assertThat(fingerprintAuthenticatorAnswerChallengeResponse.stateHandle, notNullValue())
+        assertThat(fingerprintAuthenticatorAnswerChallengeResponse.version, notNullValue())
+        assertThat(fingerprintAuthenticatorAnswerChallengeResponse.expiresAt, equalTo("2020-10-29T21:17:36.000Z"))
+        assertThat(fingerprintAuthenticatorAnswerChallengeResponse.intent, equalTo("LOGIN"))
+        assertThat(fingerprintAuthenticatorAnswerChallengeResponse.remediation.type, equalTo("array"))
+    }
+
+    @Test
     void testSkipOptionalAuthenticatorEnrollment() {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
