@@ -723,13 +723,13 @@ authenticatorOptions = remediationOption.getAuthenticatorOptions();
 log.info("Authenticator Options: {}", authenticatorOptions);
 
 // select webauthn (fingerprint) authenticator
-Authenticator fingerPrintAuthenticator = new Authenticator();
-fingerPrintAuthenticator.setId(authenticatorOptions.get("webauthn"));
-fingerPrintAuthenticator.setMethodType("webauthn");
+Authenticator webauthnAuthenticator = new Authenticator();
+webauthnAuthenticator.setId(authenticatorOptions.get("webauthn"));
+webauthnAuthenticator.setMethodType("webauthn");
 
 // build fingerprint authenticator challenge request
 ChallengeRequest fingerprintAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
-        .withAuthenticator(fingerPrintAuthenticator)
+        .withAuthenticator(webauthnAuthenticator)
         .withStateHandle(stateHandle)
         .build();
 idxResponse = remediationOption.proceed(client, fingerprintAuthenticatorChallengeRequest);
