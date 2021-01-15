@@ -80,6 +80,9 @@ public class Quickstart {
 
         // complete login flow with password and phone (sms/voice) authenticators
         //runLoginFlowWithPasswordAndPhoneAuthenticators();
+
+        // complete login flow with password and webauthn
+        //runLoginFlowWithPasswordAndWebAuthnAuthenticators();
     }
 
     private static void runEnrollSecurityQnAuthenticatorFlow() throws JsonProcessingException {
@@ -1097,6 +1100,130 @@ public class Quickstart {
                             tokenResponse.getScope(),
                             tokenResponse.getExpiresIn());
                 }
+            }
+        } catch (ProcessingException e) {
+            log.error("Something went wrong! {}, {}", e.getMessage(), e.getErrorResponse().raw());
+        }
+    }
+
+    private static void runLoginFlowWithPasswordAndWebAuthnAuthenticators() throws JsonProcessingException {
+
+        try {
+            // get interactionHandle
+            InteractResponse interactResponse = client.interact();
+            String interactHandle = interactResponse.getInteractionHandle();
+
+            // exchange interactHandle for stateHandle
+            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            String stateHandle = idxResponse.getStateHandle();
+
+            // check remediation options to continue the flow
+            RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+            Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .findFirst();
+            RemediationOption remediationOption = remediationOptionsOptional.get();
+            FormValue[] formValues = remediationOption.form();
+
+            // send identifier
+            idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                    .withIdentifier(IDENTIFIER)
+                    .withStateHandle(stateHandle)
+                    .build());
+
+            // get remediation options to go to the next step
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "select-authenticator-authenticate".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsOptional.get();
+
+            // get authenticator options
+            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+            log.info("Authenticator Options: {}", authenticatorOptions);
+
+            // select password authenticator
+            Authenticator phoneAuthenticator = new Authenticator();
+            phoneAuthenticator.setId(authenticatorOptions.get("password"));
+            phoneAuthenticator.setMethodType("password");
+
+            // build password authenticator challenge request
+            ChallengeRequest phoneAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
+                    .withAuthenticator(phoneAuthenticator)
+                    .withStateHandle(stateHandle)
+                    .build();
+            idxResponse = remediationOption.proceed(client, phoneAuthenticatorChallengeRequest);
+
+            // check remediation options to continue the flow
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "challenge-authenticator".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsOptional.get();
+
+            // answer password authenticator challenge
+            Credentials credentials = new Credentials();
+            credentials.setPasscode(PASSWORD);
+
+            // build answer password authenticator challenge request
+            AnswerChallengeRequest phoneSmsCodeAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .withCredentials(credentials)
+                    .build();
+            idxResponse = remediationOption.proceed(client, phoneSmsCodeAuthenticatorAnswerChallengeRequest);
+
+            // check remediation options to continue the flow
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "select-authenticator-authenticate".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsOptional.get();
+
+            // get authenticator options
+            authenticatorOptions = remediationOption.getAuthenticatorOptions();
+            log.info("Authenticator Options: {}", authenticatorOptions);
+
+            // select webauthn (fingerprint) authenticator
+            Authenticator fingerPrintAuthenticator = new Authenticator();
+            fingerPrintAuthenticator.setId(authenticatorOptions.get("webauthn"));
+            fingerPrintAuthenticator.setMethodType("webauthn");
+
+            // build fingerprint authenticator challenge request
+            ChallengeRequest fingerprintAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
+                    .withAuthenticator(fingerPrintAuthenticator)
+                    .withStateHandle(stateHandle)
+                    .build();
+            idxResponse = remediationOption.proceed(client, fingerprintAuthenticatorChallengeRequest);
+
+            // check remediation options to continue the flow
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "challenge-authenticator".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsOptional.get();
+
+            // build answer fingerprint authenticator challenge request
+            credentials = new Credentials();
+            credentials.setAuthenticatorData("");   // replace (extract this data from browser and supply it here)
+            credentials.setClientData("");          // replace (extract this data from browser and supply it here)
+            credentials.setSignatureData("");       // replace (extract this data from browser and supply it here)
+
+            AnswerChallengeRequest fingerprintAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .withCredentials(credentials)
+                    .build();
+            idxResponse = remediationOption.proceed(client, fingerprintAuthenticatorAnswerChallengeRequest);
+
+            // check if we landed success on login
+            if (idxResponse.isLoginSuccessful()) {
+                log.info("Login Successful!");
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                        tokenResponse.getAccessToken(),
+                        tokenResponse.getIdToken(),
+                        tokenResponse.getRefreshToken(),
+                        tokenResponse.getTokenType(),
+                        tokenResponse.getScope(),
+                        tokenResponse.getExpiresIn());
             }
         } catch (ProcessingException e) {
             log.error("Something went wrong! {}, {}", e.getMessage(), e.getErrorResponse().raw());
