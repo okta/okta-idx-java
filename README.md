@@ -789,6 +789,13 @@ String interactHandle = interactResponse.getInteractionHandle();
 IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
 String stateHandle = idxResponse.getStateHandle();
 
+// check remediation options to continue the flow
+RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+        .findFirst();
+RemediationOption remediationOption = remediationOptionsOptional.get();
+FormValue[] formValues = remediationOption.form();
+
 // identify
 idxResponse = client.identify(IdentifyRequestBuilder.builder()
         .withIdentifier("{identifier}") // email
@@ -800,8 +807,7 @@ idxResponse = client.recover(RecoverRequestBuilder.builder()
         .withStateHandle(stateHandle)
         .build());
 
-// get remediation options to go to the next step
-// since the org requires password only, we don't have the "select password authenticator" step as in previous examples 
+// since the org requires password only, we don't have the "select password authenticator" step as in previous examples
 remediationOptions = idxResponse.remediation().remediationOptions();
 remediationOptionsOptional = Arrays.stream(remediationOptions)
         .filter(x -> "challenge-authenticator".equals(x.getName()))
@@ -810,6 +816,7 @@ remediationOption = remediationOptionsOptional.get();
 
 // answer the security question authenticator which required to reset password
 Credentials secQnEnrollmentCredentials = new Credentials();
+
 // e.g. "favorite_sports_player"
 secQnEnrollmentCredentials.setQuestionKey("{questionKey}");
 
@@ -823,7 +830,6 @@ AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChall
         .build();
 idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
 
-// check remediation options to continue the flow 
 // select the "reset-authenticator" remediation option to set the new password
 remediationOptions = idxResponse.remediation().remediationOptions();
 remediationOptionsOptional = Arrays.stream(remediationOptions)
@@ -833,19 +839,19 @@ remediationOption = remediationOptionsOptional.get();
 
 // set passcode to your new password value
 Credentials credentials = new Credentials();
-credentials.setPasscode("new_password".toCharArray());
+credentials.setPasscode("{new_password}".toCharArray());
 
 // build answer password authenticator challenge request
 passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
         .withStateHandle(stateHandle)
         .withCredentials(credentials)
         .build();
-
 idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
 
 // check if we landed success on login
 if (idxResponse.isLoginSuccessful()) {
     log.info("Login Successful!");
+    // exchange the received interaction code for a token
     TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
             tokenResponse.getAccessToken(),

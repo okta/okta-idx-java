@@ -434,7 +434,6 @@ public class BaseIDXClient implements IDXClient {
         return idxResponse;
     }
 
-
     @Override
     public TokenResponse token(String url, String grantType, String interactionCode) throws ProcessingException {
 

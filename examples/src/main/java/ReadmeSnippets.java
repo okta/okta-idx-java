@@ -739,7 +739,7 @@ public class ReadmeSnippets {
 
         // set passcode to your new password value
         Credentials credentials = new Credentials();
-        credentials.setPasscode("new_password".toCharArray());
+        credentials.setPasscode("{new_password}".toCharArray());
 
         // build answer password authenticator challenge request
         passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
