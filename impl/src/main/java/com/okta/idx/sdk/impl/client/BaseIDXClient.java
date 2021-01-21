@@ -44,6 +44,7 @@ import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IntrospectRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
+import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
@@ -401,6 +402,38 @@ public class BaseIDXClient implements IDXClient {
 
         return idxResponse;
     }
+
+    @Override
+    public IDXResponse recover(RecoverRequest recoverRequest) throws ProcessingException {
+
+        IDXResponse idxResponse;
+
+        try {
+            Request request = new DefaultRequest(
+                    HttpMethod.POST,
+                    clientConfiguration.getBaseUrl() + "/idp/idx/recover",
+                    null,
+                    getHttpHeaders(false),
+                    new ByteArrayInputStream(objectMapper.writeValueAsBytes(recoverRequest)),
+                    -1L);
+
+            Response response = requestExecutor.executeRequest(request);
+
+            if (response.getHttpStatus() != 200) {
+                handleErrorResponse(request, response);
+            }
+
+            JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
+
+        } catch (IOException | HttpException e) {
+            throw new ProcessingException(e);
+        }
+
+        return idxResponse;
+    }
+
 
     @Override
     public TokenResponse token(String url, String grantType, String interactionCode) throws ProcessingException {
