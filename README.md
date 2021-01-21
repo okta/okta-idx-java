@@ -773,6 +773,91 @@ if (idxResponse.isLoginSuccessful()) {
 ```
 [//]: # (end: loginUsingPasswordAndWebAuthnAuthenticator)
 
+#### Login using password after password reset
+
+In this example, the Org is configured to require password authenticator to login, with no additional authenticators. After sending the identify request with the username, the user can reset the password, after answering the security question. Login will be successful after password reset.
+
+> Note: Steps to identify the user might change based on your Org configuration.
+
+[//]: # (method: loginWithPasswordReset)
+```java
+// get interactionHandle
+InteractResponse interactResponse = client.interact();
+String interactHandle = interactResponse.getInteractionHandle();
+
+// exchange interactHandle for stateHandle
+IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+String stateHandle = idxResponse.getStateHandle();
+
+// identify
+idxResponse = client.identify(IdentifyRequestBuilder.builder()
+        .withIdentifier("{identifier}") // email
+        .withStateHandle(stateHandle)
+        .build());
+
+// start the password recovery/reset flow
+idxResponse = client.recover(RecoverRequestBuilder.builder()
+        .withStateHandle(stateHandle)
+        .build());
+
+// get remediation options to go to the next step
+// since the org requires password only, we don't have the "select password authenticator" step as in previous examples 
+remediationOptions = idxResponse.remediation().remediationOptions();
+remediationOptionsOptional = Arrays.stream(remediationOptions)
+        .filter(x -> "challenge-authenticator".equals(x.getName()))
+        .findFirst();
+remediationOption = remediationOptionsOptional.get();
+
+// answer the security question authenticator which required to reset password
+Credentials secQnEnrollmentCredentials = new Credentials();
+// e.g. "favorite_sports_player"
+secQnEnrollmentCredentials.setQuestionKey("{questionKey}");
+
+// e.g. "Tiger Woods"
+secQnEnrollmentCredentials.setAnswer("{answer}".toCharArray());
+
+// build answer authenticator challenge request
+AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+        .withStateHandle(stateHandle)
+        .withCredentials(secQnEnrollmentCredentials)
+        .build();
+idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+
+// check remediation options to continue the flow 
+// select the "reset-authenticator" remediation option to set the new password
+remediationOptions = idxResponse.remediation().remediationOptions();
+remediationOptionsOptional = Arrays.stream(remediationOptions)
+        .filter(x -> "reset-authenticator".equals(x.getName()))
+        .findFirst();
+remediationOption = remediationOptionsOptional.get();
+
+// set passcode to your new password value
+Credentials credentials = new Credentials();
+credentials.setPasscode("new_password".toCharArray());
+
+// build answer password authenticator challenge request
+passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+        .withStateHandle(stateHandle)
+        .withCredentials(credentials)
+        .build();
+
+idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+
+// check if we landed success on login
+if (idxResponse.isLoginSuccessful()) {
+    log.info("Login Successful!");
+    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+    log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+            tokenResponse.getAccessToken(),
+            tokenResponse.getIdToken(),
+            tokenResponse.getRefreshToken(),
+            tokenResponse.getTokenType(),
+            tokenResponse.getScope(),
+            tokenResponse.getExpiresIn());
+}
+```
+[//]: # (end: loginWithPasswordReset)
+
 ### User Enrollment - Registration and progressive profiling
 
 Enroll a user with additional profile attributes.

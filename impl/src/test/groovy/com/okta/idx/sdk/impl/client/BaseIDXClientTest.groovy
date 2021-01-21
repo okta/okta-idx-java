@@ -40,6 +40,8 @@ import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequestBuilder
 import com.okta.idx.sdk.api.request.IdentifyRequest
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder
+import com.okta.idx.sdk.api.request.RecoverRequest
+import com.okta.idx.sdk.api.request.RecoverRequestBuilder
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder
 import com.okta.idx.sdk.api.response.InteractResponse
@@ -909,6 +911,66 @@ class BaseIDXClientTest {
         assertThat(skipAuthEnrollmentResponse.getSuccessWithInteractionCode().parseInteractionCode(), is("Txd_5odx08kzZ_oxeEbBk8PNjI5UDnTM2P1rMCmHDyA"))
     }
 
+    @Test
+    void testRecover() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        final Response stubbedRecoverResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("recover-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedRecoverResponse)
+
+        RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                .withStateHandle("02X1oUMHSpVb_MTxvhmr8-5Es8Rcizy4Xq4OSr3mkH")
+                .build()
+
+        IDXResponse recoverResponse = idxClient.recover(recoverRequest)
+
+        assertThat(recoverResponse.stateHandle, notNullValue())
+        assertThat(recoverResponse.version, notNullValue())
+        assertThat(recoverResponse.expiresAt, notNullValue())
+        assertThat(recoverResponse.intent, is("LOGIN"))
+
+        assertThat(recoverResponse.remediation().type, is("array"))
+        assertThat(recoverResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(recoverResponse.remediation.value.first().rel, hasItemInArray("create-form"))
+        assertThat(recoverResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/challenge/answer"))
+        assertThat(recoverResponse.remediation.value.first().name, equalTo("challenge-authenticator"))
+        assertThat(recoverResponse.remediation.value.first().accepts, equalTo("application/json; okta-version=1.0.0"))
+
+        // authenticatorEnrollments
+        assertThat(recoverResponse.authenticatorEnrollments, notNullValue())
+
+        AuthenticatorEnrollment secQnAuthEnrollment = recoverResponse.authenticatorEnrollments.value.find {it.type == "security_question"}
+        assertThat(secQnAuthEnrollment, notNullValue())
+        assertThat(secQnAuthEnrollment.profile, notNullValue())
+        assertThat(secQnAuthEnrollment.id, equalTo("qae3m4ksak2mzReE60g7"))
+        assertThat(secQnAuthEnrollment.type, equalTo("security_question"))
+        assertThat(secQnAuthEnrollment.displayName, equalTo("Security Question"))
+        assertThat(secQnAuthEnrollment.methods, notNullValue())
+        assertThat(secQnAuthEnrollment.methods.first(), notNullValue())
+        assertThat(secQnAuthEnrollment.methods.first().type, equalTo("security_question"))
+
+        assertThat(recoverResponse.cancel, notNullValue())
+        assertThat(recoverResponse.cancel.rel, hasItemInArray("create-form"))
+        assertThat(recoverResponse.cancel.href, equalTo("https://foo.oktapreview.com/idp/idx/cancel"))
+        assertThat(recoverResponse.cancel.name, equalTo("cancel"))
+        assertThat(recoverResponse.cancel.accepts, equalTo("application/json; okta-version=1.0.0"))
+
+        assertThat(recoverResponse.app, notNullValue())
+        assertThat(recoverResponse.app.type, is("object"))
+        assertThat(recoverResponse.app.value.name, is("okta_enduser"))
+        assertThat(recoverResponse.app.value.label, is("Okta Dashboard"))
+        assertThat(recoverResponse.app.value.id, is("DEFAULT_APP"))
+    }
+    
     @Test
     void testInteractErrorResponse() {
 

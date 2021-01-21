@@ -22,6 +22,7 @@ import com.okta.idx.sdk.api.request.EnrollRequest;
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
+import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
@@ -50,6 +51,8 @@ public interface IDXClient {
     IDXResponse enrollUpdateUserProfile(EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest) throws ProcessingException;
 
     IDXResponse skip(SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest) throws ProcessingException;
+
+    IDXResponse recover(RecoverRequest recoverRequest) throws ProcessingException;
 
     TokenResponse token(String url, String grantType, String interactionCode) throws ProcessingException;
 }
