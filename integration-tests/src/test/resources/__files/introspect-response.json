@@ -11,7 +11,7 @@
           "create-form"
         ],
         "name": "identify",
-        "href": "https://foo.oktapreview.com/idp/idx/identify",
+        "href": "http://localhost:5005/idp/idx/identify",
         "method": "POST",
         "value": [
           {

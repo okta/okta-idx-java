@@ -185,14 +185,14 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXResponse identify(IdentifyRequest identifyRequest) throws ProcessingException {
+    public IDXResponse identify(IdentifyRequest identifyRequest, String href) throws ProcessingException {
 
         IDXResponse idxResponse;
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getBaseUrl() + "/idp/idx/identify",
+                href,
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(identifyRequest)),
@@ -216,14 +216,14 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXResponse enroll(EnrollRequest enrollRequest) throws ProcessingException {
+    public IDXResponse enroll(EnrollRequest enrollRequest, String href) throws ProcessingException {
 
         IDXResponse idxResponse;
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getBaseUrl() + "/idp/idx/credential/enroll",
+                href,
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(enrollRequest)),
@@ -247,14 +247,14 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXResponse challenge(ChallengeRequest challengeRequest) throws ProcessingException {
+    public IDXResponse challenge(ChallengeRequest challengeRequest, String href) throws ProcessingException {
 
         IDXResponse idxResponse;
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getBaseUrl() + "/idp/idx/challenge",
+                href,
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(challengeRequest)),
@@ -278,14 +278,14 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXResponse answerChallenge(AnswerChallengeRequest answerChallengeRequest) throws ProcessingException {
+    public IDXResponse answerChallenge(AnswerChallengeRequest answerChallengeRequest, String href) throws ProcessingException {
 
         IDXResponse idxResponse;
 
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getBaseUrl() + "/idp/idx/challenge/answer",
+                href,
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(answerChallengeRequest)),
@@ -342,14 +342,15 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXResponse enrollUpdateUserProfile(EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest) throws ProcessingException {
+    public IDXResponse enrollUpdateUserProfile(EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest,
+                                               String href) throws ProcessingException {
 
         IDXResponse idxResponse;
 
         try {
             Request request = new DefaultRequest(
                     HttpMethod.POST,
-                    clientConfiguration.getBaseUrl() + "/idp/idx/enroll/update",
+                    href,
                     null,
                     getHttpHeaders(false),
                     new ByteArrayInputStream(objectMapper.writeValueAsBytes(enrollUserProfileUpdateRequest)),
@@ -373,14 +374,14 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXResponse skip(SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest) throws ProcessingException {
+    public IDXResponse skip(SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest, String href) throws ProcessingException {
 
         IDXResponse idxResponse;
 
         try {
             Request request = new DefaultRequest(
                     HttpMethod.POST,
-                    clientConfiguration.getBaseUrl() + "/idp/idx/skip",
+                    href,
                     null,
                     getHttpHeaders(false),
                     new ByteArrayInputStream(objectMapper.writeValueAsBytes(skipAuthenticatorEnrollmentRequest)),
@@ -404,14 +405,14 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXResponse recover(RecoverRequest recoverRequest) throws ProcessingException {
+    public IDXResponse recover(RecoverRequest recoverRequest, String href) throws ProcessingException {
 
         IDXResponse idxResponse;
 
         try {
             Request request = new DefaultRequest(
                     HttpMethod.POST,
-                    clientConfiguration.getBaseUrl() + "/idp/idx/recover",
+                    href,
                     null,
                     getHttpHeaders(false),
                     new ByteArrayInputStream(objectMapper.writeValueAsBytes(recoverRequest)),

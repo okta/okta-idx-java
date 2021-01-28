@@ -24,6 +24,7 @@ import com.okta.idx.sdk.api.request.ChallengeRequest;
 import com.okta.idx.sdk.api.request.EnrollRequest;
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
+import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.response.IDXResponse;
 
@@ -76,13 +77,14 @@ public class RemediationOption {
     public IDXResponse proceed(IDXClient client, Object request) throws IllegalStateException, IllegalArgumentException, ProcessingException {
         Assert.notNull(request, "request cannot be null");
 
-        if (request instanceof IdentifyRequest) return client.identify((IdentifyRequest) request);
-        else if (request instanceof ChallengeRequest) return client.challenge((ChallengeRequest) request);
+        if (request instanceof IdentifyRequest) return client.identify((IdentifyRequest) request, href);
+        else if (request instanceof ChallengeRequest) return client.challenge((ChallengeRequest) request, href);
         else if (request instanceof AnswerChallengeRequest)
-            return client.answerChallenge((AnswerChallengeRequest) request);
-        else if (request instanceof EnrollRequest) return client.enroll((EnrollRequest) request);
-        else if (request instanceof EnrollUserProfileUpdateRequest) return client.enrollUpdateUserProfile((EnrollUserProfileUpdateRequest) request);
-        else if (request instanceof SkipAuthenticatorEnrollmentRequest) return client.skip((SkipAuthenticatorEnrollmentRequest) request);
+            return client.answerChallenge((AnswerChallengeRequest) request, href);
+        else if (request instanceof EnrollRequest) return client.enroll((EnrollRequest) request, href);
+        else if (request instanceof EnrollUserProfileUpdateRequest) return client.enrollUpdateUserProfile((EnrollUserProfileUpdateRequest) request, href);
+        else if (request instanceof SkipAuthenticatorEnrollmentRequest) return client.skip((SkipAuthenticatorEnrollmentRequest) request, href);
+        else if (request instanceof RecoverRequest) return client.recover((RecoverRequest) request, href);
         else
             throw new IllegalStateException("Cannot invoke proceed with the supplied request type " + request.getClass().getSimpleName());
     }

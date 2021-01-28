@@ -38,21 +38,21 @@ public interface IDXClient {
 
     IDXResponse introspect(Optional<String> interactionHandleOptional) throws ProcessingException;
 
-    IDXResponse identify(IdentifyRequest identifyRequest) throws ProcessingException;
+    IDXResponse identify(IdentifyRequest identifyRequest, String href) throws ProcessingException;
 
-    IDXResponse enroll(EnrollRequest enrollRequest) throws ProcessingException;
+    IDXResponse enroll(EnrollRequest enrollRequest, String href) throws ProcessingException;
 
-    IDXResponse challenge(ChallengeRequest challengeRequest) throws ProcessingException;
+    IDXResponse challenge(ChallengeRequest challengeRequest, String href) throws ProcessingException;
 
-    IDXResponse answerChallenge(AnswerChallengeRequest answerChallengeRequest) throws ProcessingException;
+    IDXResponse answerChallenge(AnswerChallengeRequest answerChallengeRequest, String href) throws ProcessingException;
 
     IDXResponse cancel(String stateHandle) throws ProcessingException;
 
-    IDXResponse enrollUpdateUserProfile(EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest) throws ProcessingException;
+    IDXResponse enrollUpdateUserProfile(EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest, String href) throws ProcessingException;
 
-    IDXResponse skip(SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest) throws ProcessingException;
+    IDXResponse skip(SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest, String href) throws ProcessingException;
 
-    IDXResponse recover(RecoverRequest recoverRequest) throws ProcessingException;
+    IDXResponse recover(RecoverRequest recoverRequest, String href) throws ProcessingException;
 
     TokenResponse token(String url, String grantType, String interactionCode) throws ProcessingException;
 }

@@ -507,7 +507,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedChallengeResponse)
 
         IDXResponse passwordAuthenticatorChallengeResponse =
-            idxClient.challenge(passwordAuthenticatorChallengeRequest)
+            idxClient.challenge(passwordAuthenticatorChallengeRequest, "href")
 
         assertThat(passwordAuthenticatorChallengeResponse, notNullValue())
 
@@ -683,7 +683,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedAnswerChallengeResponse)
 
         IDXResponse secondFactorAuthenticatorAnswerChallengeResponse =
-            idxClient.answerChallenge(secondFactorAuthenticatorAnswerChallengeRequest)
+            idxClient.answerChallenge(secondFactorAuthenticatorAnswerChallengeRequest, "href")
 
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse, notNullValue())
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.remediation(), nullValue())
@@ -727,7 +727,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedEnrollAuthenticatorResponse)
 
-        IDXResponse enrollSecQnAuthenticatorResponse = idxClient.enroll(enrollRequest)
+        IDXResponse enrollSecQnAuthenticatorResponse = idxClient.enroll(enrollRequest, "href")
 
         assertThat(enrollSecQnAuthenticatorResponse, notNullValue())
         assertThat(enrollSecQnAuthenticatorResponse.stateHandle, equalTo("02JwRcw6oq-uS3iIMT9uikGHNiD0DDkyGsp6aPNYMA"))
@@ -815,7 +815,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedEnrollUserProfileUpdateResponse)
 
-        IDXResponse enrollUpdateUserProfileResponse = idxClient.enrollUpdateUserProfile(enrollUserProfileUpdateRequest)
+        IDXResponse enrollUpdateUserProfileResponse = idxClient.enrollUpdateUserProfile(enrollUserProfileUpdateRequest, "href")
 
         assertThat(enrollUpdateUserProfileResponse, notNullValue())
         assertThat(enrollUpdateUserProfileResponse.remediation(), nullValue())
@@ -861,7 +861,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedAnswerChallengeResponse)
 
-        IDXResponse fingerprintAuthenticatorAnswerChallengeResponse = idxClient.answerChallenge(fingerprintAuthenticatorAnswerChallengeRequest)
+        IDXResponse fingerprintAuthenticatorAnswerChallengeResponse = idxClient.answerChallenge(fingerprintAuthenticatorAnswerChallengeRequest, "href")
 
         assertThat(fingerprintAuthenticatorAnswerChallengeResponse.stateHandle, notNullValue())
         assertThat(fingerprintAuthenticatorAnswerChallengeResponse.version, notNullValue())
@@ -890,7 +890,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedSkipAuthEnrollmentResponse)
 
-        IDXResponse skipAuthEnrollmentResponse = idxClient.skip(skipAuthenticatorEnrollmentRequest)
+        IDXResponse skipAuthEnrollmentResponse = idxClient.skip(skipAuthenticatorEnrollmentRequest, "href")
 
         assertThat(skipAuthEnrollmentResponse, notNullValue())
         assertThat(skipAuthEnrollmentResponse.remediation(), nullValue())

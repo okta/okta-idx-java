@@ -32,7 +32,9 @@ import com.okta.idx.sdk.api.request.EnrollRequest;
 import com.okta.idx.sdk.api.request.EnrollRequestBuilder;
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequestBuilder;
+import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
+import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
@@ -45,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -56,10 +59,10 @@ public class Quickstart {
 
     private static final IDXClient client = Clients.builder().build();
 
-    private static final String IDENTIFIER = "someone@example.com";               // replace
-    private static final char[] PASSWORD = {'p','a','s','s','w','o','r','d'};     // replace
-    private static final char[] NEW_PASSWORD = {'P','a','s','s','1','2','3','4'}; // replace
-    private static final char[] SECURITY_QUESTION_ANSWER = { 'c','a','t'};        // replace
+    private static final String IDENTIFIER = "someone@example.com";                                           // replace
+    private static final char[] PASSWORD = {'T','o','p','s','e','c','r','e','t','1','2','3','!'};             // replace
+    private static final char[] NEW_PASSWORD = {'S','u','p','e','r','s','e','c','r','e','t','1','2','3','!'}; // replace
+    private static final char[] SECURITY_QUESTION_ANSWER = { 'O','k','t','a'};                                // replace
 
     public static void main(String... args) throws JsonProcessingException {
 
@@ -87,6 +90,247 @@ public class Quickstart {
         //runLoginFlowWithPasswordAndWebAuthnAuthenticators();
 
         //runLoginFlowWithPasswordReset();
+
+        // complete registration flow for new user (Sign Up)
+        //runRegistrationFlow();
+    }
+
+    private static void runRegistrationFlow() throws JsonProcessingException {
+
+        try {
+            // get interactionHandle
+            InteractResponse interactResponse = client.interact();
+            String interactHandle = interactResponse.getInteractionHandle();
+
+            // exchange interactHandle for stateHandle
+            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            String stateHandle = idxResponse.getStateHandle();
+
+            // get remediation options to go to the next step
+            RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+            Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "select-enroll-profile".equals(x.getName()))
+                    .findFirst();
+            RemediationOption remediationOption = remediationOptionsOptional.get();
+
+            EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            // enroll new user
+            idxResponse = remediationOption.proceed(client, enrollRequest);
+
+            // get remediation options to go to the next step
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "enroll-profile".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsOptional.get();
+
+            // supply only the "required" attributes
+            UserProfile up = new UserProfile();
+            up.addAttribute("lastName", "Coder");   // replace
+            up.addAttribute("firstName", "Joe");    // replace
+            Random randomGenerator = new Random();
+            int randomInt = randomGenerator.nextInt(1000);
+            up.addAttribute("email", "joe.coder" + randomInt + "@example.com"); // replace
+            up.addAttribute("age", "40"); // replace
+            up.addAttribute("sex", "Male"); // replace
+
+            EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest = EnrollUserProfileUpdateRequestBuilder.builder()
+                    .withUserProfile(up)
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            idxResponse = remediationOption.proceed(client, enrollUserProfileUpdateRequest);
+
+            // enroll authenticators next
+
+            // check remediation options to go to the next step
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            Optional<RemediationOption> remediationOptionsSelectAuthenticatorOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "select-authenticator-enroll".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsSelectAuthenticatorOptional.get();
+
+            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+            // select an authenticator (sec qn in this case)
+            Authenticator secQnEnrollmentAuthenticator = new Authenticator();
+            secQnEnrollmentAuthenticator.setId(authenticatorOptions.get("security_question"));
+            secQnEnrollmentAuthenticator.setMethodType("security_question");
+
+            // build enroll request
+            enrollRequest = EnrollRequestBuilder.builder()
+                    .withAuthenticator(secQnEnrollmentAuthenticator)
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            // proceed
+            idxResponse = remediationOption.proceed(client, enrollRequest);
+
+            // get remediation options to go to the next step
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            Optional<RemediationOption> remediationOptionsEnrollAuthenticatorOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "enroll-authenticator".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsEnrollAuthenticatorOptional.get();
+
+            FormValue[] enrollAuthenticatorFormValues = remediationOption.form();
+            Optional<FormValue> enrollAuthenticatorFormOptional = Arrays.stream(enrollAuthenticatorFormValues)
+                    .filter(x -> "credentials".equals(x.getName()))
+                    .findFirst();
+            FormValue enrollAuthenticatorForm = enrollAuthenticatorFormOptional.get();
+
+            Options[] enrollmentAuthenticatorOptions = enrollAuthenticatorForm.options();
+            Optional<Options> chooseSecQnOptionOptional = Arrays.stream(enrollmentAuthenticatorOptions)
+                    .filter(x -> "Choose a security question".equals(x.getLabel()))
+                    .findFirst();
+
+            Options choseSecQnOption = chooseSecQnOptionOptional.get(); // view default security questions list
+
+            Credentials secQnEnrollmentCredentials = new Credentials();
+            secQnEnrollmentCredentials.setQuestionKey("disliked_food");  // chosen one from the above list
+            secQnEnrollmentCredentials.setQuestion("What is the food you least liked as a child?");
+            secQnEnrollmentCredentials.setAnswer(SECURITY_QUESTION_ANSWER);
+
+            AnswerChallengeRequest answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .withCredentials(secQnEnrollmentCredentials)
+                    .build();
+
+            // proceed
+            idxResponse = remediationOption.proceed(client, answerChallengeRequest);
+
+            // check remediation options to go to the next step
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsSelectAuthenticatorOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "select-authenticator-enroll".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsSelectAuthenticatorOptional.get();
+
+            authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+            // select an authenticator (email in this case)
+            Authenticator emailAuthenticator = new Authenticator();
+            emailAuthenticator.setId(authenticatorOptions.get("email"));
+            emailAuthenticator.setMethodType("email");
+
+            // build enroll request
+            enrollRequest = EnrollRequestBuilder.builder()
+                    .withAuthenticator(emailAuthenticator)
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            // proceed
+            idxResponse = remediationOption.proceed(client, enrollRequest);
+
+            // get remediation options to go to the next step
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsEnrollAuthenticatorOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "enroll-authenticator".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsEnrollAuthenticatorOptional.get();
+
+            enrollAuthenticatorFormValues = remediationOption.form();
+            enrollAuthenticatorFormOptional = Arrays.stream(enrollAuthenticatorFormValues)
+                    .filter(x -> "credentials".equals(x.getName()))
+                    .findFirst();
+
+            // enter passcode received in email
+            Scanner in = new Scanner(System.in, "UTF-8");
+            log.info("Enter Email Passcode: ");
+            String emailPasscode = in.nextLine();
+
+            Credentials credentials = new Credentials();
+            credentials.setPasscode(emailPasscode.toCharArray());
+
+            answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .withCredentials(credentials)
+                    .build();
+
+            // proceed
+            idxResponse = remediationOption.proceed(client, answerChallengeRequest);
+
+            // check remediation options to go to the next step
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsSelectAuthenticatorOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "select-authenticator-enroll".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsSelectAuthenticatorOptional.get();
+
+            authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+            // select an authenticator (password in this case)
+            Authenticator passwordAuthenticator = new Authenticator();
+            passwordAuthenticator.setId(authenticatorOptions.get("password"));
+            passwordAuthenticator.setMethodType("password");
+
+            // build enroll request
+            enrollRequest = EnrollRequestBuilder.builder()
+                    .withAuthenticator(passwordAuthenticator)
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            // proceed
+            idxResponse = remediationOption.proceed(client, enrollRequest);
+
+            // get remediation options to go to the next step
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            remediationOptionsEnrollAuthenticatorOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "enroll-authenticator".equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsEnrollAuthenticatorOptional.get();
+
+            enrollAuthenticatorFormValues = remediationOption.form();
+            enrollAuthenticatorFormOptional = Arrays.stream(enrollAuthenticatorFormValues)
+                    .filter(x -> "credentials".equals(x.getName()))
+                    .findFirst();
+
+            credentials = new Credentials();
+            credentials.setPasscode(PASSWORD);
+
+            answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .withCredentials(credentials)
+                    .build();
+
+            // proceed
+            idxResponse = remediationOption.proceed(client, answerChallengeRequest);
+
+            // continue until "skip" is available as a remediation option. When skip becomes available, it indicates
+            // that the minimal required authenticators have been setup.
+
+            // get remediation options to go to the next step
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            Optional<RemediationOption> skipAuthenticatorEnrollmentOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> "skip".equals(x.getName()))
+                    .findFirst();
+            remediationOption = skipAuthenticatorEnrollmentOptional.get();
+
+            SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest = SkipAuthenticatorEnrollmentRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            // proceed with skipping optional authenticator enrollment
+            idxResponse = remediationOption.proceed(client, skipAuthenticatorEnrollmentRequest);
+
+            // This response should contain the interaction code
+            if (idxResponse.isLoginSuccessful()) {
+                log.info("Login Successful!");
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                        tokenResponse.getAccessToken(),
+                        tokenResponse.getIdToken(),
+                        tokenResponse.getRefreshToken(),
+                        tokenResponse.getTokenType(),
+                        tokenResponse.getScope(),
+                        tokenResponse.getExpiresIn());
+            }
+        } catch (ProcessingException e) {
+            log.error("Something went wrong! {}, {}", e.getMessage(), e.getErrorResponse().raw());
+        }
     }
 
     private static void runEnrollSecurityQnAuthenticatorFlow() throws JsonProcessingException {
@@ -112,6 +356,8 @@ public class Quickstart {
                     .filter(x -> "credentials".equals(x.getName()))
                     .findFirst();
 
+            IdentifyRequest identifyRequest = null;
+
             if (credentialsFormValueOptional.isPresent()) {
                 FormValue credentialsFormValue = credentialsFormValueOptional.get();
 
@@ -121,7 +367,7 @@ public class Quickstart {
                     Credentials credentials = new Credentials();
                     credentials.setPasscode(PASSWORD);
 
-                    idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                    identifyRequest = (IdentifyRequestBuilder.builder()
                             .withIdentifier(IDENTIFIER)
                             .withCredentials(credentials)
                             .withStateHandle(stateHandle)
@@ -129,11 +375,14 @@ public class Quickstart {
                 }
             } else {
                 // credentials are not necessary; so sending just the identifier
-                idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                identifyRequest = (IdentifyRequestBuilder.builder()
                         .withIdentifier(IDENTIFIER)
                         .withStateHandle(stateHandle)
                         .build());
             }
+
+            // identify
+            idxResponse = remediationOption.proceed(client, identifyRequest);
 
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
@@ -345,6 +594,8 @@ public class Quickstart {
                     .filter(x -> "credentials".equals(x.getName()))
                     .findFirst();
 
+            IdentifyRequest identifyRequest = null;
+
             if (credentialsFormValueOptional.isPresent()) {
                 FormValue credentialsFormValue = credentialsFormValueOptional.get();
 
@@ -354,7 +605,7 @@ public class Quickstart {
                     Credentials credentials = new Credentials();
                     credentials.setPasscode(PASSWORD);
 
-                    idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                    identifyRequest = (IdentifyRequestBuilder.builder()
                             .withIdentifier(IDENTIFIER)
                             .withCredentials(credentials)
                             .withStateHandle(stateHandle)
@@ -362,11 +613,14 @@ public class Quickstart {
                 }
             } else {
                 // credentials are not necessary; so sending just the identifier
-                idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                identifyRequest = (IdentifyRequestBuilder.builder()
                         .withIdentifier(IDENTIFIER)
                         .withStateHandle(stateHandle)
                         .build());
             }
+
+            // identify
+            idxResponse = remediationOption.proceed(client, identifyRequest);
 
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
@@ -517,11 +771,13 @@ public class Quickstart {
 
             FormValue[] formValues = remediationOption.form();
 
-            // credentials are not necessary; so sending just the identifier
-            idxResponse = client.identify(IdentifyRequestBuilder.builder()
+            IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                     .withIdentifier(IDENTIFIER)
                     .withStateHandle(stateHandle)
-                    .build());
+                    .build();
+
+            // credentials are not necessary; so sending just the identifier
+            idxResponse = remediationOption.proceed(client, identifyRequest);
 
             // check remediation options to continue the flow
             remediationOptions = idxResponse.remediation().remediationOptions();
@@ -620,6 +876,8 @@ public class Quickstart {
                     .filter(x -> "credentials".equals(x.getName()))
                     .findFirst();
 
+            IdentifyRequest identifyRequest = null;
+
             if (credentialsFormValueOptional.isPresent()) {
                 FormValue credentialsFormValue = credentialsFormValueOptional.get();
 
@@ -629,7 +887,7 @@ public class Quickstart {
                     Credentials credentials = new Credentials();
                     credentials.setPasscode(PASSWORD);
 
-                    idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                    identifyRequest = (IdentifyRequestBuilder.builder()
                             .withIdentifier(IDENTIFIER)
                             .withCredentials(credentials)
                             .withStateHandle(stateHandle)
@@ -637,11 +895,14 @@ public class Quickstart {
                 }
             } else {
                 // credentials are not necessary; so sending just the identifier
-                idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                identifyRequest = (IdentifyRequestBuilder.builder()
                         .withIdentifier(IDENTIFIER)
                         .withStateHandle(stateHandle)
                         .build());
             }
+
+            // identify
+            idxResponse = remediationOption.proceed(client, identifyRequest);
 
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
@@ -796,6 +1057,8 @@ public class Quickstart {
                     .filter(x -> "credentials".equals(x.getName()))
                     .findFirst();
 
+            IdentifyRequest identifyRequest = null;
+
             if (credentialsFormValueOptional.isPresent()) {
                 FormValue credentialsFormValue = credentialsFormValueOptional.get();
 
@@ -805,7 +1068,7 @@ public class Quickstart {
                     Credentials credentials = new Credentials();
                     credentials.setPasscode(PASSWORD);
 
-                    idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                    identifyRequest = (IdentifyRequestBuilder.builder()
                             .withIdentifier(IDENTIFIER)
                             .withCredentials(credentials)
                             .withStateHandle(stateHandle)
@@ -813,11 +1076,14 @@ public class Quickstart {
                 }
             } else {
                 // credentials are not necessary; so sending just the identifier
-                idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                identifyRequest = (IdentifyRequestBuilder.builder()
                         .withIdentifier(IDENTIFIER)
                         .withStateHandle(stateHandle)
                         .build());
             }
+
+            // identify
+            idxResponse = remediationOption.proceed(client, identifyRequest);
 
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
@@ -972,6 +1238,8 @@ public class Quickstart {
                     .filter(x -> "credentials".equals(x.getName()))
                     .findFirst();
 
+            IdentifyRequest identifyRequest = null;
+
             if (credentialsFormValueOptional.isPresent()) {
                 FormValue credentialsFormValue = credentialsFormValueOptional.get();
 
@@ -981,7 +1249,7 @@ public class Quickstart {
                     Credentials credentials = new Credentials();
                     credentials.setPasscode(PASSWORD);
 
-                    idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                    identifyRequest = (IdentifyRequestBuilder.builder()
                             .withIdentifier(IDENTIFIER)
                             .withCredentials(credentials)
                             .withStateHandle(stateHandle)
@@ -989,11 +1257,14 @@ public class Quickstart {
                 }
             } else {
                 // credentials are not necessary; so sending just the identifier
-                idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                identifyRequest = (IdentifyRequestBuilder.builder()
                         .withIdentifier(IDENTIFIER)
                         .withStateHandle(stateHandle)
                         .build());
             }
+
+            // identify
+            idxResponse = remediationOption.proceed(client, identifyRequest);
 
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
@@ -1128,11 +1399,13 @@ public class Quickstart {
             RemediationOption remediationOption = remediationOptionsOptional.get();
             FormValue[] formValues = remediationOption.form();
 
-            // send identifier
-            idxResponse = client.identify(IdentifyRequestBuilder.builder()
+            IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                     .withIdentifier(IDENTIFIER)
                     .withStateHandle(stateHandle)
-                    .build());
+                    .build();
+
+            // identify
+            idxResponse = remediationOption.proceed(client, identifyRequest);
 
             // get remediation options to go to the next step
             remediationOptions = idxResponse.remediation().remediationOptions();
@@ -1257,6 +1530,8 @@ public class Quickstart {
                     .filter(x -> "credentials".equals(x.getName()))
                     .findFirst();
 
+            IdentifyRequest identifyRequest = null;
+
             if (credentialsFormValueOptional.isPresent()) {
                 FormValue credentialsFormValue = credentialsFormValueOptional.get();
 
@@ -1266,19 +1541,23 @@ public class Quickstart {
                     Credentials credentials = new Credentials();
                     credentials.setPasscode(PASSWORD);
 
-                    idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                    identifyRequest = (IdentifyRequestBuilder.builder()
                             .withIdentifier(IDENTIFIER)
                             .withCredentials(credentials)
                             .withStateHandle(stateHandle)
                             .build());
+
                 }
             } else {
                 // credentials are not necessary; so sending just the identifier
-                idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                identifyRequest = (IdentifyRequestBuilder.builder()
                         .withIdentifier(IDENTIFIER)
                         .withStateHandle(stateHandle)
                         .build());
             }
+
+            // identify
+            idxResponse = remediationOption.proceed(client, identifyRequest);
 
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
@@ -1290,9 +1569,11 @@ public class Quickstart {
                 log.info("Login not successful yet!: {}", idxResponse.raw());
 
                 // Self Service Password Recovery
-                idxResponse = client.recover(RecoverRequestBuilder.builder()
+                RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
                         .withStateHandle(stateHandle)
-                        .build());
+                        .build();
+
+                idxResponse = remediationOption.proceed(client, recoverRequest);
 
                 // check remediation options to continue the flow
                 remediationOptions = idxResponse.remediation().remediationOptions();
