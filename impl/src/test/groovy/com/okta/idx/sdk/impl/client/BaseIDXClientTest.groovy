@@ -970,7 +970,81 @@ class BaseIDXClientTest {
         assertThat(recoverResponse.app.value.label, is("Okta Dashboard"))
         assertThat(recoverResponse.app.value.id, is("DEFAULT_APP"))
     }
-    
+
+    @Test
+    void testRegistration() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        final Response stubbedIntrospectResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("introspect-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
+
+        IDXResponse introspectResponse = idxClient.introspect(Optional.of("interactionHandle"))
+
+        assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(introspectResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/identify"))
+
+        RemediationOption remediationOption =
+                introspectResponse.remediation().remediationOptions().find({ it -> (it.name == "select-enroll-profile") })
+
+        EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                .withStateHandle("02tYS1NHhCPLcOpT3GByBBRHmGU63p7LGRXJx5cOvp")
+                .build()
+
+        final Response stubbedEnrollProfileResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("enroll-user-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedEnrollProfileResponse)
+
+        IDXResponse enrollResponse = remediationOption.proceed(idxClient, enrollRequest)
+
+        assertThat(enrollResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(enrollResponse.remediation.value.first().name, equalTo("enroll-profile"))
+        assertThat(enrollResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/enroll/new"))
+
+        remediationOption = enrollResponse.remediation().remediationOptions().find({ it -> (it.name == "enroll-profile") })
+
+        // supply only the "required" attributes
+        UserProfile up = new UserProfile()
+        up.addAttribute("lastName", "Coder")
+        up.addAttribute("firstName", "Joe")
+        Random randomGenerator = new Random()
+        int randomInt = randomGenerator.nextInt(1000)
+        up.addAttribute("email", "joe.coder" + randomInt + "@example.com")
+        up.addAttribute("age", "40")
+        up.addAttribute("sex", "Male")
+
+        EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest = EnrollUserProfileUpdateRequestBuilder.builder()
+                .withUserProfile(up)
+                .withStateHandle("02tYS1NHhCPLcOpT3GByBBRHmGU63p7LGRXJx5cOvp")
+                .build()
+
+        final Response stubbedEnrollNewResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("enroll-profile-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedEnrollNewResponse)
+
+        IDXResponse enrollProfileResponse = remediationOption.proceed(idxClient, enrollUserProfileUpdateRequest)
+
+        assertThat(enrollProfileResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(enrollProfileResponse.remediation.value.first().name, equalTo("select-authenticator-enroll"))
+        assertThat(enrollProfileResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/credential/enroll"))
+    }
+
     @Test
     void testInteractErrorResponse() {
 

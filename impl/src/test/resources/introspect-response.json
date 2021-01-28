@@ -32,6 +32,25 @@
           }
         ],
         "accepts": "application/ion+json; okta-version=1.0.0"
+      },
+      {
+        "rel": [
+          "create-form"
+        ],
+        "name": "select-enroll-profile",
+        "href": "https://foo.oktapreview.com/idp/idx/enroll",
+        "method": "POST",
+        "produces": "application/ion+json; okta-version=1.0.0",
+        "value": [
+          {
+            "name": "stateHandle",
+            "required": true,
+            "value": "02tYS1NHhCPLcOpT3GByBBRHmGU63p7LGRXJx5cOvp",
+            "visible": false,
+            "mutable": false
+          }
+        ],
+        "accepts": "application/json; okta-version=1.0.0"
       }
     ]
   },
