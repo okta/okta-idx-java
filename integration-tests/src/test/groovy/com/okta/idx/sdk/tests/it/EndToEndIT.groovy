@@ -55,7 +55,7 @@ class EndToEndIT {
 
     @BeforeClass
     void setup() {
-        mockPort = new ServerSocket(0).withCloseable {it.getLocalPort()}
+        mockPort = 5005
         wireMockServer = new WireMockServer(options().bindAddress("localhost").port(mockPort))
         wireMockServer.start()
 
@@ -124,7 +124,7 @@ class EndToEndIT {
             .withRememberMe(false)
             .withStateHandle("stateHandle")
             .build()
-        idxResponse = idxClient.identify(identifyRequest)
+        idxResponse = idxResponse.remediation().remediationOptions().first().proceed(idxClient, identifyRequest)
 
         assertThat(idxResponse, notNullValue())
         assertThat(idxResponse.remediation(), notNullValue())
@@ -333,7 +333,7 @@ class EndToEndIT {
             .withRememberMe(false)
             .withStateHandle("stateHandle")
             .build()
-        idxResponse = idxClient.identify(identifyRequest)
+        idxResponse = idxResponse.remediation().remediationOptions().first().proceed(idxClient, identifyRequest)
 
         assertThat(idxResponse, notNullValue())
         assertThat(idxResponse.remediation(), notNullValue())

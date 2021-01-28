@@ -76,13 +76,13 @@ public class RemediationOption {
     public IDXResponse proceed(IDXClient client, Object request) throws IllegalStateException, IllegalArgumentException, ProcessingException {
         Assert.notNull(request, "request cannot be null");
 
-        if (request instanceof IdentifyRequest) return client.identify((IdentifyRequest) request);
-        else if (request instanceof ChallengeRequest) return client.challenge((ChallengeRequest) request);
+        if (request instanceof IdentifyRequest) return client.identify((IdentifyRequest) request, href);
+        else if (request instanceof ChallengeRequest) return client.challenge((ChallengeRequest) request, href);
         else if (request instanceof AnswerChallengeRequest)
-            return client.answerChallenge((AnswerChallengeRequest) request);
-        else if (request instanceof EnrollRequest) return client.enroll((EnrollRequest) request);
-        else if (request instanceof EnrollUserProfileUpdateRequest) return client.enrollUpdateUserProfile((EnrollUserProfileUpdateRequest) request);
-        else if (request instanceof SkipAuthenticatorEnrollmentRequest) return client.skip((SkipAuthenticatorEnrollmentRequest) request);
+            return client.answerChallenge((AnswerChallengeRequest) request, href);
+        else if (request instanceof EnrollRequest) return client.enroll((EnrollRequest) request, href);
+        else if (request instanceof EnrollUserProfileUpdateRequest) return client.enrollUpdateUserProfile((EnrollUserProfileUpdateRequest) request, href);
+        else if (request instanceof SkipAuthenticatorEnrollmentRequest) return client.skip((SkipAuthenticatorEnrollmentRequest) request, href);
         else
             throw new IllegalStateException("Cannot invoke proceed with the supplied request type " + request.getClass().getSimpleName());
     }

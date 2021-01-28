@@ -1,7 +1,7 @@
 {
-  "stateHandle": "02tYS1NHhCPLcOpT3GByBBRHmGU63p7LGRXJx5cOvp",
+  "stateHandle": "02VIEjkWxJUD8_BAoiYs1rZ2ggU_nhOMpMaWU_5_lf",
   "version": "1.0.0",
-  "expiresAt": "2020-10-30T23:47:46.000Z",
+  "expiresAt": "2021-01-28T06:19:38.000Z",
   "intent": "LOGIN",
   "remediation": {
     "type": "array",
@@ -10,9 +10,10 @@
         "rel": [
           "create-form"
         ],
-        "name": "select-authenticator-authenticate",
-        "href": "http://localhost:5005/idp/idx/challenge",
+        "name": "select-authenticator-enroll",
+        "href": "https://foo.oktapreview.com/idp/idx/credential/enroll",
         "method": "POST",
+        "produces": "application/ion+json; okta-version=1.0.0",
         "value": [
           {
             "name": "authenticator",
@@ -26,7 +27,7 @@
                       {
                         "name": "id",
                         "required": true,
-                        "value": "aut2ihzk1gHl7ynhd1d6",
+                        "value": "aut3jya5v1oIgaLuV0g7",
                         "mutable": false
                       },
                       {
@@ -38,7 +39,7 @@
                     ]
                   }
                 },
-                "relatesTo": "$.authenticatorEnrollments.value[0]"
+                "relatesTo": "$.authenticators.value[0]"
               },
               {
                 "label": "Password",
@@ -48,7 +49,7 @@
                       {
                         "name": "id",
                         "required": true,
-                        "value": "aut2ihzk2n15tsQnQ1d6",
+                        "value": "aut3jya5v0NEuJiiB0g7",
                         "mutable": false
                       },
                       {
@@ -60,7 +61,7 @@
                     ]
                   }
                 },
-                "relatesTo": "$.authenticatorEnrollments.value[1]"
+                "relatesTo": "$.authenticators.value[1]"
               },
               {
                 "label": "Security Question",
@@ -70,7 +71,7 @@
                       {
                         "name": "id",
                         "required": true,
-                        "value": "aut2ihzk4hgf9sIQa1d6",
+                        "value": "aut3jya5v3dTh5ftl0g7",
                         "mutable": false
                       },
                       {
@@ -82,19 +83,19 @@
                     ]
                   }
                 },
-                "relatesTo": "$.authenticatorEnrollments.value[2]"
+                "relatesTo": "$.authenticators.value[2]"
               }
             ]
           },
           {
             "name": "stateHandle",
             "required": true,
-            "value": "02tYS1NHhCPLcOpT3GByBBRHmGU63p7LGRXJx5cOvp",
+            "value": "02VIEjkWxJUD8_BAoiYs1rZ2ggU_nhOMpMaWU_5_lf",
             "visible": false,
             "mutable": false
           }
         ],
-        "accepts": "application/ion+json; okta-version=1.0.0"
+        "accepts": "application/json; okta-version=1.0.0"
       }
     ]
   },
@@ -103,7 +104,7 @@
     "value": [
       {
         "type": "email",
-        "id": "aut2ihzk1gHl7ynhd1d6",
+        "id": "aut3jya5v1oIgaLuV0g7",
         "displayName": "Email",
         "methods": [
           {
@@ -113,7 +114,7 @@
       },
       {
         "type": "password",
-        "id": "aut2ihzk2n15tsQnQ1d6",
+        "id": "aut3jya5v0NEuJiiB0g7",
         "displayName": "Password",
         "methods": [
           {
@@ -123,7 +124,7 @@
       },
       {
         "type": "security_question",
-        "id": "aut2ihzk4hgf9sIQa1d6",
+        "id": "aut3jya5v3dTh5ftl0g7",
         "displayName": "Security Question",
         "methods": [
           {
@@ -135,50 +136,12 @@
   },
   "authenticatorEnrollments": {
     "type": "array",
-    "value": [
-      {
-        "profile": {
-          "email": "*****"
-        },
-        "type": "email",
-        "id": "eae3iyi3yzHZN4Cji1d6",
-        "displayName": "Email",
-        "methods": [
-          {
-            "type": "email"
-          }
-        ]
-      },
-      {
-        "type": "password",
-        "id": "laekusi77LNcWg2rX1d5",
-        "displayName": "Password",
-        "methods": [
-          {
-            "type": "password"
-          }
-        ]
-      },
-      {
-        "profile": {
-          "questionKey": "first_computer_game",
-          "question": "What was the first computer game you played?"
-        },
-        "type": "security_question",
-        "id": "qae3iypdrSLDqUoY81d6",
-        "displayName": "Security Question",
-        "methods": [
-          {
-            "type": "security_question"
-          }
-        ]
-      }
-    ]
+    "value": []
   },
   "user": {
     "type": "object",
     "value": {
-      "id": "00u3iyi3x06D2aWUR1d6"
+      "id": "00u3m8bvcbeVfqhVA0g7"
     }
   },
   "cancel": {
@@ -186,24 +149,25 @@
       "create-form"
     ],
     "name": "cancel",
-    "href": "http://localhost:5005/idp/idx/cancel",
+    "href": "https://foo.oktapreview.com/idp/idx/cancel",
     "method": "POST",
+    "produces": "application/ion+json; okta-version=1.0.0",
     "value": [
       {
         "name": "stateHandle",
         "required": true,
-        "value": "02tYS1NHhCPLcOpT3GByBBRHmGU63p7LGRXJx5cOvp",
+        "value": "02VIEjkWxJUD8_BAoiYs1rZ2ggU_nhOMpMaWU_5_lf",
         "visible": false,
         "mutable": false
       }
     ],
-    "accepts": "application/ion+json; okta-version=1.0.0"
+    "accepts": "application/json; okta-version=1.0.0"
   },
   "app": {
     "type": "object",
     "value": {
       "name": "okta_enduser",
-      "label": "okta_enduser",
+      "label": "Okta Dashboard",
       "id": "DEFAULT_APP"
     }
   }

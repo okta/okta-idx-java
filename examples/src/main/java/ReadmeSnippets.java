@@ -24,16 +24,7 @@ import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Options;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.UserProfile;
-import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
-import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
-import com.okta.idx.sdk.api.request.ChallengeRequest;
-import com.okta.idx.sdk.api.request.ChallengeRequestBuilder;
-import com.okta.idx.sdk.api.request.EnrollRequest;
-import com.okta.idx.sdk.api.request.EnrollRequestBuilder;
-import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
-import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequestBuilder;
-import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
-import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
+import com.okta.idx.sdk.api.request.*;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
@@ -44,6 +35,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -97,11 +89,13 @@ public class ReadmeSnippets {
         RemediationOption remediationOption = remediationOptionsOptional.get();
         FormValue[] formValues = remediationOption.form();
 
-        // identify
-        idxResponse = client.identify(IdentifyRequestBuilder.builder()
+        IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                 .withIdentifier("{identifier}") // email
                 .withStateHandle(stateHandle)
-                .build());
+                .build();
+
+        // identify
+        idxResponse = remediationOption.proceed(client, identifyRequest);
 
         // get remediation options to go to the next step
         remediationOptions = idxResponse.remediation().remediationOptions();
@@ -145,7 +139,7 @@ public class ReadmeSnippets {
         idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
 
         // exchange interaction code for token
-        TokenResponse tokenResponse=idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
         log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                 tokenResponse.getAccessToken(),
                 tokenResponse.getIdToken(),
@@ -191,6 +185,8 @@ public class ReadmeSnippets {
                 .filter(x -> "credentials".equals(x.getName()))
                 .findFirst();
 
+        IdentifyRequest identifyRequest = null;
+
         if (credentialsFormValueOptional.isPresent()) {
             FormValue credentialsFormValue = credentialsFormValueOptional.get();
 
@@ -199,19 +195,22 @@ public class ReadmeSnippets {
                 Credentials credentials = new Credentials();
                 credentials.setPasscode("{password}".toCharArray());
 
-                idxResponse = client.identify(IdentifyRequestBuilder.builder()
+                identifyRequest = IdentifyRequestBuilder.builder()
                         .withIdentifier("{identifier}") // email
                         .withCredentials(credentials)
                         .withStateHandle(stateHandle)
-                        .build());
+                        .build();
             }
         } else {
             // credentials not required
-            idxResponse = client.identify(IdentifyRequestBuilder.builder()
+            identifyRequest = IdentifyRequestBuilder.builder()
                     .withIdentifier("{identifier}") // email
                     .withStateHandle(stateHandle)
-                    .build());
+                    .build();
         }
+
+        // identify
+        idxResponse = remediationOption.proceed(client, identifyRequest);
     }
 
     private void checkRemediationOptionsAndSelectAuthenticator() {
@@ -277,12 +276,14 @@ public class ReadmeSnippets {
         Credentials credentials = new Credentials();
         credentials.setPasscode("{password}".toCharArray());
 
-        // identify
-        idxResponse = client.identify(IdentifyRequestBuilder.builder()
+        IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                 .withIdentifier("{identifier}") // email
                 .withCredentials(credentials)
                 .withStateHandle(stateHandle)
-                .build());
+                .build();
+
+        // identify
+        idxResponse = remediationOption.proceed(client, identifyRequest);
 
         // check remediation options to go to the next step
         RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
@@ -355,11 +356,13 @@ public class ReadmeSnippets {
         RemediationOption remediationOption = remediationOptionsOptional.get();
         FormValue[] formValues = remediationOption.form();
 
-        // identify
-        idxResponse = client.identify(IdentifyRequestBuilder.builder()
+        IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                 .withIdentifier("{identifier}") // email
                 .withStateHandle(stateHandle)
-                .build());
+                .build();
+
+        // identify
+        idxResponse = remediationOption.proceed(client, identifyRequest);
 
         // get remediation options to go to the next step
         remediationOptions = idxResponse.remediation().remediationOptions();
@@ -466,11 +469,13 @@ public class ReadmeSnippets {
         IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
         String stateHandle = idxResponse.getStateHandle();
 
-        // identify
-        idxResponse = client.identify(IdentifyRequestBuilder.builder()
+        IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                 .withIdentifier("{identifier}") // email
                 .withStateHandle(stateHandle)
-                .build());
+                .build();
+
+        // identify
+        idxResponse = remediationOption.proceed(client, identifyRequest);
 
         // get remediation options to go to the next step
         RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
@@ -585,11 +590,13 @@ public class ReadmeSnippets {
         RemediationOption remediationOption = remediationOptionsOptional.get();
         FormValue[] formValues = remediationOption.form();
 
-        // send identifier
-        idxResponse = client.identify(IdentifyRequestBuilder.builder()
+        IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                 .withIdentifier("{identifier}") // email
                 .withStateHandle(stateHandle)
-                .build());
+                .build();
+
+        // identify
+        idxResponse = remediationOption.proceed(client, identifyRequest);
 
         // get remediation options to go to the next step
         remediationOptions = idxResponse.remediation().remediationOptions();
@@ -704,16 +711,20 @@ public class ReadmeSnippets {
         RemediationOption remediationOption = remediationOptionsOptional.get();
         FormValue[] formValues = remediationOption.form();
 
-        // identify
-        idxResponse = client.identify(IdentifyRequestBuilder.builder()
+        IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                 .withIdentifier("{identifier}") // email
                 .withStateHandle(stateHandle)
-                .build());
+                .build();
+
+        // identify
+        idxResponse = remediationOption.proceed(client, identifyRequest);
 
         // start the password recovery/reset flow
-        idxResponse = client.recover(RecoverRequestBuilder.builder()
+        RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
                 .withStateHandle(stateHandle)
-                .build());
+                .build();
+
+        idxResponse = remediationOption.proceed(client, recoverRequest);
 
         // get remediation options to go to the next step
         // since the org requires password only, we don't have the "select password authenticator" step as in previous examples
@@ -748,7 +759,7 @@ public class ReadmeSnippets {
 
         // set passcode to your new password value
         Credentials credentials = new Credentials();
-        credentials.setPasscode("new_password".toCharArray());
+        credentials.setPasscode("{new_password}".toCharArray());
 
         // build answer password authenticator challenge request
         passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
@@ -798,11 +809,13 @@ public class ReadmeSnippets {
         RemediationOption remediationOption = remediationOptionsOptional.get();
         FormValue[] formValues = remediationOption.form();
 
-        // identify
-        idxResponse = client.identify(IdentifyRequestBuilder.builder()
+        IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                 .withIdentifier("{identifier}") // email
                 .withStateHandle(stateHandle)
-                .build());
+                .build();
+
+        // identify
+        idxResponse = remediationOption.proceed(client, identifyRequest);
 
         // get remediation options to go to the next step
         remediationOptions = idxResponse.remediation().remediationOptions();
@@ -865,5 +878,238 @@ public class ReadmeSnippets {
                 .build();
 
         IDXResponse idxResponse = remediationOption.proceed(client, enrollUserProfileUpdateRequest);
+    }
+
+    private void registrationFlow() throws ProcessingException {
+        // get interactionHandle
+        InteractResponse interactResponse = client.interact();
+        String interactHandle = interactResponse.getInteractionHandle();
+
+        // exchange interactHandle for stateHandle
+        IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+        String stateHandle = idxResponse.getStateHandle();
+
+        // get remediation options to go to the next step
+        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+        Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                .filter(x -> "select-enroll-profile".equals(x.getName()))
+                .findFirst();
+        RemediationOption remediationOption = remediationOptionsOptional.get();
+
+        EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                .withStateHandle(stateHandle)
+                .build();
+
+        // enroll new user
+        idxResponse = remediationOption.proceed(client, enrollRequest);
+
+        // get remediation options to go to the next step
+        remediationOptions = idxResponse.remediation().remediationOptions();
+        remediationOptionsOptional = Arrays.stream(remediationOptions)
+                .filter(x -> "enroll-profile".equals(x.getName()))
+                .findFirst();
+        remediationOption = remediationOptionsOptional.get();
+
+        // supply only the "required" attributes
+        UserProfile up = new UserProfile();
+        up.addAttribute("lastName", "Coder");   // replace
+        up.addAttribute("firstName", "Joe");    // replace
+        Random randomGenerator = new Random();
+        int randomInt = randomGenerator.nextInt(1000);
+        up.addAttribute("email", "joe.coder" + randomInt + "@example.com"); // replace
+        up.addAttribute("age", "40"); // replace
+        up.addAttribute("sex", "Male"); // replace
+
+        EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest = EnrollUserProfileUpdateRequestBuilder.builder()
+                .withUserProfile(up)
+                .withStateHandle(stateHandle)
+                .build();
+
+        idxResponse = remediationOption.proceed(client, enrollUserProfileUpdateRequest);
+
+        // enroll authenticators next
+
+        // check remediation options to go to the next step
+        remediationOptions = idxResponse.remediation().remediationOptions();
+        Optional<RemediationOption> remediationOptionsSelectAuthenticatorOptional = Arrays.stream(remediationOptions)
+                .filter(x -> "select-authenticator-enroll".equals(x.getName()))
+                .findFirst();
+        remediationOption = remediationOptionsSelectAuthenticatorOptional.get();
+
+        Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+        // select an authenticator (sec qn in this case)
+        Authenticator secQnEnrollmentAuthenticator = new Authenticator();
+        secQnEnrollmentAuthenticator.setId(authenticatorOptions.get("security_question"));
+        secQnEnrollmentAuthenticator.setMethodType("security_question");
+
+        // build enroll request
+        enrollRequest = EnrollRequestBuilder.builder()
+                .withAuthenticator(secQnEnrollmentAuthenticator)
+                .withStateHandle(stateHandle)
+                .build();
+
+        // proceed
+        idxResponse = remediationOption.proceed(client, enrollRequest);
+
+        // get remediation options to go to the next step
+        remediationOptions = idxResponse.remediation().remediationOptions();
+        Optional<RemediationOption> remediationOptionsEnrollAuthenticatorOptional = Arrays.stream(remediationOptions)
+                .filter(x -> "enroll-authenticator".equals(x.getName()))
+                .findFirst();
+        remediationOption = remediationOptionsEnrollAuthenticatorOptional.get();
+
+        FormValue[] enrollAuthenticatorFormValues = remediationOption.form();
+        Optional<FormValue> enrollAuthenticatorFormOptional = Arrays.stream(enrollAuthenticatorFormValues)
+                .filter(x -> "credentials".equals(x.getName()))
+                .findFirst();
+        FormValue enrollAuthenticatorForm = enrollAuthenticatorFormOptional.get();
+
+        Options[] enrollmentAuthenticatorOptions = enrollAuthenticatorForm.options();
+        Optional<Options> chooseSecQnOptionOptional = Arrays.stream(enrollmentAuthenticatorOptions)
+                .filter(x -> "Choose a security question".equals(x.getLabel()))
+                .findFirst();
+
+        Options choseSecQnOption = chooseSecQnOptionOptional.get(); // view default security questions list
+
+        Credentials secQnEnrollmentCredentials = new Credentials();
+        secQnEnrollmentCredentials.setQuestionKey("disliked_food");  // chosen one from the above list
+        secQnEnrollmentCredentials.setQuestion("What is the food you least liked as a child?");
+        secQnEnrollmentCredentials.setAnswer("{answer}".toCharArray());
+
+        AnswerChallengeRequest answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                .withStateHandle(stateHandle)
+                .withCredentials(secQnEnrollmentCredentials)
+                .build();
+
+        // proceed
+        idxResponse = remediationOption.proceed(client, answerChallengeRequest);
+
+        // check remediation options to go to the next step
+        remediationOptions = idxResponse.remediation().remediationOptions();
+        remediationOptionsSelectAuthenticatorOptional = Arrays.stream(remediationOptions)
+                .filter(x -> "select-authenticator-enroll".equals(x.getName()))
+                .findFirst();
+        remediationOption = remediationOptionsSelectAuthenticatorOptional.get();
+
+        authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+        // select an authenticator (email in this case)
+        Authenticator emailAuthenticator = new Authenticator();
+        emailAuthenticator.setId(authenticatorOptions.get("email"));
+        emailAuthenticator.setMethodType("email");
+
+        // build enroll request
+        enrollRequest = EnrollRequestBuilder.builder()
+                .withAuthenticator(emailAuthenticator)
+                .withStateHandle(stateHandle)
+                .build();
+
+        // proceed
+        idxResponse = remediationOption.proceed(client, enrollRequest);
+
+        // get remediation options to go to the next step
+        remediationOptions = idxResponse.remediation().remediationOptions();
+        remediationOptionsEnrollAuthenticatorOptional = Arrays.stream(remediationOptions)
+                .filter(x -> "enroll-authenticator".equals(x.getName()))
+                .findFirst();
+        remediationOption = remediationOptionsEnrollAuthenticatorOptional.get();
+
+        enrollAuthenticatorFormValues = remediationOption.form();
+        enrollAuthenticatorFormOptional = Arrays.stream(enrollAuthenticatorFormValues)
+                .filter(x -> "credentials".equals(x.getName()))
+                .findFirst();
+
+        // enter passcode received in email
+        Scanner in = new Scanner(System.in, "UTF-8");
+        log.info("Enter Email Passcode: ");
+        String emailPasscode = in.nextLine();
+
+        Credentials credentials = new Credentials();
+        credentials.setPasscode(emailPasscode.toCharArray());
+
+        answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                .withStateHandle(stateHandle)
+                .withCredentials(credentials)
+                .build();
+
+        // proceed
+        idxResponse = remediationOption.proceed(client, answerChallengeRequest);
+
+        // check remediation options to go to the next step
+        remediationOptions = idxResponse.remediation().remediationOptions();
+        remediationOptionsSelectAuthenticatorOptional = Arrays.stream(remediationOptions)
+                .filter(x -> "select-authenticator-enroll".equals(x.getName()))
+                .findFirst();
+        remediationOption = remediationOptionsSelectAuthenticatorOptional.get();
+
+        authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+        // select an authenticator (password in this case)
+        Authenticator passwordAuthenticator = new Authenticator();
+        passwordAuthenticator.setId(authenticatorOptions.get("password"));
+        passwordAuthenticator.setMethodType("password");
+
+        // build enroll request
+        enrollRequest = EnrollRequestBuilder.builder()
+                .withAuthenticator(passwordAuthenticator)
+                .withStateHandle(stateHandle)
+                .build();
+
+        // proceed
+        idxResponse = remediationOption.proceed(client, enrollRequest);
+
+        // get remediation options to go to the next step
+        remediationOptions = idxResponse.remediation().remediationOptions();
+        remediationOptionsEnrollAuthenticatorOptional = Arrays.stream(remediationOptions)
+                .filter(x -> "enroll-authenticator".equals(x.getName()))
+                .findFirst();
+        remediationOption = remediationOptionsEnrollAuthenticatorOptional.get();
+
+        enrollAuthenticatorFormValues = remediationOption.form();
+        enrollAuthenticatorFormOptional = Arrays.stream(enrollAuthenticatorFormValues)
+                .filter(x -> "credentials".equals(x.getName()))
+                .findFirst();
+
+        credentials = new Credentials();
+        credentials.setPasscode("password".toCharArray());
+
+        answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                .withStateHandle(stateHandle)
+                .withCredentials(credentials)
+                .build();
+
+        // proceed
+        idxResponse = remediationOption.proceed(client, answerChallengeRequest);
+
+        // continue until "skip" is available as a remediation option. When skip becomes available, it indicates
+        // that the minimal required authenticators have been setup.
+
+        // get remediation options to go to the next step
+        remediationOptions = idxResponse.remediation().remediationOptions();
+        Optional<RemediationOption> skipAuthenticatorEnrollmentOptional = Arrays.stream(remediationOptions)
+                .filter(x -> "skip".equals(x.getName()))
+                .findFirst();
+        remediationOption = skipAuthenticatorEnrollmentOptional.get();
+
+        SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest = SkipAuthenticatorEnrollmentRequestBuilder.builder()
+                .withStateHandle(stateHandle)
+                .build();
+
+        // proceed with skipping optional authenticator enrollment
+        idxResponse = remediationOption.proceed(client, skipAuthenticatorEnrollmentRequest);
+
+        // This response should contain the interaction code
+        if (idxResponse.isLoginSuccessful()) {
+            log.info("Login Successful!");
+            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+            log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                    tokenResponse.getAccessToken(),
+                    tokenResponse.getIdToken(),
+                    tokenResponse.getRefreshToken(),
+                    tokenResponse.getTokenType(),
+                    tokenResponse.getScope(),
+                    tokenResponse.getExpiresIn());
+        }
     }
 }

@@ -14,7 +14,7 @@
         "relatesTo": [
           "$.currentAuthenticatorEnrollment"
         ],
-        "href": "https://foo.oktapreview.com/idp/idx/challenge/answer",
+        "href": "http://localhost:5005/idp/idx/challenge/answer",
         "method": "POST",
         "value": [
           {
@@ -53,7 +53,7 @@
           "create-form"
         ],
         "name": "resend",
-        "href": "https://foo.oktapreview.com/idp/idx/challenge/resend",
+        "href": "http://localhost:5005/idp/idx/challenge/resend",
         "method": "POST",
         "value": [
           {
@@ -71,7 +71,7 @@
           "create-form"
         ],
         "name": "poll",
-        "href": "https://foo.oktapreview.com/idp/idx/challenge/poll",
+        "href": "http://localhost:5005/idp/idx/challenge/poll",
         "method": "POST",
         "refresh": 4000,
         "value": [
@@ -139,7 +139,7 @@
       "create-form"
     ],
     "name": "cancel",
-    "href": "https://foo.oktapreview.com/idp/idx/cancel",
+    "href": "http://localhost:5005/idp/idx/cancel",
     "method": "POST",
     "value": [
       {

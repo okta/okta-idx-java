@@ -32,6 +32,7 @@ import com.okta.idx.sdk.api.model.RemediationOption
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
+import com.okta.idx.sdk.api.request.CancelRequest
 import com.okta.idx.sdk.api.request.ChallengeRequest
 import com.okta.idx.sdk.api.request.ChallengeRequestBuilder
 import com.okta.idx.sdk.api.request.EnrollRequest
@@ -509,7 +510,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedChallengeResponse)
 
         IDXResponse passwordAuthenticatorChallengeResponse =
-            idxClient.challenge(passwordAuthenticatorChallengeRequest)
+            idxClient.challenge(passwordAuthenticatorChallengeRequest, "href")
 
         assertThat(passwordAuthenticatorChallengeResponse, notNullValue())
 
@@ -685,7 +686,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedAnswerChallengeResponse)
 
         IDXResponse secondFactorAuthenticatorAnswerChallengeResponse =
-            idxClient.answerChallenge(secondFactorAuthenticatorAnswerChallengeRequest)
+            idxClient.answerChallenge(secondFactorAuthenticatorAnswerChallengeRequest, "href")
 
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse, notNullValue())
         assertThat(secondFactorAuthenticatorAnswerChallengeResponse.remediation(), nullValue())
@@ -729,7 +730,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedEnrollAuthenticatorResponse)
 
-        IDXResponse enrollSecQnAuthenticatorResponse = idxClient.enroll(enrollRequest)
+        IDXResponse enrollSecQnAuthenticatorResponse = idxClient.enroll(enrollRequest, "href")
 
         assertThat(enrollSecQnAuthenticatorResponse, notNullValue())
         assertThat(enrollSecQnAuthenticatorResponse.stateHandle, equalTo("02JwRcw6oq-uS3iIMT9uikGHNiD0DDkyGsp6aPNYMA"))
@@ -817,7 +818,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedEnrollUserProfileUpdateResponse)
 
-        IDXResponse enrollUpdateUserProfileResponse = idxClient.enrollUpdateUserProfile(enrollUserProfileUpdateRequest)
+        IDXResponse enrollUpdateUserProfileResponse = idxClient.enrollUpdateUserProfile(enrollUserProfileUpdateRequest, "href")
 
         assertThat(enrollUpdateUserProfileResponse, notNullValue())
         assertThat(enrollUpdateUserProfileResponse.remediation(), nullValue())
@@ -863,7 +864,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedAnswerChallengeResponse)
 
-        IDXResponse fingerprintAuthenticatorAnswerChallengeResponse = idxClient.answerChallenge(fingerprintAuthenticatorAnswerChallengeRequest)
+        IDXResponse fingerprintAuthenticatorAnswerChallengeResponse = idxClient.answerChallenge(fingerprintAuthenticatorAnswerChallengeRequest, "href")
 
         assertThat(fingerprintAuthenticatorAnswerChallengeResponse.stateHandle, notNullValue())
         assertThat(fingerprintAuthenticatorAnswerChallengeResponse.version, notNullValue())
@@ -892,7 +893,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedSkipAuthEnrollmentResponse)
 
-        IDXResponse skipAuthEnrollmentResponse = idxClient.skip(skipAuthenticatorEnrollmentRequest)
+        IDXResponse skipAuthEnrollmentResponse = idxClient.skip(skipAuthenticatorEnrollmentRequest, "href")
 
         assertThat(skipAuthEnrollmentResponse, notNullValue())
         assertThat(skipAuthEnrollmentResponse.remediation(), nullValue())
@@ -931,7 +932,7 @@ class BaseIDXClientTest {
                 .withStateHandle("02X1oUMHSpVb_MTxvhmr8-5Es8Rcizy4Xq4OSr3mkH")
                 .build()
 
-        IDXResponse recoverResponse = idxClient.recover(recoverRequest)
+        IDXResponse recoverResponse = idxClient.recover(recoverRequest, "href")
 
         assertThat(recoverResponse.stateHandle, notNullValue())
         assertThat(recoverResponse.version, notNullValue())
@@ -970,7 +971,125 @@ class BaseIDXClientTest {
         assertThat(recoverResponse.app.value.label, is("Okta Dashboard"))
         assertThat(recoverResponse.app.value.id, is("DEFAULT_APP"))
     }
-    
+
+    @Test
+    void testRegistration() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        final Response stubbedIntrospectResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("introspect-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
+
+        IDXResponse introspectResponse = idxClient.introspect(Optional.of("interactionHandle"))
+
+        assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(introspectResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/identify"))
+
+        RemediationOption remediationOption =
+                introspectResponse.remediation().remediationOptions().find({ it -> (it.name == "select-enroll-profile") })
+
+        EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                .withStateHandle("02tYS1NHhCPLcOpT3GByBBRHmGU63p7LGRXJx5cOvp")
+                .build()
+
+        final Response stubbedEnrollProfileResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("enroll-user-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedEnrollProfileResponse)
+
+        IDXResponse enrollResponse = remediationOption.proceed(idxClient, enrollRequest)
+
+        assertThat(enrollResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(enrollResponse.remediation.value.first().name, equalTo("enroll-profile"))
+        assertThat(enrollResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/enroll/new"))
+
+        remediationOption = enrollResponse.remediation().remediationOptions().find({ it -> (it.name == "enroll-profile") })
+
+        // supply only the "required" attributes
+        UserProfile up = new UserProfile()
+        up.addAttribute("lastName", "Coder")
+        up.addAttribute("firstName", "Joe")
+        Random randomGenerator = new Random()
+        int randomInt = randomGenerator.nextInt(1000)
+        up.addAttribute("email", "joe.coder" + randomInt + "@example.com")
+        up.addAttribute("age", "40")
+        up.addAttribute("sex", "Male")
+
+        EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest = EnrollUserProfileUpdateRequestBuilder.builder()
+                .withUserProfile(up)
+                .withStateHandle("02tYS1NHhCPLcOpT3GByBBRHmGU63p7LGRXJx5cOvp")
+                .build()
+
+        final Response stubbedEnrollNewResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("enroll-profile-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedEnrollNewResponse)
+
+        IDXResponse enrollProfileResponse = remediationOption.proceed(idxClient, enrollUserProfileUpdateRequest)
+
+        assertThat(enrollProfileResponse.remediation().remediationOptions(), notNullValue())
+        assertThat(enrollProfileResponse.remediation.value.first().name, equalTo("select-authenticator-enroll"))
+        assertThat(enrollProfileResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/credential/enroll"))
+    }
+
+    @Test
+    void testSkipAuthenticatorEnrollment() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        Credentials credentials = new Credentials();
+        credentials.setPasscode("password".toCharArray())
+
+        AnswerChallengeRequest answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                .withStateHandle("02C563D3IFfsob9PQlzC70FO_H9FLKGMturswYm1at")
+                .withCredentials(credentials)
+                .build();
+
+        final Response stubbedAnswerAuthenticatorEnrollmentChallengeResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("answer-authenticator-enrollment-challenge-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedAnswerAuthenticatorEnrollmentChallengeResponse)
+
+        IDXResponse idxResponse = idxClient.answerChallenge(answerChallengeRequest, "href")
+
+        RemediationOption remediationOption = idxResponse.remediation().remediationOptions().find { it -> it.name == "skip"}
+
+        final Response stubbedSkipAuthenticatorEnrollmentResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("success-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedSkipAuthenticatorEnrollmentResponse)
+
+        SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest = SkipAuthenticatorEnrollmentRequestBuilder.builder()
+                .withStateHandle("stateHandle")
+                .build()
+
+        idxResponse = remediationOption.proceed(idxClient, skipAuthenticatorEnrollmentRequest)
+        assertThat(idxResponse.remediation(), nullValue())
+    }
+
     @Test
     void testInteractErrorResponse() {
 
