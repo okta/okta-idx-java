@@ -32,6 +32,7 @@ import com.okta.idx.sdk.api.model.RemediationOption
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
+import com.okta.idx.sdk.api.request.CancelRequest
 import com.okta.idx.sdk.api.request.ChallengeRequest
 import com.okta.idx.sdk.api.request.ChallengeRequestBuilder
 import com.okta.idx.sdk.api.request.EnrollRequest
@@ -1043,6 +1044,50 @@ class BaseIDXClientTest {
         assertThat(enrollProfileResponse.remediation().remediationOptions(), notNullValue())
         assertThat(enrollProfileResponse.remediation.value.first().name, equalTo("select-authenticator-enroll"))
         assertThat(enrollProfileResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/credential/enroll"))
+    }
+
+    @Test
+    void testSkipAuthenticatorEnrollment() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient =
+                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        Credentials credentials = new Credentials();
+        credentials.setPasscode("password".toCharArray())
+
+        AnswerChallengeRequest answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                .withStateHandle("02C563D3IFfsob9PQlzC70FO_H9FLKGMturswYm1at")
+                .withCredentials(credentials)
+                .build();
+
+        final Response stubbedAnswerAuthenticatorEnrollmentChallengeResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("answer-authenticator-enrollment-challenge-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedAnswerAuthenticatorEnrollmentChallengeResponse)
+
+        IDXResponse idxResponse = idxClient.answerChallenge(answerChallengeRequest, "href")
+
+        RemediationOption remediationOption = idxResponse.remediation().remediationOptions().find { it -> it.name == "skip"}
+
+        final Response stubbedSkipAuthenticatorEnrollmentResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
+                new FileInputStream(getClass().getClassLoader().getResource("success-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedSkipAuthenticatorEnrollmentResponse)
+
+        SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest = SkipAuthenticatorEnrollmentRequestBuilder.builder()
+                .withStateHandle("stateHandle")
+                .build()
+
+        idxResponse = remediationOption.proceed(idxClient, skipAuthenticatorEnrollmentRequest)
+        assertThat(idxResponse.remediation(), nullValue())
     }
 
     @Test
