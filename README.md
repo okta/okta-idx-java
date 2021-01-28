@@ -781,7 +781,7 @@ if (idxResponse.isLoginSuccessful()) {
 
 #### Login using password after password reset
 
-In this example, the Org is configured to require password authenticator to login, with no additional authenticators. After sending the identify request with the username, the user can reset the password, after answering the security question and continue to login
+In this example, the Org is configured to require password authenticator to login, with no additional authenticators. After sending the identify request with the username, the user can reset the password, after answering the security question. Login will be successful after password reset.
 
 > Note: Steps to identify the user might change based on your Org configuration.
 
@@ -815,7 +815,8 @@ RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
         .build();
 idxResponse = remediationOption.proceed(client, recoverRequest);
 
-// since the org requires password only, we don't have the "select password authenticator" step as in previous examples
+// get remediation options to go to the next step
+// since the org requires password only, we don't have the "select password authenticator" step as in previous examples 
 remediationOptions = idxResponse.remediation().remediationOptions();
 remediationOptionsOptional = Arrays.stream(remediationOptions)
         .filter(x -> "challenge-authenticator".equals(x.getName()))
@@ -854,6 +855,7 @@ passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.buil
         .withStateHandle(stateHandle)
         .withCredentials(credentials)
         .build();
+
 idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
 
 // check if we landed success on login

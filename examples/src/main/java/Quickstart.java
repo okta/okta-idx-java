@@ -1545,8 +1545,7 @@ public class Quickstart {
                             .withIdentifier(IDENTIFIER)
                             .withCredentials(credentials)
                             .withStateHandle(stateHandle)
-                            .build());
-
+                            .build())
                 }
             } else {
                 // credentials are not necessary; so sending just the identifier
