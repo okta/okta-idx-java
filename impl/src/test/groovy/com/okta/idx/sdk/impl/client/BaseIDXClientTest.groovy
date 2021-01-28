@@ -931,7 +931,7 @@ class BaseIDXClientTest {
                 .withStateHandle("02X1oUMHSpVb_MTxvhmr8-5Es8Rcizy4Xq4OSr3mkH")
                 .build()
 
-        IDXResponse recoverResponse = idxClient.recover(recoverRequest)
+        IDXResponse recoverResponse = idxClient.recover(recoverRequest, "href")
 
         assertThat(recoverResponse.stateHandle, notNullValue())
         assertThat(recoverResponse.version, notNullValue())

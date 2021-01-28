@@ -54,7 +54,5 @@ public interface IDXClient {
 
     IDXResponse recover(RecoverRequest recoverRequest, String href) throws ProcessingException;
 
-    IDXResponse recover(RecoverRequest recoverRequest) throws ProcessingException;
-
     TokenResponse token(String url, String grantType, String interactionCode) throws ProcessingException;
 }

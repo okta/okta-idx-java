@@ -1541,11 +1541,11 @@ public class Quickstart {
                     Credentials credentials = new Credentials();
                     credentials.setPasscode(PASSWORD);
 
-                    identifyRequest = (IdentifyRequestBuilder.builder()
+                    identifyRequest = IdentifyRequestBuilder.builder()
                             .withIdentifier(IDENTIFIER)
                             .withCredentials(credentials)
                             .withStateHandle(stateHandle)
-                            .build())
+                            .build();
                 }
             } else {
                 // credentials are not necessary; so sending just the identifier
