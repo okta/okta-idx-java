@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
-        <version>18</version>
+        <version>19</version>
     </parent>
 
     <groupId>com.okta.idx.sdk</groupId>
@@ -36,7 +36,7 @@
     <properties>
         <jackson.version>2.11.3</jackson.version>
         <snakeyaml.version>1.27</snakeyaml.version>
-        <otka.commons.version>1.2.4</otka.commons.version>
+        <otka.commons.version>1.2.5</otka.commons.version>
         <github.slug>okta/okta-idx-java</github.slug>
     </properties>
 
