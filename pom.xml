@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
-        <version>18</version>
+        <version>19</version>
     </parent>
 
     <groupId>com.okta.idx.sdk</groupId>
@@ -36,7 +36,7 @@
     <properties>
         <jackson.version>2.11.3</jackson.version>
         <snakeyaml.version>1.27</snakeyaml.version>
-        <otka.commons.version>1.2.4</otka.commons.version>
+        <okta.commons.version>1.2.5</okta.commons.version>
         <github.slug>okta/okta-idx-java</github.slug>
     </properties>
 
@@ -80,27 +80,27 @@
             <dependency>
                 <groupId>com.okta.commons</groupId>
                 <artifactId>okta-config-check</artifactId>
-                <version>${otka.commons.version}</version>
+                <version>${okta.commons.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.commons</groupId>
                 <artifactId>okta-commons-lang</artifactId>
-                <version>${otka.commons.version}</version>
+                <version>${okta.commons.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.commons</groupId>
                 <artifactId>okta-http-api</artifactId>
-                <version>${otka.commons.version}</version>
+                <version>${okta.commons.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.commons</groupId>
                 <artifactId>okta-http-httpclient</artifactId>
-                <version>${otka.commons.version}</version>
+                <version>${okta.commons.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.commons</groupId>
                 <artifactId>okta-http-okhttp</artifactId>
-                <version>${otka.commons.version}</version>
+                <version>${okta.commons.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.annotation</groupId>
