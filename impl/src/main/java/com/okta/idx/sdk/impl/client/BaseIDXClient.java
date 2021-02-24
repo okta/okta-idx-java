@@ -35,6 +35,7 @@ import com.okta.commons.lang.Classes;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.IDXClient;
 import com.okta.idx.sdk.api.exception.ProcessingException;
+import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.CancelRequest;
 import com.okta.idx.sdk.api.request.CancelRequestBuilder;
@@ -58,7 +59,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -72,8 +72,6 @@ public class BaseIDXClient implements IDXClient {
 
     private final ObjectMapper objectMapper;
     private final RequestExecutor requestExecutor;
-
-    private String codeVerifier;
 
     public BaseIDXClient(ClientConfiguration clientConfiguration, RequestExecutor requestExecutor) {
 
@@ -97,14 +95,15 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public InteractResponse interact() throws ProcessingException {
+    public IDXClientContext interact() throws ProcessingException {
 
         InteractResponse interactResponse;
+        String codeVerifier, state;
 
         try {
             codeVerifier = PkceUtil.generateCodeVerifier();
             String codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
-            String state = UUID.randomUUID().toString();
+            state = UUID.randomUUID().toString();
 
             StringBuilder urlParameters = new StringBuilder();
             urlParameters.append("client_id=").append(clientConfiguration.getClientId());
@@ -140,23 +139,15 @@ public class BaseIDXClient implements IDXClient {
             throw new ProcessingException(e);
         }
 
-        return interactResponse;
+        return new IDXClientContext(codeVerifier, interactResponse.getInteractionHandle(), state);
     }
 
     @Override
-    public IDXResponse introspect(Optional<String> interactionHandleOptional) throws ProcessingException {
+    public IDXResponse introspect(IDXClientContext idxClientContext) throws ProcessingException {
 
         IDXResponse idxResponse;
 
-        String interactionHandle;
-
-        if (!interactionHandleOptional.isPresent()) {
-            interactionHandle = this.interact().getInteractionHandle();
-        } else {
-            interactionHandle = interactionHandleOptional.get();
-        }
-
-        IntrospectRequest introspectRequest = new IntrospectRequest(interactionHandle);
+        IntrospectRequest introspectRequest = new IntrospectRequest(idxClientContext.getInteractionHandle());
 
         try {
             Request request = new DefaultRequest(
@@ -436,7 +427,7 @@ public class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public TokenResponse token(String url, String grantType, String interactionCode) throws ProcessingException {
+    public TokenResponse token(String url, String grantType, String interactionCode, IDXClientContext idxClientContext) throws ProcessingException {
 
         TokenResponse tokenResponse;
 
@@ -447,7 +438,7 @@ public class BaseIDXClient implements IDXClient {
             urlParameters.append("&client_secret=").append(clientConfiguration.getClientSecret());
         }
         urlParameters.append("&interaction_code=").append(interactionCode);
-        urlParameters.append("&code_verifier=").append(codeVerifier);
+        urlParameters.append("&code_verifier=").append(idxClientContext.getCodeVerifier());
 
         try {
             Request request = new DefaultRequest(

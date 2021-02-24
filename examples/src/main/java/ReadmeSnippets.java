@@ -21,12 +21,12 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
+import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.Options;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.request.*;
 import com.okta.idx.sdk.api.response.IDXResponse;
-import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +63,10 @@ public class ReadmeSnippets {
                 .build();
     }
 
-    private void getInteractionHandle() throws ProcessingException {
-        InteractResponse interactResponse = client.interact();
-        String interactHandle = interactResponse.getInteractionHandle();
+    private void getInteractionHandleAndCodeVerifier() throws ProcessingException {
+        IDXClientContext idxClientContext = client.interact();
+        String interactionHandle = idxClientContext.getInteractionHandle();
+        String codeVerifier = idxClientContext.getCodeVerifier();
     }
 
     private void getNewTokens() throws ProcessingException {
@@ -78,8 +79,11 @@ public class ReadmeSnippets {
                 .setRedirectUri("{redirectUri}") // must match the redirect uri in client app settings/console
                 .build();
 
-        // call introspect - interactionHandle is optional; if it's not provided, a new interactionHandle will be obtained.IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
-        IDXResponse idxResponse = client.introspect(Optional.empty());
+        // get client context
+        IDXClientContext idxClientContext = client.interact();
+
+        // introspect
+        IDXResponse idxResponse = client.introspect(idxClientContext);
         String stateHandle = idxResponse.getStateHandle();
 
         // check remediation options to continue the flow
@@ -139,7 +143,7 @@ public class ReadmeSnippets {
         idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
 
         // exchange interaction code for token
-        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
         log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                 tokenResponse.getAccessToken(),
                 tokenResponse.getIdToken(),
@@ -150,8 +154,8 @@ public class ReadmeSnippets {
     }
 
     private void exchangeInteractionHandleForStateHandle() throws ProcessingException {
-        // optional with interactionHandle or empty; if empty, a new interactionHandle will be obtained
-        IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
+        IDXClientContext idxClientContext = client.interact();
+        IDXResponse idxResponse = client.introspect(idxClientContext);
         String stateHandle = idxResponse.getStateHandle();
     }
 
@@ -169,8 +173,11 @@ public class ReadmeSnippets {
     }
 
     private void invokeIdentifyWithOrWithoutCredentials() throws ProcessingException {
+        // get client context
+        IDXClientContext idxClientContext = client.interact();
+
         // introspect
-        IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
+        IDXResponse idxResponse = client.introspect(idxClientContext);
         String stateHandle = idxResponse.getStateHandle();
 
         // check remediation options to continue the flow
@@ -269,8 +276,11 @@ public class ReadmeSnippets {
     }
 
     private void loginUsingPasswordAndEnrollSecQnAuthenticator() throws ProcessingException {
+        // get client context
+        IDXClientContext idxClientContext = client.interact();
+
         // introspect
-        IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
+        IDXResponse idxResponse = client.introspect(idxClientContext);
         String stateHandle = idxResponse.getStateHandle();
 
         Credentials credentials = new Credentials();
@@ -341,12 +351,11 @@ public class ReadmeSnippets {
     }
 
     private void loginUsingPasswordAndEmailAuthenticator() throws ProcessingException {
-        // get interactionHandle
-        InteractResponse interactResponse = client.interact();
-        String interactHandle = interactResponse.getInteractionHandle();
+        // get client context
+        IDXClientContext idxClientContext = client.interact();
 
         // exchange interactHandle for stateHandle
-        IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+        IDXResponse idxResponse = client.introspect(idxClientContext);
         String stateHandle = idxResponse.getStateHandle();
 
         // check remediation options to continue the flow
@@ -449,7 +458,7 @@ public class ReadmeSnippets {
         if (idxResponse.isLoginSuccessful()) {
             log.info("Login Successful!");
             // exchange the received interaction code for a token
-            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
             log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                     tokenResponse.getAccessToken(),
                     tokenResponse.getIdToken(),
@@ -461,12 +470,11 @@ public class ReadmeSnippets {
     }
 
     private void loginUsingPasswordAndPhoneAuthenticator() throws ProcessingException {
-        // get interactionHandle
-        InteractResponse interactResponse = client.interact();
-        String interactHandle = interactResponse.getInteractionHandle();
+        // get client context
+        IDXClientContext idxClientContext = client.interact();
 
         // exchange interactHandle for stateHandle
-        IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+        IDXResponse idxResponse = client.introspect(idxClientContext);
         String stateHandle = idxResponse.getStateHandle();
 
         IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
@@ -563,7 +571,7 @@ public class ReadmeSnippets {
         // check if we landed success on login
         if (idxResponse.isLoginSuccessful()) {
             log.info("Login Successful!");
-            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
             log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                     tokenResponse.getAccessToken(),
                     tokenResponse.getIdToken(),
@@ -575,12 +583,11 @@ public class ReadmeSnippets {
     }
 
     private void loginUsingPasswordAndWebAuthnAuthenticator() throws ProcessingException {
-        // get interactionHandle
-        InteractResponse interactResponse = client.interact();
-        String interactHandle = interactResponse.getInteractionHandle();
+        // get client context
+        IDXClientContext idxClientContext = client.interact();
 
         // exchange interactHandle for stateHandle
-        IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+        IDXResponse idxResponse = client.introspect(idxClientContext);
         String stateHandle = idxResponse.getStateHandle();
 
         // check remediation options to continue the flow
@@ -684,7 +691,7 @@ public class ReadmeSnippets {
         // check if we landed success on login
         if (idxResponse.isLoginSuccessful()) {
             log.info("Login Successful!");
-            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
             log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                     tokenResponse.getAccessToken(),
                     tokenResponse.getIdToken(),
@@ -696,12 +703,11 @@ public class ReadmeSnippets {
     }
 
     private void loginWithPasswordReset() throws ProcessingException {
-        // get interactionHandle
-        InteractResponse interactResponse = client.interact();
-        String interactHandle = interactResponse.getInteractionHandle();
+        // get client context
+        IDXClientContext idxClientContext = client.interact();
 
         // exchange interactHandle for stateHandle
-        IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+        IDXResponse idxResponse = client.introspect(idxClientContext);
         String stateHandle = idxResponse.getStateHandle();
 
         // check remediation options to continue the flow
@@ -773,7 +779,7 @@ public class ReadmeSnippets {
         if (idxResponse.isLoginSuccessful()) {
             log.info("Login Successful!");
             // exchange the received interaction code for a token
-            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
             log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                     tokenResponse.getAccessToken(),
                     tokenResponse.getIdToken(),
@@ -794,12 +800,11 @@ public class ReadmeSnippets {
                 .setRedirectUri("{redirectUri}") // must match the redirect uri in client app settings/console
                 .build();
 
-        // get interactionHandle
-        InteractResponse interactResponse = client.interact();
-        String interactHandle = interactResponse.getInteractionHandle();
+        // get client context
+        IDXClientContext idxClientContext = client.interact();
 
         // exchange interactHandle for stateHandle
-        IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+        IDXResponse idxResponse = client.introspect(idxClientContext);
         String stateHandle = idxResponse.getStateHandle();
 
         // check remediation options to continue the flow
@@ -881,12 +886,11 @@ public class ReadmeSnippets {
     }
 
     private void registrationFlow() throws ProcessingException {
-        // get interactionHandle
-        InteractResponse interactResponse = client.interact();
-        String interactHandle = interactResponse.getInteractionHandle();
+        // get client context
+        IDXClientContext idxClientContext = client.interact();
 
         // exchange interactHandle for stateHandle
-        IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+        IDXResponse idxResponse = client.introspect(idxClientContext);
         String stateHandle = idxResponse.getStateHandle();
 
         // get remediation options to go to the next step
@@ -1102,7 +1106,7 @@ public class ReadmeSnippets {
         // This response should contain the interaction code
         if (idxResponse.isLoginSuccessful()) {
             log.info("Login Successful!");
-            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+            TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
             log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                     tokenResponse.getAccessToken(),
                     tokenResponse.getIdToken(),
