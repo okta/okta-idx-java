@@ -1193,8 +1193,6 @@ class BaseIDXClientTest {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
-        //todo
-
         final IDXClient idxClient =
                 new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
