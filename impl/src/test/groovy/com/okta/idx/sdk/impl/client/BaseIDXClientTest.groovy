@@ -27,12 +27,12 @@ import com.okta.idx.sdk.api.model.Authenticator
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment
 import com.okta.idx.sdk.api.model.Credentials
 import com.okta.idx.sdk.api.model.FormValue
+import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Options
 import com.okta.idx.sdk.api.model.RemediationOption
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
-import com.okta.idx.sdk.api.request.CancelRequest
 import com.okta.idx.sdk.api.request.ChallengeRequest
 import com.okta.idx.sdk.api.request.ChallengeRequestBuilder
 import com.okta.idx.sdk.api.request.EnrollRequest
@@ -45,15 +45,13 @@ import com.okta.idx.sdk.api.request.RecoverRequest
 import com.okta.idx.sdk.api.request.RecoverRequestBuilder
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder
-import com.okta.idx.sdk.api.response.InteractResponse
+
 import com.okta.idx.sdk.api.response.IDXResponse
 import com.okta.idx.sdk.api.response.TokenResponse
 import com.okta.idx.sdk.impl.config.ClientConfiguration
 import org.testng.annotations.Test
 
 import static org.hamcrest.Matchers.arrayWithSize
-import static org.hamcrest.Matchers.hasLength
-import static org.hamcrest.Matchers.hasSize
 import static org.hamcrest.Matchers.is
 import static org.mockito.Mockito.any
 import static org.mockito.Mockito.mock
@@ -68,7 +66,7 @@ import static org.hamcrest.Matchers.nullValue
 class BaseIDXClientTest {
 
     @Test
-    void testInteractResponse() {
+    void testIDXClientContext() {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
@@ -83,10 +81,12 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
 
-        InteractResponse response = idxClient.interact()
+        IDXClientContext idxClientContext = idxClient.interact()
 
-        assertThat(response, notNullValue())
-        assertThat(response.getInteractionHandle(), is("003Q14X7li"))
+        assertThat(idxClientContext, notNullValue())
+        assertThat(idxClientContext.getCodeVerifier(), notNullValue())
+        assertThat(idxClientContext.getState(), notNullValue())
+        assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
     }
 
     @Test
@@ -97,15 +97,25 @@ class BaseIDXClientTest {
         final IDXClient idxClient =
             new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
-        final Response stubbedResponse = new DefaultResponse(
+        final Response stubbedInteractResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/json"),
+                new FileInputStream(getClass().getClassLoader().getResource("interact-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
+
+        IDXClientContext idxClientContext = idxClient.interact()
+
+        final Response stubbedIntrospectResponse = new DefaultResponse(
             200,
             MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
             new FileInputStream(getClass().getClassLoader().getResource("introspect-response.json").getFile()),
             -1)
 
-        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
-        IDXResponse response = idxClient.introspect(Optional.of("interactionHandle"))
+        IDXResponse response = idxClient.introspect(idxClientContext)
 
         assertThat(response, notNullValue())
         assertThat(response.remediation(), notNullValue())
@@ -165,6 +175,16 @@ class BaseIDXClientTest {
         final IDXClient idxClient =
             new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
+        final Response stubbedInteractResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/json"),
+                new FileInputStream(getClass().getClassLoader().getResource("interact-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
+
+        IDXClientContext idxClientContext = idxClient.interact()
+
         final Response stubbedIntrospectResponse = new DefaultResponse(
             200,
             MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
@@ -173,7 +193,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
-        IDXResponse introspectResponse = idxClient.introspect(Optional.of("interactionHandle"))
+        IDXResponse introspectResponse = idxClient.introspect(idxClientContext)
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
         assertThat(introspectResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/identify"))
@@ -314,6 +334,16 @@ class BaseIDXClientTest {
         final IDXClient idxClient =
             new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
+        final Response stubbedInteractResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/json"),
+                new FileInputStream(getClass().getClassLoader().getResource("interact-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
+
+        IDXClientContext idxClientContext = idxClient.interact()
+
         final Response stubbedIntrospectResponse = new DefaultResponse(
             200,
             MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
@@ -322,7 +352,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
-        IDXResponse introspectResponse = idxClient.introspect(Optional.of("interactionHandle"))
+        IDXResponse introspectResponse = idxClient.introspect(idxClientContext)
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
         assertThat(introspectResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/identify"))
@@ -642,6 +672,8 @@ class BaseIDXClientTest {
         final IDXClient idxClient =
                 new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
+        final IDXClientContext idxClientContext = new IDXClientContext("codeVerifier", "interactionHandle", "state")
+
         final Response stubbedTokenResponse = new DefaultResponse(
                 200,
                 MediaType.valueOf("application/json"),
@@ -650,7 +682,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedTokenResponse)
 
-        TokenResponse tokenResponse = idxClient.token("tokenUrl","grantType", "interactionCode")
+        TokenResponse tokenResponse = idxClient.token("tokenUrl","grantType", "interactionCode", idxClientContext)
 
         assertThat(tokenResponse, notNullValue())
         assertThat(tokenResponse.tokenType, is("Bearer"))
@@ -980,6 +1012,16 @@ class BaseIDXClientTest {
         final IDXClient idxClient =
                 new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
+        final Response stubbedInteractResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/json"),
+                new FileInputStream(getClass().getClassLoader().getResource("interact-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
+
+        IDXClientContext idxClientContext = idxClient.interact()
+
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 200,
                 MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
@@ -988,7 +1030,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
-        IDXResponse introspectResponse = idxClient.introspect(Optional.of("interactionHandle"))
+        IDXResponse introspectResponse = idxClient.introspect(idxClientContext)
 
         assertThat(introspectResponse.remediation().remediationOptions(), notNullValue())
         assertThat(introspectResponse.remediation.value.first().href, equalTo("https://foo.oktapreview.com/idp/idx/identify"))
@@ -1125,6 +1167,8 @@ class BaseIDXClientTest {
         final IDXClient idxClient =
                 new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
+        final IDXClientContext idxClientContext = new IDXClientContext("codeVerifier", "expiredInteractionHandle", "state")
+
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 401,
                 MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
@@ -1134,7 +1178,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedIntrospectResponse)
 
         try {
-            idxClient.introspect(Optional.of("expiredInteractionHandle"))
+            idxClient.introspect(idxClientContext)
         } catch (ProcessingException e) {
             assertThat(e.getHttpStatus(), is(401))
             assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/idp/idx/introspect failed. HTTP status: 401"))
@@ -1152,6 +1196,8 @@ class BaseIDXClientTest {
         final IDXClient idxClient =
                 new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
+        final IDXClientContext idxClientContext = new IDXClientContext("codeVerifier", "interactionHandle", "state")
+
         final Response stubbedTokenResponse = new DefaultResponse(
                 400,
                 MediaType.valueOf("application/json"),
@@ -1161,7 +1207,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedTokenResponse)
 
         try {
-            idxClient.token("tokenUrl", "grantType", "interactionCode")
+            idxClient.token("tokenUrl", "grantType", "interactionCode", idxClientContext)
         } catch (ProcessingException e) {
             assertThat(e.getMessage(), is("Request to tokenUrl failed. HTTP status: 400"))
             assertThat(e.getHttpStatus(), is(400))

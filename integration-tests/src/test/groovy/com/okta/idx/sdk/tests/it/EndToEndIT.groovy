@@ -26,6 +26,7 @@ import com.okta.idx.sdk.api.client.IDXClient
 import com.okta.idx.sdk.api.client.IDXClientBuilder
 import com.okta.idx.sdk.api.model.Authenticator
 import com.okta.idx.sdk.api.model.Credentials
+import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.RemediationOption
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
@@ -33,7 +34,7 @@ import com.okta.idx.sdk.api.request.ChallengeRequest
 import com.okta.idx.sdk.api.request.ChallengeRequestBuilder
 import com.okta.idx.sdk.api.request.IdentifyRequest
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder
-import com.okta.idx.sdk.api.response.InteractResponse
+
 import com.okta.idx.sdk.api.response.IDXResponse
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
@@ -86,10 +87,10 @@ class EndToEndIT {
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("interact-response.json")))
 
-        InteractResponse interactResponse = idxClient.interact()
+        IDXClientContext idxClientContext = idxClient.interact()
 
-        assertThat(interactResponse, notNullValue())
-        assertThat(interactResponse.getInteractionHandle(), is("003Q14X7li"))
+        assertThat(idxClientContext, notNullValue())
+        assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/v1/interact"))
             .withHeader("Content-Type", equalTo(MediaType.APPLICATION_FORM_URLENCODED_VALUE)))
@@ -103,7 +104,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
                 .withBodyFile("introspect-response.json")))
 
-        IDXResponse idxResponse = idxClient.introspect(Optional.of("interactionHandle"))
+        IDXResponse idxResponse = idxClient.introspect(idxClientContext)
 
         assertThat(idxResponse, notNullValue())
 
@@ -295,10 +296,10 @@ class EndToEndIT {
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("interact-response.json")))
 
-        InteractResponse interactResponse = idxClient.interact()
+        IDXClientContext idxClientContext = idxClient.interact()
 
-        assertThat(interactResponse, notNullValue())
-        assertThat(interactResponse.getInteractionHandle(), is("003Q14X7li"))
+        assertThat(idxClientContext, notNullValue())
+        assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/v1/interact"))
             .withHeader("Content-Type", equalTo(MediaType.APPLICATION_FORM_URLENCODED_VALUE)))
@@ -312,7 +313,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
                 .withBodyFile("introspect-response.json")))
 
-        IDXResponse idxResponse = idxClient.introspect(Optional.of("interactionHandle"))
+        IDXResponse idxResponse = idxClient.introspect(idxClientContext)
 
         assertThat(idxResponse, notNullValue())
 

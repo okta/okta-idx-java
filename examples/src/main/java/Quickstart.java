@@ -21,6 +21,7 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
+import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.Options;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.UserProfile;
@@ -39,7 +40,6 @@ import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.response.IDXResponse;
-import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,10 +59,10 @@ public class Quickstart {
 
     private static final IDXClient client = Clients.builder().build();
 
-    private static final String IDENTIFIER = "someone@example.com";                                           // replace
-    private static final char[] PASSWORD = {'T','o','p','s','e','c','r','e','t','1','2','3','!'};             // replace
-    private static final char[] NEW_PASSWORD = {'S','u','p','e','r','s','e','c','r','e','t','1','2','3','!'}; // replace
-    private static final char[] SECURITY_QUESTION_ANSWER = { 'O','k','t','a'};                                // replace
+    private static final String IDENTIFIER = "someone@example.com";                   // replace
+    private static final char[] PASSWORD = "Topsecret123!".toCharArray();             // replace
+    private static final char[] NEW_PASSWORD = "Supersecret123!".toCharArray();       // replace
+    private static final char[] SECURITY_QUESTION_ANSWER = "Okta".toCharArray();      // replace
 
     public static void main(String... args) throws JsonProcessingException {
 
@@ -89,6 +89,7 @@ public class Quickstart {
         // complete login flow with password and webauthn
         //runLoginFlowWithPasswordAndWebAuthnAuthenticators();
 
+        // complete reset password flow
         //runLoginFlowWithPasswordReset();
 
         // complete registration flow for new user (Sign Up)
@@ -98,12 +99,11 @@ public class Quickstart {
     private static void runRegistrationFlow() throws JsonProcessingException {
 
         try {
-            // get interactionHandle
-            InteractResponse interactResponse = client.interact();
-            String interactHandle = interactResponse.getInteractionHandle();
+            // get client context
+            IDXClientContext idxClientContext = client.interact();
 
-            // exchange interactHandle for stateHandle
-            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            // get stateHandle
+            IDXResponse idxResponse = client.introspect(idxClientContext);
             String stateHandle = idxResponse.getStateHandle();
 
             // get remediation options to go to the next step
@@ -319,7 +319,7 @@ public class Quickstart {
             // This response should contain the interaction code
             if (idxResponse.isLoginSuccessful()) {
                 log.info("Login Successful!");
-                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                         tokenResponse.getAccessToken(),
                         tokenResponse.getIdToken(),
@@ -336,12 +336,11 @@ public class Quickstart {
     private static void runEnrollSecurityQnAuthenticatorFlow() throws JsonProcessingException {
 
         try {
-            // get interactionHandle
-            InteractResponse interactResponse = client.interact();
-            String interactHandle = interactResponse.getInteractionHandle();
+            // get client context
+            IDXClientContext idxClientContext = client.interact();
 
-            // exchange interactHandle for stateHandle
-            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            // get stateHandle
+            IDXResponse idxResponse = client.introspect(idxClientContext);
             String stateHandle = idxResponse.getStateHandle();
 
             // check remediation options to continue the flow
@@ -387,7 +386,7 @@ public class Quickstart {
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
                 log.info("Login Successful!");
-                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 log.info("Token: {}", tokenResponse);
             } else {
                 // logon is not successful yet; we need to follow more remediation steps.
@@ -437,7 +436,7 @@ public class Quickstart {
                 // check if we landed success on login
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
-                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
@@ -498,7 +497,7 @@ public class Quickstart {
                     if (idxResponse.isLoginSuccessful()) {
                         log.info("Login Successful!");
                         // exchange the received interaction code for a token
-                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                         log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                                 tokenResponse.getAccessToken(),
                                 tokenResponse.getIdToken(),
@@ -574,12 +573,11 @@ public class Quickstart {
     private static void runLoginFlowWithPasswordAndEmailAuthenticators() throws JsonProcessingException {
 
         try {
-            // get interactionHandle
-            InteractResponse interactResponse = client.interact();
-            String interactHandle = interactResponse.getInteractionHandle();
+            // get client context
+            IDXClientContext idxClientContext = client.interact();
 
-            // exchange interactHandle for stateHandle
-            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            // get stateHandle
+            IDXResponse idxResponse = client.introspect(idxClientContext);
             String stateHandle = idxResponse.getStateHandle();
 
             // check remediation options to continue the flow
@@ -625,7 +623,7 @@ public class Quickstart {
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
                 log.info("Login Successful!");
-                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 log.info("Token: {}", tokenResponse);
             } else {
                 // logon is not successful yet; we need to follow more remediation steps.
@@ -675,7 +673,7 @@ public class Quickstart {
                 // check if we landed success on login
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
-                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
@@ -736,7 +734,7 @@ public class Quickstart {
                     if (idxResponse.isLoginSuccessful()) {
                         log.info("Login Successful!");
                         // exchange the received interaction code for a token
-                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                         log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                                 tokenResponse.getAccessToken(),
                                 tokenResponse.getIdToken(),
@@ -755,12 +753,11 @@ public class Quickstart {
     private static void runLoginFlowWithPasswordAndProgressiveProfiling() throws JsonProcessingException {
 
         try {
-            // get interactionHandle
-            InteractResponse interactResponse = client.interact();
-            String interactHandle = interactResponse.getInteractionHandle();
+            // get client context
+            IDXClientContext idxClientContext = client.interact();
 
-            // exchange interactHandle for stateHandle
-            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            // get stateHandle
+            IDXResponse idxResponse = client.introspect(idxClientContext);
             String stateHandle = idxResponse.getStateHandle();
 
             // check remediation options to continue the flow
@@ -801,7 +798,7 @@ public class Quickstart {
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
                 log.info("Login Successful!");
-                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                         tokenResponse.getAccessToken(),
                         tokenResponse.getIdToken(),
@@ -838,7 +835,7 @@ public class Quickstart {
 
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
-                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
@@ -856,12 +853,11 @@ public class Quickstart {
     private static void runLoginFlowWithOptionalAuthenticatorEnrollment() throws JsonProcessingException {
 
         try {
-            // get interactionHandle
-            InteractResponse interactResponse = client.interact();
-            String interactHandle = interactResponse.getInteractionHandle();
+            // get client context
+            IDXClientContext idxClientContext = client.interact();
 
-            // exchange interactHandle for stateHandle
-            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            // get stateHandle
+            IDXResponse idxResponse = client.introspect(idxClientContext);
             String stateHandle = idxResponse.getStateHandle();
 
             // check remediation options to continue the flow
@@ -907,7 +903,7 @@ public class Quickstart {
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
                 log.info("Login Successful!");
-                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 log.info("Token: {}", tokenResponse);
             } else {
                 // logon is not successful yet; we need to follow more remediation steps.
@@ -934,7 +930,7 @@ public class Quickstart {
                 // check if we landed success on login
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
-                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
@@ -1018,7 +1014,7 @@ public class Quickstart {
                     // This response should contain the interaction code
                     if (idxResponse.isLoginSuccessful()) {
                         log.info("Login Successful!");
-                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                         log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                                 tokenResponse.getAccessToken(),
                                 tokenResponse.getIdToken(),
@@ -1037,12 +1033,11 @@ public class Quickstart {
     private static void runLoginFlowWithSecurityQnAndEmailAuthenticators() throws JsonProcessingException {
 
         try {
-            // get interactionHandle
-            InteractResponse interactResponse = client.interact();
-            String interactHandle = interactResponse.getInteractionHandle();
+            // get client context
+            IDXClientContext idxClientContext = client.interact();
 
-            // exchange interactHandle for stateHandle
-            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            // get stateHandle
+            IDXResponse idxResponse = client.introspect(idxClientContext);
             String stateHandle = idxResponse.getStateHandle();
 
             // check remediation options to continue the flow
@@ -1088,7 +1083,7 @@ public class Quickstart {
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
                 log.info("Login Successful!");
-                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 log.info("Token: {}", tokenResponse);
             } else {
                 // login is not successful yet; we need to follow more remediation steps.
@@ -1138,7 +1133,7 @@ public class Quickstart {
                 // check if we landed success on login
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
-                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
@@ -1199,7 +1194,7 @@ public class Quickstart {
                     if (idxResponse.isLoginSuccessful()) {
                         log.info("Login Successful!");
                         // exchange the received interaction code for a token
-                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                         log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                                 tokenResponse.getAccessToken(),
                                 tokenResponse.getIdToken(),
@@ -1218,12 +1213,11 @@ public class Quickstart {
     private static void runLoginFlowWithPasswordAndPhoneAuthenticators() throws JsonProcessingException {
 
         try {
-            // get interactionHandle
-            InteractResponse interactResponse = client.interact();
-            String interactHandle = interactResponse.getInteractionHandle();
+            // get client context
+            IDXClientContext idxClientContext = client.interact();
 
-            // exchange interactHandle for stateHandle
-            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            // get stateHandle
+            IDXResponse idxResponse = client.introspect(idxClientContext);
             String stateHandle = idxResponse.getStateHandle();
 
             // check remediation options to continue the flow
@@ -1269,7 +1263,7 @@ public class Quickstart {
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
                 log.info("Login Successful!");
-                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 log.info("Token: {}", tokenResponse);
             } else {
                 // logon is not successful yet; we need to follow more remediation steps.
@@ -1366,7 +1360,7 @@ public class Quickstart {
                 // check if we landed success on login
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
-                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
@@ -1384,12 +1378,11 @@ public class Quickstart {
     private static void runLoginFlowWithPasswordAndWebAuthnAuthenticators() throws JsonProcessingException {
 
         try {
-            // get interactionHandle
-            InteractResponse interactResponse = client.interact();
-            String interactHandle = interactResponse.getInteractionHandle();
+            // get client context
+            IDXClientContext idxClientContext = client.interact();
 
-            // exchange interactHandle for stateHandle
-            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            // get stateHandle
+            IDXResponse idxResponse = client.introspect(idxClientContext);
             String stateHandle = idxResponse.getStateHandle();
 
             // check remediation options to continue the flow
@@ -1493,7 +1486,7 @@ public class Quickstart {
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
                 log.info("Login Successful!");
-                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                         tokenResponse.getAccessToken(),
                         tokenResponse.getIdToken(),
@@ -1510,12 +1503,11 @@ public class Quickstart {
     private static void runLoginFlowWithPasswordReset() throws JsonProcessingException {
 
         try {
-            // get interactionHandle
-            InteractResponse interactResponse = client.interact();
-            String interactHandle = interactResponse.getInteractionHandle();
+            // get client context
+            IDXClientContext idxClientContext = client.interact();
 
-            // exchange interactHandle for stateHandle
-            IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+            // get stateHandle
+            IDXResponse idxResponse = client.introspect(idxClientContext);
             String stateHandle = idxResponse.getStateHandle();
 
             // check remediation options to continue the flow
@@ -1561,7 +1553,7 @@ public class Quickstart {
             // check if we landed success on login
             if (idxResponse.isLoginSuccessful()) {
                 log.info("Login Successful!");
-                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 log.info("Token: {}", tokenResponse);
             } else {
                 // logon is not successful yet; we need to follow more remediation steps.
@@ -1585,17 +1577,17 @@ public class Quickstart {
                 secQnEnrollmentCredentials.setQuestionKey("disliked_food");
                 secQnEnrollmentCredentials.setAnswer(SECURITY_QUESTION_ANSWER);
 
-                // build answer password authenticator challenge request
-                AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                // build answer security question authenticator challenge request
+                AnswerChallengeRequest answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
                         .withStateHandle(stateHandle)
                         .withCredentials(secQnEnrollmentCredentials)
                         .build();
-                idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+                idxResponse = remediationOption.proceed(client, answerChallengeRequest);
 
                 // check if we landed success on login
                 if (idxResponse.isLoginSuccessful()) {
                     log.info("Login Successful!");
-                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                             tokenResponse.getAccessToken(),
                             tokenResponse.getIdToken(),
@@ -1623,18 +1615,18 @@ public class Quickstart {
                     credentials.setPasscode(NEW_PASSWORD);
 
                     // build answer password authenticator challenge request
-                    passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                    answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
                             .withStateHandle(stateHandle)
                             .withCredentials(credentials)
                             .build();
 
-                    idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+                    idxResponse = remediationOption.proceed(client, answerChallengeRequest);
 
                     // check if we landed success on login
                     if (idxResponse.isLoginSuccessful()) {
                         log.info("Login Successful!");
                         // exchange the received interaction code for a token
-                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+                        TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                         log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
                                 tokenResponse.getAccessToken(),
                                 tokenResponse.getIdToken(),

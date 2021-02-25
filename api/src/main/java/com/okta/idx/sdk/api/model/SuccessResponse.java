@@ -116,10 +116,10 @@ public class SuccessResponse {
      * @param client the idx client instance
      * @return TokenResponse
      */
-    public TokenResponse exchangeCode(IDXClient client) throws ProcessingException {
+    public TokenResponse exchangeCode(IDXClient client, IDXClientContext idxClientContext) throws ProcessingException {
         String grantType = this.parseGrantType();
         String interactionCode = this.parseInteractionCode();
         String tokenUrl = this.getHref();
-        return client.token(tokenUrl, grantType, interactionCode);
+        return client.token(tokenUrl, grantType, interactionCode, idxClientContext);
     }
 }

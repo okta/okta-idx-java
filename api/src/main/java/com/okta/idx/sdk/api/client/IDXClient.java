@@ -16,6 +16,7 @@
 package com.okta.idx.sdk.api.client;
 
 import com.okta.idx.sdk.api.exception.ProcessingException;
+import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.ChallengeRequest;
 import com.okta.idx.sdk.api.request.EnrollRequest;
@@ -24,19 +25,16 @@ import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.response.IDXResponse;
-import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
-
-import java.util.Optional;
 
 /**
  * Client to interact with the IDX backend APIs.
  */
 public interface IDXClient {
 
-    InteractResponse interact() throws ProcessingException;
+    IDXClientContext interact() throws ProcessingException;
 
-    IDXResponse introspect(Optional<String> interactionHandleOptional) throws ProcessingException;
+    IDXResponse introspect(IDXClientContext idxClientContext) throws ProcessingException;
 
     IDXResponse identify(IdentifyRequest identifyRequest, String href) throws ProcessingException;
 
@@ -54,5 +52,5 @@ public interface IDXClient {
 
     IDXResponse recover(RecoverRequest recoverRequest, String href) throws ProcessingException;
 
-    TokenResponse token(String url, String grantType, String interactionCode) throws ProcessingException;
+    TokenResponse token(String url, String grantType, String interactionCode, IDXClientContext idxClientContext) throws ProcessingException;
 }

@@ -103,24 +103,25 @@ IDXClient client = Clients.builder()
 ```
 [//]: # (end: createClient)
 
-### Get Interaction Handle
-
-[//]: # (method: getInteractionHandle)
-```java
-InteractResponse interactResponse = client.interact();
-String interactHandle = interactResponse.getInteractionHandle();
-```
-[//]: # (end: getInteractionHandle)
-
 ### Get State Handle
 
 [//]: # (method: exchangeInteractionHandleForStateHandle)
 ```java
-// optional with interactionHandle or empty; if empty, a new interactionHandle will be obtained
-IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
+IDXClientContext idxClientContext = client.interact();
+IDXResponse idxResponse = client.introspect(idxClientContext);
 String stateHandle = idxResponse.getStateHandle();
 ```
 [//]: # (end: exchangeInteractionHandleForStateHandle)
+
+### Get Interaction Handle and Code Verifier
+
+[//]: # (method: getInteractionHandleAndCodeVerifier)
+```java
+IDXClientContext idxClientContext = client.interact();
+String interactionHandle = idxClientContext.getInteractionHandle();
+String codeVerifier = idxClientContext.getCodeVerifier();
+```
+[//]: # (end: getInteractionHandleAndCodeVerifier)
 
 ### Get New tokens (access_token/id_token/refresh_token)
 
@@ -139,8 +140,11 @@ IDXClient client = Clients.builder()
         .setRedirectUri("{redirectUri}") // must match the redirect uri in client app settings/console
         .build();
 
-// call introspect - interactionHandle is optional; if it's not provided, a new interactionHandle will be obtained.IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
-IDXResponse idxResponse = client.introspect(Optional.empty());
+// get client context
+IDXClientContext idxClientContext = client.interact();
+
+// introspect
+IDXResponse idxResponse = client.introspect(idxClientContext);
 String stateHandle = idxResponse.getStateHandle();
 
 // check remediation options to continue the flow
@@ -199,7 +203,7 @@ AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChall
 idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
 
 // exchange interaction code for token
-TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
 log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
         tokenResponse.getAccessToken(),
         tokenResponse.getIdToken(),
@@ -225,12 +229,11 @@ IDXClient client = Clients.builder()
         .setRedirectUri("{redirectUri}") // must match the redirect uri in client app settings/console
         .build();
 
-// get interactionHandle
-InteractResponse interactResponse = client.interact();
-String interactHandle = interactResponse.getInteractionHandle();
+// get client context
+IDXClientContext idxClientContext = client.interact();
 
 // exchange interactHandle for stateHandle
-IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+IDXResponse idxResponse = client.introspect(idxClientContext);
 String stateHandle = idxResponse.getStateHandle();
 
 // check remediation options to continue the flow
@@ -312,8 +315,11 @@ In this example, the Org is configured to require a security question as a secon
 
 [//]: # (method: loginUsingPasswordAndEnrollSecQnAuthenticator)
 ```java
+// get client context
+IDXClientContext idxClientContext = client.interact();
+
 // introspect
-IDXResponse idxResponse = client.introspect(Optional.of("{interactHandle}"));
+IDXResponse idxResponse = client.introspect(idxClientContext);
 String stateHandle = idxResponse.getStateHandle();
 Credentials credentials = new Credentials();
 credentials.setPasscode("{password}".toCharArray());
@@ -399,12 +405,11 @@ In this example, the Org is configured to require an email as a second authentic
 
 [//]: # (method: loginUsingPasswordAndEmailAuthenticator)
 ```java
-// get interactionHandle
-InteractResponse interactResponse = client.interact();
-String interactHandle = interactResponse.getInteractionHandle();
+// get client context
+IDXClientContext idxClientContext = client.interact();
 
 // exchange interactHandle for stateHandle
-IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+IDXResponse idxResponse = client.introspect(idxClientContext);
 String stateHandle = idxResponse.getStateHandle();
 
 // check remediation options to continue the flow
@@ -507,7 +512,7 @@ idxResponse = remediationOption.proceed(client, emailAuthenticatorAnswerChalleng
 if (idxResponse.isLoginSuccessful()) {
     log.info("Login Successful!");
     // exchange the received interaction code for a token
-    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
             tokenResponse.getAccessToken(),
             tokenResponse.getIdToken(),
@@ -527,12 +532,11 @@ In this example, the Org is configured to require a Phone factor (SMS/Voice) as 
 
 [//]: # (method: loginUsingPasswordAndPhoneAuthenticator)
 ```java
-// get interactionHandle
-InteractResponse interactResponse = client.interact();
-String interactHandle = interactResponse.getInteractionHandle();
+// get client context
+IDXClientContext idxClientContext = client.interact();
 
 // exchange interactHandle for stateHandle
-IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+IDXResponse idxResponse = client.introspect(idxClientContext);
 String stateHandle = idxResponse.getStateHandle();
 IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
         .withIdentifier("{identifier}") // email
@@ -632,7 +636,7 @@ idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChall
 // check if we landed success on login
 if (idxResponse.isLoginSuccessful()) {
     log.info("Login Successful!");
-    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
             tokenResponse.getAccessToken(),
             tokenResponse.getIdToken(),
@@ -654,12 +658,11 @@ Refer [here](https://developer.okta.com/docs/reference/api/authn/#get-the-signed
 
 [//]: # (method: loginUsingPasswordAndWebAuthnAuthenticator)
 ```java
-// get interactionHandle
-InteractResponse interactResponse = client.interact();
-String interactHandle = interactResponse.getInteractionHandle();
+// get client context
+IDXClientContext idxClientContext = client.interact();
 
 // exchange interactHandle for stateHandle
-IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+IDXResponse idxResponse = client.introspect(idxClientContext);
 String stateHandle = idxResponse.getStateHandle();
 
 // check remediation options to continue the flow
@@ -767,7 +770,7 @@ idxResponse = remediationOption.proceed(client, fingerprintAuthenticatorAnswerCh
 // check if we landed success on login
 if (idxResponse.isLoginSuccessful()) {
     log.info("Login Successful!");
-    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
             tokenResponse.getAccessToken(),
             tokenResponse.getIdToken(),
@@ -787,12 +790,11 @@ In this example, the Org is configured to require password authenticator to logi
 
 [//]: # (method: loginWithPasswordReset)
 ```java
-// get interactionHandle
-InteractResponse interactResponse = client.interact();
-String interactHandle = interactResponse.getInteractionHandle();
+// get client context
+IDXClientContext idxClientContext = client.interact();
 
 // exchange interactHandle for stateHandle
-IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+IDXResponse idxResponse = client.introspect(idxClientContext);
 String stateHandle = idxResponse.getStateHandle();
 
 // check remediation options to continue the flow
@@ -815,8 +817,7 @@ RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
         .build();
 idxResponse = remediationOption.proceed(client, recoverRequest);
 
-// get remediation options to go to the next step
-// since the org requires password only, we don't have the "select password authenticator" step as in previous examples 
+// since the org requires password only, we don't have the "select password authenticator" step as in previous examples
 remediationOptions = idxResponse.remediation().remediationOptions();
 remediationOptionsOptional = Arrays.stream(remediationOptions)
         .filter(x -> "challenge-authenticator".equals(x.getName()))
@@ -855,14 +856,13 @@ passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.buil
         .withStateHandle(stateHandle)
         .withCredentials(credentials)
         .build();
-
 idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
 
 // check if we landed success on login
 if (idxResponse.isLoginSuccessful()) {
     log.info("Login Successful!");
     // exchange the received interaction code for a token
-    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
             tokenResponse.getAccessToken(),
             tokenResponse.getIdToken(),
@@ -897,12 +897,11 @@ Sign up a new user.
 
 [//]: # (method: registrationFlow)
 ```java
-// get interactionHandle
-InteractResponse interactResponse = client.interact();
-String interactHandle = interactResponse.getInteractionHandle();
+// get client context
+IDXClientContext idxClientContext = client.interact();
 
 // exchange interactHandle for stateHandle
-IDXResponse idxResponse = client.introspect(Optional.of(interactHandle));
+IDXResponse idxResponse = client.introspect(idxClientContext);
 String stateHandle = idxResponse.getStateHandle();
 
 // get remediation options to go to the next step
@@ -1109,7 +1108,7 @@ idxResponse = remediationOption.proceed(client, skipAuthenticatorEnrollmentReque
 // This response should contain the interaction code
 if (idxResponse.isLoginSuccessful()) {
     log.info("Login Successful!");
-    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client);
+    TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
     log.info("Exchanged interaction code for token: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
             tokenResponse.getAccessToken(),
             tokenResponse.getIdToken(),
