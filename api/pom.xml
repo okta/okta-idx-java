@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.okta.idx.sdk</groupId>
         <artifactId>okta-idx-java-root</artifactId>
-        <version>0.1.1-beta.5-SNAPSHOT</version>
+        <version>0.1.0-beta.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>okta-idx-java-api</artifactId>
