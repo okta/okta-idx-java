@@ -46,6 +46,11 @@ public class RemediationOption {
     private String name;
 
     /**
+     * Type for this remediation option
+     */
+    private String type;
+
+    /**
      * HTTP Method to use for this remediation option.
      */
     private String method;
@@ -98,6 +103,10 @@ public class RemediationOption {
 
     public String getName() {
         return name;
+    }
+
+    public String getType() {
+        return type;
     }
 
     /**
