@@ -108,6 +108,8 @@ public class ConvenienceExamples {
                 log.info("Login Successful!");
                 tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 log.info("Token: {}", tokenResponse);
+            } else if (idxResponse.getMessages() != null) {
+                Arrays.stream(idxResponse.getMessages().getValue()).forEach(msg -> log.error("{}", msg.getMessage()));
             } else {
                 // we need to follow remediation steps
                 remediationOptions = idxResponse.remediation().remediationOptions();
@@ -160,6 +162,8 @@ public class ConvenienceExamples {
                             tokenResponse.getTokenType(),
                             tokenResponse.getScope(),
                             tokenResponse.getExpiresIn());
+                } else if (idxResponse.getMessages() != null) {
+                    Arrays.stream(idxResponse.getMessages().getValue()).forEach(msg -> log.error("Error: {}", msg.getMessage()));
                 } else {
                     // authentication not successful yet; we need to follow more remediation steps
                     log.info("Could not authenticate with just the provided username and password (password authenticator). More remediation steps needed...");
@@ -181,6 +185,6 @@ public class ConvenienceExamples {
         System.out.print("Enter Password: ");
         String password = scanner.nextLine();
 
-        TokenResponse tokenResponse = authenticate(username, password);
+        authenticate(username, password);
     }
 }
