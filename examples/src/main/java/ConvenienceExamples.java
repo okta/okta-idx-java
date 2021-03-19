@@ -45,6 +45,8 @@ public class ConvenienceExamples {
      * Authenticate user with username and password by completing the password authenticator
      * challenge and returns the Token (access_token/id_token/refresh_token).
      *
+     * Note: This requires 'Password' as the only required factor in app Sign-on policy configuration.
+     *
      * @param username the email
      * @param password the password
      * @return the token response
@@ -139,7 +141,7 @@ public class ConvenienceExamples {
                     log.error("Terminal error occurred");
                     Arrays.stream(idxResponse.getMessages().getValue()).forEach(msg -> log.error("Error: {}", msg.getMessage()));
                 } else {
-                    log.error("Could not authenticate with just the provided username and password.");
+                    log.error("Could not authenticate user with password factor alone. Please review your app Sign-on policy configuration.");
                 }
             }
         } catch (ProcessingException e) {
