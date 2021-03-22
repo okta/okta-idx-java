@@ -18,12 +18,15 @@ import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.client.Clients;
 import com.okta.idx.sdk.api.client.IDXClient;
 import com.okta.idx.sdk.api.exception.ProcessingException;
+import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
+import com.okta.idx.sdk.api.request.ChallengeRequest;
+import com.okta.idx.sdk.api.request.ChallengeRequestBuilder;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
 import com.okta.idx.sdk.api.response.IDXResponse;
@@ -32,12 +35,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class ConvenienceExamples {
 
-    private static final Logger log = LoggerFactory.getLogger(Quickstart.class);
+    private static final Logger log = LoggerFactory.getLogger(ConvenienceExamples.class);
 
     private static final IDXClient client = Clients.builder().build();
 
@@ -45,7 +50,7 @@ public class ConvenienceExamples {
      * Authenticate user with username and password by completing the password authenticator
      * challenge and returns the Token (access_token/id_token/refresh_token).
      *
-     * Note: This requires 'Password' as the only required factor in app Sign-on policy configuration.
+     * Note: This requires 'Password' as the ONLY required factor in app Sign-on policy configuration.
      *
      * @param username the email
      * @param password the password
@@ -65,6 +70,11 @@ public class ConvenienceExamples {
 
             // check remediation options to continue the flow
             RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+
+            log.info("Remediation Options: {}", Arrays.stream(remediationOptions)
+                    .map(RemediationOption::getName)
+                    .collect(Collectors.toList()));
+
             Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
                     .findFirst();
             Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation options");
@@ -113,8 +123,41 @@ public class ConvenienceExamples {
             } else {
                 log.info("Attempting to follow next remediation option(s)");
 
+                // we need to follow remediation steps
+                remediationOptions = idxResponse.remediation().remediationOptions();
+
+                log.info("Remediation Options: {}", Arrays.stream(remediationOptions)
+                        .map(RemediationOption::getName)
+                        .collect(Collectors.toList()));
+
+                remediationOptionsOptional = Arrays.stream(remediationOptions)
+                        .filter(x -> "select-authenticator-authenticate".equals(x.getName()))
+                        .findFirst();
+                remediationOption = remediationOptionsOptional.get();
+
+                // get authenticator options
+                Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+                log.info("Authenticator Options: {}", authenticatorOptions);
+
+                // select password authenticator
+                Authenticator passwordAuthenticator = new Authenticator();
+                passwordAuthenticator.setId(authenticatorOptions.get("password"));
+                passwordAuthenticator.setMethodType("password");
+
+                // build password authenticator challenge request
+                ChallengeRequest passwordAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
+                        .withAuthenticator(passwordAuthenticator)
+                        .withStateHandle(stateHandle)
+                        .build();
+                idxResponse = remediationOption.proceed(client, passwordAuthenticatorChallengeRequest);
+
                 // check remediation options to continue the flow
                 remediationOptions = idxResponse.remediation().remediationOptions();
+
+                log.info("Remediation Options: {}", Arrays.stream(remediationOptions)
+                        .map(RemediationOption::getName)
+                        .collect(Collectors.toList()));
+
                 remediationOptionsOptional = Arrays.stream(remediationOptions)
                         .filter(x -> "challenge-authenticator".equals(x.getName()))
                         .findFirst();
@@ -141,7 +184,40 @@ public class ConvenienceExamples {
                     log.error("Terminal error occurred");
                     Arrays.stream(idxResponse.getMessages().getValue()).forEach(msg -> log.error("Error: {}", msg.getMessage()));
                 } else {
-                    log.error("Could not authenticate user with password factor alone. Please review your app Sign-on policy configuration.");
+                    // password expired or required to be changed on initial login
+
+                    remediationOptions = idxResponse.remediation().remediationOptions();
+
+                    log.info("Remediation Options: {}", Arrays.stream(remediationOptions)
+                            .map(RemediationOption::getName)
+                            .collect(Collectors.toList()));
+
+                    remediationOptionsOptional = Arrays.stream(remediationOptions)
+                            .filter(x -> "reenroll-authenticator".equals(x.getName()))
+                            .findFirst();
+
+                    remediationOption = remediationOptionsOptional.get();
+
+                    // set new password
+                    credentials.setPasscode("newAbcd1234".toCharArray());
+
+                    // build answer password authenticator challenge request
+                    passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                            .withStateHandle(stateHandle)
+                            .withCredentials(credentials)
+                            .build();
+
+                    idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+
+                    if (idxResponse.isLoginSuccessful()) {
+                        log.info("Login Successful!");
+                        tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
+                    } else if (idxResponse.getMessages() != null && idxResponse.remediation() == null) {
+                        log.error("Terminal error occurred");
+                        Arrays.stream(idxResponse.getMessages().getValue()).forEach(msg -> log.error("Error: {}", msg.getMessage()));
+                    } else {
+                        log.error("Could not authenticate user with password factor alone. Please review your app Sign-on policy configuration.");
+                    }
                 }
             }
         } catch (ProcessingException e) {
@@ -153,21 +229,29 @@ public class ConvenienceExamples {
         return tokenResponse;
     }
 
+    /**
+     * Test drive
+     *
+     * @param args
+     */
     public static void main(String... args) {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter Username: ");
         String username = scanner.nextLine();
         System.out.print("Enter Password: ");
+        // TODO: mask password entry
         String password = scanner.nextLine();
 
         TokenResponse tokenResponse = authenticate(username, password);
 
-        log.info("TokenResponse: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
-                tokenResponse.getAccessToken(),
-                tokenResponse.getIdToken(),
-                tokenResponse.getRefreshToken(),
-                tokenResponse.getTokenType(),
-                tokenResponse.getScope(),
-                tokenResponse.getExpiresIn());
+        if (tokenResponse != null) {
+            log.info("TokenResponse: \naccessToken: {}, \nidToken: {}, \nrefreshToken: {}, \ntokenType: {}, \nscope: {}, \nexpiresIn:{}",
+                    tokenResponse.getAccessToken(),
+                    tokenResponse.getIdToken(),
+                    tokenResponse.getRefreshToken(),
+                    tokenResponse.getTokenType(),
+                    tokenResponse.getScope(),
+                    tokenResponse.getExpiresIn());
+        }
     }
 }
