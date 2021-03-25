@@ -46,6 +46,7 @@
         <module>integration-tests</module>
         <module>examples</module>
         <module>coverage</module>
+        <module>samples</module>
     </modules>
 
     <dependencyManagement>

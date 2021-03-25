@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+spring:
+  logging:
+    level:
+      org.springframework.web: DEBUG
+      com.okta.idx.sdk.samples.controller: DEBUG
