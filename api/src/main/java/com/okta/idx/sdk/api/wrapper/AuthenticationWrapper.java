@@ -77,11 +77,7 @@ public class AuthenticationWrapper {
             RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
             printRemediationOptions(remediationOptions);
 
-            Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
-                    .filter(x -> RemediationType.IDENTIFY.equals(x.getName()))
-                    .findFirst();
-            Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + RemediationType.IDENTIFY);
-            RemediationOption remediationOption = remediationOptionsOptional.get();
+            RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.IDENTIFY);
 
             // Check if identify flow needs to include credentials
             boolean isIdentifyInOneStep = isRemediationRequireCredentials(RemediationType.IDENTIFY, introspectResponse);
@@ -135,12 +131,7 @@ public class AuthenticationWrapper {
                     remediationOptions = identifyResponse.remediation().remediationOptions();
                     printRemediationOptions(remediationOptions);
 
-                    remediationOptionsOptional = Arrays.stream(remediationOptions)
-                            .filter(x -> RemediationType.CHALLENGE_AUTHENTICATOR.equals(x.getName()))
-                            .findFirst();
-                    Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + RemediationType.CHALLENGE_AUTHENTICATOR);
-
-                    remediationOption = remediationOptionsOptional.get();
+                    remediationOption = extractRemediationOption(remediationOptions, RemediationType.CHALLENGE_AUTHENTICATOR);
 
                     // answer password authenticator challenge
                     Credentials credentials = new Credentials();
@@ -202,11 +193,7 @@ public class AuthenticationWrapper {
                 RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
                 printRemediationOptions(remediationOptions);
 
-                Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
-                        .filter(x -> RemediationType.REENROLL_AUTHENTICATOR.equals(x.getName()))
-                        .findFirst();
-                Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + RemediationType.REENROLL_AUTHENTICATOR);
-                RemediationOption remediationOption = remediationOptionsOptional.get();
+                RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.REENROLL_AUTHENTICATOR);
 
                 // set new password
                 Credentials credentials = new Credentials();
@@ -259,6 +246,14 @@ public class AuthenticationWrapper {
                 .findFirst();
 
         return credentialsFormValueOptional.isPresent();
+    }
+
+    private static RemediationOption extractRemediationOption(RemediationOption[] remediationOptions, String remediationType) {
+        Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                .filter(x -> remediationType.equals(x.getName()))
+                .findFirst();
+        Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + remediationType);
+        return remediationOptionsOptional.get();
     }
 
     private static void printRemediationOptions(RemediationOption[] remediationOptions) {
