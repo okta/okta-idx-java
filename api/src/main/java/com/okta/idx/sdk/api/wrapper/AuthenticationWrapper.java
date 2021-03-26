@@ -114,10 +114,10 @@ public class AuthenticationWrapper {
                     if (isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, identifyResponse)) {
                         logger.warn("Password expired!");
                         authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
-                        return authenticationResponse;
                     } else {
                         logger.error("Unexpected remediation {}", RemediationType.REENROLL_AUTHENTICATOR);
                         Arrays.stream(identifyResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                        authenticationResponse.setAuthenticationStatus(AuthenticationStatus.FAILURE);
                     }
                 } else {
                     // login successful
@@ -130,6 +130,7 @@ public class AuthenticationWrapper {
                 if (!isRemediationRequireCredentials(RemediationType.CHALLENGE_AUTHENTICATOR, identifyResponse)) {
                     logger.error("Unexpected remediation {}", RemediationType.CHALLENGE_AUTHENTICATOR);
                     Arrays.stream(identifyResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                    authenticationResponse.setAuthenticationStatus(AuthenticationStatus.FAILURE);
                 } else {
                     remediationOptions = identifyResponse.remediation().remediationOptions();
                     printRemediationOptions(remediationOptions);
@@ -156,10 +157,10 @@ public class AuthenticationWrapper {
                         // verify if password expired
                         if (isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, challengeResponse)) {
                             authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
-                            return authenticationResponse;
                         } else {
                             logger.error("Unexpected remediation {}", RemediationType.REENROLL_AUTHENTICATOR);
                             Arrays.stream(challengeResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.FAILURE);
                         }
                     } else {
                         // login successful
@@ -167,17 +168,19 @@ public class AuthenticationWrapper {
                         tokenResponse = challengeResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                         authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
                         authenticationResponse.setTokenResponse(tokenResponse);
-                        return authenticationResponse;
                     }
                 }
             }
+            return authenticationResponse;
         } catch (ProcessingException e) {
             List<String> errors = new LinkedList<>();
             Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> errors.add(msg.getMessage()));
             logger.error("Something went wrong! {}, {}", e, errors);
             authenticationResponse.setErrors(errors);
+            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.FAILURE);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
+            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.FAILURE);
         }
 
         return authenticationResponse;

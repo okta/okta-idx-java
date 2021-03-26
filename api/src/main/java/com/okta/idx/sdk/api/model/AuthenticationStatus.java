@@ -21,7 +21,7 @@ public enum AuthenticationStatus {
 
     PASSWORD_EXPIRED("password_expired"),
 
-    UNKNOWN("unknown");
+    FAILURE("failure");
 
     private String value;
 
