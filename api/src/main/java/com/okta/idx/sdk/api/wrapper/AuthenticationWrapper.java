@@ -20,6 +20,7 @@ import com.okta.idx.sdk.api.client.IDXClient;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
+import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -182,7 +183,7 @@ public class AuthenticationWrapper {
         return authenticationResponse;
     }
 
-    public static AuthenticationResponse changePassword(IDXClient client, IDXClientContext idxClientContext) {
+    public static AuthenticationResponse changePassword(IDXClient client, IDXClientContext idxClientContext, ChangePasswordOptions changePasswordOptions) {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
         TokenResponse tokenResponse;
 
@@ -201,11 +202,12 @@ public class AuthenticationWrapper {
                 Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
                         .filter(x -> RemediationType.REENROLL_AUTHENTICATOR.equals(x.getName()))
                         .findFirst();
+                Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + RemediationType.REENROLL_AUTHENTICATOR);
                 RemediationOption remediationOption = remediationOptionsOptional.get();
 
                 // set new password
                 Credentials credentials = new Credentials();
-                credentials.setPasscode("newAbcd1234".toCharArray());
+                credentials.setPasscode(changePasswordOptions.getNewPassword().toCharArray());
 
                 // build answer password authenticator challenge request
                 AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
