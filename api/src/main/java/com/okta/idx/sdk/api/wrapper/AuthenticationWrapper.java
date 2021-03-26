@@ -91,16 +91,16 @@ public class AuthenticationWrapper {
                 Credentials credentials = new Credentials();
                 credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
 
-                identifyRequest = (IdentifyRequestBuilder.builder()
+                identifyRequest = IdentifyRequestBuilder.builder()
                         .withIdentifier(authenticationOptions.getUsername())
                         .withCredentials(credentials)
                         .withStateHandle(stateHandle)
-                        .build());
+                        .build();
             } else {
-                identifyRequest = (IdentifyRequestBuilder.builder()
+                identifyRequest = IdentifyRequestBuilder.builder()
                         .withIdentifier(authenticationOptions.getUsername())
                         .withStateHandle(stateHandle)
-                        .build());
+                        .build();
             }
 
             // identify user
