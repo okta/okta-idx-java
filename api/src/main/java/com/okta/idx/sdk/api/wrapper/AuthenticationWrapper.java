@@ -1,18 +1,32 @@
+/*
+ * Copyright 2020-Present Okta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.okta.idx.sdk.api.wrapper;
 
 import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.client.IDXClient;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
-import com.okta.idx.sdk.api.model.Authenticator;
+import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.RemediationOption;
+import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
-import com.okta.idx.sdk.api.request.ChallengeRequest;
-import com.okta.idx.sdk.api.request.ChallengeRequestBuilder;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -24,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,19 +46,22 @@ public class AuthenticationWrapper {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationWrapper.class);
 
     /**
-     * Authenticate user with username and password by completing the password authenticator
-     * challenge and returns the Token (access_token/id_token/refresh_token).
-     *
+     * Authenticate user with the supplied Authentication options (username and password) and
+     * returns the Authentication response object that contains:
+     * - IDX Client context
+     * - Token (access_token/id_token/refresh_token) object
+     * - Authentication status
+     * <p>
      * Note: This requires 'Password' as the ONLY required factor in app Sign-on policy configuration.
      *
-     * @param client the IDX Client reference
-     * @param authenticationOptions the Authenticator object reference
+     * @param client                the IDX Client
+     * @param authenticationOptions the Authenticator options
      * @return the Authentication response
      */
     public static AuthenticationResponse authenticate(IDXClient client, AuthenticationOptions authenticationOptions) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        TokenResponse tokenResponse = new TokenResponse();
+        TokenResponse tokenResponse;
         IDXClientContext idxClientContext;
 
         try {
@@ -53,47 +69,34 @@ public class AuthenticationWrapper {
             Assert.notNull(idxClientContext, "IDX client context may not be null");
             authenticationResponse.setIdxClientContext(idxClientContext);
 
-            IDXResponse idxResponse = client.introspect(idxClientContext);
-            String stateHandle = idxResponse.getStateHandle();
-            Assert.hasText(stateHandle, "Missing state handle");
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+            String stateHandle = introspectResponse.getStateHandle();
+            Assert.hasText(stateHandle, "State handle may not be null");
 
-            // check remediation options to continue the flow
-            RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
-
-            logger.info("Remediation Options: {}", Arrays.stream(remediationOptions)
-                    .map(RemediationOption::getName)
-                    .collect(Collectors.toList()));
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
 
             Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> RemediationType.IDENTIFY.equals(x.getName()))
                     .findFirst();
-            Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation options");
-
+            Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + RemediationType.IDENTIFY);
             RemediationOption remediationOption = remediationOptionsOptional.get();
-            FormValue[] formValues = remediationOption.form();
 
-            // check if credentials are required to move on to next step
-            Optional<FormValue> credentialsFormValueOptional = Arrays.stream(formValues)
-                    .filter(x -> "credentials".equals(x.getName()))
-                    .findFirst();
+            // Check if identify flow needs to include credentials
+            boolean isIdentifyInOneStep = isRemediationRequireCredentials(RemediationType.IDENTIFY, introspectResponse);
 
-            IdentifyRequest identifyRequest = null;
+            IdentifyRequest identifyRequest;
 
-            if (credentialsFormValueOptional.isPresent()) {
-                FormValue credentialsFormValue = credentialsFormValueOptional.get();
+            if (isIdentifyInOneStep) {
+                Credentials credentials = new Credentials();
+                credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
 
-                // check if password credential is required to be sent in identify user step
-                if (credentialsFormValue.isRequired()) {
-                    Credentials credentials = new Credentials();
-                    credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
-
-                    identifyRequest = (IdentifyRequestBuilder.builder()
-                            .withIdentifier(authenticationOptions.getUsername())
-                            .withCredentials(credentials)
-                            .withStateHandle(stateHandle)
-                            .build());
-                }
+                identifyRequest = (IdentifyRequestBuilder.builder()
+                        .withIdentifier(authenticationOptions.getUsername())
+                        .withCredentials(credentials)
+                        .withStateHandle(stateHandle)
+                        .build());
             } else {
-                // password credential is not necessary, so sending just the identifier (username)
                 identifyRequest = (IdentifyRequestBuilder.builder()
                         .withIdentifier(authenticationOptions.getUsername())
                         .withStateHandle(stateHandle)
@@ -101,112 +104,69 @@ public class AuthenticationWrapper {
             }
 
             // identify user
-            idxResponse = remediationOption.proceed(client, identifyRequest);
+            IDXResponse identifyResponse = remediationOption.proceed(client, identifyRequest);
 
-            if (idxResponse.isLoginSuccessful()) {
-                logger.info("Login Successful!");
-                tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
-            } else if (idxResponse.getMessages() != null && idxResponse.remediation() == null) {
-                authenticationResponse.addError("Terminal error occurred");
-                Arrays.stream(idxResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            } else {
-                logger.info("Attempting to follow next remediation option(s)");
-
-                // we need to follow remediation steps
-                remediationOptions = idxResponse.remediation().remediationOptions();
-
-                logger.info("Remediation Options: {}", Arrays.stream(remediationOptions)
-                        .map(RemediationOption::getName)
-                        .collect(Collectors.toList()));
-
-                remediationOptionsOptional = Arrays.stream(remediationOptions)
-                        .filter(x -> "select-authenticator-authenticate".equals(x.getName()))
-                        .findFirst();
-                remediationOption = remediationOptionsOptional.get();
-
-                // get authenticator options
-                Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
-                logger.info("Authenticator Options: {}", authenticatorOptions);
-
-                // select password authenticator
-                Authenticator passwordAuthenticator = new Authenticator();
-                passwordAuthenticator.setId(authenticatorOptions.get("password"));
-                passwordAuthenticator.setMethodType("password");
-
-                // build password authenticator challenge request
-                ChallengeRequest passwordAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
-                        .withAuthenticator(passwordAuthenticator)
-                        .withStateHandle(stateHandle)
-                        .build();
-                idxResponse = remediationOption.proceed(client, passwordAuthenticatorChallengeRequest);
-
-                // check remediation options to continue the flow
-                remediationOptions = idxResponse.remediation().remediationOptions();
-
-                logger.info("Remediation Options: {}", Arrays.stream(remediationOptions)
-                        .map(RemediationOption::getName)
-                        .collect(Collectors.toList()));
-
-                remediationOptionsOptional = Arrays.stream(remediationOptions)
-                        .filter(x -> "challenge-authenticator".equals(x.getName()))
-                        .findFirst();
-
-                Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing challenge-authenticator remediation option");
-
-                remediationOption = remediationOptionsOptional.get();
-
-                // answer password authenticator challenge
-                Credentials credentials = new Credentials();
-                credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
-
-                // build answer password authenticator challenge request
-                AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
-                        .withStateHandle(stateHandle)
-                        .withCredentials(credentials)
-                        .build();
-                idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
-
-                if (idxResponse.isLoginSuccessful()) {
-                    logger.info("Login Successful!");
-                    tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
-                } else if (idxResponse.getMessages() != null && idxResponse.remediation() == null) {
-                    logger.error("Terminal error occurred");
-                    Arrays.stream(idxResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            if (isIdentifyInOneStep) {
+                // we expect success
+                if (!identifyResponse.isLoginSuccessful()) {
+                    // verify if password expired
+                    if (isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, identifyResponse)) {
+                        logger.warn("Password expired!");
+                        authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
+                        return authenticationResponse;
+                    } else {
+                        logger.error("Unexpected remediation {}", RemediationType.REENROLL_AUTHENTICATOR);
+                        Arrays.stream(identifyResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                    }
                 } else {
-                    // password expired or required to be changed on initial login
-
-                    remediationOptions = idxResponse.remediation().remediationOptions();
-
-                    logger.info("Remediation Options: {}", Arrays.stream(remediationOptions)
-                            .map(RemediationOption::getName)
-                            .collect(Collectors.toList()));
+                    // login successful
+                    logger.info("Login Successful!");
+                    tokenResponse = identifyResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
+                    authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
+                    authenticationResponse.setTokenResponse(tokenResponse);
+                }
+            } else {
+                if (!isRemediationRequireCredentials(RemediationType.CHALLENGE_AUTHENTICATOR, identifyResponse)) {
+                    logger.error("Unexpected remediation {}", RemediationType.CHALLENGE_AUTHENTICATOR);
+                    Arrays.stream(identifyResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                } else {
+                    remediationOptions = identifyResponse.remediation().remediationOptions();
+                    printRemediationOptions(remediationOptions);
 
                     remediationOptionsOptional = Arrays.stream(remediationOptions)
-                            .filter(x -> "reenroll-authenticator".equals(x.getName()))
+                            .filter(x -> RemediationType.CHALLENGE_AUTHENTICATOR.equals(x.getName()))
                             .findFirst();
+                    Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + RemediationType.CHALLENGE_AUTHENTICATOR);
 
                     remediationOption = remediationOptionsOptional.get();
 
-                    // set new password
-                    credentials.setPasscode("newAbcd1234".toCharArray());
+                    // answer password authenticator challenge
+                    Credentials credentials = new Credentials();
+                    credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
 
                     // build answer password authenticator challenge request
-                    passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                    AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
                             .withStateHandle(stateHandle)
                             .withCredentials(credentials)
                             .build();
+                    IDXResponse challengeResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
 
-                    idxResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
-
-                    if (idxResponse.isLoginSuccessful()) {
-                        logger.info("Login Successful!");
-                        tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
-                        logger.info("Token RESPONSE! {}", tokenResponse);
-                    } else if (idxResponse.getMessages() != null && idxResponse.remediation() == null) {
-                        logger.error("Terminal error occurred");
-                        Arrays.stream(idxResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                    if (!challengeResponse.isLoginSuccessful()) {
+                        // verify if password expired
+                        if (isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, challengeResponse)) {
+                            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
+                            return authenticationResponse;
+                        } else {
+                            logger.error("Unexpected remediation {}", RemediationType.REENROLL_AUTHENTICATOR);
+                            Arrays.stream(challengeResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                        }
                     } else {
-                        authenticationResponse.addError("Could not authenticate user with password factor alone. Please review your app Sign-on policy configuration.");
+                        // login successful
+                        logger.info("Login Successful!");
+                        tokenResponse = challengeResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
+                        authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
+                        authenticationResponse.setTokenResponse(tokenResponse);
+                        return authenticationResponse;
                     }
                 }
             }
@@ -219,8 +179,86 @@ public class AuthenticationWrapper {
             logger.error("Exception occurred", e);
         }
 
-        authenticationResponse.setTokenResponse(tokenResponse);
         return authenticationResponse;
     }
 
+    public static AuthenticationResponse changePassword(IDXClient client, IDXClientContext idxClientContext) {
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        TokenResponse tokenResponse;
+
+        try {
+            // re-enter flow with context
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+
+            // verify if password expired
+            if (!isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, introspectResponse)) {
+                logger.error("Unexpected remediation {}", RemediationType.REENROLL_AUTHENTICATOR);
+            } else {
+
+                RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+                printRemediationOptions(remediationOptions);
+
+                Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                        .filter(x -> RemediationType.REENROLL_AUTHENTICATOR.equals(x.getName()))
+                        .findFirst();
+                RemediationOption remediationOption = remediationOptionsOptional.get();
+
+                // set new password
+                Credentials credentials = new Credentials();
+                credentials.setPasscode("newAbcd1234".toCharArray());
+
+                // build answer password authenticator challenge request
+                AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                        .withStateHandle(introspectResponse.getStateHandle())
+                        .withCredentials(credentials)
+                        .build();
+
+                IDXResponse resetPasswordResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+
+                if (resetPasswordResponse.isLoginSuccessful()) {
+                    // login successful
+                    logger.info("Login Successful!");
+                    tokenResponse = resetPasswordResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
+                    authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
+                    authenticationResponse.setTokenResponse(tokenResponse);
+                    return authenticationResponse;
+                } else {
+                    logger.error("Unexpected remediation {}", RemediationType.SUCCESS_WITH_INTERACTION_CODE);
+                }
+            }
+        } catch (ProcessingException e) {
+            List<String> errors = new LinkedList<>();
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> errors.add(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, errors);
+            authenticationResponse.setErrors(errors);
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+        }
+
+        return authenticationResponse;
+    }
+
+    private static boolean isRemediationRequireCredentials(String remediationOptionName, IDXResponse idxResponse) {
+        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+
+        Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                .filter(x -> remediationOptionName.equals(x.getName()))
+                .findFirst();
+        Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + remediationOptionName);
+
+        RemediationOption remediationOption = remediationOptionsOptional.get();
+        FormValue[] formValues = remediationOption.form();
+
+        Optional<FormValue> credentialsFormValueOptional = Arrays.stream(formValues)
+                .filter(x -> "credentials".equals(x.getName()))
+                .findFirst();
+
+        return credentialsFormValueOptional.isPresent();
+    }
+
+    private static void printRemediationOptions(RemediationOption[] remediationOptions) {
+        logger.info("Remediation Options: {}", Arrays.stream(remediationOptions)
+                .map(RemediationOption::getName)
+                .collect(Collectors.toList()));
+    }
 }

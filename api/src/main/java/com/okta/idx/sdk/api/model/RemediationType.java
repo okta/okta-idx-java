@@ -15,22 +15,14 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public enum AuthenticationStatus {
+public class RemediationType {
 
-    SUCCESS("success"),
+    public static final String IDENTIFY = "identify";
 
-    PASSWORD_EXPIRED("password_expired"),
+    public static final String REENROLL_AUTHENTICATOR = "reenroll-authenticator";
 
-    UNKNOWN("unknown");
+    public static final String CHALLENGE_AUTHENTICATOR = "challenge-authenticator";
 
-    private String value;
-
-    AuthenticationStatus(String value) {
-        this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
+    // represents success state
+    public static final String SUCCESS_WITH_INTERACTION_CODE = "successWithInteractionCode";
 }
