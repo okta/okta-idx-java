@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Home</title>
+
+    <div th:replace="fragments/header :: header-css"></div>
+
+</head>
+<body>
+
+<div th:if="${session.user}">
+    <a href="/logout" class="btn btn-danger pull-right">Logout</a>
+</div>
+
+<div class="container">
+
+    <div th:if="${session.user}" class="alert alert-success">
+        <p>Welcome, <span th:text="${session.user}"></span>!</p>
+        <p>You have successfully authenticated against your Okta Org.</p>
+    </div>
+
+    <div th:if="${authenticationResponse.tokenResponse.accessToken}">
+        <p><label>Access Token: </label>
+            <span th:text="${authenticationResponse.tokenResponse.accessToken}">2</span></p>
+    </div>
+
+    <div th:if="${authenticationResponse.tokenResponse.expiresIn}">
+        <p><label>Expires In: </label>
+            <span th:text="${authenticationResponse.tokenResponse.expiresIn}">1</span></p>
+    </div>
+
+    <div th:if="${authenticationResponse.tokenResponse.idToken}">
+        <p><label>ID Token: </label>
+            <span th:text="${authenticationResponse.tokenResponse.idToken}">1</span></p>
+    </div>
+
+    <div th:if="${authenticationResponse.tokenResponse.refreshToken}">
+        <p><label>Refresh Token: </label>
+            <span th:text="${authenticationResponse.tokenResponse.refreshToken}">1</span></p>
+    </div>
+
+    <div th:if="${authenticationResponse.tokenResponse.scope}">
+        <p><label>Scope(s): </label>
+            <span th:text="${authenticationResponse.tokenResponse.scope}">1</span></p>
+    </div>
+
+    <div th:if="${authenticationResponse.tokenResponse.tokenType}">
+        <p><label>Token Type: </label>
+            <span th:text="${authenticationResponse.tokenResponse.tokenType}">1</span></p>
+    </div>
+
+    <div th:if="${authenticationResponse.errors}">
+        <p><label>Errors: </label>
+            <span th:text="${authenticationResponse.errors}">1</span></p>
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

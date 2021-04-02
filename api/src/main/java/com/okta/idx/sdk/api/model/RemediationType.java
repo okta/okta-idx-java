@@ -25,4 +25,12 @@ public class RemediationType {
 
     // represents success state
     public static final String SUCCESS_WITH_INTERACTION_CODE = "successWithInteractionCode";
+
+    public static final String SELECT_AUTHENTICATOR_AUTHENTICATE = "select-authenticator-authenticate";
+
+    public static final String RESET_AUTHENTICATOR = "reset-authenticator";
+
+    public static final String SELECT_ENROLL_PROFILE = "select-enroll-profile";
+
+    public static final String UNKNOWN = "unknown";
 }

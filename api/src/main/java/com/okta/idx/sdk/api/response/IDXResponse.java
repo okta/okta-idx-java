@@ -23,8 +23,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.okta.idx.sdk.api.client.IDXClient;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.App;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
+import com.okta.idx.sdk.api.model.Authenticators;
 import com.okta.idx.sdk.api.model.Cancel;
+import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.Messages;
 import com.okta.idx.sdk.api.model.Remediation;
 import com.okta.idx.sdk.api.model.SuccessResponse;
@@ -63,12 +66,14 @@ public class IDXResponse {
 
     private AuthenticatorEnrollments authenticatorEnrollments;
 
+    private CurrentAuthenticatorEnrollment currentAuthenticatorEnrollment;
+
+    private Authenticators authenticators;
+
     // TODO: model below objects (they are not used for processing anyway)?
 
 /*
     currentAuthenticator
-    currentAuthenticatorEnrollment
-    authenticators
     recoveryAuthenticator
     enrollmentAuthenticator
     unenrollmentAuthenticator
@@ -142,6 +147,8 @@ public class IDXResponse {
     public AuthenticatorEnrollments getAuthenticatorEnrollments() {
         return authenticatorEnrollments;
     }
+
+    public CurrentAuthenticatorEnrollment getCurrentAuthenticatorEnrollment() { return currentAuthenticatorEnrollment; }
 
     public SuccessResponse getSuccessWithInteractionCode() {
         return successWithInteractionCode;

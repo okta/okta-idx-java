@@ -15,24 +15,15 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public enum AuthenticationStatus {
+public class VerifyAuthenticatorOptions {
 
-    SUCCESS("success"),
+    private String code;
 
-    PASSWORD_EXPIRED("password_expired"),
-
-    AWAITING_AUTHENTICATOR_VERIFICATION("awaiting_authenticator_verification"),
-
-    AWAITING_PASSWORD_RESET("awaiting_password_reset");
-
-    private String value;
-
-    AuthenticationStatus(String value) {
-        this.value = value;
+    public String getCode() {
+        return code;
     }
 
-    @Override
-    public String toString() {
-        return String.valueOf(value);
+    public void setCode(String code) {
+        this.code = code;
     }
 }
