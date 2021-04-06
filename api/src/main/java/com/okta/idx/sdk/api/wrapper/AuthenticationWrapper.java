@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.wrapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.client.IDXClient;
 import com.okta.idx.sdk.api.exception.ProcessingException;
@@ -28,6 +29,7 @@ import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.RecoverPasswordOptions;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
+import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
@@ -35,17 +37,22 @@ import com.okta.idx.sdk.api.request.ChallengeRequest;
 import com.okta.idx.sdk.api.request.ChallengeRequestBuilder;
 import com.okta.idx.sdk.api.request.EnrollRequest;
 import com.okta.idx.sdk.api.request.EnrollRequestBuilder;
+import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
+import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequestBuilder;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
 import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
+import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -385,20 +392,20 @@ public class AuthenticationWrapper {
     }
 
     /**
-     * Register a new user.
+     * Fetch Form Values for signing up a new user.
      *
      * @param client                the IDX Client
-     * @param username              the login email
-     * @return the Authentication response
+     * @return the new user registration response
      */
-    public static AuthenticationResponse register(IDXClient client, String username) {
+    public static NewUserRegistrationResponse fetchSignUpFormValues(IDXClient client) {
 
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        List<FormValue> enrollProfileFormValues;
+
+        NewUserRegistrationResponse newUserRegistrationResponse = new NewUserRegistrationResponse();
 
         try {
             IDXClientContext idxClientContext = client.interact();
             Assert.notNull(idxClientContext, "IDX client context may not be null");
-            authenticationResponse.setIdxClientContext(idxClientContext);
 
             IDXResponse introspectResponse = client.introspect(idxClientContext);
             String stateHandle = introspectResponse.getStateHandle();
@@ -417,18 +424,100 @@ public class AuthenticationWrapper {
             // enroll new user
             IDXResponse enrollResponse = selectEnrollProfileRemediationOption.proceed(client, enrollRequest);
 
-            //TODO
+            RemediationOption[] enrollRemediationOptions = enrollResponse.remediation().remediationOptions();
+            printRemediationOptions(enrollRemediationOptions);
 
+            RemediationOption enrollProfileRemediationOption =
+                    extractRemediationOption(enrollRemediationOptions, RemediationType.ENROLL_PROFILE);
+
+            enrollProfileFormValues = Arrays.stream(enrollProfileRemediationOption.form())
+                    .filter(x-> "userProfile".equals(x.getName()))
+                    .collect(Collectors.toList());
+
+            newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
+            newUserRegistrationResponse.setEnrollProfileRemediationOption(enrollProfileRemediationOption);
 
         } catch (ProcessingException e) {
-            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, newUserRegistrationResponse.getErrors());
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
+            newUserRegistrationResponse.addError(e.getMessage());
         }
 
-        return authenticationResponse;
+        return newUserRegistrationResponse;
+    }
+
+    public static RemediationOption processRegistration(IDXClient client, RemediationOption remediationOption, UserProfile userProfile) {
+
+        try {
+            logger.info("Remediation Option: {} {}", remediationOption.form()[0].getName(), remediationOption.form()[0].getValue());
+
+            Optional<FormValue> stateHandleOptional = Arrays.stream(remediationOption.form())
+                    .filter(x-> "stateHandle".equals(x.getName())).findFirst();
+
+            String newUserRegistrationStateHandle = String.valueOf(stateHandleOptional.get().getValue());
+
+            EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest = EnrollUserProfileUpdateRequestBuilder.builder()
+                    .withUserProfile(userProfile)
+                    .withStateHandle(newUserRegistrationStateHandle)
+                    .build();
+            IDXResponse idxResponse = remediationOption.proceed(client, enrollUserProfileUpdateRequest);
+
+            // check remediation options to go to the next step
+            RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            Optional<RemediationOption> remediationOptionsSelectAuthenticatorOptional = Arrays.stream(remediationOptions)
+                    .filter(x -> RemediationType.SELECT_AUTHENTICATOR_ENROLL.equals(x.getName()))
+                    .findFirst();
+            remediationOption = remediationOptionsSelectAuthenticatorOptional.get();
+            return remediationOption;
+
+        } catch (ProcessingException e) {
+            logger.error("Error", e);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+        }
+
+        return null; //TODO
+    }
+
+    public static RemediationOption processEnrollAuthenticator(IDXClient idxClient, RemediationOption remediationOption, String authenticatorId) {
+
+        Authenticator emailAuthenticator = new Authenticator();
+        emailAuthenticator.setId(authenticatorId);
+
+        Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+        logger.info("Authenticator Options: {}", authenticatorOptions);
+
+        emailAuthenticator.setMethodType("email");
+
+        Optional<FormValue> stateHandleOptional = Arrays.stream(remediationOption.form())
+                .filter(x-> "stateHandle".equals(x.getName())).findFirst();
+
+        String stateHandle = String.valueOf(stateHandleOptional.get().getValue());
+
+        EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                .withAuthenticator(emailAuthenticator)
+                .withStateHandle(stateHandle)
+                .build();
+
+        try {
+            IDXResponse idxResponse = remediationOption.proceed(idxClient, enrollRequest);
+
+            logger.info("IDX response after one authenticator enrolled {}", idxResponse.raw());
+        } catch (ProcessingException e) {
+            logger.error("Error", e);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+        } catch (JsonProcessingException e) {
+            logger.error("Exception occurred", e);
+        }
+
+        return null; //TODO
     }
 
     private static boolean isRemediationRequireCredentials(String remediationOptionName, IDXResponse idxResponse) {

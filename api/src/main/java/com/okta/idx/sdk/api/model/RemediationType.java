@@ -30,7 +30,11 @@ public class RemediationType {
 
     public static final String RESET_AUTHENTICATOR = "reset-authenticator";
 
+    public static final String ENROLL_PROFILE = "enroll-profile";
+
     public static final String SELECT_ENROLL_PROFILE = "select-enroll-profile";
+
+    public static final String SELECT_AUTHENTICATOR_ENROLL = "select-authenticator-enroll";
 
     public static final String UNKNOWN = "unknown";
 }

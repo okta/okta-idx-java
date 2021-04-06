@@ -62,7 +62,11 @@
         </div>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
         <a class="alignleft" href="/forgot-password">Forgot Password?</a>
-        <a class="alignright" href="/register">Register</a>
+<!--        <a class="alignright" href="/signup">Sign Up</a>-->
+    </form>
+
+    <form th:action="@{/signup}" method="post">
+        <button id="signup-btn" type="submit" class="btn btn-primary btn-block">Sign Up</button>
     </form>
 </div>
 

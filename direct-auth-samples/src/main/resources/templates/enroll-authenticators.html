@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Enroll Authenticator</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+    <style>
+        .enroll-authenticators-form {
+            width: 340px;
+            margin: 50px auto;
+        }
+        .enroll-authenticators-form form {
+            margin-bottom: 15px;
+            background: #f7f7f7;
+            box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+        .enroll-authenticators-form h2 {
+            margin: 0 0 15px;
+        }
+        .btn {
+            font-size: 15px;
+            font-weight: bold;
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $( document ).ready(function() {
+            $("#proceed-btn").click(function() {
+                var selValue = $('input[name=authenticator-id]:checked').attr('value');
+                alert(selValue);
+
+            });
+        });
+    </script>
+</head>
+
+<body>
+<div class="enroll-authenticators-form">
+
+    <form th:action="@{/enroll-authenticator}" method="post">
+        <h2 class="text-center">Enroll Authenticator</h2>
+
+        <tr th:each="item : ${authenticatorUIOptionList}">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="authenticator-id" th:value="${item.id}">
+                <label class="form-check-label" th:text="${item.type}"></label>
+            </div>
+        </tr>
+
+        <p/>
+
+        <div class="form-group">
+            <button id="proceed-btn" type="submit" class="btn btn-primary btn-block">Proceed</button>
+        </div>
+    </form>
+
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>
