@@ -18,6 +18,7 @@ package com.okta.idx.sdk.api.response;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class AuthenticationResponse {
 
     private AuthenticationStatus authenticationStatus;
 
-    private List<String> errors;
+    private List<String> errors = new LinkedList<>();
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
@@ -59,15 +60,7 @@ public class AuthenticationResponse {
         return errors;
     }
 
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
-    }
-
     public boolean addError(String error) {
-        if (getErrors() == null) {
-            this.errors = new LinkedList<>();
-            return this.errors.add(error);
-        }
         return getErrors().add(error);
     }
 }

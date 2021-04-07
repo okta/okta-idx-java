@@ -35,7 +35,9 @@
 
     <form th:action="@{/enroll-authenticator}" method="post">
         <h2 class="text-center">Enroll Authenticator</h2>
-
+        <div th:if="${errors}" class="alert alert-danger">
+            <span th:text="${errors}">1</span>
+        </div>
         <tr th:each="item : ${authenticatorUIOptionList}">
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="authenticator-type" th:value="${item.type}">

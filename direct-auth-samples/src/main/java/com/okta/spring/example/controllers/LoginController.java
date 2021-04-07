@@ -25,12 +25,9 @@ import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.RecoverPasswordOptions;
-import com.okta.idx.sdk.api.model.RemediationOption;
-import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
-import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import com.okta.idx.sdk.api.wrapper.AuthenticationWrapper;
 import org.slf4j.Logger;
@@ -41,9 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 public class LoginController {
@@ -73,9 +68,9 @@ public class LoginController {
 
         // populate login view with errors
         if (authenticationResponse.getAuthenticationStatus() != AuthenticationStatus.SUCCESS) {
-            ModelAndView modelAndView = new ModelAndView("login");
-            modelAndView.addObject("errors", authenticationResponse.getErrors());
-            return modelAndView;
+            ModelAndView mav = new ModelAndView("login");
+            mav.addObject("errors", authenticationResponse.getErrors());
+            return mav;
         }
 
         // success
@@ -109,7 +104,7 @@ public class LoginController {
             return new ModelAndView("verify");
         }
 
-        return null; //TODO
+        return new ModelAndView("login"); //TODO revisit this
     }
 
     @PostMapping("/verify")
@@ -126,13 +121,12 @@ public class LoginController {
                 AuthenticationWrapper.verifyAuthenticator(client, idxClientContext, verifyAuthenticatorOptions);
 
         if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.AWAITING_PASSWORD_RESET) {
-            ModelAndView modelAndView = new ModelAndView("changepassword");
-            return modelAndView;
+            return new ModelAndView("changepassword");
         }
 
-        ModelAndView modelAndView = new ModelAndView("login");
-        modelAndView.addObject("messages", authenticationResponse.getAuthenticationStatus().toString());
-        return modelAndView;
+        ModelAndView mav = new ModelAndView("login");
+        mav.addObject("messages", authenticationResponse.getAuthenticationStatus().toString());
+        return mav;
     }
 
     @PostMapping("/change-password")
@@ -142,12 +136,12 @@ public class LoginController {
         logger.info(":: Change Password ::");
 
         if (!newPassword.equals(confirmNewPassword)) {
-            ModelAndView modelAndView = new ModelAndView("changepassword");
-            modelAndView.addObject("result", "Passwords do not match");
-            return modelAndView;
+            ModelAndView mav = new ModelAndView("changepassword");
+            mav.addObject("errors", "Passwords do not match");
+            return mav;
         }
 
-        ModelAndView modelAndView = new ModelAndView("login");
+        ModelAndView mav = new ModelAndView("login");
 
         IDXClientContext idxClientContext = (IDXClientContext) httpSession.getAttribute("idxClientContext");
 
@@ -157,9 +151,9 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.changePassword(client, idxClientContext, changePasswordOptions);
 
-        modelAndView.addObject("info", authenticationResponse.getAuthenticationStatus().toString());
+        mav.addObject("info", authenticationResponse.getAuthenticationStatus().toString());
 
-        return modelAndView;
+        return mav;
     }
 
     @PostMapping("/register")
@@ -169,7 +163,7 @@ public class LoginController {
                                      HttpSession session) {
         logger.info(":: Register ::");
 
-        ModelAndView modelAndView = new ModelAndView("enroll-authenticators");
+        ModelAndView mav = new ModelAndView("enroll-authenticators");
 
         NewUserRegistrationResponse newUserRegistrationResponse = AuthenticationWrapper.fetchSignUpFormValues(client);
 
@@ -177,7 +171,7 @@ public class LoginController {
             for (FormValue userProfileFormValue : formValue.getForm().getValue()) {
                 if (userProfileFormValue.isRequired()) {
                     logger.info("Adding object {}", userProfileFormValue.getName());
-                    modelAndView.addObject(userProfileFormValue);
+                    mav.addObject(userProfileFormValue);
                 }
             }
         }
@@ -195,11 +189,11 @@ public class LoginController {
 
         List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
-        modelAndView.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
 
         session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
 
-        return modelAndView;
+        return mav;
     }
 
     @PostMapping(value = "/enroll-authenticator")
@@ -212,9 +206,14 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.processEnrollAuthenticator(client, idxClientContext, authenticatorType);
 
-        // TODO deal error
-
         session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
+
+        if (authenticationResponse.getErrors().size() > 0) {
+            ModelAndView mav = new ModelAndView("enroll-authenticators");
+            mav.addObject("messages", authenticationResponse.getAuthenticationStatus().toString());
+            return mav;
+        }
+
 
         if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
             return new ModelAndView("verify-email-authenticator-enrollment");
@@ -239,27 +238,27 @@ public class LoginController {
         idxClientContext = authenticationResponse.getIdxClientContext();
 
         if (AuthenticationWrapper.isTerminalSuccess(client, idxClientContext)) {
-            ModelAndView modelAndView = new ModelAndView("login");
-            modelAndView.addObject("info", "Registration successful");
-            return modelAndView;
+            ModelAndView mav = new ModelAndView("login");
+            mav.addObject("info", "Registration successful");
+            return mav;
         }
 
         if (AuthenticationWrapper.isSkipAuthenticatorPresent(client, idxClientContext)) {
             AuthenticationResponse response = AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
 
             if (AuthenticationWrapper.isTerminalSuccess(client, response.getIdxClientContext())) {
-                ModelAndView modelAndView = new ModelAndView("login");
-                modelAndView.addObject("info", "Registration successful");
-                return modelAndView;
+                ModelAndView mav = new ModelAndView("login");
+                mav.addObject("info", "Registration successful");
+                return mav;
             }
         }
 
-        ModelAndView modelAndView = new ModelAndView("enroll-authenticators");
+        ModelAndView mav = new ModelAndView("enroll-authenticators");
 
         List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
-        modelAndView.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
-        return modelAndView;
+        mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        return mav;
     }
 
     @PostMapping(value = "/password-authenticator-enrollment")
@@ -269,9 +268,9 @@ public class LoginController {
         logger.info(":: Enroll Password Authenticator ::");
 
         if (!newPassword.equals(confirmNewPassword)) {
-            ModelAndView modelAndView = new ModelAndView("password-authenticator-enrollment");
-            modelAndView.addObject("result", "Passwords do not match");
-            return modelAndView;
+            ModelAndView mav = new ModelAndView("password-authenticator-enrollment");
+            mav.addObject("result", "Passwords do not match");
+            return mav;
         }
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
@@ -282,26 +281,26 @@ public class LoginController {
         idxClientContext = authenticationResponse.getIdxClientContext();
 
         if (AuthenticationWrapper.isTerminalSuccess(client, idxClientContext)) {
-            ModelAndView modelAndView = new ModelAndView("login");
-            modelAndView.addObject("info", "Registration successful");
-            return modelAndView;
+            ModelAndView mav = new ModelAndView("login");
+            mav.addObject("info", "Registration successful");
+            return mav;
         }
 
         if (AuthenticationWrapper.isSkipAuthenticatorPresent(client, idxClientContext)) {
             AuthenticationResponse response = AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
 
             if (AuthenticationWrapper.isTerminalSuccess(client, response.getIdxClientContext())) {
-                ModelAndView modelAndView = new ModelAndView("login");
-                modelAndView.addObject("info", "Registration successful");
-                return modelAndView;
+                ModelAndView mav = new ModelAndView("login");
+                mav.addObject("info", "Registration successful");
+                return mav;
             }
         }
 
-        ModelAndView modelAndView = new ModelAndView("enroll-authenticators");
+        ModelAndView mav = new ModelAndView("enroll-authenticators");
 
         List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
-        modelAndView.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
-        return modelAndView;
+        mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        return mav;
     }
 }
