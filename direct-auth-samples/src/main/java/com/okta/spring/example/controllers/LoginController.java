@@ -168,29 +168,6 @@ public class LoginController {
         return modelAndView;
     }
 
-    @PostMapping("/signup")
-    public ModelAndView postSignup(HttpSession httpSession) {
-        logger.info(":: Sign Up ::");
-
-        ModelAndView modelAndView = new ModelAndView("register");
-
-        NewUserRegistrationResponse newUserRegistrationResponse = AuthenticationWrapper.fetchSignUpFormValues(client);
-
-        if (newUserRegistrationResponse.getEnrollProfileRemediationOption() != null) {
-            httpSession.setAttribute("enrollProfileRemediationOption", newUserRegistrationResponse.getEnrollProfileRemediationOption());
-        }
-
-        for (FormValue formValue : newUserRegistrationResponse.getFormValues()) {
-            for (FormValue userProfileFormValue : formValue.getForm().getValue()) {
-                if (userProfileFormValue.isRequired()) {
-                    logger.info("Adding object {}", userProfileFormValue.getName());
-                    modelAndView.addObject(userProfileFormValue);
-                }
-            }
-        }
-        return modelAndView;
-    }
-
     @PostMapping("/register")
     public ModelAndView postRegister(@RequestParam("lastname") String lastname,
                                      @RequestParam("firstname") String firstname,
