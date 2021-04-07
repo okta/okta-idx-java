@@ -19,6 +19,10 @@ public class RemediationType {
 
     public static final String IDENTIFY = "identify";
 
+    public static final String SKIP = "skip";
+
+    public static final String ENROLL_AUTHENTICATOR = "enroll-authenticator";
+
     public static final String REENROLL_AUTHENTICATOR = "reenroll-authenticator";
 
     public static final String CHALLENGE_AUTHENTICATOR = "challenge-authenticator";

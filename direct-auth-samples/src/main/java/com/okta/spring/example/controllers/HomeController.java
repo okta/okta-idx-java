@@ -60,6 +60,16 @@ public class HomeController {
         return "enroll-authenticator";
     }
 
+    @GetMapping("/verify-email-authenticator-enrollment")
+    public ModelAndView getVerifyEmailAuthenticatorEnrollment() {
+        return new ModelAndView("verify-email-authenticator-enrollment");
+    }
+
+    @GetMapping("/password-authenticator-enrollment")
+    public ModelAndView getPasswordAuthenticatorEnrollment() {
+        return new ModelAndView("password-authenticator-enrollment");
+    }
+
     @GetMapping("/logout")
     public String logout(HttpSession session ) {
         session.invalidate();

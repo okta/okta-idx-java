@@ -19,7 +19,6 @@ import com.okta.idx.sdk.api.client.Clients;
 import com.okta.idx.sdk.api.client.IDXClient;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
-import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
 import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
@@ -27,10 +26,9 @@ import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.RecoverPasswordOptions;
 import com.okta.idx.sdk.api.model.RemediationOption;
+import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
-import com.okta.idx.sdk.api.request.EnrollRequest;
-import com.okta.idx.sdk.api.request.EnrollRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
@@ -38,19 +36,14 @@ import com.okta.idx.sdk.api.wrapper.AuthenticationWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Controller
 public class LoginController {
@@ -211,14 +204,15 @@ public class LoginController {
         RemediationOption remediationOption = (RemediationOption) session.getAttribute("enrollProfileRemediationOption");
 
         //TODO: set this dynamically (for initial flow, only these three fields will be configured)
-        UserProfile up = new UserProfile();
-        up.addAttribute("lastName", lastname);
-        up.addAttribute("firstName", firstname);
-        up.addAttribute("email", email);
+        UserProfile userProfile = new UserProfile();
+        userProfile.addAttribute("lastName", lastname);
+        userProfile.addAttribute("firstName", firstname);
+        userProfile.addAttribute("email", email);
 
-        RemediationOption enrollAuthenticatorRemediationOption = AuthenticationWrapper.processRegistration(client, remediationOption, up);
+        RemediationOption enrollAuthenticatorRemediationOption = AuthenticationWrapper.processRegistration(client, remediationOption, userProfile);
 
         session.setAttribute("enrollAuthenticatorRemediationOption", enrollAuthenticatorRemediationOption);
+        session.setAttribute("email", email);
 
         Map<String, String> authenticatorOptions = enrollAuthenticatorRemediationOption.getAuthenticatorOptions();
 
@@ -233,16 +227,104 @@ public class LoginController {
     }
 
     @PostMapping(value = "/enroll-authenticator")
-    public String postEnrollAuthenticator(@RequestParam("authenticator-id") String authenticatorId,
-                                          HttpSession session) {
+    public ModelAndView postEnrollAuthenticator(@RequestParam("authenticator-id") String authenticatorType,
+                                                HttpSession session) {
         logger.info(":: Enroll Authenticator ::");
-        logger.info("== Selected Authenticator ID == {}", authenticatorId);
+        logger.info("== Selected Authenticator == {}", authenticatorType);
 
         RemediationOption remediationOption = (RemediationOption) session.getAttribute("enrollAuthenticatorRemediationOption");
 
-        AuthenticationWrapper.processEnrollAuthenticator(client, remediationOption, authenticatorId);
+        RemediationOption enrollResponseRemediationOption =
+                AuthenticationWrapper.processEnrollAuthenticator(client, remediationOption, authenticatorType);
 
-        return "";
+        session.setAttribute("enrollResponseRemediationOption", enrollResponseRemediationOption);
+
+        // TODO deal error
+
+        if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
+            return new ModelAndView("verify-email-authenticator-enrollment");
+        } else if (authenticatorType.equals(AuthenticatorType.PASSWORD.toString())) {
+            return new ModelAndView("password-authenticator-enrollment");
+        } else {
+            logger.error("Unsupported authenticator {}", authenticatorType);
+            return null; //TODO
+        }
     }
 
+    @PostMapping(value = "/verify-email-authenticator-enrollment")
+    public ModelAndView verifyEmailAuthenticator(@RequestParam("code") String code,
+                                                 HttpSession session) {
+        logger.info(":: Verify Email Authenticator :: {}", code);
+
+        RemediationOption remediationOption = (RemediationOption) session.getAttribute("enrollResponseRemediationOption");
+
+        RemediationOption emailAuthenticatorVerificationResponseRemediation =
+                AuthenticationWrapper.verifyEmailAuthenticator(client, remediationOption, code);
+
+        if (emailAuthenticatorVerificationResponseRemediation.getName().equals(RemediationType.SKIP)) {
+            IDXResponse idxResponse =
+                    AuthenticationWrapper.skipAuthenticatorEnrollment(client, emailAuthenticatorVerificationResponseRemediation);
+
+            if (idxResponse.isLoginSuccessful()) {
+                ModelAndView modelAndView = new ModelAndView("login");
+                modelAndView.addObject("info", "Registration successful");
+                return modelAndView;
+            }
+        }
+
+        session.setAttribute("enrollResponseRemediationOption", emailAuthenticatorVerificationResponseRemediation);
+
+        ModelAndView modelAndView = new ModelAndView("enroll-authenticators");
+        Map<String, String> authenticatorOptions = emailAuthenticatorVerificationResponseRemediation.getAuthenticatorOptions();
+
+        List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
+
+        for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
+            authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
+        }
+
+        modelAndView.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        return modelAndView;
+    }
+
+    @PostMapping(value = "/password-authenticator-enrollment")
+    public ModelAndView enrollPasswordAuthenticator(@RequestParam("new-password") String newPassword,
+                                                    @RequestParam("confirm-new-password") String confirmNewPassword,
+                                                    HttpSession session) {
+        logger.info(":: Enroll Password Authenticator ::");
+
+        if (!newPassword.equals(confirmNewPassword)) {
+            ModelAndView modelAndView = new ModelAndView("password-authenticator-enrollment");
+            modelAndView.addObject("result", "Passwords do not match");
+            return modelAndView;
+        }
+
+        RemediationOption remediationOption = (RemediationOption) session.getAttribute("enrollResponseRemediationOption");
+
+        RemediationOption passwordAuthenticatorVerificationResponseRemediation =
+                AuthenticationWrapper.enrollPasswordAuthenticator(client, remediationOption, confirmNewPassword);
+
+        if (passwordAuthenticatorVerificationResponseRemediation.getName().equals(RemediationType.SKIP)) {
+            IDXResponse idxResponse =
+                    AuthenticationWrapper.skipAuthenticatorEnrollment(client, passwordAuthenticatorVerificationResponseRemediation);
+
+            if (idxResponse.isLoginSuccessful()) {
+                ModelAndView modelAndView = new ModelAndView("login");
+                modelAndView.addObject("info", "Registration successful");
+                return modelAndView;
+            }
+        }
+
+        ModelAndView modelAndView = new ModelAndView("enroll-authenticators");
+        Map<String, String> authenticatorOptions = passwordAuthenticatorVerificationResponseRemediation.getAuthenticatorOptions();
+
+        List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
+
+        for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
+            authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
+        }
+
+        modelAndView.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        return modelAndView;
+    }
 }

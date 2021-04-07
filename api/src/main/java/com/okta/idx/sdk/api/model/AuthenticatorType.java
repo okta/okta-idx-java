@@ -19,6 +19,8 @@ public enum AuthenticatorType {
 
     EMAIL("email"),
 
+    PASSWORD("password"),
+
     SMS("sms");
 
     private String value;

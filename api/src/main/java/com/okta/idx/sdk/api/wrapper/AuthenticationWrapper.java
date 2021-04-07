@@ -22,6 +22,7 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.Authenticator;
+import com.okta.idx.sdk.api.model.AuthenticatorType;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
@@ -43,6 +44,8 @@ import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
 import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
+import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
+import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
@@ -50,7 +53,6 @@ import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -484,40 +486,154 @@ public class AuthenticationWrapper {
         return null; //TODO
     }
 
-    public static RemediationOption processEnrollAuthenticator(IDXClient idxClient, RemediationOption remediationOption, String authenticatorId) {
-
-        Authenticator emailAuthenticator = new Authenticator();
-        emailAuthenticator.setId(authenticatorId);
+    public static RemediationOption processEnrollAuthenticator(IDXClient idxClient, RemediationOption remediationOption, String authenticatorType) {
 
         Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
         logger.info("Authenticator Options: {}", authenticatorOptions);
 
-        emailAuthenticator.setMethodType("email");
-
-        Optional<FormValue> stateHandleOptional = Arrays.stream(remediationOption.form())
-                .filter(x-> "stateHandle".equals(x.getName())).findFirst();
-
-        String stateHandle = String.valueOf(stateHandleOptional.get().getValue());
-
-        EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
-                .withAuthenticator(emailAuthenticator)
-                .withStateHandle(stateHandle)
-                .build();
+        RemediationOption enrollRemediationOption = null;
 
         try {
+            Authenticator authenticator = new Authenticator();
+
+            if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
+                authenticator.setId(authenticatorOptions.get(AuthenticatorType.EMAIL.toString()));
+                authenticator.setMethodType(AuthenticatorType.EMAIL.toString());
+            } else if (authenticatorType.equals(AuthenticatorType.PASSWORD.toString())) {
+                authenticator.setId(authenticatorOptions.get(AuthenticatorType.PASSWORD.toString()));
+                authenticator.setMethodType(AuthenticatorType.PASSWORD.toString());
+            } else {
+                String errMsg = "Unsupported authenticator " + authenticatorType;
+                logger.error(errMsg);
+                throw new IllegalArgumentException(errMsg);
+            }
+
+            Optional<FormValue> stateHandleOptional = Arrays.stream(remediationOption.form())
+                    .filter(x -> "stateHandle" .equals(x.getName())).findFirst();
+            String stateHandle = String.valueOf(stateHandleOptional.get().getValue());
+
+            EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                    .withAuthenticator(authenticator)
+                    .withStateHandle(stateHandle)
+                    .build();
+
             IDXResponse idxResponse = remediationOption.proceed(idxClient, enrollRequest);
 
-            logger.info("IDX response after one authenticator enrolled {}", idxResponse.raw());
+            RemediationOption[] enrollRemediationOptions = idxResponse.remediation().remediationOptions();
+            printRemediationOptions(enrollRemediationOptions);
+
+            enrollRemediationOption = extractRemediationOption(enrollRemediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
+
         } catch (ProcessingException e) {
             logger.error("Error", e);
-
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-        } catch (JsonProcessingException e) {
             logger.error("Exception occurred", e);
         }
 
-        return null; //TODO
+        return enrollRemediationOption;
+    }
+
+    public static RemediationOption verifyEmailAuthenticator(IDXClient client, RemediationOption remediationOption, String passcode) {
+        Credentials credentials = new Credentials();
+        credentials.setPasscode(passcode.toCharArray());
+
+        Optional<FormValue> stateHandleOptional = Arrays.stream(remediationOption.form())
+                .filter(x-> "stateHandle".equals(x.getName())).findFirst();
+        String stateHandle = String.valueOf(stateHandleOptional.get().getValue());
+
+        // build answer password authenticator challenge request
+        AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+                .withStateHandle(stateHandle)
+                .withCredentials(credentials)
+                .build();
+
+        RemediationOption enrollRemediationOption = null;
+
+        try {
+            IDXResponse challengeAuthenticatorResponse =
+                    remediationOption.proceed(client, challengeAuthenticatorRequest);
+
+            RemediationOption[] remediationOptions = challengeAuthenticatorResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            // check if skip is present in remediation options, if yes skip it (we'll process only mandatory authenticators for now)
+            try {
+                enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SKIP);
+            } catch (IllegalArgumentException e) {
+                logger.warn("Skip authenticator not found in remediation option");
+                enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+            }
+        } catch (ProcessingException e) {
+            logger.error("Error", e);
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+        }
+
+        return enrollRemediationOption;
+    }
+
+    public static RemediationOption enrollPasswordAuthenticator(IDXClient client, RemediationOption remediationOption, String password) {
+
+        Credentials credentials = new Credentials();
+        credentials.setPasscode(password.toCharArray());
+
+        Optional<FormValue> stateHandleOptional = Arrays.stream(remediationOption.form())
+                .filter(x-> "stateHandle".equals(x.getName())).findFirst();
+        String stateHandle = String.valueOf(stateHandleOptional.get().getValue());
+
+        // build answer password authenticator challenge request
+        AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+                .withStateHandle(stateHandle)
+                .withCredentials(credentials)
+                .build();
+
+        RemediationOption enrollRemediationOption = null;
+
+        try {
+            IDXResponse challengeAuthenticatorResponse =
+                    remediationOption.proceed(client, challengeAuthenticatorRequest);
+
+            RemediationOption[] remediationOptions = challengeAuthenticatorResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            // check if skip is present in remediation options, if yes skip it (we'll process only mandatory authenticators for now)
+            try {
+                enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SKIP);
+            } catch (IllegalArgumentException e) {
+                logger.warn("Skip authenticator not found in remediation option");
+                enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+            }
+
+        } catch (ProcessingException e) {
+            logger.error("Error", e);
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+        }
+
+        return enrollRemediationOption;
+    }
+
+    public static IDXResponse skipAuthenticatorEnrollment(IDXClient client, RemediationOption remediationOption) {
+
+        IDXResponse idxResponse = null;
+
+        try {
+            Optional<FormValue> stateHandleOptional = Arrays.stream(remediationOption.form())
+                    .filter(x -> "stateHandle" .equals(x.getName())).findFirst();
+            String stateHandle = String.valueOf(stateHandleOptional.get().getValue());
+
+            SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest = SkipAuthenticatorEnrollmentRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            idxResponse = remediationOption.proceed(client, skipAuthenticatorEnrollmentRequest);
+        } catch (ProcessingException e) {
+            logger.error("Error", e);
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+        }
+
+        return idxResponse;
     }
 
     private static boolean isRemediationRequireCredentials(String remediationOptionName, IDXResponse idxResponse) {
