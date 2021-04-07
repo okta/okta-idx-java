@@ -104,8 +104,6 @@ public class LoginController {
             return mav;
         }
 
-        logger.info("Authentication status: {}", authenticationResponse.getAuthenticationStatus());
-
         if (authenticationResponse.getAuthenticationStatus().equals(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION)) {
             httpSession.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
             return new ModelAndView("verify");
@@ -126,8 +124,6 @@ public class LoginController {
 
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.verifyAuthenticator(client, idxClientContext, verifyAuthenticatorOptions);
-
-        logger.info("Authentication status: {}", authenticationResponse.getAuthenticationStatus());
 
         if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.AWAITING_PASSWORD_RESET) {
             ModelAndView modelAndView = new ModelAndView("changepassword");
@@ -161,8 +157,6 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.changePassword(client, idxClientContext, changePasswordOptions);
 
-        logger.info("Authentication status: {}", authenticationResponse.getAuthenticationStatus());
-
         modelAndView.addObject("info", authenticationResponse.getAuthenticationStatus().toString());
 
         return modelAndView;
@@ -188,27 +182,23 @@ public class LoginController {
             }
         }
 
-        //TODO: set this dynamically (for initial flow, only these three fields will be configured)
+        //TODO: set this dynamically in future (for initial flow, only these three fields will be configured)
         UserProfile userProfile = new UserProfile();
         userProfile.addAttribute("lastName", lastname);
         userProfile.addAttribute("firstName", firstname);
         userProfile.addAttribute("email", email);
 
-        RemediationOption enrollAuthenticatorRemediationOption =
-                AuthenticationWrapper.processRegistration(client, newUserRegistrationResponse.getEnrollProfileRemediationOption(), userProfile);
+        IDXClientContext idxClientContext = newUserRegistrationResponse.getIdxClientContext();
 
-        session.setAttribute("enrollAuthenticatorRemediationOption", enrollAuthenticatorRemediationOption);
-        session.setAttribute("email", email);
+        AuthenticationResponse authenticationResponse =
+                AuthenticationWrapper.processRegistration(client, idxClientContext, userProfile);
 
-        Map<String, String> authenticatorOptions = enrollAuthenticatorRemediationOption.getAuthenticatorOptions();
-
-        List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
-
-        for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
-            authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
-        }
+        List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
         modelAndView.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+
+        session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
+
         return modelAndView;
     }
 
@@ -217,14 +207,14 @@ public class LoginController {
                                                 HttpSession session) {
         logger.info(":: Enroll Authenticator ::");
 
-        RemediationOption remediationOption = (RemediationOption) session.getAttribute("enrollAuthenticatorRemediationOption");
+        IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
-        RemediationOption enrollResponseRemediationOption =
-                AuthenticationWrapper.processEnrollAuthenticator(client, remediationOption, authenticatorType);
-
-        session.setAttribute("enrollResponseRemediationOption", enrollResponseRemediationOption);
+        AuthenticationResponse authenticationResponse =
+                AuthenticationWrapper.processEnrollAuthenticator(client, idxClientContext, authenticatorType);
 
         // TODO deal error
+
+        session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
 
         if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
             return new ModelAndView("verify-email-authenticator-enrollment");
@@ -241,38 +231,32 @@ public class LoginController {
                                                  HttpSession session) {
         logger.info(":: Verify Email Authenticator :: {}", code);
 
-        RemediationOption remediationOption = (RemediationOption) session.getAttribute("enrollResponseRemediationOption");
+        IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
-        RemediationOption emailAuthenticatorVerificationResponseRemediation =
-                AuthenticationWrapper.verifyEmailAuthenticator(client, remediationOption, code);
+        AuthenticationResponse authenticationResponse =
+                AuthenticationWrapper.verifyEmailAuthenticator(client, idxClientContext, code);
 
-        if (emailAuthenticatorVerificationResponseRemediation == null) {
+        idxClientContext = authenticationResponse.getIdxClientContext();
+
+        if (AuthenticationWrapper.isTerminalSuccess(client, idxClientContext)) {
             ModelAndView modelAndView = new ModelAndView("login");
             modelAndView.addObject("info", "Registration successful");
             return modelAndView;
         }
 
-        if (emailAuthenticatorVerificationResponseRemediation.getName().equals(RemediationType.SKIP)) {
-            IDXResponse idxResponse =
-                    AuthenticationWrapper.skipAuthenticatorEnrollment(client, emailAuthenticatorVerificationResponseRemediation);
+        if (AuthenticationWrapper.isSkipAuthenticatorPresent(client, idxClientContext)) {
+            AuthenticationResponse response = AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
 
-            if (idxResponse.isLoginSuccessful()) {
+            if (AuthenticationWrapper.isTerminalSuccess(client, response.getIdxClientContext())) {
                 ModelAndView modelAndView = new ModelAndView("login");
                 modelAndView.addObject("info", "Registration successful");
                 return modelAndView;
             }
         }
 
-        session.setAttribute("enrollResponseRemediationOption", emailAuthenticatorVerificationResponseRemediation);
-
         ModelAndView modelAndView = new ModelAndView("enroll-authenticators");
-        Map<String, String> authenticatorOptions = emailAuthenticatorVerificationResponseRemediation.getAuthenticatorOptions();
 
-        List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
-
-        for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
-            authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
-        }
+        List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
         modelAndView.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
         return modelAndView;
@@ -290,22 +274,23 @@ public class LoginController {
             return modelAndView;
         }
 
-        RemediationOption remediationOption = (RemediationOption) session.getAttribute("enrollResponseRemediationOption");
+        IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
-        RemediationOption passwordAuthenticatorVerificationResponseRemediation =
-                AuthenticationWrapper.enrollPasswordAuthenticator(client, remediationOption, confirmNewPassword);
+        AuthenticationResponse authenticationResponse =
+                AuthenticationWrapper.verifyPasswordAuthenticator(client, idxClientContext, confirmNewPassword);
 
-        if (passwordAuthenticatorVerificationResponseRemediation == null) {
+        idxClientContext = authenticationResponse.getIdxClientContext();
+
+        if (AuthenticationWrapper.isTerminalSuccess(client, idxClientContext)) {
             ModelAndView modelAndView = new ModelAndView("login");
             modelAndView.addObject("info", "Registration successful");
             return modelAndView;
         }
 
-        if (passwordAuthenticatorVerificationResponseRemediation.getName().equals(RemediationType.SKIP)) {
-            IDXResponse idxResponse =
-                    AuthenticationWrapper.skipAuthenticatorEnrollment(client, passwordAuthenticatorVerificationResponseRemediation);
+        if (AuthenticationWrapper.isSkipAuthenticatorPresent(client, idxClientContext)) {
+            AuthenticationResponse response = AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
 
-            if (idxResponse.isLoginSuccessful()) {
+            if (AuthenticationWrapper.isTerminalSuccess(client, response.getIdxClientContext())) {
                 ModelAndView modelAndView = new ModelAndView("login");
                 modelAndView.addObject("info", "Registration successful");
                 return modelAndView;
@@ -313,13 +298,8 @@ public class LoginController {
         }
 
         ModelAndView modelAndView = new ModelAndView("enroll-authenticators");
-        Map<String, String> authenticatorOptions = passwordAuthenticatorVerificationResponseRemediation.getAuthenticatorOptions();
 
-        List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
-
-        for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
-            authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
-        }
+        List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
         modelAndView.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
         return modelAndView;
