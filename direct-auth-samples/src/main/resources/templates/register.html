@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Sign Up</title>
+    <title>Register</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
 
@@ -40,11 +40,10 @@
 
 <div class="register-form">
     <form th:action="@{/register}" method="post">
-        <h2 class="text-center">Register</h2>
+        <h2 class="text-center">Create Account</h2>
         <div th:if="${result}" class="alert alert-danger">
             <span th:text="${result}">1</span>
         </div>
-
         <div class="form-group">
             <input type="text" class="form-control" name="lastname" placeholder="Last Name" required="required">
         </div>
@@ -54,7 +53,6 @@
         <div class="form-group">
             <input type="text" class="form-control" name="email" placeholder="Email" required="required">
         </div>
-
         <div class="form-group">
             <button id="sign-in-btn" type="submit" class="btn btn-primary btn-block">Register</button>
         </div>

@@ -1,8 +1,6 @@
 package com.okta.spring.example.controllers;
 
 import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +10,6 @@ import javax.servlet.http.HttpSession;
 
 @Controller
 public class HomeController {
-
-    private final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     @GetMapping("/")
     public String home() {
@@ -30,10 +26,6 @@ public class HomeController {
         return new ModelAndView("forgotpassword");
     }
 
-    @GetMapping("/signup")
-    public ModelAndView getSignup() {
-        return new ModelAndView("signup");
-    }
 
     @GetMapping("/register")
     public ModelAndView getRegister() {
@@ -42,22 +34,8 @@ public class HomeController {
 
     @GetMapping("/enroll-authenticators")
     public String getEnrollAuthenticators(Model model) {
-//        ModelAndView modelAndView = new ModelAndView("enroll-authenticators");
-//        modelAndView.addObject("authenticatorUIOption", new AuthenticatorUIOption());
-//        return modelAndView;
-
-        logger.info(" :: getEnrollAuthenticators() ::");
-
         model.addAttribute("authenticatorUIOption", new AuthenticatorUIOption());
         return "enroll-authenticators";
-    }
-
-    @GetMapping("/enroll-authenticator")
-    public String getEnrollAuthenticator(Model model) {
-        logger.info(" :: getEnrollAuthenticator() ::");
-
-        model.addAttribute("authenticatorUIOption", new AuthenticatorUIOption());
-        return "enroll-authenticator";
     }
 
     @GetMapping("/verify-email-authenticator-enrollment")

@@ -201,7 +201,16 @@ public class LoginController {
 
         ModelAndView modelAndView = new ModelAndView("enroll-authenticators");
 
-        RemediationOption remediationOption = (RemediationOption) session.getAttribute("enrollProfileRemediationOption");
+        NewUserRegistrationResponse newUserRegistrationResponse = AuthenticationWrapper.fetchSignUpFormValues(client);
+
+        for (FormValue formValue : newUserRegistrationResponse.getFormValues()) {
+            for (FormValue userProfileFormValue : formValue.getForm().getValue()) {
+                if (userProfileFormValue.isRequired()) {
+                    logger.info("Adding object {}", userProfileFormValue.getName());
+                    modelAndView.addObject(userProfileFormValue);
+                }
+            }
+        }
 
         //TODO: set this dynamically (for initial flow, only these three fields will be configured)
         UserProfile userProfile = new UserProfile();
@@ -209,7 +218,8 @@ public class LoginController {
         userProfile.addAttribute("firstName", firstname);
         userProfile.addAttribute("email", email);
 
-        RemediationOption enrollAuthenticatorRemediationOption = AuthenticationWrapper.processRegistration(client, remediationOption, userProfile);
+        RemediationOption enrollAuthenticatorRemediationOption =
+                AuthenticationWrapper.processRegistration(client, newUserRegistrationResponse.getEnrollProfileRemediationOption(), userProfile);
 
         session.setAttribute("enrollAuthenticatorRemediationOption", enrollAuthenticatorRemediationOption);
         session.setAttribute("email", email);
@@ -230,7 +240,6 @@ public class LoginController {
     public ModelAndView postEnrollAuthenticator(@RequestParam("authenticator-id") String authenticatorType,
                                                 HttpSession session) {
         logger.info(":: Enroll Authenticator ::");
-        logger.info("== Selected Authenticator == {}", authenticatorType);
 
         RemediationOption remediationOption = (RemediationOption) session.getAttribute("enrollAuthenticatorRemediationOption");
 
