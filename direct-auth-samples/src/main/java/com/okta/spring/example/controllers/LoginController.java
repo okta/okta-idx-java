@@ -245,8 +245,10 @@ public class LoginController {
 
         if (AuthenticationWrapper.isSkipAuthenticatorPresent(client, idxClientContext)) {
             AuthenticationResponse response = AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
+            idxClientContext = response.getIdxClientContext();
 
-            if (AuthenticationWrapper.isTerminalSuccess(client, response.getIdxClientContext())) {
+            if (AuthenticationWrapper.isTerminalSuccess(client, idxClientContext)) {
+                session.setAttribute("idxClientContext", idxClientContext);
                 ModelAndView mav = new ModelAndView("login");
                 mav.addObject("info", "Registration successful");
                 return mav;
@@ -258,6 +260,7 @@ public class LoginController {
         List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        session.setAttribute("idxClientContext", idxClientContext);
         return mav;
     }
 
@@ -290,6 +293,7 @@ public class LoginController {
             AuthenticationResponse response = AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
 
             if (AuthenticationWrapper.isTerminalSuccess(client, response.getIdxClientContext())) {
+                session.setAttribute("idxClientContext", idxClientContext);
                 ModelAndView mav = new ModelAndView("login");
                 mav.addObject("info", "Registration successful");
                 return mav;
@@ -301,6 +305,7 @@ public class LoginController {
         List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        session.setAttribute("idxClientContext", idxClientContext);
         return mav;
     }
 }
