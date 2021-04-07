@@ -88,7 +88,6 @@ public class LoginController {
         return mav;
     }
 
-
     @PostMapping("/forgot-password")
     public ModelAndView postForgotPassword(@RequestParam("username") String username,
                                            @RequestParam("authenticatorType") String authenticatorType,
@@ -237,7 +236,7 @@ public class LoginController {
     }
 
     @PostMapping(value = "/enroll-authenticator")
-    public ModelAndView postEnrollAuthenticator(@RequestParam("authenticator-id") String authenticatorType,
+    public ModelAndView postEnrollAuthenticator(@RequestParam("authenticator-type") String authenticatorType,
                                                 HttpSession session) {
         logger.info(":: Enroll Authenticator ::");
 
@@ -269,6 +268,12 @@ public class LoginController {
 
         RemediationOption emailAuthenticatorVerificationResponseRemediation =
                 AuthenticationWrapper.verifyEmailAuthenticator(client, remediationOption, code);
+
+        if (emailAuthenticatorVerificationResponseRemediation == null) {
+            ModelAndView modelAndView = new ModelAndView("login");
+            modelAndView.addObject("info", "Registration successful");
+            return modelAndView;
+        }
 
         if (emailAuthenticatorVerificationResponseRemediation.getName().equals(RemediationType.SKIP)) {
             IDXResponse idxResponse =
@@ -312,6 +317,12 @@ public class LoginController {
 
         RemediationOption passwordAuthenticatorVerificationResponseRemediation =
                 AuthenticationWrapper.enrollPasswordAuthenticator(client, remediationOption, confirmNewPassword);
+
+        if (passwordAuthenticatorVerificationResponseRemediation == null) {
+            ModelAndView modelAndView = new ModelAndView("login");
+            modelAndView.addObject("info", "Registration successful");
+            return modelAndView;
+        }
 
         if (passwordAuthenticatorVerificationResponseRemediation.getName().equals(RemediationType.SKIP)) {
             IDXResponse idxResponse =

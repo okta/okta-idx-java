@@ -553,15 +553,17 @@ public class AuthenticationWrapper {
             IDXResponse challengeAuthenticatorResponse =
                     remediationOption.proceed(client, challengeAuthenticatorRequest);
 
-            RemediationOption[] remediationOptions = challengeAuthenticatorResponse.remediation().remediationOptions();
-            printRemediationOptions(remediationOptions);
+            if (challengeAuthenticatorResponse.remediation() != null) {
+                RemediationOption[] remediationOptions = challengeAuthenticatorResponse.remediation().remediationOptions();
+                printRemediationOptions(remediationOptions);
 
-            // check if skip is present in remediation options, if yes skip it (we'll process only mandatory authenticators for now)
-            try {
-                enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SKIP);
-            } catch (IllegalArgumentException e) {
-                logger.warn("Skip authenticator not found in remediation option");
-                enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+                // check if skip is present in remediation options, if yes skip it (we'll process only mandatory authenticators for now)
+                try {
+                    enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SKIP);
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Skip authenticator not found in remediation option");
+                    enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+                }
             }
         } catch (ProcessingException e) {
             logger.error("Error", e);
@@ -593,15 +595,17 @@ public class AuthenticationWrapper {
             IDXResponse challengeAuthenticatorResponse =
                     remediationOption.proceed(client, challengeAuthenticatorRequest);
 
-            RemediationOption[] remediationOptions = challengeAuthenticatorResponse.remediation().remediationOptions();
-            printRemediationOptions(remediationOptions);
+            if (challengeAuthenticatorResponse.remediation() != null) {
+                RemediationOption[] remediationOptions = challengeAuthenticatorResponse.remediation().remediationOptions();
+                printRemediationOptions(remediationOptions);
 
-            // check if skip is present in remediation options, if yes skip it (we'll process only mandatory authenticators for now)
-            try {
-                enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SKIP);
-            } catch (IllegalArgumentException e) {
-                logger.warn("Skip authenticator not found in remediation option");
-                enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+                // check if skip is present in remediation options, if yes skip it (we'll process only mandatory authenticators for now)
+                try {
+                    enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SKIP);
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Skip authenticator not found in remediation option");
+                    enrollRemediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+                }
             }
 
         } catch (ProcessingException e) {

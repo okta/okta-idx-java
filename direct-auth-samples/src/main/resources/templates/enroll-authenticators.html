@@ -38,7 +38,7 @@
 
         <tr th:each="item : ${authenticatorUIOptionList}">
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="authenticator-id" th:value="${item.type}">
+                <input class="form-check-input" type="radio" name="authenticator-type" th:value="${item.type}">
                 <label class="form-check-label" th:text="${item.type}"></label>
             </div>
         </tr>
