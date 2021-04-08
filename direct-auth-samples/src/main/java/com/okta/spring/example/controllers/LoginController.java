@@ -220,7 +220,7 @@ public class LoginController {
             return new ModelAndView("password-authenticator-enrollment");
         } else {
             logger.error("Unsupported authenticator {}", authenticatorType);
-            return null; //TODO
+            return new ModelAndView("enroll-authenticators");
         }
     }
 
