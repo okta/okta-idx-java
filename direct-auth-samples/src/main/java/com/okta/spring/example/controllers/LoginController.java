@@ -49,9 +49,9 @@ public class LoginController {
     private IDXClient client;
 
     @PostMapping("/custom-login")
-    public ModelAndView postLogin(@RequestParam("username") String username,
-                                  @RequestParam("password") String password,
-                                  HttpSession session) {
+    public ModelAndView handleLogin(@RequestParam("username") String username,
+                                    @RequestParam("password") String password,
+                                    HttpSession session) {
 
         AuthenticationResponse authenticationResponse =
                 (AuthenticationResponse) session.getAttribute("authenticationResponse");
@@ -85,9 +85,9 @@ public class LoginController {
     }
 
     @PostMapping("/forgot-password")
-    public ModelAndView postForgotPassword(@RequestParam("username") String username,
-                                           @RequestParam("authenticatorType") String authenticatorType,
-                                           HttpSession httpSession) {
+    public ModelAndView handleForgotPassword(@RequestParam("username") String username,
+                                             @RequestParam("authenticatorType") String authenticatorType,
+                                             HttpSession httpSession) {
         logger.info(":: Forgot Password ::");
 
         //TODO
@@ -95,7 +95,7 @@ public class LoginController {
                 AuthenticationWrapper.recoverPassword(client, new RecoverPasswordOptions(username, AuthenticatorType.EMAIL));
 
         if (authenticationResponse.getAuthenticationStatus() == null) {
-            ModelAndView mav = new ModelAndView("forgotpassword");
+            ModelAndView mav = new ModelAndView("forgot-password");
             mav.addObject("result", authenticationResponse.getErrors());
             return mav;
         }
@@ -109,8 +109,8 @@ public class LoginController {
     }
 
     @PostMapping("/verify")
-    public ModelAndView postVerify(@RequestParam("code") String code,
-                                   HttpSession httpSession) {
+    public ModelAndView handleEmailVerify(@RequestParam("code") String code,
+                                          HttpSession httpSession) {
         logger.info(":: Verify Code :: {}", code);
 
         IDXClientContext idxClientContext = (IDXClientContext) httpSession.getAttribute("idxClientContext");
@@ -122,7 +122,7 @@ public class LoginController {
                 AuthenticationWrapper.verifyAuthenticator(client, idxClientContext, verifyAuthenticatorOptions);
 
         if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.AWAITING_PASSWORD_RESET) {
-            return new ModelAndView("changepassword");
+            return new ModelAndView("change-password");
         }
 
         ModelAndView mav = new ModelAndView("login");
@@ -131,13 +131,13 @@ public class LoginController {
     }
 
     @PostMapping("/change-password")
-    public ModelAndView postChangePassword(@RequestParam("new-password") String newPassword,
-                                           @RequestParam("confirm-new-password") String confirmNewPassword,
-                                           HttpSession httpSession) {
+    public ModelAndView handleChangePassword(@RequestParam("new-password") String newPassword,
+                                             @RequestParam("confirm-new-password") String confirmNewPassword,
+                                             HttpSession httpSession) {
         logger.info(":: Change Password ::");
 
         if (!newPassword.equals(confirmNewPassword)) {
-            ModelAndView mav = new ModelAndView("changepassword");
+            ModelAndView mav = new ModelAndView("change-password");
             mav.addObject("errors", "Passwords do not match");
             return mav;
         }
@@ -153,15 +153,14 @@ public class LoginController {
                 AuthenticationWrapper.changePassword(client, idxClientContext, changePasswordOptions);
 
         mav.addObject("info", authenticationResponse.getAuthenticationStatus().toString());
-
         return mav;
     }
 
     @PostMapping("/register")
-    public ModelAndView postRegister(@RequestParam("lastname") String lastname,
-                                     @RequestParam("firstname") String firstname,
-                                     @RequestParam("email") String email,
-                                     HttpSession session) {
+    public ModelAndView handleRegister(@RequestParam("lastname") String lastname,
+                                       @RequestParam("firstname") String firstname,
+                                       @RequestParam("email") String email,
+                                       HttpSession session) {
         logger.info(":: Register ::");
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
@@ -193,13 +192,12 @@ public class LoginController {
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
 
         session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
-
         return mav;
     }
 
     @PostMapping(value = "/enroll-authenticator")
-    public ModelAndView postEnrollAuthenticator(@RequestParam("authenticator-type") String authenticatorType,
-                                                HttpSession session) {
+    public ModelAndView handleEnrollAuthenticator(@RequestParam("authenticator-type") String authenticatorType,
+                                                  HttpSession session) {
         logger.info(":: Enroll Authenticator ::");
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
@@ -227,8 +225,8 @@ public class LoginController {
     }
 
     @PostMapping(value = "/verify-email-authenticator-enrollment")
-    public ModelAndView verifyEmailAuthenticator(@RequestParam("code") String code,
-                                                 HttpSession session) {
+    public ModelAndView handleVerifyEmailAuthenticator(@RequestParam("code") String code,
+                                                       HttpSession session) {
         logger.info(":: Verify Email Authenticator :: {}", code);
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
@@ -266,9 +264,9 @@ public class LoginController {
     }
 
     @PostMapping(value = "/password-authenticator-enrollment")
-    public ModelAndView enrollPasswordAuthenticator(@RequestParam("new-password") String newPassword,
-                                                    @RequestParam("confirm-new-password") String confirmNewPassword,
-                                                    HttpSession session) {
+    public ModelAndView handleEnrollPasswordAuthenticator(@RequestParam("new-password") String newPassword,
+                                                          @RequestParam("confirm-new-password") String confirmNewPassword,
+                                                          HttpSession session) {
         logger.info(":: Enroll Password Authenticator ::");
 
         if (!newPassword.equals(confirmNewPassword)) {

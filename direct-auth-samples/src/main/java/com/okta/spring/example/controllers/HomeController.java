@@ -25,39 +25,39 @@ import org.springframework.web.servlet.ModelAndView;
 public class HomeController {
 
     @GetMapping("/")
-    public String home() {
+    public String displayHomePage() {
         return "redirect:/custom-login";
     }
 
     @GetMapping(value = "/custom-login")
-    public ModelAndView getLogin() {
+    public ModelAndView displayLoginPage() {
         return new ModelAndView("login");
     }
 
     @GetMapping("/forgot-password")
-    public ModelAndView getForgotPassword() {
+    public ModelAndView displayForgotPasswordPage() {
         return new ModelAndView("forgotpassword");
     }
 
 
     @GetMapping("/register")
-    public ModelAndView getRegister() {
+    public ModelAndView displayRegisterPage() {
         return new ModelAndView("register");
     }
 
     @GetMapping("/enroll-authenticators")
-    public String getEnrollAuthenticators(Model model) {
+    public String displayEnrollAuthenticatorsPage(Model model) {
         model.addAttribute("authenticatorUIOption", new AuthenticatorUIOption());
         return "enroll-authenticators";
     }
 
     @GetMapping("/verify-email-authenticator-enrollment")
-    public ModelAndView getVerifyEmailAuthenticatorEnrollment() {
+    public ModelAndView displayVerifyEmailAuthenticatorEnrollmentPage() {
         return new ModelAndView("verify-email-authenticator-enrollment");
     }
 
     @GetMapping("/password-authenticator-enrollment")
-    public ModelAndView getPasswordAuthenticatorEnrollment() {
+    public ModelAndView displayPasswordAuthenticatorEnrollmentPage() {
         return new ModelAndView("password-authenticator-enrollment");
     }
 }

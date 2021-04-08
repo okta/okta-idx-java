@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-Present Okta, Inc.
+ * Copyright 2021-Present Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,6 +195,13 @@ public class AuthenticationWrapper {
         return authenticationResponse;
     }
 
+    /**
+     * Change password with the supplied change password options reference.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @return the Authentication response
+     */
     public static AuthenticationResponse changePassword(IDXClient client, IDXClientContext idxClientContext, ChangePasswordOptions changePasswordOptions) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
@@ -395,7 +402,7 @@ public class AuthenticationWrapper {
     }
 
     /**
-     * Fetch Form Values for signing up a new user.
+     * Populate UI form values for signing up a new user.
      *
      * @param client                the IDX Client
      * @return the new user registration response
@@ -453,6 +460,14 @@ public class AuthenticationWrapper {
         return newUserRegistrationResponse;
     }
 
+    /**
+     * Register new user with the supplied user profile reference.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @param userProfile           the user profile
+     * @return the Authentication response
+     */
     public static AuthenticationResponse processRegistration(IDXClient client, IDXClientContext idxClientContext, UserProfile userProfile) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
@@ -477,8 +492,6 @@ public class AuthenticationWrapper {
 
             remediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
 
-            //authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_PASSWORD_RESET);
-
         } catch (ProcessingException e) {
             logger.error("Error occurred", e);
             Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
@@ -492,12 +505,20 @@ public class AuthenticationWrapper {
         return authenticationResponse;
     }
 
-    public static AuthenticationResponse processEnrollAuthenticator(IDXClient idxClient, IDXClientContext idxClientContext, String authenticatorType) {
+    /**
+     * Enroll authenticator of the supplied type.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @param authenticatorType     the authenticator type
+     * @return the Authentication response
+     */
+    public static AuthenticationResponse processEnrollAuthenticator(IDXClient client, IDXClientContext idxClientContext, String authenticatorType) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
         try {
-            IDXResponse introspectResponse = idxClient.introspect(idxClientContext);
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
             String stateHandle = introspectResponse.getStateHandle();
 
             RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
@@ -529,7 +550,7 @@ public class AuthenticationWrapper {
                     .withStateHandle(stateHandle)
                     .build();
 
-            IDXResponse idxResponse = remediationOption.proceed(idxClient, enrollRequest);
+            IDXResponse idxResponse = remediationOption.proceed(client, enrollRequest);
 
             RemediationOption[] enrollRemediationOptions = idxResponse.remediation().remediationOptions();
             printRemediationOptions(enrollRemediationOptions);
@@ -549,6 +570,14 @@ public class AuthenticationWrapper {
         return authenticationResponse;
     }
 
+    /**
+     * Verify the Email authenticator enrollment process with the user supplied email passcode.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @param passcode              the user supplied email passcode
+     * @return the Authentication response
+     */
     public static AuthenticationResponse verifyEmailAuthenticator(IDXClient client, IDXClientContext idxClientContext, String passcode) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
@@ -600,6 +629,14 @@ public class AuthenticationWrapper {
         return authenticationResponse;
     }
 
+    /**
+     * Verify the Password authenticator enrollment process with the user supplied password.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @param password              the user chosen password
+     * @return the Authentication response
+     */
     public static AuthenticationResponse verifyPasswordAuthenticator(IDXClient client, IDXClientContext idxClientContext, String password) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
@@ -648,6 +685,13 @@ public class AuthenticationWrapper {
         return authenticationResponse;
     }
 
+    /**
+     * Skip optional authenticator enrollment.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @return the Authentication response
+     */
     public static AuthenticationResponse skipAuthenticatorEnrollment(IDXClient client, IDXClientContext idxClientContext) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
@@ -679,6 +723,13 @@ public class AuthenticationWrapper {
         return authenticationResponse;
     }
 
+    /**
+     * Helper to populate the UI options to be shown on Authenticator options page.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @return the list of {@link AuthenticatorUIOption} options
+     */
     public static List<AuthenticatorUIOption> populateAuthenticatorUIOptions(IDXClient client, IDXClientContext idxClientContext) {
 
         List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
@@ -703,15 +754,46 @@ public class AuthenticationWrapper {
         return authenticatorUIOptionList;
     }
 
+    /**
+     * Helper to check if we have landed terminal success/no more remediation steps to follow.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @return true if login is successful and if there are no more remediation steps to follow; false otherwise.
+     */
     public static boolean isTerminalSuccess(IDXClient client, IDXClientContext idxClientContext) {
         try {
-            IDXResponse introspectResponse = client.introspect(idxClientContext);
-            return introspectResponse.isLoginSuccessful();
-
-        } catch (Exception e) {
+            return client.introspect(idxClientContext).isLoginSuccessful();
+        } catch (ProcessingException e) {
             logger.error("Error occurred:", e);
             return false;
         }
+    }
+
+    /**
+     * Helper to check if we have optional authenticators to skip in current remediation step.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @return true if we have optional authenticators to skip; false otherwise.
+     */
+
+    public static boolean isSkipAuthenticatorPresent(IDXClient client, IDXClientContext idxClientContext) {
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            extractRemediationOption(remediationOptions, RemediationType.SKIP);
+        } catch (IllegalArgumentException e) {
+            return false;
+        } catch (ProcessingException e) {
+            logger.error("Error occurred:", e);
+            return false;
+        }
+
+        return true;
     }
 
     private static boolean isRemediationRequireCredentials(String remediationOptionName, IDXResponse idxResponse) {
@@ -744,23 +826,5 @@ public class AuthenticationWrapper {
         logger.info("Remediation Options: {}", Arrays.stream(remediationOptions)
                 .map(RemediationOption::getName)
                 .collect(Collectors.toList()));
-    }
-
-    public static boolean isSkipAuthenticatorPresent(IDXClient client, IDXClientContext idxClientContext) {
-        try {
-            IDXResponse introspectResponse = client.introspect(idxClientContext);
-
-            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
-            printRemediationOptions(remediationOptions);
-
-            extractRemediationOption(remediationOptions, RemediationType.SKIP);
-        } catch (IllegalArgumentException e) {
-            return false;
-        } catch (ProcessingException e) {
-            logger.error("Error occurred:", e);
-            return false;
-        }
-
-        return true;
     }
 }
