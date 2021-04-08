@@ -17,7 +17,6 @@ package com.okta.idx.sdk.api.response;
 
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
-import com.okta.idx.sdk.api.model.RemediationOption;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,8 +28,6 @@ public class NewUserRegistrationResponse {
     private List<String> errors;
 
     private List<FormValue> formValues;
-
-    private RemediationOption enrollProfileRemediationOption;
 
     public List<FormValue> getFormValues() {
         return formValues;
@@ -62,13 +59,5 @@ public class NewUserRegistrationResponse {
 
     public void setIdxClientContext(IDXClientContext idxClientContext) {
         this.idxClientContext = idxClientContext;
-    }
-
-    public RemediationOption getEnrollProfileRemediationOption() {
-        return enrollProfileRemediationOption;
-    }
-
-    public void setEnrollProfileRemediationOption(RemediationOption enrollProfileRemediationOption) {
-        this.enrollProfileRemediationOption = enrollProfileRemediationOption;
     }
 }

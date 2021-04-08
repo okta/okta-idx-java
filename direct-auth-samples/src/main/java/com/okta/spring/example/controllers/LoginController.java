@@ -167,16 +167,6 @@ public class LoginController {
 
         NewUserRegistrationResponse newUserRegistrationResponse = AuthenticationWrapper.fetchSignUpFormValues(client);
 
-        for (FormValue formValue : newUserRegistrationResponse.getFormValues()) {
-            for (FormValue userProfileFormValue : formValue.getForm().getValue()) {
-                if (userProfileFormValue.isRequired()) {
-                    logger.info("Adding object {}", userProfileFormValue.getName());
-                    mav.addObject(userProfileFormValue);
-                }
-            }
-        }
-
-        //TODO: set this dynamically in future (for initial flow, only these three fields will be configured)
         UserProfile userProfile = new UserProfile();
         userProfile.addAttribute("lastName", lastname);
         userProfile.addAttribute("firstName", firstname);

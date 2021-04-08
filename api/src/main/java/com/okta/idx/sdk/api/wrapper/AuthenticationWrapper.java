@@ -446,7 +446,6 @@ public class AuthenticationWrapper {
                     .collect(Collectors.toList());
 
             newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
-            newUserRegistrationResponse.setEnrollProfileRemediationOption(enrollProfileRemediationOption);
 
         } catch (ProcessingException e) {
             Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
