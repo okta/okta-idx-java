@@ -36,7 +36,7 @@ public class HomeController {
 
     @GetMapping("/forgot-password")
     public ModelAndView displayForgotPasswordPage() {
-        return new ModelAndView("forgotpassword");
+        return new ModelAndView("forgot-password");
     }
 
 
