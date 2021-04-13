@@ -56,7 +56,7 @@ public class LoginController {
         TokenResponse tokenResponse =
                 (TokenResponse) session.getAttribute("tokenResponse");
 
-        // render existing token response if a successful one is already present in session
+        // render token response if a successful one is already present in session
         if (tokenResponse != null) {
             ModelAndView mav = new ModelAndView("home");
             AuthenticationResponse authenticationResponse = new AuthenticationResponse();
