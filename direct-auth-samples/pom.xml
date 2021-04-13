@@ -25,6 +25,7 @@
 
     <artifactId>okta-idx-java-direct-auth-samples</artifactId>
     <name>Okta IDX Java SDK :: Direct Auth Samples</name>
+    <version>${okta.sdk.version}</version>
     <description>Demonstrate IDX SDK Direct Auth flows</description>
 
     <properties>
