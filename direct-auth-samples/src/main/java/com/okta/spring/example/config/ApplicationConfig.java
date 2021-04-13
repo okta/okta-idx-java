@@ -13,26 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.idx.sdk.api.model;
+package com.okta.spring.example.config;
 
-public enum AuthenticationStatus {
+import com.okta.idx.sdk.api.client.Clients;
+import com.okta.idx.sdk.api.client.IDXClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-    SUCCESS("success"),
+@Configuration
+public class ApplicationConfig {
 
-    PASSWORD_EXPIRED("password_expired"),
-
-    AWAITING_AUTHENTICATOR_VERIFICATION("awaiting_authenticator_verification"),
-
-    AWAITING_PASSWORD_RESET("awaiting_password_reset");
-
-    private String value;
-
-    AuthenticationStatus(String value) {
-        this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
+    @Bean
+    public IDXClient idxClient() {
+        return Clients.builder().build();
     }
 }

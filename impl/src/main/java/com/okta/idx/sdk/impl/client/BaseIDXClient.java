@@ -44,8 +44,8 @@ import com.okta.idx.sdk.api.request.EnrollRequest;
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IntrospectRequest;
-import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.RecoverRequest;
+import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
@@ -464,6 +464,32 @@ public class BaseIDXClient implements IDXClient {
         }
 
         return tokenResponse;
+    }
+
+    @Override
+    public void revokeToken(String tokenType, String token) throws ProcessingException {
+
+        StringBuilder urlParameters = new StringBuilder();
+        urlParameters.append("client_id=").append(clientConfiguration.getClientId());
+        if (Strings.hasText(clientConfiguration.getClientSecret())) {
+            urlParameters.append("&client_secret=").append(clientConfiguration.getClientSecret());
+        }
+        urlParameters.append("&token_type_hint=").append(tokenType);
+        urlParameters.append("&token=").append(token);
+
+        try {
+            Request request = new DefaultRequest(
+                    HttpMethod.POST,
+                    clientConfiguration.getIssuer() + "/v1/revoke",
+                    null,
+                    getHttpHeaders(true),
+                    new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
+                    -1L);
+
+            requestExecutor.executeRequest(request);
+        } catch (HttpException e) {
+            throw new ProcessingException(e);
+        }
     }
 
     private void handleErrorResponse(Request request, Response response) throws IOException, ProcessingException {

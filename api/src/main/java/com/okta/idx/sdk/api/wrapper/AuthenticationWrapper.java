@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-Present Okta, Inc.
+ * Copyright 2021-Present Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,35 @@ import com.okta.idx.sdk.api.client.IDXClient;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
+import com.okta.idx.sdk.api.model.Authenticator;
+import com.okta.idx.sdk.api.model.AuthenticatorType;
+import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
+import com.okta.idx.sdk.api.model.RecoverPasswordOptions;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
+import com.okta.idx.sdk.api.model.UserProfile;
+import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
+import com.okta.idx.sdk.api.request.ChallengeRequest;
+import com.okta.idx.sdk.api.request.ChallengeRequestBuilder;
+import com.okta.idx.sdk.api.request.EnrollRequest;
+import com.okta.idx.sdk.api.request.EnrollRequestBuilder;
+import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
+import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequestBuilder;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
+import com.okta.idx.sdk.api.request.RecoverRequest;
+import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
+import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
+import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
+import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -62,13 +80,14 @@ public class AuthenticationWrapper {
     public static AuthenticationResponse authenticate(IDXClient client, AuthenticationOptions authenticationOptions) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        authenticationResponse.setUser(authenticationOptions.getUsername());
+
         TokenResponse tokenResponse;
-        IDXClientContext idxClientContext;
+        IDXClientContext idxClientContext = null;
 
         try {
             idxClientContext = client.interact();
             Assert.notNull(idxClientContext, "IDX client context may not be null");
-            authenticationResponse.setIdxClientContext(idxClientContext);
 
             IDXResponse introspectResponse = client.introspect(idxClientContext);
             String stateHandle = introspectResponse.getStateHandle();
@@ -111,9 +130,9 @@ public class AuthenticationWrapper {
                         logger.warn("Password expired!");
                         authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
                     } else {
-                        logger.error("Unexpected remediation {}", RemediationType.REENROLL_AUTHENTICATOR);
+                        String errMsg = "Unexpected remediation: " + RemediationType.REENROLL_AUTHENTICATOR;
+                        logger.error("{}", errMsg);
                         Arrays.stream(identifyResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-                        authenticationResponse.setAuthenticationStatus(AuthenticationStatus.FAILURE);
                     }
                 } else {
                     // login successful
@@ -123,10 +142,13 @@ public class AuthenticationWrapper {
                     authenticationResponse.setTokenResponse(tokenResponse);
                 }
             } else {
-                if (!isRemediationRequireCredentials(RemediationType.CHALLENGE_AUTHENTICATOR, identifyResponse)) {
-                    logger.error("Unexpected remediation {}", RemediationType.CHALLENGE_AUTHENTICATOR);
+                if (identifyResponse.getMessages() != null) {
                     Arrays.stream(identifyResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-                    authenticationResponse.setAuthenticationStatus(AuthenticationStatus.FAILURE);
+                }
+                else if (!isRemediationRequireCredentials(RemediationType.CHALLENGE_AUTHENTICATOR, identifyResponse)) {
+                    String errMsg = "Unexpected remediation: " + RemediationType.CHALLENGE_AUTHENTICATOR;
+                    logger.error("{}", errMsg);
+                    Arrays.stream(identifyResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
                 } else {
                     remediationOptions = identifyResponse.remediation().remediationOptions();
                     printRemediationOptions(remediationOptions);
@@ -149,9 +171,9 @@ public class AuthenticationWrapper {
                         if (isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, challengeResponse)) {
                             authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
                         } else {
-                            logger.error("Unexpected remediation {}", RemediationType.REENROLL_AUTHENTICATOR);
-                            Arrays.stream(challengeResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-                            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.FAILURE);
+                            String errMsg = "Unexpected remediation: " + RemediationType.REENROLL_AUTHENTICATOR;
+                            logger.error("{}", errMsg);
+                            Arrays.stream(identifyResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
                         }
                     } else {
                         // login successful
@@ -164,20 +186,26 @@ public class AuthenticationWrapper {
             }
             return authenticationResponse;
         } catch (ProcessingException e) {
-            List<String> errors = new LinkedList<>();
-            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> errors.add(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, errors);
-            authenticationResponse.setErrors(errors);
-            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.FAILURE);
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
-            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.FAILURE);
+            authenticationResponse.addError(e.getMessage());
         }
 
+        authenticationResponse.setIdxClientContext(idxClientContext);
         return authenticationResponse;
     }
 
+    /**
+     * Change password with the supplied change password options reference.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @return the Authentication response
+     */
     public static AuthenticationResponse changePassword(IDXClient client, IDXClientContext idxClientContext, ChangePasswordOptions changePasswordOptions) {
+
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
         TokenResponse tokenResponse;
 
@@ -185,49 +213,580 @@ public class AuthenticationWrapper {
             // re-enter flow with context
             IDXResponse introspectResponse = client.introspect(idxClientContext);
 
+            // check if flow is password expiration or forgot password
+            RemediationOption[] resetAuthenticatorRemediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(resetAuthenticatorRemediationOptions);
+
+            RemediationOption resetAuthenticatorRemediationOption =
+                    extractRemediationOption(resetAuthenticatorRemediationOptions, RemediationType.RESET_AUTHENTICATOR);
+
+            // set new password
+            Credentials credentials = new Credentials();
+            credentials.setPasscode(changePasswordOptions.getNewPassword().toCharArray());
+
+            // build answer password authenticator challenge request
+            AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(introspectResponse.getStateHandle())
+                    .withCredentials(credentials)
+                    .build();
+
+            IDXResponse resetPasswordResponse = resetAuthenticatorRemediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+
+            if (resetPasswordResponse.isLoginSuccessful()) {
+                // login successful
+                logger.info("Login Successful!");
+                tokenResponse = resetPasswordResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
+                authenticationResponse.setTokenResponse(tokenResponse);
+                return authenticationResponse;
+            } else {
+                String errMsg = "Unexpected remediation: " + RemediationType.SUCCESS_WITH_INTERACTION_CODE;
+                logger.error("{}", errMsg);
+                Arrays.stream(resetPasswordResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            }
+        } catch (ProcessingException e) {
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+            authenticationResponse.addError(e.getMessage());
+        }
+
+        authenticationResponse.setIdxClientContext(idxClientContext);
+        return authenticationResponse;
+    }
+
+    /**
+     * Recover Password with the supplied authenticator options.
+     *
+     * @param client the IDX Client
+     * @param recoverPasswordOptions the password recovery options
+     * @return the Authentication response
+     */
+    public static AuthenticationResponse recoverPassword(IDXClient client, RecoverPasswordOptions recoverPasswordOptions) {
+
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        IDXClientContext idxClientContext = null;
+
+        try {
+            idxClientContext = client.interact();
+            Assert.notNull(idxClientContext, "IDX client context may not be null");
+
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+            String stateHandle = introspectResponse.getStateHandle();
+            Assert.hasText(stateHandle, "State handle may not be null");
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.IDENTIFY);
+
+            IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
+                        .withIdentifier(recoverPasswordOptions.getUsername())
+                        .withStateHandle(stateHandle)
+                        .build();
+
+            // identify user
+            IDXResponse identifyResponse = remediationOption.proceed(client, identifyRequest);
+
+            remediationOptions = identifyResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            if (identifyResponse.getCurrentAuthenticatorEnrollment() == null ||
+                identifyResponse.getCurrentAuthenticatorEnrollment().getValue() == null ||
+                identifyResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover() == null) {
+                  Arrays.stream(identifyResponse.getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                } else {
+
+            // recover password
+            RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                    .withStateHandle(identifyResponse.getStateHandle())
+                    .build();
+
+            IDXResponse recoverResponse = identifyResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover()
+                    .proceed(client, recoverRequest);
+
+            RemediationOption[] recoverResponseRemediationOptions = recoverResponse.remediation().remediationOptions();
+            RemediationOption selectAuthenticatorAuthenticateRemediationOption = extractRemediationOption(recoverResponseRemediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+
+            Map<String, String> authenticatorOptions = selectAuthenticatorAuthenticateRemediationOption.getAuthenticatorOptions();
+
+            Authenticator authenticator = new Authenticator();
+
+            authenticator.setId(authenticatorOptions.get(recoverPasswordOptions.getAuthenticatorType().toString()));
+
+            ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .withAuthenticator(authenticator)
+                    .build();
+
+            IDXResponse selectAuthenticatorResponse = selectAuthenticatorAuthenticateRemediationOption.proceed(client, selectAuthenticatorRequest);
+
+            RemediationOption[] selectAuthenticatorResponseRemediationOptions = selectAuthenticatorResponse.remediation().remediationOptions();
+
+            extractRemediationOption(selectAuthenticatorResponseRemediationOptions, RemediationType.CHALLENGE_AUTHENTICATOR);
+
+            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
+          }
+        } catch (ProcessingException e) {
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+            authenticationResponse.addError(e.getMessage());
+        }
+
+        authenticationResponse.setIdxClientContext(idxClientContext);
+        return authenticationResponse;
+    }
+
+    /**
+     * Verify Authenticator with the supplied authenticator options.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDX Client context
+     * @param verifyAuthenticatorOptions the verify Authenticator options
+     * @return the Authentication response
+     */
+    public static AuthenticationResponse verifyAuthenticator(IDXClient client, IDXClientContext idxClientContext, VerifyAuthenticatorOptions verifyAuthenticatorOptions) {
+
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+
+        try {
+            // re-enter flow with context
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+
             // verify if password expired
-            if (!isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, introspectResponse)) {
-                logger.error("Unexpected remediation {}", RemediationType.REENROLL_AUTHENTICATOR);
+            if (!isRemediationRequireCredentials(RemediationType.CHALLENGE_AUTHENTICATOR, introspectResponse)) {
+                String errMsg = "Unexpected remediation: " + RemediationType.CHALLENGE_AUTHENTICATOR;
+                logger.error("{}", errMsg);
             } else {
 
-                RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
-                printRemediationOptions(remediationOptions);
-
-                RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.REENROLL_AUTHENTICATOR);
-
-                // set new password
                 Credentials credentials = new Credentials();
-                credentials.setPasscode(changePasswordOptions.getNewPassword().toCharArray());
+                credentials.setPasscode(verifyAuthenticatorOptions.getCode().toCharArray());
 
                 // build answer password authenticator challenge request
-                AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest = AnswerChallengeRequestBuilder.builder()
+                AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
                         .withStateHandle(introspectResponse.getStateHandle())
                         .withCredentials(credentials)
                         .build();
 
-                IDXResponse resetPasswordResponse = remediationOption.proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+                RemediationOption[] introspectRemediationOptions = introspectResponse.remediation().remediationOptions();
+                printRemediationOptions(introspectRemediationOptions);
 
-                if (resetPasswordResponse.isLoginSuccessful()) {
-                    // login successful
-                    logger.info("Login Successful!");
-                    tokenResponse = resetPasswordResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
-                    authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
-                    authenticationResponse.setTokenResponse(tokenResponse);
-                    return authenticationResponse;
-                } else {
-                    logger.error("Unexpected remediation {}", RemediationType.SUCCESS_WITH_INTERACTION_CODE);
+                RemediationOption challengeAuthenticatorRemediationOption =
+                        extractRemediationOption(introspectRemediationOptions, RemediationType.CHALLENGE_AUTHENTICATOR);
+
+                IDXResponse challengeAuthenticatorResponse =
+                        challengeAuthenticatorRemediationOption.proceed(client, challengeAuthenticatorRequest);
+
+                RemediationOption[] challengeAuthenticatorResponseRemediationOptions =
+                        challengeAuthenticatorResponse.remediation().remediationOptions();
+                printRemediationOptions(challengeAuthenticatorResponseRemediationOptions);
+
+                extractRemediationOption(challengeAuthenticatorResponseRemediationOptions, RemediationType.RESET_AUTHENTICATOR);
+
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+            }
+        } catch (ProcessingException e) {
+          logger.error("Error occurred", e);
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+            authenticationResponse.addError(e.getMessage());
+        }
+
+        authenticationResponse.setIdxClientContext(idxClientContext);
+        return authenticationResponse;
+    }
+
+    /**
+     * Populate UI form values for signing up a new user.
+     *
+     * @param client                the IDX Client
+     * @return the new user registration response
+     */
+    public static NewUserRegistrationResponse fetchSignUpFormValues(IDXClient client) {
+
+        IDXClientContext idxClientContext = null;
+        List<FormValue> enrollProfileFormValues;
+
+        NewUserRegistrationResponse newUserRegistrationResponse = new NewUserRegistrationResponse();
+
+        try {
+            idxClientContext = client.interact();
+            Assert.notNull(idxClientContext, "IDX client context may not be null");
+
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+            String stateHandle = introspectResponse.getStateHandle();
+            Assert.hasText(stateHandle, "State handle may not be null");
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            RemediationOption selectEnrollProfileRemediationOption =
+                    extractRemediationOption(remediationOptions, RemediationType.SELECT_ENROLL_PROFILE);
+
+            EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            // enroll new user
+            IDXResponse enrollResponse = selectEnrollProfileRemediationOption.proceed(client, enrollRequest);
+
+            RemediationOption[] enrollRemediationOptions = enrollResponse.remediation().remediationOptions();
+            printRemediationOptions(enrollRemediationOptions);
+
+            RemediationOption enrollProfileRemediationOption =
+                    extractRemediationOption(enrollRemediationOptions, RemediationType.ENROLL_PROFILE);
+
+            enrollProfileFormValues = Arrays.stream(enrollProfileRemediationOption.form())
+                    .filter(x-> "userProfile".equals(x.getName()))
+                    .collect(Collectors.toList());
+
+            newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
+
+        } catch (ProcessingException e) {
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, newUserRegistrationResponse.getErrors());
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+            newUserRegistrationResponse.addError(e.getMessage());
+        }
+
+        newUserRegistrationResponse.setIdxClientContext(idxClientContext);
+        return newUserRegistrationResponse;
+    }
+
+    /**
+     * Register new user with the supplied user profile reference.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @param userProfile           the user profile
+     * @return the Authentication response
+     */
+    public static AuthenticationResponse register(IDXClient client, IDXClientContext idxClientContext, UserProfile userProfile) {
+
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+            String stateHandle = introspectResponse.getStateHandle();
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.ENROLL_PROFILE);
+
+            EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest = EnrollUserProfileUpdateRequestBuilder.builder()
+                    .withUserProfile(userProfile)
+                    .withStateHandle(stateHandle)
+                    .build();
+            IDXResponse idxResponse = remediationOption.proceed(client, enrollUserProfileUpdateRequest);
+
+            remediationOptions = idxResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+
+        } catch (ProcessingException e) {
+            logger.error("Error occurred", e);
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+            authenticationResponse.addError(e.getMessage());
+        }
+
+        authenticationResponse.setIdxClientContext(idxClientContext);
+        return authenticationResponse;
+    }
+
+    /**
+     * Enroll authenticator of the supplied type.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @param authenticatorType     the authenticator type
+     * @return the Authentication response
+     */
+    public static AuthenticationResponse enrollAuthenticator(IDXClient client, IDXClientContext idxClientContext, String authenticatorType) {
+
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+            String stateHandle = introspectResponse.getStateHandle();
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+
+            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+            logger.info("Authenticator Options: {}", authenticatorOptions);
+
+            Authenticator authenticator = new Authenticator();
+
+            if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
+                authenticator.setId(authenticatorOptions.get(AuthenticatorType.EMAIL.toString()));
+                authenticator.setMethodType(AuthenticatorType.EMAIL.toString());
+            } else if (authenticatorType.equals(AuthenticatorType.PASSWORD.toString())) {
+                authenticator.setId(authenticatorOptions.get(AuthenticatorType.PASSWORD.toString()));
+                authenticator.setMethodType(AuthenticatorType.PASSWORD.toString());
+            } else {
+                String errMsg = "Unsupported authenticator " + authenticatorType;
+                logger.error(errMsg);
+                throw new IllegalArgumentException(errMsg);
+            }
+
+            EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                    .withAuthenticator(authenticator)
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            IDXResponse idxResponse = remediationOption.proceed(client, enrollRequest);
+
+            RemediationOption[] enrollRemediationOptions = idxResponse.remediation().remediationOptions();
+            printRemediationOptions(enrollRemediationOptions);
+
+            extractRemediationOption(enrollRemediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
+
+        } catch (ProcessingException e) {
+            logger.error("Error occurred", e);
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+            authenticationResponse.addError(e.getMessage());
+        }
+
+        authenticationResponse.setIdxClientContext(idxClientContext);
+        return authenticationResponse;
+    }
+
+    /**
+     * Verify the Email authenticator enrollment process with the user supplied email passcode.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @param passcode              the user supplied email passcode
+     * @return the Authentication response
+     */
+    public static AuthenticationResponse verifyEmailAuthenticator(IDXClient client, IDXClientContext idxClientContext, String passcode) {
+
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+            String stateHandle = introspectResponse.getStateHandle();
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+
+            RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
+
+            Credentials credentials = new Credentials();
+            credentials.setPasscode(passcode.toCharArray());
+
+            // build answer password authenticator challenge request
+            AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .withCredentials(credentials)
+                    .build();
+
+            IDXResponse challengeAuthenticatorResponse =
+                    remediationOption.proceed(client, challengeAuthenticatorRequest);
+
+            if (challengeAuthenticatorResponse.remediation() != null) {
+                remediationOptions = challengeAuthenticatorResponse.remediation().remediationOptions();
+                printRemediationOptions(remediationOptions);
+
+                // check if skip is present in remediation options, if yes skip it (we'll process only mandatory authenticators)
+                try {
+                    extractRemediationOption(remediationOptions, RemediationType.SKIP);
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Skip authenticator not found in remediation option");
+                    extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
                 }
             }
         } catch (ProcessingException e) {
-            List<String> errors = new LinkedList<>();
-            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> errors.add(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, errors);
-            authenticationResponse.setErrors(errors);
+            logger.error("Error occurred", e);
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+            authenticationResponse.addError(e.getMessage());
+        }
+
+        authenticationResponse.setIdxClientContext(idxClientContext);
+        return authenticationResponse;
+    }
+
+    /**
+     * Verify the Password authenticator enrollment process with the user supplied password.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @param password              the user chosen password
+     * @return the Authentication response
+     */
+    public static AuthenticationResponse verifyPasswordAuthenticator(IDXClient client, IDXClientContext idxClientContext, String password) {
+
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+            String stateHandle = introspectResponse.getStateHandle();
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+
+            RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
+
+            Credentials credentials = new Credentials();
+            credentials.setPasscode(password.toCharArray());
+
+            // build answer password authenticator challenge request
+            AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .withCredentials(credentials)
+                    .build();
+
+            IDXResponse challengeAuthenticatorResponse =
+                    remediationOption.proceed(client, challengeAuthenticatorRequest);
+
+            if (challengeAuthenticatorResponse.remediation() != null) {
+                remediationOptions = challengeAuthenticatorResponse.remediation().remediationOptions();
+                printRemediationOptions(remediationOptions);
+
+                // check if skip is present in remediation options, if yes skip it (we'll process only mandatory authenticators for now)
+                try {
+                    extractRemediationOption(remediationOptions, RemediationType.SKIP);
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Skip authenticator not found in remediation option");
+                    extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+                }
+            }
+        } catch (ProcessingException e) {
+            logger.error("Error", e);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
         }
 
+        authenticationResponse.setIdxClientContext(idxClientContext);
         return authenticationResponse;
+    }
+
+    /**
+     * Skip optional authenticator enrollment.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @return the Authentication response
+     */
+    public static AuthenticationResponse skipAuthenticatorEnrollment(IDXClient client, IDXClientContext idxClientContext) {
+
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+            String stateHandle = introspectResponse.getStateHandle();
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+
+            RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.SKIP);
+
+            SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest = SkipAuthenticatorEnrollmentRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            remediationOption.proceed(client, skipAuthenticatorEnrollmentRequest);
+
+        } catch (ProcessingException e) {
+            logger.error("Error occurred", e);
+            Arrays.stream(e.getErrorResponse().getMessages().getValue()).forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+            authenticationResponse.addError(e.getMessage());
+        }
+
+        authenticationResponse.setIdxClientContext(idxClientContext);
+        return authenticationResponse;
+    }
+
+    /**
+     * Helper to populate the UI options to be shown on Authenticator options page.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @return the list of {@link AuthenticatorUIOption} options
+     */
+    public static List<AuthenticatorUIOption> populateAuthenticatorUIOptions(IDXClient client, IDXClientContext idxClientContext) {
+
+        List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
+
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+
+            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+            for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
+                authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
+            }
+        } catch (Exception e) {
+            logger.error("Error occurred:", e);
+        }
+
+        return authenticatorUIOptionList;
+    }
+
+    /**
+     * Helper to check if we have landed terminal success/no more remediation steps to follow.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @return true if login is successful and if there are no more remediation steps to follow; false otherwise.
+     */
+    public static boolean isTerminalSuccess(IDXClient client, IDXClientContext idxClientContext) {
+        try {
+            return client.introspect(idxClientContext).isLoginSuccessful();
+        } catch (ProcessingException e) {
+            logger.error("Error occurred:", e);
+            return false;
+        }
+    }
+
+    /**
+     * Helper to check if we have optional authenticators to skip in current remediation step.
+     *
+     * @param client                the IDX Client
+     * @param idxClientContext      the IDC Client context
+     * @return true if we have optional authenticators to skip; false otherwise.
+     */
+
+    public static boolean isSkipAuthenticatorPresent(IDXClient client, IDXClientContext idxClientContext) {
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            extractRemediationOption(remediationOptions, RemediationType.SKIP);
+        } catch (IllegalArgumentException e) {
+            return false;
+        } catch (ProcessingException e) {
+            logger.error("Error occurred:", e);
+            return false;
+        }
+
+        return true;
     }
 
     private static boolean isRemediationRequireCredentials(String remediationOptionName, IDXResponse idxResponse) {

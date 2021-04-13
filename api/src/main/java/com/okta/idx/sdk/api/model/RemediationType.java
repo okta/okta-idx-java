@@ -19,10 +19,26 @@ public class RemediationType {
 
     public static final String IDENTIFY = "identify";
 
+    public static final String SKIP = "skip";
+
+    public static final String ENROLL_AUTHENTICATOR = "enroll-authenticator";
+
     public static final String REENROLL_AUTHENTICATOR = "reenroll-authenticator";
 
     public static final String CHALLENGE_AUTHENTICATOR = "challenge-authenticator";
 
     // represents success state
     public static final String SUCCESS_WITH_INTERACTION_CODE = "successWithInteractionCode";
+
+    public static final String SELECT_AUTHENTICATOR_AUTHENTICATE = "select-authenticator-authenticate";
+
+    public static final String RESET_AUTHENTICATOR = "reset-authenticator";
+
+    public static final String ENROLL_PROFILE = "enroll-profile";
+
+    public static final String SELECT_ENROLL_PROFILE = "select-enroll-profile";
+
+    public static final String SELECT_AUTHENTICATOR_ENROLL = "select-authenticator-enroll";
+
+    public static final String UNKNOWN = "unknown";
 }

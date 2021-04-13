@@ -15,38 +15,42 @@
  */
 package com.okta.idx.sdk.api.response;
 
-import com.okta.idx.sdk.api.model.AuthenticationStatus;
+import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class AuthenticationResponse {
-
-    private String user;
-
-    private TokenResponse tokenResponse;
+public class NewUserRegistrationResponse {
 
     private IDXClientContext idxClientContext;
 
-    private AuthenticationStatus authenticationStatus;
+    private List<String> errors;
 
-    private List<String> errors = new LinkedList<>();
+    private List<FormValue> formValues;
 
-    public String getUser() {
-        return user;
+    public List<FormValue> getFormValues() {
+        return formValues;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setFormValues(List<FormValue> formValues) {
+        this.formValues = formValues;
     }
 
-    public TokenResponse getTokenResponse() {
-        return tokenResponse;
+    public List<String> getErrors() {
+        return errors;
     }
 
-    public void setTokenResponse(TokenResponse tokenResponse) {
-        this.tokenResponse = tokenResponse;
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
+    }
+
+    public boolean addError(String error) {
+        if (getErrors() == null) {
+            this.errors = new LinkedList<>();
+            return this.errors.add(error);
+        }
+        return getErrors().add(error);
     }
 
     public IDXClientContext getIdxClientContext() {
@@ -55,21 +59,5 @@ public class AuthenticationResponse {
 
     public void setIdxClientContext(IDXClientContext idxClientContext) {
         this.idxClientContext = idxClientContext;
-    }
-
-    public AuthenticationStatus getAuthenticationStatus() {
-        return authenticationStatus;
-    }
-
-    public void setAuthenticationStatus(AuthenticationStatus authenticationStatus) {
-        this.authenticationStatus = authenticationStatus;
-    }
-
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    public boolean addError(String error) {
-        return getErrors().add(error);
     }
 }

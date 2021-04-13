@@ -15,19 +15,15 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public enum AuthenticationStatus {
+public enum TokenType {
 
-    SUCCESS("success"),
+    ACCESS_TOKEN("access_token"),
 
-    PASSWORD_EXPIRED("password_expired"),
-
-    AWAITING_AUTHENTICATOR_VERIFICATION("awaiting_authenticator_verification"),
-
-    AWAITING_PASSWORD_RESET("awaiting_password_reset");
+    REFRESH_TOKEN("refresh_token");
 
     private String value;
 
-    AuthenticationStatus(String value) {
+    TokenType(String value) {
         this.value = value;
     }
 

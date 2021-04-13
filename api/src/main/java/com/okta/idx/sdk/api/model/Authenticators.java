@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-Present Okta, Inc.
+ * Copyright 2020-Present Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,28 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public enum AuthenticationStatus {
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-    SUCCESS("success"),
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class Authenticators {
 
-    PASSWORD_EXPIRED("password_expired"),
+    private String type;
 
-    AWAITING_AUTHENTICATOR_VERIFICATION("awaiting_authenticator_verification"),
+    private String id;
 
-    AWAITING_PASSWORD_RESET("awaiting_password_reset");
+    private String key;
 
-    private String value;
+    private String displayName;
 
-    AuthenticationStatus(String value) {
-        this.value = value;
+    public String getType() {
+        return type;
     }
 
-    @Override
-    public String toString() {
-        return String.valueOf(value);
+    public String getId() {
+        return id;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 }

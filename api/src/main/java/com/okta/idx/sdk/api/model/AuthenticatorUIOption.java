@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-Present Okta, Inc.
+ * Copyright 2020-Present Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,24 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public enum AuthenticationStatus {
+public class AuthenticatorUIOption {
 
-    SUCCESS("success"),
+    private String id;
 
-    PASSWORD_EXPIRED("password_expired"),
+    private String type;
 
-    AWAITING_AUTHENTICATOR_VERIFICATION("awaiting_authenticator_verification"),
+    public AuthenticatorUIOption() {}
 
-    AWAITING_PASSWORD_RESET("awaiting_password_reset");
-
-    private String value;
-
-    AuthenticationStatus(String value) {
-        this.value = value;
+    public AuthenticatorUIOption(String id, String type) {
+        this.id = id;
+        this.type = type;
     }
 
-    @Override
-    public String toString() {
-        return String.valueOf(value);
+    public String getId() {
+        return id;
+    }
+
+    public String getType() {
+        return type;
     }
 }
