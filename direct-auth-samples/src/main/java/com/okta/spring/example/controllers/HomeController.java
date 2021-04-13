@@ -24,38 +24,73 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class HomeController {
 
+    /**
+     * Display the home page.
+     *
+     * @return the redirection to login view
+     */
     @GetMapping("/")
     public String displayHomePage() {
         return "redirect:/custom-login";
     }
 
+    /**
+     * Display the login page.
+     *
+     * @return the login view
+     */
     @GetMapping(value = "/custom-login")
     public ModelAndView displayLoginPage() {
         return new ModelAndView("login");
     }
 
+    /**
+     * Display the forgot password page.
+     *
+     * @return the forgot password view
+     */
     @GetMapping("/forgot-password")
     public ModelAndView displayForgotPasswordPage() {
         return new ModelAndView("forgot-password");
     }
 
-
+    /**
+     * Display the registration page.
+     *
+     * @return the register view
+     */
     @GetMapping("/register")
     public ModelAndView displayRegisterPage() {
         return new ModelAndView("register");
     }
 
+    /**
+     * Display the enroll authenticators page.
+     *
+     * @param model the model
+     * @return the enroll authenticators view
+     */
     @GetMapping("/enroll-authenticators")
-    public String displayEnrollAuthenticatorsPage(Model model) {
+    public String displayEnrollAuthenticatorsPage(final Model model) {
         model.addAttribute("authenticatorUIOption", new AuthenticatorUIOption());
         return "enroll-authenticators";
     }
 
+    /**
+     * Display the verify email authenticator enrollment page.
+     *
+     * @return the verify email authenticators view
+     */
     @GetMapping("/verify-email-authenticator-enrollment")
     public ModelAndView displayVerifyEmailAuthenticatorEnrollmentPage() {
         return new ModelAndView("verify-email-authenticator-enrollment");
     }
 
+    /**
+     * Display the password authenticator enrollment page.
+     *
+     * @return the password authenticator enrollment view
+     */
     @GetMapping("/password-authenticator-enrollment")
     public ModelAndView displayPasswordAuthenticatorEnrollmentPage() {
         return new ModelAndView("password-authenticator-enrollment");

@@ -13,20 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ *  This package contains the main class for the Spring boot webapp.
+ */
 package com.okta.spring.example;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class ExampleApplication {
-
-    /**
-     * Application entry point.
-     *
-     * @param args
-     */
-    public static void main(final String[] args) {
-        SpringApplication.run(ExampleApplication.class, args);
-    }
-}

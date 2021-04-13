@@ -23,6 +23,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfig {
 
+    /**
+     * The IDX client bean definition.
+     *
+     * @return the idx client
+     */
     @Bean
     public IDXClient idxClient() {
         return Clients.builder().build();
