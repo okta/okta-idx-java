@@ -23,14 +23,14 @@
 </head>
 <body>
 
-<div th:if="${session.user}">
+<div th:if="${authenticationResponse.user}">
     <a href="/logout" class="btn btn-danger pull-right">Logout</a>
 </div>
 
 <div class="container">
 
-    <div th:if="${session.user}" class="alert alert-success">
-        <p>Welcome, <span th:text="${session.user}"></span>!</p>
+    <div th:if="${authenticationResponse.user}" class="alert alert-success">
+        <p>Welcome, <span th:text="${authenticationResponse.user}"></span>!</p>
         <p>You have successfully authenticated against your Okta Org.</p>
     </div>
 

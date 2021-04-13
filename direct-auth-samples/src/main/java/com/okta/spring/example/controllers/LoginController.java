@@ -60,6 +60,7 @@ public class LoginController {
         if (tokenResponse != null) {
             ModelAndView mav = new ModelAndView("home");
             AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+            authenticationResponse.setUser(username);
             authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
             authenticationResponse.setTokenResponse(tokenResponse);
             mav.addObject("authenticationResponse", authenticationResponse);
@@ -82,7 +83,6 @@ public class LoginController {
         mav.addObject("authenticationResponse", authenticationResponse);
 
         // store attributes in session
-        session.setAttribute("user", username);
         session.setAttribute("tokenResponse", authenticationResponse.getTokenResponse());
         return mav;
     }
