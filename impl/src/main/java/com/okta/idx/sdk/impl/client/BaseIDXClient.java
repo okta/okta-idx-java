@@ -471,7 +471,9 @@ public class BaseIDXClient implements IDXClient {
 
         StringBuilder urlParameters = new StringBuilder();
         urlParameters.append("client_id=").append(clientConfiguration.getClientId());
-        urlParameters.append("&client_secret=").append(clientConfiguration.getClientSecret());
+        if (Strings.hasText(clientConfiguration.getClientSecret())) {
+            urlParameters.append("&client_secret=").append(clientConfiguration.getClientSecret());
+        }
         urlParameters.append("&token_type_hint=").append(tokenType);
         urlParameters.append("&token=").append(token);
 

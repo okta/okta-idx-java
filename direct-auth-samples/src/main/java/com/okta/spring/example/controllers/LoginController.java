@@ -21,7 +21,6 @@ import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
 import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
-import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.RecoverPasswordOptions;
 import com.okta.idx.sdk.api.model.UserProfile;
@@ -175,7 +174,7 @@ public class LoginController {
         IDXClientContext idxClientContext = newUserRegistrationResponse.getIdxClientContext();
 
         AuthenticationResponse authenticationResponse =
-                AuthenticationWrapper.processRegistration(client, idxClientContext, userProfile);
+                AuthenticationWrapper.register(client, idxClientContext, userProfile);
 
         List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
@@ -193,7 +192,7 @@ public class LoginController {
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
         AuthenticationResponse authenticationResponse =
-                AuthenticationWrapper.processEnrollAuthenticator(client, idxClientContext, authenticatorType);
+                AuthenticationWrapper.enrollAuthenticator(client, idxClientContext, authenticatorType);
 
         session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
 

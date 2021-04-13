@@ -467,7 +467,7 @@ public class AuthenticationWrapper {
      * @param userProfile           the user profile
      * @return the Authentication response
      */
-    public static AuthenticationResponse processRegistration(IDXClient client, IDXClientContext idxClientContext, UserProfile userProfile) {
+    public static AuthenticationResponse register(IDXClient client, IDXClientContext idxClientContext, UserProfile userProfile) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
@@ -512,7 +512,7 @@ public class AuthenticationWrapper {
      * @param authenticatorType     the authenticator type
      * @return the Authentication response
      */
-    public static AuthenticationResponse processEnrollAuthenticator(IDXClient client, IDXClientContext idxClientContext, String authenticatorType) {
+    public static AuthenticationResponse enrollAuthenticator(IDXClient client, IDXClientContext idxClientContext, String authenticatorType) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
