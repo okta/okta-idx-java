@@ -18,7 +18,6 @@ package com.okta.idx.sdk.api.response;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 

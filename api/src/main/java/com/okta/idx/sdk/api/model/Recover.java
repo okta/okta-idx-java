@@ -41,7 +41,7 @@ public class Recover {
     private FormValue[] value;
 
     public String[] getRel() {
-        return rel;
+        return Arrays.copyOf(this.rel, this.rel.length);
     }
 
     public String getName() {
@@ -65,7 +65,7 @@ public class Recover {
     }
 
     public FormValue[] getValue() {
-        return value;
+        return Arrays.copyOf(this.value, this.value.length);
     }
 
     public IDXResponse proceed(IDXClient client, RecoverRequest request) throws IllegalStateException, IllegalArgumentException, ProcessingException {
