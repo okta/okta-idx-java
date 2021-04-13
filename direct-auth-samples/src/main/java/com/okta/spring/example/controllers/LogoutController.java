@@ -31,13 +31,25 @@ import javax.servlet.http.HttpSession;
 @Controller
 public class LogoutController {
 
+    /**
+     * logger instance.
+     */
     private final Logger logger = LoggerFactory.getLogger(LogoutController.class);
 
+    /**
+     * idx client instance.
+     */
     @Autowired
     private IDXClient client;
 
+    /**
+     * Handle logout by revoking the access token and invalidating the session.
+     *
+     * @param session the session
+     * @return the redirection to login view
+     */
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
+    public String logout(final HttpSession session) {
         logger.info(":: Logout ::");
 
         // retrieve access token

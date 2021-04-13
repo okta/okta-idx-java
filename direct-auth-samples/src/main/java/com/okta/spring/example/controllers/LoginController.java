@@ -43,15 +43,29 @@ import java.util.List;
 @Controller
 public class LoginController {
 
+    /**
+     * logger instance.
+     */
     private final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
+    /**
+     * idx client instance.
+     */
     @Autowired
     private IDXClient client;
 
+    /**
+     * Handle login with the supplied username and password.
+     *
+     * @param username the username
+     * @param password the password
+     * @param session the session
+     * @return the home page view (if login is successful), else the login page with errors.
+     */
     @PostMapping("/custom-login")
-    public ModelAndView handleLogin(@RequestParam("username") String username,
-                                    @RequestParam("password") String password,
-                                    HttpSession session) {
+    public ModelAndView handleLogin(final @RequestParam("username") String username,
+                                    final @RequestParam("password") String password,
+                                    final HttpSession session) {
 
         TokenResponse tokenResponse =
                 (TokenResponse) session.getAttribute("tokenResponse");
@@ -87,15 +101,25 @@ public class LoginController {
         return mav;
     }
 
+    /**
+     * Handle forgot password (password recovery) functionality.
+     *
+     * @param username the username
+     * @param authenticatorType the authenticator type
+     * @param session the session
+     * @return the verify view (if password recovery operation is successful),
+     * else the forgot password page with errors.
+     */
     @PostMapping("/forgot-password")
-    public ModelAndView handleForgotPassword(@RequestParam("username") String username,
-                                             @RequestParam("authenticatorType") String authenticatorType,
-                                             HttpSession httpSession) {
+    public ModelAndView handleForgotPassword(final @RequestParam("username") String username,
+                                             final @RequestParam("authenticatorType") String authenticatorType,
+                                             final HttpSession session) {
         logger.info(":: Forgot Password ::");
 
         //TODO
         AuthenticationResponse authenticationResponse =
-                AuthenticationWrapper.recoverPassword(client, new RecoverPasswordOptions(username, AuthenticatorType.EMAIL));
+                AuthenticationWrapper.recoverPassword(client,
+                        new RecoverPasswordOptions(username, AuthenticatorType.EMAIL));
 
         if (authenticationResponse.getAuthenticationStatus() == null) {
             ModelAndView mav = new ModelAndView("forgot-password");
@@ -103,20 +127,28 @@ public class LoginController {
             return mav;
         }
 
-        if (authenticationResponse.getAuthenticationStatus().equals(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION)) {
-            httpSession.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
+        if (authenticationResponse.getAuthenticationStatus()
+                .equals(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION)) {
+            session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
             return new ModelAndView("verify");
         }
 
         return new ModelAndView("login"); //TODO revisit this
     }
 
+    /**
+     * Handle email verification functionality.
+     *
+     * @param code the email verification code
+     * @param session the session
+     * @return the change password view (if awaiting password reset), else the login page.
+     */
     @PostMapping("/verify")
-    public ModelAndView handleEmailVerify(@RequestParam("code") String code,
-                                          HttpSession httpSession) {
+    public ModelAndView handleEmailVerify(final @RequestParam("code") String code,
+                                          final HttpSession session) {
         logger.info(":: Verify Code :: {}", code);
 
-        IDXClientContext idxClientContext = (IDXClientContext) httpSession.getAttribute("idxClientContext");
+        IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
         VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions();
         verifyAuthenticatorOptions.setCode(code);
@@ -133,10 +165,18 @@ public class LoginController {
         return mav;
     }
 
+    /**
+     * Handle change password functionality.
+     *
+     * @param newPassword the new password
+     * @param confirmNewPassword the confirmation of the new password
+     * @param session the session
+     * @return the login view
+     */
     @PostMapping("/change-password")
-    public ModelAndView handleChangePassword(@RequestParam("new-password") String newPassword,
-                                             @RequestParam("confirm-new-password") String confirmNewPassword,
-                                             HttpSession httpSession) {
+    public ModelAndView handleChangePassword(final @RequestParam("new-password") String newPassword,
+                                             final @RequestParam("confirm-new-password") String confirmNewPassword,
+                                             final HttpSession session) {
         logger.info(":: Change Password ::");
 
         if (!newPassword.equals(confirmNewPassword)) {
@@ -147,7 +187,7 @@ public class LoginController {
 
         ModelAndView mav = new ModelAndView("login");
 
-        IDXClientContext idxClientContext = (IDXClientContext) httpSession.getAttribute("idxClientContext");
+        IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
         ChangePasswordOptions changePasswordOptions = new ChangePasswordOptions();
         changePasswordOptions.setNewPassword(newPassword);
@@ -159,11 +199,20 @@ public class LoginController {
         return mav;
     }
 
+    /**
+     * Handle new user registration functionality.
+     *
+     * @param lastname the lastname
+     * @param firstname the firstname
+     * @param email the email
+     * @param session the session
+     * @return the enroll authenticators view.
+     */
     @PostMapping("/register")
-    public ModelAndView handleRegister(@RequestParam("lastname") String lastname,
-                                       @RequestParam("firstname") String firstname,
-                                       @RequestParam("email") String email,
-                                       HttpSession session) {
+    public ModelAndView handleRegister(final @RequestParam("lastname") String lastname,
+                                       final @RequestParam("firstname") String firstname,
+                                       final @RequestParam("email") String email,
+                                       final HttpSession session) {
         logger.info(":: Register ::");
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
@@ -180,7 +229,8 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.register(client, idxClientContext, userProfile);
 
-        List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
+        List<AuthenticatorUIOption> authenticatorUIOptionList =
+                AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
 
@@ -188,9 +238,16 @@ public class LoginController {
         return mav;
     }
 
+    /**
+     * Handle authenticator enrollment functionality.
+     *
+     * @param authenticatorType the authenticator type
+     * @param session the session
+     * @return the email or password authenticator enrollment view, else the enroll authenticators page with errors.
+     */
     @PostMapping(value = "/enroll-authenticator")
-    public ModelAndView handleEnrollAuthenticator(@RequestParam("authenticator-type") String authenticatorType,
-                                                  HttpSession session) {
+    public ModelAndView handleEnrollAuthenticator(final @RequestParam("authenticator-type") String authenticatorType,
+                                                  final HttpSession session) {
         logger.info(":: Enroll Authenticator ::");
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
@@ -217,9 +274,16 @@ public class LoginController {
         }
     }
 
+    /**
+     * Handle email authenticator verification functionality.
+     *
+     * @param code the email verification code
+     * @param session the session
+     * @return the login page view (if login operation is successful), else the enroll-authenticators page.
+     */
     @PostMapping(value = "/verify-email-authenticator-enrollment")
-    public ModelAndView handleVerifyEmailAuthenticator(@RequestParam("code") String code,
-                                                       HttpSession session) {
+    public ModelAndView handleVerifyEmailAuthenticator(final @RequestParam("code") String code,
+                                                       final HttpSession session) {
         logger.info(":: Verify Email Authenticator :: {}", code);
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
@@ -236,7 +300,8 @@ public class LoginController {
         }
 
         if (AuthenticationWrapper.isSkipAuthenticatorPresent(client, idxClientContext)) {
-            AuthenticationResponse response = AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
+            AuthenticationResponse response =
+                    AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
             idxClientContext = response.getIdxClientContext();
 
             if (AuthenticationWrapper.isTerminalSuccess(client, idxClientContext)) {
@@ -249,17 +314,26 @@ public class LoginController {
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
 
-        List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
+        List<AuthenticatorUIOption> authenticatorUIOptionList =
+                AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
         session.setAttribute("idxClientContext", idxClientContext);
         return mav;
     }
 
+    /**
+     * Handle password authenticator enrollment functionality.
+     *
+     * @param newPassword the new password
+     * @param confirmNewPassword the confirmation for new password
+     * @param session the session
+     * @return the login page view (if login operation is successful), else the enroll-authenticators page.
+     */
     @PostMapping(value = "/password-authenticator-enrollment")
-    public ModelAndView handleEnrollPasswordAuthenticator(@RequestParam("new-password") String newPassword,
-                                                          @RequestParam("confirm-new-password") String confirmNewPassword,
-                                                          HttpSession session) {
+    public ModelAndView handleEnrollPasswordAuthenticator(final @RequestParam("new-password") String newPassword,
+                                                          final @RequestParam("confirm-new-password") String confirmNewPassword,
+                                                          final HttpSession session) {
         logger.info(":: Enroll Password Authenticator ::");
 
         if (!newPassword.equals(confirmNewPassword)) {
@@ -282,7 +356,8 @@ public class LoginController {
         }
 
         if (AuthenticationWrapper.isSkipAuthenticatorPresent(client, idxClientContext)) {
-            AuthenticationResponse response = AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
+            AuthenticationResponse response =
+                    AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
 
             if (AuthenticationWrapper.isTerminalSuccess(client, response.getIdxClientContext())) {
                 session.setAttribute("idxClientContext", idxClientContext);
@@ -294,7 +369,8 @@ public class LoginController {
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
 
-        List<AuthenticatorUIOption> authenticatorUIOptionList = AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
+        List<AuthenticatorUIOption> authenticatorUIOptionList =
+                AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
         session.setAttribute("idxClientContext", idxClientContext);
