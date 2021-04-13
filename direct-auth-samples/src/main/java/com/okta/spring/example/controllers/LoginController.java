@@ -82,7 +82,7 @@ public class LoginController {
         ModelAndView mav = new ModelAndView("home");
         mav.addObject("authenticationResponse", authenticationResponse);
 
-        // store attributes in session
+        // store token in session
         session.setAttribute("tokenResponse", authenticationResponse.getTokenResponse());
         return mav;
     }
