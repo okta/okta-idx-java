@@ -27,6 +27,7 @@ import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
+import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.api.wrapper.AuthenticationWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,19 +53,22 @@ public class LoginController {
                                     @RequestParam("password") String password,
                                     HttpSession session) {
 
-        AuthenticationResponse authenticationResponse =
-                (AuthenticationResponse) session.getAttribute("authenticationResponse");
+        TokenResponse tokenResponse =
+                (TokenResponse) session.getAttribute("tokenResponse");
 
-        // render existing auth response if a successful one is already present in session
-        if (authenticationResponse != null &&
-            authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.SUCCESS) {
+        // render existing token response if a successful one is already present in session
+        if (tokenResponse != null) {
             ModelAndView mav = new ModelAndView("home");
+            AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
+            authenticationResponse.setTokenResponse(tokenResponse);
             mav.addObject("authenticationResponse", authenticationResponse);
             return mav;
         }
 
         // trigger authentication
-        authenticationResponse = AuthenticationWrapper.authenticate(client, new AuthenticationOptions(username, password));
+        AuthenticationResponse authenticationResponse =
+                AuthenticationWrapper.authenticate(client, new AuthenticationOptions(username, password));
 
         // populate login view with errors
         if (authenticationResponse.getAuthenticationStatus() != AuthenticationStatus.SUCCESS) {
@@ -79,7 +83,7 @@ public class LoginController {
 
         // store attributes in session
         session.setAttribute("user", username);
-        session.setAttribute("authenticationResponse", authenticationResponse);
+        session.setAttribute("tokenResponse", authenticationResponse.getTokenResponse());
         return mav;
     }
 
