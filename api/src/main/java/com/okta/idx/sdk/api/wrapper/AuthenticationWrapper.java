@@ -47,6 +47,7 @@ import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
+import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
@@ -192,9 +193,7 @@ public class AuthenticationWrapper {
             }
             return authenticationResponse;
         } catch (ProcessingException e) {
-            Arrays.stream(e.getErrorResponse().getMessages().getValue())
-                    .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+            handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
             authenticationResponse.addError(e.getMessage());
@@ -257,9 +256,7 @@ public class AuthenticationWrapper {
                         .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
             }
         } catch (ProcessingException e) {
-            Arrays.stream(e.getErrorResponse().getMessages().getValue())
-                    .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+            handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
             authenticationResponse.addError(e.getMessage());
@@ -348,9 +345,7 @@ public class AuthenticationWrapper {
             authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
           }
         } catch (ProcessingException e) {
-            Arrays.stream(e.getErrorResponse().getMessages().getValue())
-                    .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+            handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
             authenticationResponse.addError(e.getMessage());
@@ -411,10 +406,7 @@ public class AuthenticationWrapper {
                 authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_PASSWORD_RESET);
             }
         } catch (ProcessingException e) {
-          logger.error("Error occurred", e);
-            Arrays.stream(e.getErrorResponse().getMessages().getValue())
-                    .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+            handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
             authenticationResponse.addError(e.getMessage());
@@ -471,9 +463,7 @@ public class AuthenticationWrapper {
             newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
 
         } catch (ProcessingException e) {
-            Arrays.stream(e.getErrorResponse().getMessages().getValue())
-                    .forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, newUserRegistrationResponse.getErrors());
+            handleProcessingException(e, newUserRegistrationResponse);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
             newUserRegistrationResponse.addError(e.getMessage());
@@ -520,10 +510,7 @@ public class AuthenticationWrapper {
             extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
 
         } catch (ProcessingException e) {
-            logger.error("Error occurred", e);
-            Arrays.stream(e.getErrorResponse().getMessages().getValue())
-                    .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+            handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
             authenticationResponse.addError(e.getMessage());
@@ -587,10 +574,7 @@ public class AuthenticationWrapper {
             extractRemediationOption(enrollRemediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
 
         } catch (ProcessingException e) {
-            logger.error("Error occurred", e);
-            Arrays.stream(e.getErrorResponse().getMessages().getValue())
-                    .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+            handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
             authenticationResponse.addError(e.getMessage());
@@ -648,10 +632,7 @@ public class AuthenticationWrapper {
                 }
             }
         } catch (ProcessingException e) {
-            logger.error("Error occurred", e);
-            Arrays.stream(e.getErrorResponse().getMessages().getValue())
-                    .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+            handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
             authenticationResponse.addError(e.getMessage());
@@ -710,7 +691,7 @@ public class AuthenticationWrapper {
                 }
             }
         } catch (ProcessingException e) {
-            logger.error("Error", e);
+            handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
         }
@@ -747,10 +728,7 @@ public class AuthenticationWrapper {
             remediationOption.proceed(client, skipAuthenticatorEnrollmentRequest);
 
         } catch (ProcessingException e) {
-            logger.error("Error occurred", e);
-            Arrays.stream(e.getErrorResponse().getMessages().getValue())
-                    .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            logger.error("Something went wrong! {}, {}", e, authenticationResponse.getErrors());
+            handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
             authenticationResponse.addError(e.getMessage());
@@ -791,6 +769,54 @@ public class AuthenticationWrapper {
         }
 
         return authenticatorUIOptionList;
+    }
+
+    /**
+     * Helper to parse {@link ProcessingException} and populate {@link AuthenticationResponse}
+     * with appropriate error messages.
+     *
+     * @param e the {@link ProcessingException} reference
+     * @param authenticationResponse the {@link AuthenticationResponse} reference
+     */
+    private static void handleProcessingException(ProcessingException e,
+                                                  AuthenticationResponse authenticationResponse) {
+        logger.error("Exception occurred", e);
+        ErrorResponse errorResponse = e.getErrorResponse();
+        if (errorResponse != null) {
+            if (errorResponse.getMessages() != null) {
+                Arrays.stream(errorResponse.getMessages().getValue())
+                        .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            } else {
+                authenticationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
+            }
+        } else {
+            authenticationResponse.addError(e.getMessage());
+        }
+        logger.error("Error Detail: {}", authenticationResponse.getErrors());
+    }
+
+    /**
+     * Helper to parse {@link ProcessingException} and populate {@link NewUserRegistrationResponse}
+     * with appropriate error messages.
+     *
+     * @param e the {@link ProcessingException} reference
+     * @param newUserRegistrationResponse the {@link NewUserRegistrationResponse} reference
+     */
+    private static void handleProcessingException(ProcessingException e,
+                                                  NewUserRegistrationResponse newUserRegistrationResponse) {
+        logger.error("Exception occurred", e);
+        ErrorResponse errorResponse = e.getErrorResponse();
+        if (errorResponse != null) {
+            if (errorResponse.getMessages() != null) {
+                Arrays.stream(errorResponse.getMessages().getValue())
+                        .forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
+            } else {
+                newUserRegistrationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
+            }
+        } else {
+            newUserRegistrationResponse.addError(e.getMessage());
+        }
+        logger.error("Error Detail: {}", newUserRegistrationResponse.getErrors());
     }
 
     /**
