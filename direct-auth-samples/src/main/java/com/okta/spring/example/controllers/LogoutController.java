@@ -18,7 +18,6 @@ package com.okta.spring.example.controllers;
 import com.okta.idx.sdk.api.client.IDXClient;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.TokenType;
-import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,21 +52,18 @@ public class LogoutController {
         logger.info(":: Logout ::");
 
         // retrieve access token
-        AuthenticationResponse authenticationResponse =
-                (AuthenticationResponse) session.getAttribute("authenticationResponse");
+        TokenResponse tokenResponse =
+                (TokenResponse) session.getAttribute("tokenResponse");
 
-        if (authenticationResponse != null) {
-            TokenResponse tokenResponse = authenticationResponse.getTokenResponse();
+        if (tokenResponse != null) {
+            String accessToken = tokenResponse.getAccessToken();
 
-            if (tokenResponse != null) {
-                String accessToken = tokenResponse.getAccessToken();
-
-                // revoke access token
-                try {
-                    client.revokeToken(TokenType.ACCESS_TOKEN.toString(), accessToken);
-                } catch (ProcessingException e) {
-                    logger.error("Error occurred while trying to revoke access token", e);
-                }
+            // revoke access token
+            try {
+                logger.info("Revoking access token");
+                client.revokeToken(TokenType.ACCESS_TOKEN.toString(), accessToken);
+            } catch (ProcessingException e) {
+                logger.error("Error occurred", e);
             }
         }
 
