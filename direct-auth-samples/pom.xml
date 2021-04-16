@@ -34,6 +34,7 @@
         <checkstyle-maven-plugin.version>3.1.2</checkstyle-maven-plugin.version>
         <java.version>1.8</java.version>
         <okta.sdk.version>0.1.0-beta.6-SNAPSHOT</okta.sdk.version>
+        <okta.jwt.version>0.5.1</okta.jwt.version>
     </properties>
 
     <dependencies>
@@ -89,6 +90,19 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Used to parse the email out of the id token -->
+        <dependency>
+            <groupId>com.okta.jwt</groupId>
+            <artifactId>okta-jwt-verifier</artifactId>
+            <version>${okta.jwt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.okta.jwt</groupId>
+            <artifactId>okta-jwt-verifier-impl</artifactId>
+            <version>${okta.jwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>

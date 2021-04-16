@@ -27,8 +27,9 @@ import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
-import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.api.wrapper.AuthenticationWrapper;
+import com.okta.spring.example.helpers.HomeHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,12 @@ public class LoginController {
     private IDXClient client;
 
     /**
+     * home helper instance.
+     */
+    @Autowired
+    private HomeHelper homeHelper;
+
+    /**
      * Handle login with the supplied username and password.
      *
      * @param username the username
@@ -66,21 +73,6 @@ public class LoginController {
     public ModelAndView handleLogin(final @RequestParam("username") String username,
                                     final @RequestParam("password") String password,
                                     final HttpSession session) {
-
-        TokenResponse tokenResponse =
-                (TokenResponse) session.getAttribute("tokenResponse");
-
-        // render token response if a successful one is already present in session
-        if (tokenResponse != null) {
-            ModelAndView mav = new ModelAndView("home");
-            AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-            authenticationResponse.setUser(username);
-            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
-            authenticationResponse.setTokenResponse(tokenResponse);
-            mav.addObject("authenticationResponse", authenticationResponse);
-            return mav;
-        }
-
         // trigger authentication
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.authenticate(client, new AuthenticationOptions(username, password));
@@ -92,13 +84,7 @@ public class LoginController {
             return mav;
         }
 
-        // success
-        ModelAndView mav = new ModelAndView("home");
-        mav.addObject("authenticationResponse", authenticationResponse);
-
-        // store token in session
-        session.setAttribute("tokenResponse", authenticationResponse.getTokenResponse());
-        return mav;
+        return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
     }
 
     /**
@@ -291,24 +277,17 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.verifyEmailAuthenticator(client, idxClientContext, code);
 
-        idxClientContext = authenticationResponse.getIdxClientContext();
-
-        if (AuthenticationWrapper.isTerminalSuccess(client, idxClientContext)) {
-            ModelAndView mav = new ModelAndView("login");
-            mav.addObject("info", "Registration successful");
-            return mav;
+        if (authenticationResponse.getTokenResponse() != null) {
+            return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
         }
+
+        idxClientContext = authenticationResponse.getIdxClientContext();
 
         if (AuthenticationWrapper.isSkipAuthenticatorPresent(client, idxClientContext)) {
             AuthenticationResponse response =
                     AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
-            idxClientContext = response.getIdxClientContext();
-
-            if (AuthenticationWrapper.isTerminalSuccess(client, idxClientContext)) {
-                session.setAttribute("idxClientContext", idxClientContext);
-                ModelAndView mav = new ModelAndView("login");
-                mav.addObject("info", "Registration successful");
-                return mav;
+            if (response.getTokenResponse() != null) {
+                return homeHelper.proceedToHome(response.getTokenResponse(), session);
             }
         }
 
@@ -347,23 +326,18 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.verifyPasswordAuthenticator(client, idxClientContext, confirmNewPassword);
 
-        idxClientContext = authenticationResponse.getIdxClientContext();
-
-        if (AuthenticationWrapper.isTerminalSuccess(client, idxClientContext)) {
-            ModelAndView mav = new ModelAndView("login");
-            mav.addObject("info", "Registration successful");
-            return mav;
+        if (authenticationResponse.getTokenResponse() != null) {
+            return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
         }
+
+        idxClientContext = authenticationResponse.getIdxClientContext();
 
         if (AuthenticationWrapper.isSkipAuthenticatorPresent(client, idxClientContext)) {
             AuthenticationResponse response =
                     AuthenticationWrapper.skipAuthenticatorEnrollment(client, idxClientContext);
 
-            if (AuthenticationWrapper.isTerminalSuccess(client, response.getIdxClientContext())) {
-                session.setAttribute("idxClientContext", idxClientContext);
-                ModelAndView mav = new ModelAndView("login");
-                mav.addObject("info", "Registration successful");
-                return mav;
+            if (response.getTokenResponse() != null) {
+                return homeHelper.proceedToHome(response.getTokenResponse(), session);
             }
         }
 

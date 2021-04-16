@@ -82,7 +82,6 @@ public class AuthenticationWrapper {
                                                       AuthenticationOptions authenticationOptions) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        authenticationResponse.setUser(authenticationOptions.getUsername());
 
         TokenResponse tokenResponse;
         IDXClientContext idxClientContext = null;
@@ -631,6 +630,14 @@ public class AuthenticationWrapper {
                     extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
                 }
             }
+
+            if (challengeAuthenticatorResponse.isLoginSuccessful()) {
+                // login successful
+                logger.info("Login Successful!");
+                TokenResponse tokenResponse = challengeAuthenticatorResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
+                authenticationResponse.setTokenResponse(tokenResponse);
+            }
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
@@ -689,6 +696,14 @@ public class AuthenticationWrapper {
                     logger.warn("Skip authenticator not found in remediation option");
                     extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
                 }
+            }
+
+            if (challengeAuthenticatorResponse.isLoginSuccessful()) {
+                // login successful
+                logger.info("Login Successful!");
+                TokenResponse tokenResponse = challengeAuthenticatorResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
+                authenticationResponse.setTokenResponse(tokenResponse);
             }
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);

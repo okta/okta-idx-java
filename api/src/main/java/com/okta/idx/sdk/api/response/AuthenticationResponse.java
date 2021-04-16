@@ -23,8 +23,6 @@ import java.util.List;
 
 public class AuthenticationResponse {
 
-    private String user;
-
     private TokenResponse tokenResponse;
 
     private IDXClientContext idxClientContext;
@@ -32,14 +30,6 @@ public class AuthenticationResponse {
     private AuthenticationStatus authenticationStatus;
 
     private List<String> errors = new LinkedList<>();
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
