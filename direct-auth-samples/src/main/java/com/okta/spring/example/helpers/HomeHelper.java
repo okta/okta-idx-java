@@ -18,7 +18,13 @@ public class HomeHelper {
     @Autowired
     private AccessTokenVerifier accessTokenVerifier;
 
-    public ModelAndView proceedToHome(TokenResponse tokenResponse, HttpSession session) {
+    /**
+     * Go to the home page, setting the session, and creating the view.
+     * @param tokenResponse
+     * @param session
+     * @return the ModelAndView for the home page.
+     */
+    public ModelAndView proceedToHome(final TokenResponse tokenResponse, final HttpSession session) {
         // success
         ModelAndView mav = new ModelAndView("home");
         mav.addObject("tokenResponse", tokenResponse);

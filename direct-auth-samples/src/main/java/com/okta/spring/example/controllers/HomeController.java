@@ -49,6 +49,8 @@ public class HomeController {
     /**
      * Display the login page.
      *
+     * @param session
+     *
      * @return the login view
      */
     @GetMapping(value = "/custom-login")
