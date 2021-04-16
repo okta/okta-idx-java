@@ -16,13 +16,25 @@
 package com.okta.spring.example.controllers;
 
 import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
+import com.okta.idx.sdk.api.response.TokenResponse;
+import com.okta.spring.example.helpers.HomeHelper;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpSession;
+
 @Controller
 public class HomeController {
+
+    /**
+     * homeHelper instance.
+     */
+    @Autowired
+    private HomeHelper homeHelper;
 
     /**
      * Display the home page.
@@ -40,7 +52,14 @@ public class HomeController {
      * @return the login view
      */
     @GetMapping(value = "/custom-login")
-    public ModelAndView displayLoginPage() {
+    public ModelAndView displayLoginPage(final HttpSession session) {
+        TokenResponse tokenResponse =
+                (TokenResponse) session.getAttribute("tokenResponse");
+
+        // render token response if a successful one is already present in session
+        if (tokenResponse != null) {
+            return homeHelper.proceedToHome(tokenResponse, session);
+        }
         return new ModelAndView("login");
     }
 

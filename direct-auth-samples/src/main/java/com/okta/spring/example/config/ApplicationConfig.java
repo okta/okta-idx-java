@@ -17,6 +17,9 @@ package com.okta.spring.example.config;
 
 import com.okta.idx.sdk.api.client.Clients;
 import com.okta.idx.sdk.api.client.IDXClient;
+import com.okta.jwt.AccessTokenVerifier;
+import com.okta.jwt.JwtVerifiers;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,5 +34,18 @@ public class ApplicationConfig {
     @Bean
     public IDXClient idxClient() {
         return Clients.builder().build();
+    }
+
+    /**
+     * The accessTokenVerifier bean definition.
+     *
+     * @return the accessTokenVerifier
+     */
+    @Bean
+    public AccessTokenVerifier accessTokenVerifier() {
+        return JwtVerifiers.accessTokenVerifierBuilder()
+                .setIssuer("https://{your_okta_domain}/oauth2/default")
+                .setAudience("{your_client_id}")
+                .build();
     }
 }

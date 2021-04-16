@@ -23,50 +23,45 @@
 </head>
 <body>
 
-<div th:if="${authenticationResponse.user}">
+<div th:if="${tokenResponse}">
     <a href="/logout" class="btn btn-danger pull-right">Logout</a>
 </div>
 
 <div class="container">
 
-    <div th:if="${authenticationResponse.user}" class="alert alert-success">
-        <p>Welcome, <span th:text="${authenticationResponse.user}"></span>!</p>
+    <div th:if="${tokenResponse}" class="alert alert-success">
+        <p>Welcome, <span th:text="${user}"></span>!</p>
         <p>You have successfully authenticated against your Okta Org.</p>
     </div>
 
-    <div th:if="${authenticationResponse.tokenResponse.accessToken}">
+    <div th:if="${tokenResponse.accessToken}">
         <p><label>Access Token: </label>
-            <span th:text="${authenticationResponse.tokenResponse.accessToken}">2</span></p>
+            <span th:text="${tokenResponse.accessToken}">2</span></p>
     </div>
 
-    <div th:if="${authenticationResponse.tokenResponse.expiresIn}">
+    <div th:if="${tokenResponse.expiresIn}">
         <p><label>Expires In: </label>
-            <span th:text="${authenticationResponse.tokenResponse.expiresIn}">1</span></p>
+            <span th:text="${tokenResponse.expiresIn}">1</span></p>
     </div>
 
-    <div th:if="${authenticationResponse.tokenResponse.idToken}">
+    <div th:if="${tokenResponse.idToken}">
         <p><label>ID Token: </label>
-            <span th:text="${authenticationResponse.tokenResponse.idToken}">1</span></p>
+            <span th:text="${tokenResponse.idToken}">1</span></p>
     </div>
 
-    <div th:if="${authenticationResponse.tokenResponse.refreshToken}">
+    <div th:if="${tokenResponse.refreshToken}">
         <p><label>Refresh Token: </label>
-            <span th:text="${authenticationResponse.tokenResponse.refreshToken}">1</span></p>
+            <span th:text="${tokenResponse.refreshToken}">1</span></p>
     </div>
 
-    <div th:if="${authenticationResponse.tokenResponse.scope}">
+    <div th:if="${tokenResponse.scope}">
         <p><label>Scope(s): </label>
-            <span th:text="${authenticationResponse.tokenResponse.scope}">1</span></p>
+            <span th:text="${tokenResponse.scope}">1</span></p>
     </div>
 
-    <div th:if="${authenticationResponse.tokenResponse.tokenType}">
+    <div th:if="${tokenResponse.tokenType}">
         <p><label>Token Type: </label>
-            <span th:text="${authenticationResponse.tokenResponse.tokenType}">1</span></p>
-    </div>
-
-    <div th:if="${authenticationResponse.errors}">
-        <p><label>Errors: </label>
-            <span th:text="${authenticationResponse.errors}">1</span></p>
+            <span th:text="${tokenResponse.tokenType}">1</span></p>
     </div>
 </div>
 

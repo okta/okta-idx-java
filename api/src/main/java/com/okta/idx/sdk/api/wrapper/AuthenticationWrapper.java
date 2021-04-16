@@ -82,7 +82,6 @@ public class AuthenticationWrapper {
                                                       AuthenticationOptions authenticationOptions) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        authenticationResponse.setUser(authenticationOptions.getUsername());
 
         TokenResponse tokenResponse;
         IDXClientContext idxClientContext = null;
