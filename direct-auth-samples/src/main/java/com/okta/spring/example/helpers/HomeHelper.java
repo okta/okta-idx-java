@@ -54,7 +54,7 @@ public class HomeHelper {
         try {
             user = (String) accessTokenVerifier.decode(tokenResponse.idToken).getClaims().get("email");
         } catch (JwtVerificationException e) {
-            logger.error("Error verifying email claim from token response", e);
+            logger.error("Error verifying email claim from access token response", e);
         }
         mav.addObject("user", user);
 
