@@ -18,7 +18,8 @@ package com.okta.spring.example.helpers;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.jwt.AccessTokenVerifier;
 import com.okta.jwt.JwtVerificationException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
@@ -27,6 +28,12 @@ import javax.servlet.http.HttpSession;
 
 @Component
 public class HomeHelper {
+
+    /**
+     * logger instance.
+     */
+    private final Logger logger = LoggerFactory.getLogger(HomeHelper.class);
+
     /**
      * jwt parser instance.
      */
@@ -47,7 +54,7 @@ public class HomeHelper {
         try {
             user = (String) accessTokenVerifier.decode(tokenResponse.idToken).getClaims().get("email");
         } catch (JwtVerificationException e) {
-            e.printStackTrace();
+            logger.error("Error verifying email claim from access token response", e);
         }
         mav.addObject("user", user);
 

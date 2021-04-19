@@ -15,6 +15,9 @@
  */
 package com.okta.idx.sdk.api.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum AuthenticatorType {
 
     EMAIL("email"),
@@ -29,8 +32,24 @@ public enum AuthenticatorType {
         this.value = value;
     }
 
+    public String getValue() { return this.value; }
+
+    public static AuthenticatorType get(String authenticatorType) {
+        return reverseLookupMap.get(authenticatorType);
+    }
+
     @Override
     public String toString() {
         return String.valueOf(value);
+    }
+
+    static Map<String, AuthenticatorType> reverseLookupMap = new HashMap<>();
+
+    static {
+        AuthenticatorType[] values = AuthenticatorType.values();
+
+        for (AuthenticatorType val : values) {
+            reverseLookupMap.put(val.getValue(), val);
+        }
     }
 }

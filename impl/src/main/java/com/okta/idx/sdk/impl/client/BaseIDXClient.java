@@ -52,8 +52,6 @@ import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.impl.config.ClientConfiguration;
 import com.okta.idx.sdk.impl.util.PkceUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -63,8 +61,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class BaseIDXClient implements IDXClient {
-
-    private static final Logger log = LoggerFactory.getLogger(BaseIDXClient.class);
 
     private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/1.0.0";
 
@@ -98,11 +94,11 @@ public class BaseIDXClient implements IDXClient {
     public IDXClientContext interact() throws ProcessingException {
 
         InteractResponse interactResponse;
-        String codeVerifier, state;
+        String codeVerifier, codeChallenge, state;
 
         try {
             codeVerifier = PkceUtil.generateCodeVerifier();
-            String codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
+            codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
             state = UUID.randomUUID().toString();
 
             StringBuilder urlParameters = new StringBuilder();
@@ -139,7 +135,7 @@ public class BaseIDXClient implements IDXClient {
             throw new ProcessingException(e);
         }
 
-        return new IDXClientContext(codeVerifier, interactResponse.getInteractionHandle(), state);
+        return new IDXClientContext(codeVerifier, codeChallenge, interactResponse.getInteractionHandle(), state);
     }
 
     @Override
