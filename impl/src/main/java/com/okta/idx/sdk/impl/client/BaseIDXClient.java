@@ -52,8 +52,6 @@ import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.impl.config.ClientConfiguration;
 import com.okta.idx.sdk.impl.util.PkceUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

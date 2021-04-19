@@ -1564,23 +1564,50 @@ public class Quickstart {
                         .withStateHandle(stateHandle)
                         .build();
 
-                idxResponse = remediationOption.proceed(client, recoverRequest);
+                idxResponse = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover()
+                        .proceed(client, recoverRequest);
 
                 // check remediation options to continue the flow
                 remediationOptions = idxResponse.remediation().remediationOptions();
+
+                remediationOptionsOptional = Arrays.stream(remediationOptions)
+                        .filter(x -> "select-authenticator-authenticate".equals(x.getName()))
+                        .findFirst();
+                remediationOption = remediationOptionsOptional.get();
+
+                Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+                Authenticator authenticator = new Authenticator();
+
+                authenticator.setId(authenticatorOptions.get("email"));   /* replace with your desired authenticator */
+
+                ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
+                        .withStateHandle(stateHandle)
+                        .withAuthenticator(authenticator)
+                        .build();
+
+                idxResponse = remediationOption.proceed(client, selectAuthenticatorRequest);
+
+                // check remediation options to continue the flow
+                remediationOptions = idxResponse.remediation().remediationOptions();
+
                 remediationOptionsOptional = Arrays.stream(remediationOptions)
                         .filter(x -> "challenge-authenticator".equals(x.getName()))
                         .findFirst();
                 remediationOption = remediationOptionsOptional.get();
 
-                Credentials secQnEnrollmentCredentials = new Credentials();
-                secQnEnrollmentCredentials.setQuestionKey("disliked_food");
-                secQnEnrollmentCredentials.setAnswer(SECURITY_QUESTION_ANSWER);
+                // enter sms code received on phone (via sms or voice)
+                Scanner in = new Scanner(System.in, "UTF-8");
+                log.info("Enter Email Code: ");
+                String emailCode = in.nextLine();
+
+                Credentials emailPasscodeCredentials = new Credentials();
+                emailPasscodeCredentials.setPasscode(emailCode.toCharArray());
 
                 // build answer security question authenticator challenge request
                 AnswerChallengeRequest answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
                         .withStateHandle(stateHandle)
-                        .withCredentials(secQnEnrollmentCredentials)
+                        .withCredentials(emailPasscodeCredentials)
                         .build();
                 idxResponse = remediationOption.proceed(client, answerChallengeRequest);
 
@@ -1607,7 +1634,7 @@ public class Quickstart {
                     remediationOption = remediationOptionsOptional.get();
 
                     // get authenticator options
-                    Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+                    authenticatorOptions = remediationOption.getAuthenticatorOptions();
                     log.info("Authenticator Options: {}", authenticatorOptions);
 
                     // answer password authenticator challenge
