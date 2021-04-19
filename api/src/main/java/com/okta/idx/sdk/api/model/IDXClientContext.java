@@ -19,18 +19,25 @@ public class IDXClientContext {
 
     private String codeVerifier;
 
+    private String codeChallenge;
+
     private String interactionHandle;
 
     private String state;
 
-    public IDXClientContext(String codeVerifier, String interactionHandle, String state) {
+    public IDXClientContext(String codeVerifier, String codeChallenge, String interactionHandle, String state) {
         this.codeVerifier = codeVerifier;
+        this.codeChallenge = codeChallenge;
         this.interactionHandle = interactionHandle;
         this.state = state;
     }
 
     public String getCodeVerifier() {
         return codeVerifier;
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
     }
 
     public String getInteractionHandle() {

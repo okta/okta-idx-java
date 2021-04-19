@@ -102,10 +102,18 @@ public class LoginController {
                                              final HttpSession session) {
         logger.info(":: Forgot Password ::");
 
-        //TODO
+        AuthenticatorType authType = AuthenticatorType.get(authenticatorType);
+
+        if (authType == null) {
+            ModelAndView mav = new ModelAndView("forgot-password");
+            mav.addObject("result",
+                    "unknown authenticator type - " + authenticatorType);
+            return mav;
+        }
+
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.recoverPassword(client,
-                        new RecoverPasswordOptions(username, AuthenticatorType.EMAIL));
+                        new RecoverPasswordOptions(username, authType));
 
         if (authenticationResponse.getAuthenticationStatus() == null) {
             ModelAndView mav = new ModelAndView("forgot-password");
@@ -142,6 +150,12 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.verifyAuthenticator(client, idxClientContext, verifyAuthenticatorOptions);
 
+        if (authenticationResponse.getErrors().size() > 0) {
+            ModelAndView mav = new ModelAndView("login");
+            mav.addObject("errors", authenticationResponse.getErrors());
+            return mav;
+        }
+
         if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.AWAITING_PASSWORD_RESET) {
             return new ModelAndView("change-password");
         }
@@ -171,8 +185,6 @@ public class LoginController {
             return mav;
         }
 
-        ModelAndView mav = new ModelAndView("login");
-
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
         ChangePasswordOptions changePasswordOptions = new ChangePasswordOptions();
@@ -181,6 +193,13 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 AuthenticationWrapper.changePassword(client, idxClientContext, changePasswordOptions);
 
+        if (authenticationResponse.getErrors().size() > 0) {
+            ModelAndView mav = new ModelAndView("change-password");
+            mav.addObject("errors", authenticationResponse.getErrors());
+            return mav;
+        }
+
+        ModelAndView mav = new ModelAndView("login");
         mav.addObject("info", authenticationResponse.getAuthenticationStatus().toString());
         return mav;
     }
@@ -248,7 +267,6 @@ public class LoginController {
             mav.addObject("messages", authenticationResponse.getAuthenticationStatus().toString());
             return mav;
         }
-
 
         if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
             return new ModelAndView("verify-email-authenticator-enrollment");

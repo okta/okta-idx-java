@@ -672,7 +672,8 @@ class BaseIDXClientTest {
         final IDXClient idxClient =
                 new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
-        final IDXClientContext idxClientContext = new IDXClientContext("codeVerifier", "interactionHandle", "state")
+        final IDXClientContext idxClientContext = new IDXClientContext(
+                "codeVerifier", "codeChallenge", "interactionHandle", "state")
 
         final Response stubbedTokenResponse = new DefaultResponse(
                 200,
@@ -1167,7 +1168,8 @@ class BaseIDXClientTest {
         final IDXClient idxClient =
                 new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
-        final IDXClientContext idxClientContext = new IDXClientContext("codeVerifier", "expiredInteractionHandle", "state")
+        final IDXClientContext idxClientContext = new IDXClientContext(
+                "codeVerifier", "codeChallenge", "expiredInteractionHandle", "state")
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 401,
@@ -1196,7 +1198,8 @@ class BaseIDXClientTest {
         final IDXClient idxClient =
                 new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
-        final IDXClientContext idxClientContext = new IDXClientContext("codeVerifier", "interactionHandle", "state")
+        final IDXClientContext idxClientContext = new IDXClientContext(
+                "codeVerifier", "codeChallenge","interactionHandle", "state")
 
         final Response stubbedTokenResponse = new DefaultResponse(
                 400,
