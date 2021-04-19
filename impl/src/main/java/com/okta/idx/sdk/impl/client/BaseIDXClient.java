@@ -112,8 +112,9 @@ public class BaseIDXClient implements IDXClient {
 
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                    isRootOrgIssuer(clientConfiguration.getIssuer()) ? clientConfiguration.getIssuer() + "/oauth2/v1/interact" :
-                    clientConfiguration.getIssuer() + "/v1/interact",
+                    isRootOrgIssuer(clientConfiguration.getIssuer()) ?
+                            clientConfiguration.getIssuer() + "/oauth2/v1/interact" :
+                            clientConfiguration.getIssuer() + "/v1/interact",
                 null,
                 getHttpHeaders(true),
                 new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
