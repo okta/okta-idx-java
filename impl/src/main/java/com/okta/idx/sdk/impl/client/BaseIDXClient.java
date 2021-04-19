@@ -52,15 +52,21 @@ import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.impl.config.ClientConfiguration;
 import com.okta.idx.sdk.impl.util.PkceUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class BaseIDXClient implements IDXClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(BaseIDXClient.class);
 
     private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/1.0.0";
 
@@ -112,7 +118,8 @@ public class BaseIDXClient implements IDXClient {
 
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/v1/interact",
+                isRootOrgIssuer(clientConfiguration.getIssuer()) ? clientConfiguration.getIssuer() + "/oauth2/v1/interact" :
+                    clientConfiguration.getIssuer() + "/v1/interact",
                 null,
                 getHttpHeaders(true),
                 new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
@@ -520,5 +527,36 @@ public class BaseIDXClient implements IDXClient {
 
         httpHeaders.add(HttpHeaders.USER_AGENT, USER_AGENT_HEADER_VALUE);
         return httpHeaders;
+    }
+
+    /**
+     * Check if the issuer is root/org URI.
+     *
+     * Issuer URL that does not follow the pattern '/oauth2/default' (or) '/oauth2/some_id_string' is
+     * considered root/org issuer.
+     *
+     * e.g. https://sample.okta.com (root/org url)
+     *      https://sample.okta.com/oauth2/default (non-root issuer/org url)
+     *      https://sample.okta.com/oauth2/ausar5cbq5TRRsbcJ0h7 (non-root issuer/org url)
+     *
+     * @param issuerUri
+     * @return true if root/org, false otherwise
+     */
+    private boolean isRootOrgIssuer(String issuerUri) throws MalformedURLException {
+        String uriPath = new URL(issuerUri).getPath();
+
+        if (Strings.hasText(uriPath)) {
+            String[] tokenizedUri = uriPath.substring(uriPath.indexOf("/")+1).split("/");
+
+            if (tokenizedUri.length >= 2 &&
+                    "oauth2".equals(tokenizedUri[0]) &&
+                    Strings.hasText(tokenizedUri[1])) {
+                logger.debug("The issuer URL: '{}' is an Okta custom authorization server", issuerUri);
+                return false;
+            }
+        }
+
+        logger.debug("The issuer URL: '{}' is an Okta root/org authorization server", issuerUri);
+        return true;
     }
 }
