@@ -51,8 +51,8 @@ import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.impl.config.ClientConfiguration;
+import static com.okta.idx.sdk.impl.util.ClientUtil.isRootOrgIssuer;
 import com.okta.idx.sdk.impl.util.PkceUtil;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -112,7 +112,9 @@ public class BaseIDXClient implements IDXClient {
 
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                clientConfiguration.getIssuer() + "/v1/interact",
+                    isRootOrgIssuer(clientConfiguration.getIssuer()) ?
+                            clientConfiguration.getIssuer() + "/oauth2/v1/interact" :
+                            clientConfiguration.getIssuer() + "/v1/interact",
                 null,
                 getHttpHeaders(true),
                 new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),

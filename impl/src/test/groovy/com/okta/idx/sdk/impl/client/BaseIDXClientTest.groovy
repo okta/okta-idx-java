@@ -51,6 +51,7 @@ import com.okta.idx.sdk.api.response.TokenResponse
 import com.okta.idx.sdk.impl.config.ClientConfiguration
 import org.testng.annotations.Test
 
+import static com.okta.idx.sdk.impl.util.ClientUtil.isRootOrgIssuer
 import static org.hamcrest.Matchers.arrayWithSize
 import static org.hamcrest.Matchers.is
 import static org.mockito.Mockito.any
@@ -1152,8 +1153,10 @@ class BaseIDXClientTest {
         try {
             idxClient.interact()
         } catch (ProcessingException e) {
+            String interactUrl = isRootOrgIssuer(clientConfiguration.getIssuer()) ? clientConfiguration.getIssuer() + "/oauth2/v1/interact" :
+                    clientConfiguration.getIssuer() + "/v1/interact";
             assertThat(e.getHttpStatus(), is(400))
-            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getIssuer() + "/v1/interact failed. HTTP status: 400"))
+            assertThat(e.getMessage(), is("Request to " + interactUrl + " failed. HTTP status: 400"))
             assertThat(e.getErrorResponse(), notNullValue())
             assertThat(e.getErrorResponse().getError(), is("invalid_request"))
             assertThat(e.getErrorResponse().getErrorDescription(), is("PKCE code challenge is required when the token endpoint authentication method is 'NONE'."))
@@ -1239,8 +1242,10 @@ class BaseIDXClientTest {
         try {
             idxClient.interact()
         } catch (ProcessingException e) {
+            String interactUrl = isRootOrgIssuer(clientConfiguration.getIssuer()) ? clientConfiguration.getIssuer() + "/oauth2/v1/interact" :
+                    clientConfiguration.getIssuer() + "/v1/interact";
             assertThat(e.getHttpStatus(), is(500))
-            assertThat(e.getMessage(), is("Request to " + clientConfiguration.getBaseUrl() + "/v1/interact failed. HTTP status: 500"))
+            assertThat(e.getMessage(), is("Request to " + interactUrl + " failed. HTTP status: 500"))
         }
     }
 
