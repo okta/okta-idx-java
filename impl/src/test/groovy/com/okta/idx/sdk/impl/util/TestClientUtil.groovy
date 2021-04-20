@@ -29,6 +29,10 @@ class TestClientUtil {
                 ClientUtil.isRootOrgIssuer("https://dev-12345.oktapreview.com/")
         assertThat "issuer uri expected to be root/org)",
                 ClientUtil.isRootOrgIssuer("https://example.io")
+        assertThat "issuer uri expected to be root/org)",
+                ClientUtil.isRootOrgIssuer("https://example.io/")
+        assertThat "issuer uri expected to be root/org)",
+                ClientUtil.isRootOrgIssuer("https://example.io//")
     }
 
     @Test
