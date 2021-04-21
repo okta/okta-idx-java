@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-Present Okta, Inc.
+ * Copyright 2021-Present Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ public class ClientUtil {
      * @return the normalized full url
      */
     public static String getNormalizedUri(String issuer, String resourceUri) throws MalformedURLException {
-        String normalizedUri;
+        String normalizedUri = issuer.replaceAll("$/", "");
 
         if (isRootOrgIssuer(issuer)) {
             // remove trailing / before concatenating with /oauth2
-            normalizedUri = issuer.replaceAll("$/", "") + "/oauth2" + resourceUri;
+            normalizedUri = normalizedUri + "/oauth2" + resourceUri;
         } else {
-            normalizedUri = issuer + resourceUri;
+            normalizedUri = normalizedUri + resourceUri;
         }
 
         return normalizedUri;
