@@ -51,7 +51,6 @@ import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.impl.config.ClientConfiguration;
-import static com.okta.idx.sdk.impl.util.ClientUtil.isRootOrgIssuer;
 import com.okta.idx.sdk.impl.util.PkceUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
