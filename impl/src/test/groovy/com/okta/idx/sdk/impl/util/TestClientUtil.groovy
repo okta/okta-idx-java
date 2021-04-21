@@ -15,31 +15,58 @@
  */
 package com.okta.idx.sdk.impl.util
 
+import static com.okta.idx.sdk.api.util.ClientUtil.isRootOrgIssuer
+import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri
+
 import org.testng.annotations.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.Matchers.is
 
 class TestClientUtil {
 
     @Test
     void issuerUri_rootOrgTest() {
         assertThat "issuer uri expected to be root/org)",
-                ClientUtil.isRootOrgIssuer("https://sample.okta.com")
+                isRootOrgIssuer("https://sample.okta.com")
         assertThat "issuer uri expected to be root/org)",
-                ClientUtil.isRootOrgIssuer("https://dev-12345.oktapreview.com/")
+                isRootOrgIssuer("https://dev-12345.oktapreview.com/")
         assertThat "issuer uri expected to be root/org)",
-                ClientUtil.isRootOrgIssuer("https://example.io")
+                isRootOrgIssuer("https://example.io")
         assertThat "issuer uri expected to be root/org)",
-                ClientUtil.isRootOrgIssuer("https://example.io/")
+                isRootOrgIssuer("https://example.io/")
         assertThat "issuer uri expected to be root/org)",
-                ClientUtil.isRootOrgIssuer("https://example.io//")
+                isRootOrgIssuer("https://example.io//")
     }
 
     @Test
     void issuerUri_nonRootOrgTest() {
         assertThat "issuer uri expected to be non-root/org)",
-                !ClientUtil.isRootOrgIssuer("https://sample.okta.com/oauth2/default")
+                !isRootOrgIssuer("https://sample.okta.com/oauth2/default")
         assertThat "issuer uri expected to be non-root/org)",
-                !ClientUtil.isRootOrgIssuer("https://example.io/oauth2/ausvd5ple5TRRsbcJ0h7")
+                !isRootOrgIssuer("https://example.io/oauth2/ausvd5ple5TRRsbcJ0h7")
+    }
+
+    @Test
+    void normalizedUri_rootOrgTest() {
+        String issuer = "https://sample.okta.com"
+        String resourceUri = "/v1/interact"
+        assertThat(getNormalizedUri(issuer, resourceUri), is(issuer + "/oauth2" + resourceUri))
+
+        issuer = "https://example.io/"
+        assertThat(getNormalizedUri(issuer, resourceUri), is(issuer + "/oauth2" + resourceUri))
+
+        issuer = "https://example.io//"
+        assertThat(getNormalizedUri(issuer, resourceUri), is(issuer + "/oauth2" + resourceUri))
+    }
+
+    @Test
+    void normalizedUri_nonRootOrgTest() {
+        String issuer = "https://sample.okta.com/oauth2/default"
+        String resourceUri = "/v1/interact"
+        assertThat(getNormalizedUri(issuer, resourceUri), is(issuer + resourceUri))
+
+        issuer = "https://example.io/oauth2/ausvd5ple5TRRsbcJ0h7"
+        assertThat(getNormalizedUri(issuer, resourceUri), is(issuer + resourceUri))
     }
 }
