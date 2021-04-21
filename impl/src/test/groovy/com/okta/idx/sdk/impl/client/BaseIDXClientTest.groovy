@@ -52,6 +52,7 @@ import com.okta.idx.sdk.impl.config.ClientConfiguration
 import org.testng.annotations.Test
 
 import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri
+
 import static org.hamcrest.Matchers.arrayWithSize
 import static org.hamcrest.Matchers.is
 import static org.mockito.Mockito.any

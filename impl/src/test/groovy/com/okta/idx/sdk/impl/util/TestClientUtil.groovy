@@ -20,8 +20,8 @@ import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri
 
 import org.testng.annotations.Test
 
-import static org.hamcrest.Matchers.is
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.Matchers.is
 
 class TestClientUtil {
 
