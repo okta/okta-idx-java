@@ -55,10 +55,13 @@ import static com.okta.idx.sdk.impl.util.ClientUtil.isRootOrgIssuer;
 import com.okta.idx.sdk.impl.util.PkceUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+
 
 public class BaseIDXClient implements IDXClient {
 
@@ -478,14 +481,16 @@ public class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                     HttpMethod.POST,
-                    clientConfiguration.getIssuer() + "/v1/revoke",
+                    isRootOrgIssuer(clientConfiguration.getIssuer()) ?
+                            clientConfiguration.getIssuer() + "/oauth2/v1/revoke" :
+                            clientConfiguration.getIssuer() + "/v1/revoke",
                     null,
                     getHttpHeaders(true),
                     new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
                     -1L);
 
             requestExecutor.executeRequest(request);
-        } catch (HttpException e) {
+        } catch (HttpException | MalformedURLException e) {
             throw new ProcessingException(e);
         }
     }
