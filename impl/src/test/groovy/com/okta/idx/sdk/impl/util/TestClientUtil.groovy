@@ -15,8 +15,8 @@
  */
 package com.okta.idx.sdk.impl.util
 
-import static com.okta.idx.sdk.api.util.ClientUtil.isRootOrgIssuer;
-import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri;
+import static com.okta.idx.sdk.api.util.ClientUtil.isRootOrgIssuer
+import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri
 
 import org.testng.annotations.Test
 
