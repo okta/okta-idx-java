@@ -29,7 +29,6 @@ public class ClientUtil {
     /**
      * Construct the normalized URL given an issuer and a resource uri.
      *
-     *
      * @param issuer the issuer url
      * @param resourceUri the uri of resource
      * @return the normalized full url
