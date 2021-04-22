@@ -22,7 +22,6 @@ import com.okta.idx.sdk.api.model.AuthenticatorType;
 import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.IDXClientContext;
-import com.okta.idx.sdk.api.model.RecoverPasswordOptions;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -91,29 +90,17 @@ public class LoginController {
      * Handle forgot password (password recovery) functionality.
      *
      * @param username the username
-     * @param authenticatorType the authenticator type
      * @param session the session
      * @return the verify view (if password recovery operation is successful),
      * else the forgot password page with errors.
      */
     @PostMapping("/forgot-password")
     public ModelAndView handleForgotPassword(final @RequestParam("username") String username,
-                                             final @RequestParam("authenticatorType") String authenticatorType,
                                              final HttpSession session) {
         logger.info(":: Forgot Password ::");
 
-        AuthenticatorType authType = AuthenticatorType.get(authenticatorType);
-
-        if (authType == null) {
-            ModelAndView mav = new ModelAndView("forgot-password");
-            mav.addObject("result",
-                    "unknown authenticator type - " + authenticatorType);
-            return mav;
-        }
-
         AuthenticationResponse authenticationResponse =
-                AuthenticationWrapper.recoverPassword(client,
-                        new RecoverPasswordOptions(username, authType));
+                AuthenticationWrapper.recoverPassword(client, username);
 
         if (authenticationResponse.getAuthenticationStatus() == null) {
             ModelAndView mav = new ModelAndView("forgot-password");
@@ -122,12 +109,49 @@ public class LoginController {
         }
 
         if (authenticationResponse.getAuthenticationStatus()
-                .equals(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION)) {
+                .equals(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION)) {
             session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
-            return new ModelAndView("verify");
+            ModelAndView mav =  new ModelAndView("forgot-password-authenticators");
+            List<AuthenticatorUIOption> uiOptions = AuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(client,
+                    authenticationResponse.getIdxClientContext());
+            mav.addObject("authenticatorUIOptionList", uiOptions);
+            return mav;
         }
 
         return new ModelAndView("login"); //TODO revisit this
+    }
+
+    /**
+     * Handle forgot password authenticator selection functionality.
+     *
+     * @param authenticatorType the authenticator type
+     * @param session the session
+     * @return the verify view, else the forgot-password-authenticators page with errors.
+     */
+    @PostMapping(value = "/forgot-password-authenticator")
+    public ModelAndView handleForgotPasswordAuthenticator(final @RequestParam("authenticator-type") String authenticatorType,
+            final HttpSession session) {
+        logger.info(":: Forgot password Authenticator ::");
+
+        IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
+
+        AuthenticationResponse authenticationResponse =
+                AuthenticationWrapper.selectForgotPasswordAuthenticator(client, idxClientContext, authenticatorType);
+
+        session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
+
+        if (authenticationResponse.getErrors().size() > 0) {
+            ModelAndView mav = new ModelAndView("forgot-password-authenticators");
+            mav.addObject("errors", authenticationResponse.getAuthenticationStatus().toString());
+            return mav;
+        }
+
+        if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
+            return new ModelAndView("verify");
+        } else {
+            logger.error("Unsupported authenticator {}", authenticatorType);
+            return new ModelAndView("forgot-password-authenticators");
+        }
     }
 
     /**
@@ -197,6 +221,10 @@ public class LoginController {
             ModelAndView mav = new ModelAndView("change-password");
             mav.addObject("errors", authenticationResponse.getErrors());
             return mav;
+        }
+
+        if (authenticationResponse.getTokenResponse() != null) {
+            return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
         }
 
         ModelAndView mav = new ModelAndView("login");

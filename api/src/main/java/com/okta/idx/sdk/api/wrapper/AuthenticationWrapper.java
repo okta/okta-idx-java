@@ -27,7 +27,6 @@ import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
-import com.okta.idx.sdk.api.model.RecoverPasswordOptions;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.model.UserProfile;
@@ -266,15 +265,13 @@ public class AuthenticationWrapper {
     }
 
     /**
-     * Recover Password with the supplied authenticator options.
+     * Recover Password with the supplied username.
      *
      * @param client the IDX Client
-     * @param recoverPasswordOptions the password recovery options
+     * @param username the username
      * @return the Authentication response
      */
-    public static AuthenticationResponse recoverPassword(IDXClient client,
-                                                         RecoverPasswordOptions recoverPasswordOptions) {
-
+    public static AuthenticationResponse recoverPassword(IDXClient client, String username) {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
         IDXClientContext idxClientContext = null;
 
@@ -292,7 +289,7 @@ public class AuthenticationWrapper {
             RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.IDENTIFY);
 
             IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
-                    .withIdentifier(recoverPasswordOptions.getUsername())
+                    .withIdentifier(username)
                     .withStateHandle(stateHandle)
                     .build();
 
@@ -308,40 +305,7 @@ public class AuthenticationWrapper {
                 Arrays.stream(identifyResponse.getMessages().getValue())
                         .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
             } else {
-
-                // recover password
-                RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                        .withStateHandle(identifyResponse.getStateHandle())
-                        .build();
-
-                IDXResponse recoverResponse = identifyResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover()
-                        .proceed(client, recoverRequest);
-
-                RemediationOption[] recoverResponseRemediationOptions = recoverResponse.remediation().remediationOptions();
-                RemediationOption selectAuthenticatorAuthenticateRemediationOption =
-                        extractRemediationOption(recoverResponseRemediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
-
-                Map<String, String> authenticatorOptions =
-                        selectAuthenticatorAuthenticateRemediationOption.getAuthenticatorOptions();
-
-                Authenticator authenticator = new Authenticator();
-
-                authenticator.setId(authenticatorOptions.get(recoverPasswordOptions.getAuthenticatorType().toString()));
-
-                ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
-                        .withStateHandle(stateHandle)
-                        .withAuthenticator(authenticator)
-                        .build();
-
-                IDXResponse selectAuthenticatorResponse =
-                        selectAuthenticatorAuthenticateRemediationOption.proceed(client, selectAuthenticatorRequest);
-
-                RemediationOption[] selectAuthenticatorResponseRemediationOptions =
-                        selectAuthenticatorResponse.remediation().remediationOptions();
-
-                extractRemediationOption(selectAuthenticatorResponseRemediationOptions, RemediationType.CHALLENGE_AUTHENTICATOR);
-
-                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
             }
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
@@ -351,6 +315,113 @@ public class AuthenticationWrapper {
         }
 
         authenticationResponse.setIdxClientContext(idxClientContext);
+        return authenticationResponse;
+    }
+
+    /**
+     * Get the authenticator options for the forgot password remediation.
+     *
+     * @param client the IDX Client
+     * @param idxClientContext the idxClientContext
+     * @return the list of AuthenticatorUIOptions
+     */
+    public static List<AuthenticatorUIOption> populateForgotPasswordAuthenticatorUIOptions(IDXClient client,
+            IDXClientContext idxClientContext) {
+
+        List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
+
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            // recover password
+            RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                    .withStateHandle(introspectResponse.getStateHandle())
+                    .build();
+
+            IDXResponse recoverResponse = introspectResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover()
+                    .proceed(client, recoverRequest);
+
+            RemediationOption[] recoverResponseRemediationOptions = recoverResponse.remediation().remediationOptions();
+            extractRemediationOption(recoverResponseRemediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+
+            RemediationOption remediationOption =
+                    extractRemediationOption(recoverResponseRemediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+
+            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+            for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
+                authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
+            }
+        } catch (ProcessingException e) {
+            logger.error("Error occurred:", e);
+        }
+
+        return authenticatorUIOptionList;
+    }
+
+    /**
+     * Select the next authenticator type to remediate.
+     *
+     * @param client the IDX Client
+     * @param idxClientContext the idxClientContext
+     * @param authenticatorType
+     * @return the Authentication response
+     */
+    public static AuthenticationResponse selectForgotPasswordAuthenticator(IDXClient client, IDXClientContext idxClientContext,
+            String authenticatorType) {
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        authenticationResponse.setIdxClientContext(idxClientContext);
+
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            printRemediationOptions(remediationOptions);
+
+            // recover password
+            RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                    .withStateHandle(introspectResponse.getStateHandle())
+                    .build();
+
+            IDXResponse recoverResponse = introspectResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover()
+                    .proceed(client, recoverRequest);
+
+            RemediationOption[] recoverResponseRemediationOptions = recoverResponse.remediation().remediationOptions();
+            extractRemediationOption(recoverResponseRemediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+
+            RemediationOption remediationOption =
+                    extractRemediationOption(recoverResponseRemediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+
+            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+            Authenticator authenticator = new Authenticator();
+
+            authenticator.setId(authenticatorOptions.get(authenticatorType));
+
+            ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
+                    .withStateHandle(introspectResponse.getStateHandle())
+                    .withAuthenticator(authenticator)
+                    .build();
+
+            IDXResponse selectAuthenticatorResponse =
+                    remediationOption.proceed(client, selectAuthenticatorRequest);
+
+            RemediationOption[] selectAuthenticatorResponseRemediationOptions =
+                    selectAuthenticatorResponse.remediation().remediationOptions();
+
+            extractRemediationOption(selectAuthenticatorResponseRemediationOptions, RemediationType.CHALLENGE_AUTHENTICATOR);
+
+            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
+        } catch (ProcessingException e) {
+            handleProcessingException(e, authenticationResponse);
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+            authenticationResponse.addError(e.getMessage());
+        }
+
         return authenticationResponse;
     }
 
