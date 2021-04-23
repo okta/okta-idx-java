@@ -34,10 +34,10 @@ public class ClientUtil {
      * @return the normalized full url
      */
     public static String getNormalizedUri(String issuer, String resourceUri) throws MalformedURLException {
+        // remove trailing /
         String normalizedUri = issuer.replaceAll("$/", "");
 
         if (isRootOrgIssuer(issuer)) {
-            // remove trailing / before concatenating with /oauth2
             normalizedUri = normalizedUri + "/oauth2" + resourceUri;
         } else {
             normalizedUri = normalizedUri + resourceUri;
