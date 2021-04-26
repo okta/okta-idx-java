@@ -27,6 +27,7 @@ import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
+import com.okta.idx.sdk.api.model.Remediation;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.model.UserProfile;
@@ -839,7 +840,13 @@ public class AuthenticationWrapper {
         try {
             IDXResponse introspectResponse = client.introspect(idxClientContext);
 
-            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+            Remediation remediation = introspectResponse.remediation();
+
+            if (remediation == null) {
+                return authenticatorUIOptionList;
+            }
+
+            RemediationOption[] remediationOptions = remediation.remediationOptions();
             printRemediationOptions(remediationOptions);
 
             RemediationOption remediationOption =

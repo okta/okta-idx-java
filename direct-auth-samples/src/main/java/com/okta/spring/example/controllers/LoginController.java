@@ -387,11 +387,16 @@ public class LoginController {
             }
         }
 
-        ModelAndView mav = new ModelAndView("enroll-authenticators");
-
         List<AuthenticatorUIOption> authenticatorUIOptionList =
                 AuthenticationWrapper.populateAuthenticatorUIOptions(client, idxClientContext);
 
+        if (authenticatorUIOptionList == null || authenticatorUIOptionList.size() == 0) {
+            ModelAndView mav = new ModelAndView("login");
+            mav.addObject("info", "Success");
+            return mav;
+        }
+
+        ModelAndView mav = new ModelAndView("enroll-authenticators");
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
         session.setAttribute("idxClientContext", idxClientContext);
         return mav;
