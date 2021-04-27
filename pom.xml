@@ -42,7 +42,6 @@
 
     <modules>
         <module>api</module>
-        <module>impl</module>
         <module>integration-tests</module>
         <module>coverage</module>
         <module>direct-auth-samples</module>

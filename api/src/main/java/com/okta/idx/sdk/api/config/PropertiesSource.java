@@ -1,5 +1,6 @@
 /*
- * Copyright 2020-Present Okta, Inc.
+ * Copyright 2014 Stormpath, Inc.
+ * Modifications Copyright 2018 Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.idx.sdk.api.client;
+package com.okta.idx.sdk.api.config;
 
-import java.util.Set;
+import java.util.Map;
 
-abstract class IDXClientBuilder {
+public interface PropertiesSource {
 
-    protected abstract IDXClientBuilder setIssuer(String issuer);
+    Map<String,String> getProperties();
 
-    protected abstract IDXClientBuilder setClientId(String clientId);
-
-    protected abstract IDXClientBuilder setClientSecret(String clientSecret);
-
-    protected abstract IDXClientBuilder setScopes(Set<String> scopes);
-
-    protected abstract IDXClientBuilder setRedirectUri(String redirectUri);
-
-    protected abstract IDXClient build();
 }

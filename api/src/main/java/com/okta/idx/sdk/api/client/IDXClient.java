@@ -28,11 +28,12 @@ import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 
 /**
- * Client to interact with the IDX backend APIs.
+ * Client abstraction that holds the internal API calls
+ * that the library makes to the IDX backend.
  */
 public abstract class IDXClient {
 
-    protected abstract IDXClientContext interact()
+    public abstract IDXClientContext interact()
             throws ProcessingException;
 
     public abstract IDXResponse introspect(IDXClientContext idxClientContext)

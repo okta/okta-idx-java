@@ -36,6 +36,7 @@ import com.okta.idx.sdk.api.request.IdentifyRequest
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder
 
 import com.okta.idx.sdk.api.response.IDXResponse
+import com.okta.idx.sdk.api.util.Constants
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
@@ -65,7 +66,7 @@ class EndToEndIT {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-        System.setProperty(IDXClientBuilder.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
+        System.setProperty(Constants.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
 
         idxClient = Clients.builder()
             .setIssuer("http://localhost:" + mockPort)

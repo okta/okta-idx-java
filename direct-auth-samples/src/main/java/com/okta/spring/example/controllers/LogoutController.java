@@ -16,6 +16,7 @@
 package com.okta.spring.example.controllers;
 
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
+import com.okta.idx.sdk.api.model.TokenType;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ public class LogoutController {
             String accessToken = tokenResponse.getAccessToken();
             // revoke access token
             logger.info("Revoking access token");
-            idxAuthenticationWrapper.handleLogout(accessToken);
+            idxAuthenticationWrapper.revokeToken(TokenType.ACCESS_TOKEN, accessToken);
         }
 
         // invalidate session

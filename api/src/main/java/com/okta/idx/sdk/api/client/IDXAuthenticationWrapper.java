@@ -62,6 +62,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Wrapper to enable a client to interact with the backend IDX APIs.
+ */
 public class IDXAuthenticationWrapper {
 
     private static final Logger logger = LoggerFactory.getLogger(IDXAuthenticationWrapper.class);
@@ -233,7 +236,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Change password with the supplied change password options reference.
      *
-     * @param idxClientContext      the IDC Client context
+     * @param idxClientContext      the IDX Client context
      * @return the Authentication response
      */
     public AuthenticationResponse changePassword(IDXClientContext idxClientContext,
@@ -569,7 +572,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Register new user with the supplied user profile reference.
      *
-     * @param idxClientContext      the IDC Client context
+     * @param idxClientContext      the IDX Client context
      * @param userProfile           the user profile
      * @return the Authentication response
      */
@@ -614,7 +617,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Enroll authenticator of the supplied type.
      *
-     * @param idxClientContext      the IDC Client context
+     * @param idxClientContext      the IDX Client context
      * @param authenticatorType     the authenticator type
      * @return the Authentication response
      */
@@ -676,7 +679,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Verify the Email authenticator enrollment process with the user supplied email passcode.
      *
-     * @param idxClientContext      the IDC Client context
+     * @param idxClientContext      the IDX Client context
      * @param passcode              the user supplied email passcode
      * @return the Authentication response
      */
@@ -740,7 +743,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Verify the Password authenticator enrollment process with the user supplied password.
      *
-     * @param idxClientContext      the IDC Client context
+     * @param idxClientContext      the IDX Client context
      * @param password              the user chosen password
      * @return the Authentication response
      */
@@ -804,7 +807,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Skip optional authenticator enrollment.
      *
-     * @param idxClientContext      the IDC Client context
+     * @param idxClientContext      the IDX Client context
      * @return the Authentication response
      */
     public AuthenticationResponse skipAuthenticatorEnrollment(IDXClientContext idxClientContext) {
@@ -840,7 +843,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Helper to populate the UI options to be shown on Authenticator options page.
      *
-     * @param idxClientContext      the IDC Client context
+     * @param idxClientContext      the IDX Client context
      * @return the list of {@link AuthenticatorUIOption} options
      */
     public List<AuthenticatorUIOption> populateAuthenticatorUIOptions(IDXClientContext idxClientContext) {
@@ -894,14 +897,15 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Handle logout by revoking the access token and invalidating the session.
+     * Revoke the oauth2 token.
      *
-     * @param accessToken the access token
+     * @param tokenType the token type (access|refresh)
+     * @param token the token
      */
-    public void handleLogout(String accessToken) {
+    public void revokeToken(TokenType tokenType, String token) {
 
         try {
-            client.revokeToken(TokenType.ACCESS_TOKEN.toString(), accessToken);
+            client.revokeToken(tokenType.toString(), token);
         } catch (ProcessingException e) {
             logger.error("Exception occurred", e);
         }
@@ -958,7 +962,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Helper to check if we have landed terminal success/no more remediation steps to follow.
      *
-     * @param idxClientContext      the IDC Client context
+     * @param idxClientContext      the IDX Client context
      * @return true if login is successful and if there are no more remediation steps to follow; false otherwise.
      */
     public boolean isTerminalSuccess(IDXClientContext idxClientContext) {
@@ -973,7 +977,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Helper to check if we have optional authenticators to skip in current remediation step.
      *
-     * @param idxClientContext      the IDC Client context
+     * @param idxClientContext      the IDX Client context
      * @return true if we have optional authenticators to skip; false otherwise.
      */
 

@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.idx.sdk.api.client;
+package com.okta.idx.sdk.api.util
 
-import java.util.Set;
+import org.testng.Assert
 
-abstract class IDXClientBuilder {
+class TestUtil {
 
-    protected abstract IDXClientBuilder setIssuer(String issuer);
-
-    protected abstract IDXClientBuilder setClientId(String clientId);
-
-    protected abstract IDXClientBuilder setClientSecret(String clientSecret);
-
-    protected abstract IDXClientBuilder setScopes(Set<String> scopes);
-
-    protected abstract IDXClientBuilder setRedirectUri(String redirectUri);
-
-    protected abstract IDXClient build();
+    static <T extends Throwable> T expect(Class<T> catchMe, Closure closure) {
+        try {
+            closure.call()
+            Assert.fail("Expected ${catchMe.getName()} to be thrown.")
+        } catch(e) {
+            if (!e.class.isAssignableFrom(catchMe)) {
+                throw e
+            }
+            return e
+        }
+    }
 }

@@ -15,8 +15,6 @@
  */
 package com.okta.idx.sdk.api.client;
 
-import com.okta.commons.lang.Classes;
-
 final class Clients {
 
     /**
@@ -25,6 +23,6 @@ final class Clients {
      * @return a new {@link IDXClientBuilder} instance
      */
     static IDXClientBuilder builder() {
-        return Classes.newInstance("com.okta.idx.sdk.impl.client.DefaultIDXClientBuilder");
+        return new DefaultIDXClientBuilder();
     }
 }
