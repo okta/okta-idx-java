@@ -56,7 +56,7 @@ import java.util.Set;
  * <li>Programmatically</li>
  * </ul>
  */
-public class DefaultIDXClientBuilder implements IDXClientBuilder {
+public class DefaultIDXClientBuilder extends IDXClientBuilder {
 
     private static final String ENVVARS_TOKEN   = "envvars";
     private static final String SYSPROPS_TOKEN  = "sysprops";

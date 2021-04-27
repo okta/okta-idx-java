@@ -17,14 +17,14 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.lang.Classes;
 
-public final class Clients {
+final class Clients {
 
     /**
      * Builds a {@link IDXClientBuilder} instance used to construct {@link IDXClient} instance.
      *
      * @return a new {@link IDXClientBuilder} instance
      */
-    public static IDXClientBuilder builder() {
+    static IDXClientBuilder builder() {
         return Classes.newInstance("com.okta.idx.sdk.impl.client.DefaultIDXClientBuilder");
     }
 }
