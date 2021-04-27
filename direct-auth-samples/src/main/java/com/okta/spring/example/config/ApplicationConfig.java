@@ -15,8 +15,7 @@
  */
 package com.okta.spring.example.config;
 
-import com.okta.idx.sdk.api.client.Clients;
-import com.okta.idx.sdk.api.client.IDXClient;
+import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.jwt.AccessTokenVerifier;
 import com.okta.jwt.JwtVerifiers;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,13 +38,13 @@ public class ApplicationConfig {
     private String clientId;
 
     /**
-     * The IDX client bean definition.
+     * The IDX authentication wrapper.
      *
-     * @return the idx client
+     * @return the idx authentication wrapper
      */
     @Bean
-    public IDXClient idxClient() {
-        return Clients.builder().build();
+    public IDXAuthenticationWrapper idxAuthenticationWrapper() {
+        return new IDXAuthenticationWrapper();
     }
 
     /**
