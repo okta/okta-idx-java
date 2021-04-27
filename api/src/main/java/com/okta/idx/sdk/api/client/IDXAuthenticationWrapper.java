@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
@@ -316,26 +317,58 @@ public class IDXAuthenticationWrapper {
             RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
             printRemediationOptions(remediationOptions);
 
-            RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.IDENTIFY);
+            boolean isIdentifyInOneStep = isRemediationRequireCredentials(RemediationType.IDENTIFY, introspectResponse);
+            logger.info("isIdentifyInOneStep? {}", isIdentifyInOneStep);
 
-            IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
-                    .withIdentifier(username)
-                    .withStateHandle(stateHandle)
-                    .build();
+            if (isIdentifyInOneStep) {
+                // recover
+                RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                        .withStateHandle(introspectResponse.getStateHandle())
+                        .build();
 
-            // identify user
-            IDXResponse identifyResponse = remediationOption.proceed(client, identifyRequest);
+                IDXResponse idxResponse = client.recover(recoverRequest, null);
+                remediationOptions = idxResponse.remediation().remediationOptions();
+                printRemediationOptions(remediationOptions);
 
-            remediationOptions = identifyResponse.remediation().remediationOptions();
-            printRemediationOptions(remediationOptions);
+                RemediationOption remediationOption =
+                        extractRemediationOption(remediationOptions, RemediationType.IDENTIFY_RECOVERY);
 
-            if (identifyResponse.getCurrentAuthenticatorEnrollment() == null ||
+                IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
+                        .withIdentifier(username)
+                        .withStateHandle(stateHandle)
+                        .build();
+
+                // identify user
+                IDXResponse identifyResponse = remediationOption.proceed(client, identifyRequest);
+
+                remediationOptions = identifyResponse.remediation().remediationOptions();
+                printRemediationOptions(remediationOptions);
+
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
+            } else {
+                RemediationOption remediationOption = extractRemediationOption(remediationOptions, RemediationType.IDENTIFY);
+
+                IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
+                        .withIdentifier(username)
+                        .withStateHandle(stateHandle)
+                        .build();
+
+                // identify user
+                IDXResponse identifyResponse = remediationOption.proceed(client, identifyRequest);
+
+                remediationOptions = identifyResponse.remediation().remediationOptions();
+                printRemediationOptions(remediationOptions);
+
+                if (identifyResponse.getCurrentAuthenticatorEnrollment() == null ||
                     identifyResponse.getCurrentAuthenticatorEnrollment().getValue() == null ||
                     identifyResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover() == null) {
-                Arrays.stream(identifyResponse.getMessages().getValue())
-                        .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            } else {
-                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
+                    if (identifyResponse.getMessages() != null) {
+                        Arrays.stream(identifyResponse.getMessages().getValue())
+                                .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                    }
+                } else {
+                    authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
+                }
             }
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
@@ -382,6 +415,11 @@ public class IDXAuthenticationWrapper {
             Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
 
             for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
+                if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue())) {
+                    logger.info("Skipping unsupported authenticator - {}", entry.getKey());
+                    continue;
+                }
                 authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
             }
         } catch (ProcessingException e) {
