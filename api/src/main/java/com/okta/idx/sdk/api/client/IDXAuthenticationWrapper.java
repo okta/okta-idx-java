@@ -876,8 +876,9 @@ public class IDXAuthenticationWrapper {
 
     /**
      * Get IDX client context by calling the interact endpoint.
-     *
      * ClientContext reference contains the interaction handle and PKCE params.
+     *
+     * @return the idx client context
      */
     public IDXClientContext getClientContext() {
 
