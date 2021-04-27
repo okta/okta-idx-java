@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
 
 import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri;
 
-final class BaseIDXClient extends IDXClient {
+final class BaseIDXClient implements IDXClient {
 
     private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/1.0.0";
 

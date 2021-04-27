@@ -28,51 +28,31 @@ import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 
 /**
- * Client abstraction that holds the internal API calls
- * that the library makes to the IDX backend.
+ * Client to interact with the IDX backend APIs.
  */
-public abstract class IDXClient {
+public interface IDXClient {
 
-    public abstract IDXClientContext interact()
-            throws ProcessingException;
+    IDXClientContext interact() throws ProcessingException;
 
-    public abstract IDXResponse introspect(IDXClientContext idxClientContext)
-            throws ProcessingException;
+    IDXResponse introspect(IDXClientContext idxClientContext) throws ProcessingException;
 
-    public abstract IDXResponse identify(IdentifyRequest identifyRequest, String href)
-            throws ProcessingException;
+    IDXResponse identify(IdentifyRequest identifyRequest, String href) throws ProcessingException;
 
-    public abstract IDXResponse enroll(EnrollRequest enrollRequest, String href)
-            throws ProcessingException;
+    IDXResponse enroll(EnrollRequest enrollRequest, String href) throws ProcessingException;
 
-    public abstract IDXResponse challenge(ChallengeRequest challengeRequest,
-                                          String href)
-            throws ProcessingException;
+    IDXResponse challenge(ChallengeRequest challengeRequest, String href) throws ProcessingException;
 
-    public abstract IDXResponse answerChallenge(AnswerChallengeRequest answerChallengeRequest,
-                                                String href)
-            throws ProcessingException;
+    IDXResponse answerChallenge(AnswerChallengeRequest answerChallengeRequest, String href) throws ProcessingException;
 
-    public abstract IDXResponse cancel(String stateHandle)
-            throws ProcessingException;
+    IDXResponse cancel(String stateHandle) throws ProcessingException;
 
-    public abstract IDXResponse enrollUpdateUserProfile(EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest,
-                                                        String href)
-            throws ProcessingException;
+    IDXResponse enrollUpdateUserProfile(EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest, String href) throws ProcessingException;
 
-    public abstract IDXResponse skip(SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest,
-                                     String href)
-            throws ProcessingException;
+    IDXResponse skip(SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest, String href) throws ProcessingException;
 
-    public abstract IDXResponse recover(RecoverRequest recoverRequest, String href)
-            throws ProcessingException;
+    IDXResponse recover(RecoverRequest recoverRequest, String href) throws ProcessingException;
 
-    public abstract TokenResponse token(String url,
-                                        String grantType,
-                                        String interactionCode,
-                                        IDXClientContext idxClientContext)
-            throws ProcessingException;
+    TokenResponse token(String url, String grantType, String interactionCode, IDXClientContext idxClientContext) throws ProcessingException;
 
-    public abstract void revokeToken(String tokenType, String token)
-            throws ProcessingException;
+    void revokeToken(String tokenType, String token) throws ProcessingException;
 }
