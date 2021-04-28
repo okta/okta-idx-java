@@ -75,6 +75,11 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password));
 
+        if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.PASSWORD_EXPIRED) {
+            session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
+            return new ModelAndView("change-password");
+        }
+
         // populate login view with errors
         if (authenticationResponse.getAuthenticationStatus() != AuthenticationStatus.SUCCESS) {
             ModelAndView mav = new ModelAndView("login");
