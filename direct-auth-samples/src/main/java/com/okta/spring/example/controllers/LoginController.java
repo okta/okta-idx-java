@@ -333,6 +333,12 @@ public class LoginController {
                     idxAuthenticationWrapper.skipAuthenticatorEnrollment(idxClientContext);
             if (response.getTokenResponse() != null) {
                 return homeHelper.proceedToHome(response.getTokenResponse(), session);
+            } else if (response.getAuthenticationStatus() == AuthenticationStatus.SKIP_COMPLETE) {
+                ModelAndView mav = new ModelAndView("login");
+                if (response.getErrors().size() == 1) {
+                    mav.addObject("info", response.getErrors().get(0));
+                }
+                return mav;
             }
         }
 
@@ -383,6 +389,12 @@ public class LoginController {
 
             if (response.getTokenResponse() != null) {
                 return homeHelper.proceedToHome(response.getTokenResponse(), session);
+            } else if (response.getAuthenticationStatus() == AuthenticationStatus.SKIP_COMPLETE) {
+                ModelAndView mav = new ModelAndView("login");
+                if (response.getErrors().size() == 1) {
+                    mav.addObject("info", response.getErrors().get(0));
+                }
+                return mav;
             }
         }
 

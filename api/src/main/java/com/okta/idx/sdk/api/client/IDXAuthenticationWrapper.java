@@ -864,8 +864,10 @@ public class IDXAuthenticationWrapper {
                             .withStateHandle(stateHandle)
                             .build();
 
-            remediationOption.proceed(client, skipAuthenticatorEnrollmentRequest);
-
+            IDXResponse skipResponse = remediationOption.proceed(client, skipAuthenticatorEnrollmentRequest);
+            Arrays.stream(skipResponse.getMessages().getValue())
+                    .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SKIP_COMPLETE);
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {

@@ -19,6 +19,8 @@ public enum AuthenticationStatus {
 
     SUCCESS("success"),
 
+    SKIP_COMPLETE("skip_complete"),
+
     PASSWORD_EXPIRED("password_expired"),
 
     AWAITING_AUTHENTICATOR_SELECTION("awaiting_authenticator_selection"),
