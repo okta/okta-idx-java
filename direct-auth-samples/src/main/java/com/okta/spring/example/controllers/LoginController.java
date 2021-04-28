@@ -107,17 +107,27 @@ public class LoginController {
             return mav;
         }
 
-        if (authenticationResponse.getAuthenticationStatus()
-                .equals(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION)) {
-            session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
-            ModelAndView mav =  new ModelAndView("forgot-password-authenticators");
-            List<AuthenticatorUIOption> uiOptions = idxAuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(
-                    authenticationResponse.getIdxClientContext());
-            mav.addObject("authenticatorUIOptionList", uiOptions);
-            return mav;
-        }
+        session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
 
-        return new ModelAndView("login"); //TODO revisit this
+        ModelAndView mav;
+
+        switch (authenticationResponse.getAuthenticationStatus()) {
+            case AWAITING_AUTHENTICATOR_SELECTION:
+                mav = new ModelAndView("forgot-password-authenticators");
+                List<AuthenticatorUIOption> uiOptions =
+                        idxAuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(
+                                authenticationResponse.getIdxClientContext());
+                mav.addObject("authenticatorUIOptionList", uiOptions);
+                return mav;
+
+            case AWAITING_USER_EMAIL_ACTIVATION:
+                mav = new ModelAndView("login");
+                mav.addObject("errors", authenticationResponse.getErrors());
+                return mav;
+
+            default:
+                return new ModelAndView("login");
+        }
     }
 
     /**
