@@ -401,7 +401,7 @@ final class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                     HttpMethod.POST,
-                    href,
+                    Strings.hasText(href) ? href : clientConfiguration.getBaseUrl() + "/idp/idx/recover",
                     null,
                     getHttpHeaders(false),
                     new ByteArrayInputStream(objectMapper.writeValueAsBytes(recoverRequest)),

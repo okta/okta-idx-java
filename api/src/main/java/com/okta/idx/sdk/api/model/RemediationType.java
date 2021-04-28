@@ -40,5 +40,7 @@ public class RemediationType {
 
     public static final String SELECT_AUTHENTICATOR_ENROLL = "select-authenticator-enroll";
 
+    public static final String IDENTIFY_RECOVERY = "identify-recovery";
+
     public static final String UNKNOWN = "unknown";
 }
