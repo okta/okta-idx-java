@@ -317,7 +317,6 @@ public class IDXAuthenticationWrapper {
             printRemediationOptions(remediationOptions);
 
             boolean isIdentifyInOneStep = isRemediationRequireCredentials(RemediationType.IDENTIFY, introspectResponse);
-            logger.info("isIdentifyInOneStep? {}", isIdentifyInOneStep);
 
             if (isIdentifyInOneStep) {
                 // recover
@@ -355,12 +354,19 @@ public class IDXAuthenticationWrapper {
                 // identify user
                 IDXResponse identifyResponse = remediationOption.proceed(client, identifyRequest);
 
+                if (identifyResponse.getMessages() != null) {
+                    Arrays.stream(identifyResponse.getMessages().getValue())
+                            .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                    authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_USER_EMAIL_ACTIVATION);
+                    return authenticationResponse;
+                }
+
                 remediationOptions = identifyResponse.remediation().remediationOptions();
                 printRemediationOptions(remediationOptions);
 
                 if (identifyResponse.getCurrentAuthenticatorEnrollment() == null ||
-                    identifyResponse.getCurrentAuthenticatorEnrollment().getValue() == null ||
-                    identifyResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover() == null) {
+                        identifyResponse.getCurrentAuthenticatorEnrollment().getValue() == null ||
+                        identifyResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover() == null) {
                     if (identifyResponse.getMessages() != null) {
                         Arrays.stream(identifyResponse.getMessages().getValue())
                                 .forEach(msg -> authenticationResponse.addError(msg.getMessage()));

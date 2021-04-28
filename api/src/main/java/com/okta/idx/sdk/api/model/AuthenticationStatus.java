@@ -23,6 +23,8 @@ public enum AuthenticationStatus {
 
     PASSWORD_EXPIRED("password_expired"),
 
+    AWAITING_USER_EMAIL_ACTIVATION("awaiting_user_email_activation"),
+
     AWAITING_AUTHENTICATOR_SELECTION("awaiting_authenticator_selection"),
 
     AWAITING_AUTHENTICATOR_VERIFICATION("awaiting_authenticator_verification"),
