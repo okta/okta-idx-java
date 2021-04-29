@@ -177,6 +177,34 @@ public class IDXAuthenticationWrapper {
                     authenticationResponse.setTokenResponse(tokenResponse);
                 }
             } else {
+                remediationOptions = identifyResponse.remediation().remediationOptions();
+                printRemediationOptions(remediationOptions);
+
+                // If app sign-on policy is set to "any 1 factor", the next remediation after identify is select-authenticator-authenticate
+                // Check if that's the case, and proceed to select password authenticator
+                Optional<RemediationOption> remediationOptional = Arrays.stream(remediationOptions)
+                        .filter(x -> RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE.equals(x.getName()))
+                        .findFirst();
+
+                if (remediationOptional.isPresent()) {
+                    remediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+                    Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+                    Authenticator authenticator = new Authenticator();
+
+                    authenticator.setId(authenticatorOptions.get("password"));
+
+                    ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
+                            .withStateHandle(introspectResponse.getStateHandle())
+                            .withAuthenticator(authenticator)
+                            .build();
+
+                    identifyResponse = remediationOption.proceed(client, selectAuthenticatorRequest);
+
+                    remediationOptions = identifyResponse.remediation().remediationOptions();
+                    printRemediationOptions(remediationOptions);
+                }
+
                 if (identifyResponse.getMessages() != null) {
                     Arrays.stream(identifyResponse.getMessages().getValue())
                             .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
