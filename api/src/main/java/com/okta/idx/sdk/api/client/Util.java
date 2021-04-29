@@ -66,6 +66,9 @@ final class Util {
     }
 
     static void copyErrorMessages(IDXResponse idxResponse, AuthenticationResponse authenticationResponse) {
+        if (idxResponse.getMessages() == null) {
+            return;
+        }
         Arrays.stream(idxResponse.getMessages().getValue())
                 .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
     }
@@ -77,8 +80,11 @@ final class Util {
         }
         RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
 
-        RemediationOption remediationOption = extractRemediationOption(remediationOptions, remediationOptionName);
-        FormValue[] formValues = remediationOption.form();
+        Optional<RemediationOption> remediationOptionOptional = extractOptionalRemediationOption(remediationOptions, remediationOptionName);
+        if (!remediationOptionOptional.isPresent()) {
+            return false;
+        }
+        FormValue[] formValues = remediationOptionOptional.get().form();
 
         Optional<FormValue> credentialsFormValueOptional = Arrays.stream(formValues)
                 .filter(x -> "credentials".equals(x.getName()))
