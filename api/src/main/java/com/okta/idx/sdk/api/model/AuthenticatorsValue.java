@@ -18,17 +18,35 @@ package com.okta.idx.sdk.api.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Authenticators {
+public class AuthenticatorsValue {
 
     private String type;
 
-    private AuthenticatorsValue[] value;
+    private String key;
+
+    private String id;
+
+    private String displayName;
+
+    private MethodType[] methods;
 
     public String getType() {
         return type;
     }
 
-    public AuthenticatorsValue[] getValue() {
-        return value;
+    public String getKey() {
+        return key;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public MethodType[] getMethods() {
+        return methods;
     }
 }

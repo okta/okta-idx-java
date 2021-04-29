@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
@@ -22,6 +23,8 @@ import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
 import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
+import com.okta.idx.sdk.api.model.Authenticators;
+import com.okta.idx.sdk.api.model.AuthenticatorsValue;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
@@ -55,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -690,6 +694,9 @@ public class IDXAuthenticationWrapper {
             } else if (authenticatorType.equals(AuthenticatorType.PASSWORD.toString())) {
                 authenticator.setId(authenticatorOptions.get(AuthenticatorType.PASSWORD.toString()));
                 authenticator.setMethodType(AuthenticatorType.PASSWORD.toString());
+            } else if (authenticatorType.contains(AuthenticatorType.SMS.toString())) {
+                authenticator.setId(authenticatorOptions.get("sms,voice"));
+                authenticator.setMethodType(AuthenticatorType.SMS.toString());
             } else {
                 String errMsg = "Unsupported authenticator " + authenticatorType;
                 logger.error(errMsg);
@@ -705,8 +712,6 @@ public class IDXAuthenticationWrapper {
 
             RemediationOption[] enrollRemediationOptions = idxResponse.remediation().remediationOptions();
             printRemediationOptions(enrollRemediationOptions);
-
-            extractRemediationOption(enrollRemediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
 
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
@@ -806,6 +811,119 @@ public class IDXAuthenticationWrapper {
 
             Credentials credentials = new Credentials();
             credentials.setPasscode(password.toCharArray());
+
+            // build answer password authenticator challenge request
+            AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(stateHandle)
+                    .withCredentials(credentials)
+                    .build();
+
+            IDXResponse challengeAuthenticatorResponse =
+                    remediationOption.proceed(client, challengeAuthenticatorRequest);
+
+            if (challengeAuthenticatorResponse.remediation() != null) {
+                remediationOptions = challengeAuthenticatorResponse.remediation().remediationOptions();
+                printRemediationOptions(remediationOptions);
+
+                // check if skip is present in remediation options, if yes skip it.
+                // (we'll process only mandatory authenticators for now)
+                try {
+                    extractRemediationOption(remediationOptions, RemediationType.SKIP);
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Skip authenticator not found in remediation option");
+                    extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+                }
+            }
+
+            if (challengeAuthenticatorResponse.isLoginSuccessful()) {
+                // login successful
+                logger.info("Login Successful!");
+                TokenResponse tokenResponse = challengeAuthenticatorResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
+                authenticationResponse.setTokenResponse(tokenResponse);
+            }
+        } catch (ProcessingException e) {
+            handleProcessingException(e, authenticationResponse);
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+        }
+
+        authenticationResponse.setIdxClientContext(idxClientContext);
+        return authenticationResponse;
+    }
+
+    /**
+     * Submit the SMS authenticator enrollment with the provided phone number.
+     *
+     * @param idxClientContext    the IDX Client context
+     * @param phone               the phone number
+     * @return the Authentication response
+     */
+    public AuthenticationResponse submitSmsAuthenticator(IDXClientContext idxClientContext,
+                                                         String phone) {
+
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+            String stateHandle = introspectResponse.getStateHandle();
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+
+            RemediationOption remediationOption =
+                    extractRemediationOption(remediationOptions, RemediationType.AUTHENTICATOR_ENROLLMENT_DATA);
+
+            AuthenticatorsValue[] authenticators = introspectResponse.getAuthenticators().getValue();
+            Optional<AuthenticatorsValue> authenticatorsValueOptional = Arrays.stream(authenticators)
+                    .filter(x -> "phone_number".equals(x.getKey()))
+                    .findAny();
+            AuthenticatorsValue authenticatorsValue = authenticatorsValueOptional.get();
+
+            Authenticator phoneAuthenticator = new Authenticator();
+            phoneAuthenticator.setId(authenticatorsValue.getId());
+            phoneAuthenticator.setMethodType(AuthenticatorType.SMS.toString());
+            phoneAuthenticator.setPhoneNumber(phone);
+
+            EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                    .withAuthenticator(phoneAuthenticator)
+                    .withStateHandle(stateHandle)
+                    .build();
+
+            remediationOption.proceed(client, enrollRequest);
+
+        } catch (ProcessingException e) {
+            handleProcessingException(e, authenticationResponse);
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+        }
+
+        authenticationResponse.setIdxClientContext(idxClientContext);
+        return authenticationResponse;
+    }
+
+    /**
+     * Verify the SMS authenticator enrollment process with the provided sms code.
+     *
+     * @param idxClientContext      the IDX Client context
+     * @param smsCode               the code received in sms
+     * @return the Authentication response
+     */
+    public AuthenticationResponse verifySmsAuthenticator(IDXClientContext idxClientContext,
+                                                         String smsCode) {
+
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+
+        try {
+            IDXResponse introspectResponse = client.introspect(idxClientContext);
+            String stateHandle = introspectResponse.getStateHandle();
+
+            RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
+
+            RemediationOption remediationOption =
+                    extractRemediationOption(remediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
+
+            Credentials credentials = new Credentials();
+            credentials.setPasscode(smsCode.toCharArray());
 
             // build answer password authenticator challenge request
             AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()

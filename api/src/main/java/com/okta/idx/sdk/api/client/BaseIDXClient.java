@@ -51,6 +51,8 @@ import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.api.util.PkceUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -63,6 +65,8 @@ import java.util.stream.Collectors;
 import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri;
 
 final class BaseIDXClient implements IDXClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(BaseIDXClient.class);
 
     private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/1.0.0";
 

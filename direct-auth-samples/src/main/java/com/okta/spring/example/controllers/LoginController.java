@@ -15,6 +15,8 @@
  */
 package com.okta.spring.example.controllers;
 
+import com.okta.commons.lang.Strings;
+import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
@@ -25,9 +27,8 @@ import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
-import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.spring.example.helpers.HomeHelper;
-
+import com.okta.spring.example.helpers.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -309,6 +310,8 @@ public class LoginController {
             return new ModelAndView("verify-email-authenticator-enrollment");
         } else if (authenticatorType.equals(AuthenticatorType.PASSWORD.toString())) {
             return new ModelAndView("password-authenticator-enrollment");
+        } else if (authenticatorType.contains(AuthenticatorType.SMS.toString())) {
+            return new ModelAndView("sms-authenticator-enrollment");
         } else {
             logger.error("Unsupported authenticator {}", authenticatorType);
             return new ModelAndView("enroll-authenticators");
@@ -418,6 +421,107 @@ public class LoginController {
         }
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
+        mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        session.setAttribute("idxClientContext", idxClientContext);
+        return mav;
+    }
+
+    /**
+     * Handle SMS authenticator enrollment functionality.
+     *
+     * @param phone the phone number
+     * @return the login page view (if login operation is successful), else the enroll-authenticators page.
+     */
+    @PostMapping(value = "/sms-authenticator-enrollment")
+    public ModelAndView handleEnrollSmsAuthenticator(final @RequestParam("phone") String phone) {
+        logger.info(":: Enroll SMS Authenticator ::");
+
+        if (!Strings.hasText(phone)) {
+            ModelAndView mav = new ModelAndView("sms-authenticator-enrollment");
+            mav.addObject("errors", "Phone is required");
+            return mav;
+        }
+
+        // remove all whitespaces
+        final String trimmedPhoneNumber = phone.replaceAll("\\s+", "");
+
+        // validate phone number
+        if (!Util.isValidPhoneNumber(phone)) {
+            ModelAndView mav = new ModelAndView("sms-authenticator-enrollment");
+            mav.addObject("errors", "Invalid phone number");
+            return mav;
+        }
+
+        ModelAndView mav = new ModelAndView("submit-sms-authenticator-enrollment");
+        mav.addObject("phone", trimmedPhoneNumber);
+        return mav;
+    }
+
+    /**
+     * Handle sms authenticator functionality.
+     *
+     * @param phone the phone number
+     * @param session the session
+     * @return the verify sms authenticator view with phone number.
+     */
+    @PostMapping(value = "/submit-sms-authenticator-enrollment")
+    public ModelAndView handleSubmitSmsAuthenticator(final @RequestParam("phone") String phone,
+                                                     final HttpSession session) {
+        logger.info(":: Submit SMS Authenticator :: {}", phone);
+
+        IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
+
+        idxAuthenticationWrapper.submitSmsAuthenticator(idxClientContext, phone);
+
+        session.setAttribute("idxClientContext", idxClientContext);
+
+        ModelAndView mav = new ModelAndView("verify-sms-authenticator-enrollment");
+        mav.addObject("phone", phone);
+        return mav;
+    }
+
+    /**
+     * Handle sms authenticator verification functionality.
+     *
+     * @param code the sms verification code
+     * @param session the session
+     * @return the login page view (if login operation is successful), else the enroll-authenticators page.
+     */
+    @PostMapping(value = "/verify-sms-authenticator-enrollment")
+    public ModelAndView handleVerifySmsAuthenticator(final @RequestParam("code") String code,
+                                                     final HttpSession session) {
+        logger.info(":: Verify SMS Authenticator ::");
+
+        IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
+
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.verifySmsAuthenticator(idxClientContext, code);
+
+        if (authenticationResponse.getTokenResponse() != null) {
+            return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
+        }
+
+        idxClientContext = authenticationResponse.getIdxClientContext();
+
+        if (idxAuthenticationWrapper.isSkipAuthenticatorPresent(idxClientContext)) {
+            AuthenticationResponse response =
+                    idxAuthenticationWrapper.skipAuthenticatorEnrollment(idxClientContext);
+            if (response.getTokenResponse() != null) {
+                return homeHelper.proceedToHome(response.getTokenResponse(), session);
+            } else if (response.getAuthenticationStatus() == AuthenticationStatus.SKIP_COMPLETE) {
+                ModelAndView mav = new ModelAndView("login");
+                if (response.getErrors().size() == 1) {
+                    mav.addObject("info", response.getErrors().get(0));
+                }
+                return mav;
+            }
+        }
+
+        ModelAndView mav = new ModelAndView("enroll-authenticators");
+
+        List<AuthenticatorUIOption> authenticatorUIOptionList =
+                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
+
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
         session.setAttribute("idxClientContext", idxClientContext);
         return mav;

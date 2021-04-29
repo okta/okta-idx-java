@@ -25,22 +25,18 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
     <style>
-        .verify-email-authenticator-form {
+        .submit-sms-authenticator-form {
             width: 340px;
             margin: 50px auto;
         }
-        .verify-email-authenticator-form form {
+        .submit-sms-authenticator-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .verify-email-authenticator-form h2 {
+        .submit-sms-authenticator-form h2 {
             margin: 0 0 15px;
-        }
-        .form-control, .btn {
-            min-height: 38px;
-            border-radius: 2px;
         }
         .btn {
             font-size: 15px;
@@ -53,18 +49,15 @@
 
 <a href="/custom-login" class="btn btn-info pull-left">Login Page</a>
 
-<div class="verify-email-authenticator-form">
-    <form th:action="@{/verify-email-authenticator-enrollment}" method="post">
-        <h2 class="text-center">Verify Code</h2>
+<div class="submit-sms-authenticator-form">
+    <form th:action="@{/submit-sms-authenticator-enrollment}" method="post">
         <div th:if="${result}" class="alert alert-danger">
             <span th:text="${result}">1</span>
         </div>
-        <p class="font-weight-light">Please check your email and enter the code below.</p>
+        <p class="font-weight-light">You will receive a code sent to your phone.</p>
+        <input type="phone" th:readonly="readonly" id="phone" name="phone" th:value="${phone}">
         <div class="form-group">
-            <input type="text" class="form-control" name="code" required="required">
-        </div>
-        <div class="form-group">
-            <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Verify</button>
+            <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Send a code via SMS</button>
         </div>
     </form>
 </div>
