@@ -30,12 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-import static com.okta.idx.sdk.api.client.Util.copyErrorMessages;
-import static com.okta.idx.sdk.api.client.Util.extractOptionalRemediationOption;
-import static com.okta.idx.sdk.api.client.Util.extractRemediationOption;
-import static com.okta.idx.sdk.api.client.Util.isRemediationRequireCredentials;
-import static com.okta.idx.sdk.api.client.Util.printRemediationOptions;
-
 final class AuthenticationTransaction {
     static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
         IDXClientContext idxClientContext = client.interact();
@@ -46,7 +40,7 @@ final class AuthenticationTransaction {
         Assert.hasText(stateHandle, "State handle may not be null");
 
         RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
-        printRemediationOptions(remediationOptions);
+        Util.printRemediationOptions(remediationOptions);
 
         return new AuthenticationTransaction(client, idxClientContext, introspectResponse);
     }
@@ -68,11 +62,11 @@ final class AuthenticationTransaction {
     }
 
     RemediationOption getRemediationOption(String name) {
-        return extractRemediationOption(idxResponse.remediation().remediationOptions(), name);
+        return Util.extractRemediationOption(idxResponse.remediation().remediationOptions(), name);
     }
 
     Optional<RemediationOption> getOptionalRemediationOption(String name) {
-        return extractOptionalRemediationOption(idxResponse.remediation().remediationOptions(), name);
+        return Util.extractOptionalRemediationOption(idxResponse.remediation().remediationOptions(), name);
     }
 
     String getStateHandle() {
@@ -92,7 +86,7 @@ final class AuthenticationTransaction {
         authenticationResponse.setIdxClientContext(clientContext);
 
         if (idxResponse.getMessages() != null) {
-            copyErrorMessages(idxResponse, authenticationResponse);
+            Util.copyErrorMessages(idxResponse, authenticationResponse);
         }
 
         if (idxResponse.isLoginSuccessful()) {
@@ -103,12 +97,12 @@ final class AuthenticationTransaction {
             authenticationResponse.setTokenResponse(tokenResponse);
         } else {
             // verify if password expired
-            if (isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, idxResponse)) {
+            if (Util.isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, idxResponse)) {
                 authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
             } else {
                 String errMsg = "Unexpected remediation: " + RemediationType.REENROLL_AUTHENTICATOR;
                 logger.error("{}", errMsg);
-                copyErrorMessages(idxResponse, authenticationResponse);
+                Util.copyErrorMessages(idxResponse, authenticationResponse);
             }
         }
 
