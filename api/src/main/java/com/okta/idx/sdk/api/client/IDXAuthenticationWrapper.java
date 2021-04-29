@@ -368,6 +368,28 @@ public class IDXAuthenticationWrapper {
                 remediationOptions = identifyResponse.remediation().remediationOptions();
                 printRemediationOptions(remediationOptions);
 
+                // Check if instead of password, user is being prompted for list of authenticators to select
+                if (identifyResponse.getCurrentAuthenticatorEnrollment() == null) {
+                    remediationOption = extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+
+                    Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+                    Authenticator authenticator = new Authenticator();
+
+                    authenticator.setId(authenticatorOptions.get("password"));
+
+                    ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
+                            .withStateHandle(introspectResponse.getStateHandle())
+                            .withAuthenticator(authenticator)
+                            .build();
+
+                    identifyResponse =
+                            remediationOption.proceed(client, selectAuthenticatorRequest);
+
+                    remediationOptions = identifyResponse.remediation().remediationOptions();
+                    printRemediationOptions(remediationOptions);
+                }
+
                 if (identifyResponse.getCurrentAuthenticatorEnrollment() == null ||
                         identifyResponse.getCurrentAuthenticatorEnrollment().getValue() == null ||
                         identifyResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover() == null) {
@@ -462,14 +484,16 @@ public class IDXAuthenticationWrapper {
                     .withStateHandle(introspectResponse.getStateHandle())
                     .build();
 
-            IDXResponse recoverResponse = introspectResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover()
-                    .proceed(client, recoverRequest);
+            if (introspectResponse.getCurrentAuthenticatorEnrollment() != null) {
+                IDXResponse recoverResponse = introspectResponse.getCurrentAuthenticatorEnrollment().getValue().getRecover()
+                        .proceed(client, recoverRequest);
+                remediationOptions = recoverResponse.remediation().remediationOptions();
+            }
 
-            RemediationOption[] recoverResponseRemediationOptions = recoverResponse.remediation().remediationOptions();
-            extractRemediationOption(recoverResponseRemediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+            extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
 
             RemediationOption remediationOption =
-                    extractRemediationOption(recoverResponseRemediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+                    extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
 
             Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
 
