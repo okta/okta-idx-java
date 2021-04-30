@@ -73,6 +73,9 @@ final class AuthenticationTransaction {
     }
 
     Optional<RemediationOption> getOptionalRemediationOption(String name) {
+        if (idxResponse == null || idxResponse.remediation() == null) {
+            return Optional.empty();
+        }
         return Util.extractOptionalRemediationOption(idxResponse.remediation().remediationOptions(), name);
     }
 
