@@ -15,19 +15,40 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public class VerifyAuthenticatorOptions {
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-    public VerifyAuthenticatorOptions(String code) {
-        this.code = code;
+import java.util.Arrays;
+
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class AuthenticatorsValue {
+
+    private String type;
+
+    private String key;
+
+    private String id;
+
+    private String displayName;
+
+    private MethodType[] methods;
+
+    public String getType() {
+        return type;
     }
 
-    private String code;
-
-    public String getCode() {
-        return code;
+    public String getKey() {
+        return key;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public String getId() {
+        return id;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public MethodType[] getMethods() {
+        return Arrays.copyOf(methods, methods.length);
     }
 }

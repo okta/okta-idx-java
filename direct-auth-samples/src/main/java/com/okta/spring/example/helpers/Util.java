@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.idx.sdk.api.model;
+package com.okta.spring.example.helpers;
 
-public class VerifyAuthenticatorOptions {
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-    public VerifyAuthenticatorOptions(String code) {
-        this.code = code;
-    }
+public class Util {
 
-    private String code;
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
+    /**
+     * Validates if the supplied phone number is a valid international number.
+     *
+     * @param phoneNumber the phone number
+     * @return true if valid; false otherwise
+     */
+    public static boolean isValidPhoneNumber(final String phoneNumber) {
+        Pattern pattern = Pattern.compile("^\\+(?:[0-9] ?){6,14}[0-9]$");
+        Matcher matcher = pattern.matcher(phoneNumber);
+        return (matcher.find() && matcher.group().equals(phoneNumber));
     }
 }

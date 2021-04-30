@@ -17,26 +17,20 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import java.util.Arrays;
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Authenticators {
 
     private String type;
 
-    private String id;
-
-    private String key;
-
-    private String displayName;
+    private AuthenticatorsValue[] value;
 
     public String getType() {
         return type;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getDisplayName() {
-        return displayName;
+    public AuthenticatorsValue[] getValue() {
+        return Arrays.copyOf(value, value.length);
     }
 }

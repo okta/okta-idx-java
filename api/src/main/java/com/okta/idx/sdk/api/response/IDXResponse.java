@@ -147,6 +147,10 @@ public class IDXResponse {
         return authenticatorEnrollments;
     }
 
+    public Authenticators getAuthenticators() {
+        return authenticators;
+    }
+
     public CurrentAuthenticatorEnrollment getCurrentAuthenticatorEnrollment() { return currentAuthenticatorEnrollment; }
 
     public SuccessResponse getSuccessWithInteractionCode() {

@@ -14,28 +14,28 @@
   ~ limitations under the License.
   -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en"><html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Forgot Password</title>
+    <title>Enroll Phone Authenticator</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
     <style>
-        .forgotpassword-form {
+        .enroll-phone-authenticator-form {
             width: 440px;
             margin: 50px auto;
         }
-        .forgotpassword-form form {
+        .enroll-phone-authenticator-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .forgotpassword-form h2 {
+        .enroll-phone-authenticator-form h2 {
             margin: 0 0 15px;
         }
         .form-control, .btn {
@@ -51,21 +51,31 @@
 
 <body>
 
-<div>
-    <a href="/custom-login" class="btn btn-info pull-left">Login Page</a>
-</div>
+<a href="/custom-login" class="btn btn-info pull-left">Login Page</a>
 
-<div class="forgotpassword-form">
-    <form th:action="@{/forgot-password}" method="post">
-        <h2 class="text-center">Forgot Password</h2>
-        <div th:if="${result}" class="alert alert-danger">
-            <span th:text="${result}">1</span>
+<div class="enroll-phone-authenticator-form">
+    <form th:action="@{/phone-authenticator-enrollment}" method="post">
+        <h2 class="text-center">Enroll Phone Authenticator</h2>
+        <div th:if="${errors}" class="alert alert-danger">
+            <span th:text="${errors}">1</span>
+        </div>
+        <p class="font-weight-light">Format: (+) {country code} {area code} {number}
+            <br> For e.g. +1 555 666 7777 (US)</p>
+        <div class="form-group">
+            <input type="phone" class="form-control" name="phone" placeholder="Phone number" required="required">
         </div>
         <div class="form-group">
-            <input type="text" class="form-control" name="username" placeholder="Username" required="required">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="mode" th:value="sms">
+                <label class="form-check-label" th:text="SMS"></label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="mode" th:value="voice">
+                <label class="form-check-label" th:text="Voice"></label>
+            </div>
         </div>
         <div class="form-group">
-            <button id="next-btn" type="submit" class="btn btn-primary btn-block">Next</button>
+            <button id="submit-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
         </div>
     </form>
 </div>

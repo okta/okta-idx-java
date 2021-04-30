@@ -23,6 +23,7 @@ import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
 import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
+import com.okta.idx.sdk.api.model.AuthenticatorsValue;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
@@ -396,7 +397,8 @@ public class IDXAuthenticationWrapper {
 
             for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
                 if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue())) {
+                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
                     logger.info("Skipping unsupported authenticator - {}", entry.getKey());
                     continue;
                 }
@@ -471,65 +473,6 @@ public class IDXAuthenticationWrapper {
             authenticationResponse.addError(e.getMessage());
         }
 
-        return authenticationResponse;
-    }
-
-    /**
-     * Verify Authenticator with the supplied authenticator options.
-     *
-     * @param idxClientContext      the IDX Client context
-     * @param verifyAuthenticatorOptions the verify Authenticator options
-     * @return the Authentication response
-     */
-    public AuthenticationResponse verifyAuthenticator(IDXClientContext idxClientContext,
-                                                      VerifyAuthenticatorOptions verifyAuthenticatorOptions) {
-
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
-        try {
-            // re-enter flow with context
-            IDXResponse introspectResponse = client.introspect(idxClientContext);
-
-            // verify if password expired
-            if (!isRemediationRequireCredentials(RemediationType.CHALLENGE_AUTHENTICATOR, introspectResponse)) {
-                String errMsg = "Unexpected remediation: " + RemediationType.CHALLENGE_AUTHENTICATOR;
-                logger.error("{}", errMsg);
-            } else {
-
-                Credentials credentials = new Credentials();
-                credentials.setPasscode(verifyAuthenticatorOptions.getCode().toCharArray());
-
-                // build answer password authenticator challenge request
-                AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
-                        .withStateHandle(introspectResponse.getStateHandle())
-                        .withCredentials(credentials)
-                        .build();
-
-                RemediationOption[] introspectRemediationOptions = introspectResponse.remediation().remediationOptions();
-                printRemediationOptions(introspectRemediationOptions);
-
-                RemediationOption challengeAuthenticatorRemediationOption =
-                        extractRemediationOption(introspectRemediationOptions, RemediationType.CHALLENGE_AUTHENTICATOR);
-
-                IDXResponse challengeAuthenticatorResponse =
-                        challengeAuthenticatorRemediationOption.proceed(client, challengeAuthenticatorRequest);
-
-                RemediationOption[] challengeAuthenticatorResponseRemediationOptions =
-                        challengeAuthenticatorResponse.remediation().remediationOptions();
-                printRemediationOptions(challengeAuthenticatorResponseRemediationOptions);
-
-                extractRemediationOption(challengeAuthenticatorResponseRemediationOptions, RemediationType.RESET_AUTHENTICATOR);
-
-                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_PASSWORD_RESET);
-            }
-        } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
-        } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
-        }
-
-        authenticationResponse.setIdxClientContext(idxClientContext);
         return authenticationResponse;
     }
 
@@ -620,7 +563,13 @@ public class IDXAuthenticationWrapper {
             remediationOptions = idxResponse.remediation().remediationOptions();
             printRemediationOptions(remediationOptions);
 
-            extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+            try {
+                extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+            } catch (IllegalArgumentException e) {
+                logger.error("Expected remediation {} not found", RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+                authenticationResponse.addError(e.getMessage());
+            }
+
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
@@ -729,17 +678,16 @@ public class IDXAuthenticationWrapper {
 
             Authenticator authenticator = new Authenticator();
 
-            if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
-                authenticator.setId(authenticatorOptions.get(AuthenticatorType.EMAIL.toString()));
-                authenticator.setMethodType(AuthenticatorType.EMAIL.toString());
-            } else if (authenticatorType.equals(AuthenticatorType.PASSWORD.toString())) {
-                authenticator.setId(authenticatorOptions.get(AuthenticatorType.PASSWORD.toString()));
-                authenticator.setMethodType(AuthenticatorType.PASSWORD.toString());
-            } else {
+            AuthenticatorType authType = AuthenticatorType.get(authenticatorType);
+
+            if (authType == null) {
                 String errMsg = "Unsupported authenticator " + authenticatorType;
                 logger.error(errMsg);
                 throw new IllegalArgumentException(errMsg);
             }
+
+            authenticator.setId(authenticatorOptions.get(authType.toString()));
+            authenticator.setMethodType(authType.toString());
 
             EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
                     .withAuthenticator(authenticator)
@@ -751,7 +699,6 @@ public class IDXAuthenticationWrapper {
             RemediationOption[] enrollRemediationOptions = idxResponse.remediation().remediationOptions();
             printRemediationOptions(enrollRemediationOptions);
 
-            extractRemediationOption(enrollRemediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
@@ -764,14 +711,14 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Verify the Email authenticator enrollment process with the user supplied email passcode.
+     * Verify Authenticator with the supplied authenticator options.
      *
      * @param idxClientContext      the IDX Client context
-     * @param passcode              the user supplied email passcode
+     * @param verifyAuthenticatorOptions the verify Authenticator options
      * @return the Authentication response
      */
-    public AuthenticationResponse verifyEmailAuthenticator(IDXClientContext idxClientContext,
-                                                           String passcode) {
+    public AuthenticationResponse verifyAuthenticator(IDXClientContext idxClientContext,
+                                                      VerifyAuthenticatorOptions verifyAuthenticatorOptions) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
@@ -781,11 +728,21 @@ public class IDXAuthenticationWrapper {
 
             RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
 
-            RemediationOption remediationOption =
-                    extractRemediationOption(remediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
+            RemediationOption remediationOption = null;
+
+            try {
+                remediationOption = extractRemediationOption(remediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
+            } catch (IllegalArgumentException e) {
+                // no need to panic
+                logger.info("Missing remediation option {}", e.getMessage());
+            }
+
+            if (remediationOption == null) {
+                remediationOption = extractRemediationOption(remediationOptions, RemediationType.CHALLENGE_AUTHENTICATOR);
+            }
 
             Credentials credentials = new Credentials();
-            credentials.setPasscode(passcode.toCharArray());
+            credentials.setPasscode(verifyAuthenticatorOptions.getCode().toCharArray());
 
             // build answer password authenticator challenge request
             AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
@@ -805,8 +762,20 @@ public class IDXAuthenticationWrapper {
                     extractRemediationOption(remediationOptions, RemediationType.SKIP);
                 } catch (IllegalArgumentException e) {
                     logger.warn("Skip authenticator not found in remediation option");
-                    extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
                 }
+            }
+
+            RemediationOption resetAuthenticator = null;
+
+            try {
+                resetAuthenticator = extractRemediationOption(remediationOptions, RemediationType.RESET_AUTHENTICATOR);
+            } catch (IllegalArgumentException e) {
+                logger.info("Missing remediation option {}", e.getMessage());
+            }
+
+            if (resetAuthenticator != null) {
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+                return authenticationResponse;
             }
 
             if (challengeAuthenticatorResponse.isLoginSuccessful()) {
@@ -828,14 +797,16 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Verify the Password authenticator enrollment process with the user supplied password.
+     * Submit phone authenticator enrollment with the provided phone number.
      *
-     * @param idxClientContext      the IDX Client context
-     * @param password              the user chosen password
+     * @param idxClientContext    the IDX Client context
+     * @param phone               the phone number
+     * @param mode                the delivery mode - sms or voice
      * @return the Authentication response
      */
-    public AuthenticationResponse verifyPasswordAuthenticator(IDXClientContext idxClientContext,
-                                                              String password) {
+    public AuthenticationResponse submitPhoneAuthenticator(IDXClientContext idxClientContext,
+                                                           String phone,
+                                                           String mode) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
@@ -846,41 +817,26 @@ public class IDXAuthenticationWrapper {
             RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
 
             RemediationOption remediationOption =
-                    extractRemediationOption(remediationOptions, RemediationType.ENROLL_AUTHENTICATOR);
+                    extractRemediationOption(remediationOptions, RemediationType.AUTHENTICATOR_ENROLLMENT_DATA);
 
-            Credentials credentials = new Credentials();
-            credentials.setPasscode(password.toCharArray());
+            AuthenticatorsValue[] authenticators = introspectResponse.getAuthenticators().getValue();
+            Optional<AuthenticatorsValue> authenticatorsValueOptional = Arrays.stream(authenticators)
+                    .filter(x -> "phone_number".equals(x.getKey()))
+                    .findAny();
+            AuthenticatorsValue authenticatorsValue = authenticatorsValueOptional.get();
 
-            // build answer password authenticator challenge request
-            AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+            Authenticator phoneAuthenticator = new Authenticator();
+            phoneAuthenticator.setId(authenticatorsValue.getId());
+            phoneAuthenticator.setMethodType(AuthenticatorType.get(mode).toString());
+            phoneAuthenticator.setPhoneNumber(phone);
+
+            EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                    .withAuthenticator(phoneAuthenticator)
                     .withStateHandle(stateHandle)
-                    .withCredentials(credentials)
                     .build();
 
-            IDXResponse challengeAuthenticatorResponse =
-                    remediationOption.proceed(client, challengeAuthenticatorRequest);
+            remediationOption.proceed(client, enrollRequest);
 
-            if (challengeAuthenticatorResponse.remediation() != null) {
-                remediationOptions = challengeAuthenticatorResponse.remediation().remediationOptions();
-                printRemediationOptions(remediationOptions);
-
-                // check if skip is present in remediation options, if yes skip it.
-                // (we'll process only mandatory authenticators for now)
-                try {
-                    extractRemediationOption(remediationOptions, RemediationType.SKIP);
-                } catch (IllegalArgumentException e) {
-                    logger.warn("Skip authenticator not found in remediation option");
-                    extractRemediationOption(remediationOptions, RemediationType.SELECT_AUTHENTICATOR_ENROLL);
-                }
-            }
-
-            if (challengeAuthenticatorResponse.isLoginSuccessful()) {
-                // login successful
-                logger.info("Login Successful!");
-                TokenResponse tokenResponse = challengeAuthenticatorResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
-                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
-                authenticationResponse.setTokenResponse(tokenResponse);
-            }
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {

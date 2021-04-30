@@ -14,33 +14,29 @@
   ~ limitations under the License.
   -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en"><html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Forgot Password</title>
+    <title>Submit Phone Authenticator</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
     <style>
-        .forgotpassword-form {
+        .submit-phone-authenticator-form {
             width: 440px;
             margin: 50px auto;
         }
-        .forgotpassword-form form {
+        .submit-phone-authenticator-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .forgotpassword-form h2 {
+        .submit-phone-authenticator-form h2 {
             margin: 0 0 15px;
-        }
-        .form-control, .btn {
-            min-height: 38px;
-            border-radius: 2px;
         }
         .btn {
             font-size: 15px;
@@ -51,21 +47,20 @@
 
 <body>
 
-<div>
-    <a href="/custom-login" class="btn btn-info pull-left">Login Page</a>
-</div>
+<a href="/custom-login" class="btn btn-info pull-left">Login Page</a>
 
-<div class="forgotpassword-form">
-    <form th:action="@{/forgot-password}" method="post">
-        <h2 class="text-center">Forgot Password</h2>
+<div class="submit-phone-authenticator-form">
+    <form th:action="@{/submit-phone-authenticator-enrollment}" method="post">
         <div th:if="${result}" class="alert alert-danger">
             <span th:text="${result}">1</span>
         </div>
+        <p class="font-weight-light">You will receive a code in your phone number
+            <span style="font-weight:bold" th:text="${phone}">1</span>
+            via <span style="font-weight:bold" th:text="${mode}">1</span> </p>
+        <input type="hidden" th:readonly="readonly" id="phone" name="phone" th:value="${phone}">
+        <input type="hidden" th:readonly="readonly" id="mode" name="mode" th:value="${mode}">
         <div class="form-group">
-            <input type="text" class="form-control" name="username" placeholder="Username" required="required">
-        </div>
-        <div class="form-group">
-            <button id="next-btn" type="submit" class="btn btn-primary btn-block">Next</button>
+            <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Next</button>
         </div>
     </form>
 </div>
