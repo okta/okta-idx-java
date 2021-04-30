@@ -272,6 +272,13 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.register(idxClientContext, userProfile);
 
+        // check for error
+        if (authenticationResponse.getErrors().size() > 0) {
+            mav = new ModelAndView("register");
+            mav.addObject("errors", authenticationResponse.getErrors());
+            return mav;
+        }
+
         List<AuthenticatorUIOption> authenticatorUIOptionList =
                 idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
 
@@ -332,8 +339,11 @@ public class LoginController {
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions();
+        verifyAuthenticatorOptions.setCode(code);
+
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.verifyEmailAuthenticator(idxClientContext, code);
+                idxAuthenticationWrapper.verifyAuthenticator(idxClientContext, verifyAuthenticatorOptions);
 
         if (authenticationResponse.getTokenResponse() != null) {
             return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
@@ -387,8 +397,11 @@ public class LoginController {
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions();
+        verifyAuthenticatorOptions.setCode(confirmNewPassword);
+
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.verifyPasswordAuthenticator(idxClientContext, confirmNewPassword);
+                idxAuthenticationWrapper.verifyAuthenticator(idxClientContext, verifyAuthenticatorOptions);
 
         if (authenticationResponse.getTokenResponse() != null) {
             return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
@@ -473,10 +486,9 @@ public class LoginController {
 
         idxAuthenticationWrapper.submitSmsAuthenticator(idxClientContext, phone);
 
-        session.setAttribute("idxClientContext", idxClientContext);
-
         ModelAndView mav = new ModelAndView("verify-sms-authenticator-enrollment");
         mav.addObject("phone", phone);
+        session.setAttribute("idxClientContext", idxClientContext);
         return mav;
     }
 
@@ -494,8 +506,11 @@ public class LoginController {
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions();
+        verifyAuthenticatorOptions.setCode(code);
+
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.verifySmsAuthenticator(idxClientContext, code);
+                idxAuthenticationWrapper.verifyAuthenticator(idxClientContext, verifyAuthenticatorOptions);
 
         if (authenticationResponse.getTokenResponse() != null) {
             return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
