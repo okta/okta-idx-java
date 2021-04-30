@@ -678,32 +678,16 @@ public class IDXAuthenticationWrapper {
 
             Authenticator authenticator = new Authenticator();
 
-            switch (AuthenticatorType.get(authenticatorType)) {
-                case EMAIL:
-                    authenticator.setId(authenticatorOptions.get(AuthenticatorType.EMAIL.toString()));
-                    authenticator.setMethodType(AuthenticatorType.EMAIL.toString());
-                    break;
+            AuthenticatorType authType = AuthenticatorType.get(authenticatorType);
 
-                case PASSWORD:
-                    authenticator.setId(authenticatorOptions.get(AuthenticatorType.PASSWORD.toString()));
-                    authenticator.setMethodType(AuthenticatorType.PASSWORD.toString());
-                    break;
-
-                case SMS:
-                    authenticator.setId(authenticatorOptions.get(AuthenticatorType.SMS.toString()));
-                    authenticator.setMethodType(AuthenticatorType.SMS.toString());
-                    break;
-
-                case VOICE:
-                    authenticator.setId(authenticatorOptions.get(AuthenticatorType.VOICE.toString()));
-                    authenticator.setMethodType(AuthenticatorType.VOICE.toString());
-                    break;
-
-                default:
-                    String errMsg = "Unsupported authenticator " + authenticatorType;
-                    logger.error(errMsg);
-                    throw new IllegalArgumentException(errMsg);
+            if (authType == null) {
+                String errMsg = "Unsupported authenticator " + authenticatorType;
+                logger.error(errMsg);
+                throw new IllegalArgumentException(errMsg);
             }
+
+            authenticator.setId(authenticatorOptions.get(authType.toString()));
+            authenticator.setMethodType(authType.toString());
 
             EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
                     .withAuthenticator(authenticator)
