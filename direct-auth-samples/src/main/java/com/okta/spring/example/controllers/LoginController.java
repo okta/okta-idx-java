@@ -76,6 +76,20 @@ public class LoginController {
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password));
 
+        if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.PASSWORD_EXPIRED) {
+            session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
+            return new ModelAndView("change-password");
+        }
+
+        if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION) {
+            session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
+            ModelAndView mav = new ModelAndView("select-authenticators");
+            List<AuthenticatorUIOption> authenticatorUIOptions =
+                    idxAuthenticationWrapper.populateAuthenticatorUIOptions(authenticationResponse.getIdxClientContext());
+            mav.addObject("authenticatorUIOptionList", authenticatorUIOptions);
+            return mav;
+        }
+
         // populate login view with errors
         if (authenticationResponse.getAuthenticationStatus() != AuthenticationStatus.SUCCESS) {
             ModelAndView mav = new ModelAndView("login");
@@ -163,6 +177,58 @@ public class LoginController {
             logger.error("Unsupported authenticator {}", authenticatorType);
             return new ModelAndView("forgot-password-authenticators");
         }
+    }
+
+    /**
+     * Handle authenticator selection during authentication.
+     *
+     * @param authenticatorType the authenticatorType
+     * @param session the session
+     * @return authenticate-email view
+     */
+    @PostMapping(value = "/select-authenticator")
+    public ModelAndView selectAuthenticator(final @RequestParam("authenticator-type") String authenticatorType,
+            final HttpSession session) {
+        IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.selectAuthenticator(idxClientContext, authenticatorType);
+
+        if (authenticationResponse.getErrors().size() > 0) {
+            ModelAndView mav = new ModelAndView("select-authenticators");
+            mav.addObject("errors", authenticationResponse.getErrors());
+            return mav;
+        }
+
+        return new ModelAndView("authenticate-email");
+    }
+
+    /**
+     * Handle email verification functionality during authentication.
+     *
+     * @param code the email verification code
+     * @param session the session
+     * @return the home page.
+     */
+    @PostMapping(value = "/authenticate-email")
+    public ModelAndView authenticateEmail(final @RequestParam("code") String code,
+            final HttpSession session) {
+        IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticateEmail(idxClientContext, code);
+
+        if (authenticationResponse.getErrors().size() > 0) {
+            ModelAndView mav = new ModelAndView("authenticate-email");
+            mav.addObject("errors", authenticationResponse.getErrors());
+            return mav;
+        }
+
+        if (authenticationResponse.getTokenResponse() != null) {
+            return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
+        }
+
+        ModelAndView mav = new ModelAndView("login");
+        mav.addObject("info", authenticationResponse.getAuthenticationStatus().toString());
+        return mav;
     }
 
     /**

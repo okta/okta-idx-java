@@ -18,24 +18,24 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Reset your password</title>
+    <title>Select Authenticator</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
     <style>
-        .forgot-password-authenticators-form {
-            width: 440px;
+        .select-authenticators-form {
+            width: 340px;
             margin: 50px auto;
         }
-        .forgot-password-authenticators-form form {
+        .select-authenticators-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .forgot-password-authenticators-form h2 {
+        .select-authenticators-form h2 {
             margin: 0 0 15px;
         }
         .btn {
@@ -46,9 +46,9 @@
 </head>
 
 <body>
-<div class="forgot-password-authenticators-form">
+<div class="select-authenticators-form">
 
-    <form th:action="@{/forgot-password-authenticator}" method="post">
+    <form th:action="@{/select-authenticator}" method="post">
         <h2 class="text-center">Reset your password</h2>
         <div th:if="${errors}" class="alert alert-danger">
             <span th:text="${errors}">1</span>

@@ -14,29 +14,33 @@
   ~ limitations under the License.
   -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en"><html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Reset your password</title>
+    <title>Verify Code</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
     <style>
-        .forgot-password-authenticators-form {
-            width: 440px;
+        .verify-email-authenticator-form {
+            width: 340px;
             margin: 50px auto;
         }
-        .forgot-password-authenticators-form form {
+        .verify-email-authenticator-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .forgot-password-authenticators-form h2 {
+        .verify-email-authenticator-form h2 {
             margin: 0 0 15px;
+        }
+        .form-control, .btn {
+            min-height: 38px;
+            border-radius: 2px;
         }
         .btn {
             font-size: 15px;
@@ -46,27 +50,23 @@
 </head>
 
 <body>
-<div class="forgot-password-authenticators-form">
 
-    <form th:action="@{/forgot-password-authenticator}" method="post">
-        <h2 class="text-center">Reset your password</h2>
-        <div th:if="${errors}" class="alert alert-danger">
-            <span th:text="${errors}">1</span>
+<a href="/custom-login" class="btn btn-info pull-left">Login Page</a>
+
+<div class="verify-email-authenticator-form">
+    <form th:action="@{/authenticate-email}" method="post">
+        <h2 class="text-center">Verify Code</h2>
+        <div th:if="${result}" class="alert alert-danger">
+            <span th:text="${result}">1</span>
         </div>
-        <tr th:each="item : ${authenticatorUIOptionList}">
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="authenticator-type" th:value="${item.type}" checked="true">
-                <label class="form-check-label" th:text="${item.type}"></label>
-            </div>
-        </tr>
-
-        <p/>
-
+        <p class="font-weight-light">Please check your email and enter the code below.</p>
         <div class="form-group">
-            <button id="proceed-btn" type="submit" class="btn btn-primary btn-block">Proceed</button>
+            <input type="text" class="form-control" name="code" required="required">
+        </div>
+        <div class="form-group">
+            <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
         </div>
     </form>
-
 </div>
 
 <div th:replace="fragments/footer :: footer"></div>
