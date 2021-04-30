@@ -54,8 +54,9 @@
         <div th:if="${result}" class="alert alert-danger">
             <span th:text="${result}">1</span>
         </div>
-        <p class="font-weight-light">You will receive a code in your phone <span th:text="${phone}">1</span>
-            via <span th:text="${mode}">1</span> </p>
+        <p class="font-weight-light">You will receive a code in your phone number
+            <span style="font-weight:bold" th:text="${phone}">1</span>
+            via <span style="font-weight:bold" th:text="${mode}">1</span> </p>
         <input type="hidden" th:readonly="readonly" id="phone" name="phone" th:value="${phone}">
         <input type="hidden" th:readonly="readonly" id="mode" name="mode" th:value="${mode}">
         <div class="form-group">

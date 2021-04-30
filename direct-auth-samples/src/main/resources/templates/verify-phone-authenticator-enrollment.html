@@ -59,9 +59,8 @@
         <div th:if="${result}" class="alert alert-danger">
             <span th:text="${result}">1</span>
         </div>
-        <p class="font-weight-light">Enter the received code below.</p>
         <div class="form-group">
-            <input type="text" class="form-control" name="code" required="required">
+            <input type="text" class="form-control" name="code" placeholder="Code" required="required">
         </div>
         <div class="form-group">
             <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Verify</button>
