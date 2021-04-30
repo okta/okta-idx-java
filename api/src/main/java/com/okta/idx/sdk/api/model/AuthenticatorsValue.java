@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-Present Okta, Inc.
+ * Copyright 2021-Present Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
+import java.util.Arrays;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuthenticatorsValue {
@@ -47,6 +49,6 @@ public class AuthenticatorsValue {
     }
 
     public MethodType[] getMethods() {
-        return methods;
+        return Arrays.copyOf(methods, methods.length);
     }
 }
