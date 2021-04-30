@@ -29,7 +29,9 @@ public enum AuthenticationStatus {
 
     AWAITING_AUTHENTICATOR_VERIFICATION("awaiting_authenticator_verification"),
 
-    AWAITING_PASSWORD_RESET("awaiting_password_reset");
+    AWAITING_PASSWORD_RESET("awaiting_password_reset"),
+
+    UNKNOWN("unknown");
 
     private String value;
 

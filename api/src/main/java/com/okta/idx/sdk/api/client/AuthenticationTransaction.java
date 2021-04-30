@@ -39,10 +39,17 @@ final class AuthenticationTransaction {
         String stateHandle = introspectResponse.getStateHandle();
         Assert.hasText(stateHandle, "State handle may not be null");
 
-        RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
-        Util.printRemediationOptions(remediationOptions);
+        Util.printRemediationOptions(introspectResponse.remediation().remediationOptions());
 
         return new AuthenticationTransaction(client, idxClientContext, introspectResponse);
+    }
+
+    static AuthenticationTransaction introspect(IDXClient client, IDXClientContext clientContext) throws ProcessingException {
+        IDXResponse introspectResponse = client.introspect(clientContext);
+
+        Util.printRemediationOptions(introspectResponse.remediation().remediationOptions());
+
+        return new AuthenticationTransaction(client, clientContext, introspectResponse);
     }
 
     interface Factory {
@@ -69,6 +76,10 @@ final class AuthenticationTransaction {
         return Util.extractOptionalRemediationOption(idxResponse.remediation().remediationOptions(), name);
     }
 
+    boolean containsRemediationOption(String name) {
+        return getOptionalRemediationOption(name).isPresent();
+    }
+
     String getStateHandle() {
         return idxResponse.getStateHandle();
     }
@@ -78,7 +89,11 @@ final class AuthenticationTransaction {
     }
 
     AuthenticationTransaction proceed(Factory factory) throws ProcessingException {
-        return new AuthenticationTransaction(client, clientContext, factory.create());
+        IDXResponse idxResponse = factory.create();
+        if (idxResponse.remediation() != null) {
+            Util.printRemediationOptions(idxResponse.remediation().remediationOptions());
+        }
+        return new AuthenticationTransaction(client, clientContext, idxResponse);
     }
 
     AuthenticationResponse asAuthenticationResponse() throws ProcessingException {
@@ -99,10 +114,10 @@ final class AuthenticationTransaction {
             // verify if password expired
             if (Util.isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, idxResponse)) {
                 authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
+            } else if (containsRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE)) {
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
             } else {
-                String errMsg = "Unexpected remediation: " + RemediationType.REENROLL_AUTHENTICATOR;
-                logger.error("{}", errMsg);
-                Util.copyErrorMessages(idxResponse, authenticationResponse);
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.UNKNOWN);
             }
         }
 
