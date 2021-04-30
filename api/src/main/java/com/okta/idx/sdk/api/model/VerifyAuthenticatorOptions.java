@@ -17,6 +17,10 @@ package com.okta.idx.sdk.api.model;
 
 public class VerifyAuthenticatorOptions {
 
+    public VerifyAuthenticatorOptions(String code) {
+        this.code = code;
+    }
+
     private String code;
 
     public String getCode() {

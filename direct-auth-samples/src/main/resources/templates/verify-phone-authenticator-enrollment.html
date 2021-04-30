@@ -25,18 +25,22 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
     <style>
-        .submit-sms-authenticator-form {
-            width: 340px;
+        .verify-phone-authenticator-form {
+            width: 440px;
             margin: 50px auto;
         }
-        .submit-sms-authenticator-form form {
+        .verify-phone-authenticator-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .submit-sms-authenticator-form h2 {
+        .verify-phone-authenticator-form h2 {
             margin: 0 0 15px;
+        }
+        .form-control, .btn {
+            min-height: 38px;
+            border-radius: 2px;
         }
         .btn {
             font-size: 15px;
@@ -49,15 +53,18 @@
 
 <a href="/custom-login" class="btn btn-info pull-left">Login Page</a>
 
-<div class="submit-sms-authenticator-form">
-    <form th:action="@{/submit-sms-authenticator-enrollment}" method="post">
+<div class="verify-phone-authenticator-form">
+    <form th:action="@{/verify-phone-authenticator-enrollment}" method="post">
+        <h2 class="text-center">Verify Code</h2>
         <div th:if="${result}" class="alert alert-danger">
             <span th:text="${result}">1</span>
         </div>
-        <p class="font-weight-light">You will receive a code sent to your phone.</p>
-        <input type="phone" th:readonly="readonly" id="phone" name="phone" th:value="${phone}">
+        <p class="font-weight-light">Enter the received code below.</p>
         <div class="form-group">
-            <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Send a code via SMS</button>
+            <input type="text" class="form-control" name="code" required="required">
+        </div>
+        <div class="form-group">
+            <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Verify</button>
         </div>
     </form>
 </div>

@@ -156,7 +156,14 @@ public class RemediationOption {
                     }
                 }
                 if (key != null) {
-                    authenticatorOptionsMap.put(key, val);
+                    String[] tokenizedKey = key.split(",");
+                    if (tokenizedKey != null) {
+                        for (String tmpKey : tokenizedKey) {
+                            authenticatorOptionsMap.put(tmpKey, val);
+                        }
+                    } else {
+                        authenticatorOptionsMap.put(key, val);
+                    }
                 }
             }
         }

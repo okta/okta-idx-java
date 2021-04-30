@@ -422,7 +422,8 @@ public class IDXAuthenticationWrapper {
 
             for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
                 if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue())) {
+                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
                     logger.info("Skipping unsupported authenticator - {}", entry.getKey());
                     continue;
                 }
@@ -631,19 +632,31 @@ public class IDXAuthenticationWrapper {
 
             Authenticator authenticator = new Authenticator();
 
-            if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
-                authenticator.setId(authenticatorOptions.get(AuthenticatorType.EMAIL.toString()));
-                authenticator.setMethodType(AuthenticatorType.EMAIL.toString());
-            } else if (authenticatorType.equals(AuthenticatorType.PASSWORD.toString())) {
-                authenticator.setId(authenticatorOptions.get(AuthenticatorType.PASSWORD.toString()));
-                authenticator.setMethodType(AuthenticatorType.PASSWORD.toString());
-            } else if (authenticatorType.contains(AuthenticatorType.SMS.toString())) {
-                authenticator.setId(authenticatorOptions.get("sms,voice"));
-                authenticator.setMethodType(AuthenticatorType.SMS.toString());
-            } else {
-                String errMsg = "Unsupported authenticator " + authenticatorType;
-                logger.error(errMsg);
-                throw new IllegalArgumentException(errMsg);
+            switch (AuthenticatorType.get(authenticatorType)) {
+                case EMAIL:
+                    authenticator.setId(authenticatorOptions.get(AuthenticatorType.EMAIL.toString()));
+                    authenticator.setMethodType(AuthenticatorType.EMAIL.toString());
+                    break;
+
+                case PASSWORD:
+                    authenticator.setId(authenticatorOptions.get(AuthenticatorType.PASSWORD.toString()));
+                    authenticator.setMethodType(AuthenticatorType.PASSWORD.toString());
+                    break;
+
+                case SMS:
+                    authenticator.setId(authenticatorOptions.get(AuthenticatorType.SMS.toString()));
+                    authenticator.setMethodType(AuthenticatorType.SMS.toString());
+                    break;
+
+                case VOICE:
+                    authenticator.setId(authenticatorOptions.get(AuthenticatorType.VOICE.toString()));
+                    authenticator.setMethodType(AuthenticatorType.VOICE.toString());
+                    break;
+
+                default:
+                    String errMsg = "Unsupported authenticator " + authenticatorType;
+                    logger.error(errMsg);
+                    throw new IllegalArgumentException(errMsg);
             }
 
             EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
@@ -754,14 +767,16 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Submit the SMS authenticator enrollment with the provided phone number.
+     * Submit phone authenticator enrollment with the provided phone number.
      *
      * @param idxClientContext    the IDX Client context
      * @param phone               the phone number
+     * @param mode                the delivery mode - sms or voice
      * @return the Authentication response
      */
-    public AuthenticationResponse submitSmsAuthenticator(IDXClientContext idxClientContext,
-                                                         String phone) {
+    public AuthenticationResponse submitPhoneAuthenticator(IDXClientContext idxClientContext,
+                                                           String phone,
+                                                           String mode) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
@@ -782,7 +797,7 @@ public class IDXAuthenticationWrapper {
 
             Authenticator phoneAuthenticator = new Authenticator();
             phoneAuthenticator.setId(authenticatorsValue.getId());
-            phoneAuthenticator.setMethodType(AuthenticatorType.SMS.toString());
+            phoneAuthenticator.setMethodType(AuthenticatorType.get(mode).toString());
             phoneAuthenticator.setPhoneNumber(phone);
 
             EnrollRequest enrollRequest = EnrollRequestBuilder.builder()

@@ -18,24 +18,24 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Verify Code</title>
+    <title>Enroll Phone Authenticator</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
     <style>
-        .verify-sms-authenticator-form {
-            width: 340px;
+        .enroll-phone-authenticator-form {
+            width: 440px;
             margin: 50px auto;
         }
-        .verify-sms-authenticator-form form {
+        .enroll-phone-authenticator-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .verify-sms-authenticator-form h2 {
+        .enroll-phone-authenticator-form h2 {
             margin: 0 0 15px;
         }
         .form-control, .btn {
@@ -53,18 +53,19 @@
 
 <a href="/custom-login" class="btn btn-info pull-left">Login Page</a>
 
-<div class="verify-sms-authenticator-form">
-    <form th:action="@{/verify-sms-authenticator-enrollment}" method="post">
-        <h2 class="text-center">Verify Code</h2>
-        <div th:if="${result}" class="alert alert-danger">
-            <span th:text="${result}">1</span>
+<div class="enroll-phone-authenticator-form">
+    <form th:action="@{/phone-authenticator-enrollment}" method="post">
+        <h2 class="text-center">Enroll Phone Authenticator</h2>
+        <div th:if="${errors}" class="alert alert-danger">
+            <span th:text="${errors}">1</span>
         </div>
-        <p class="font-weight-light">Please check your SMS and enter the code below.</p>
+        <p class="font-weight-light">Format: (+) {country code} {area code} {number} <br> For e.g. +1 555 666 7777 (US)</p>
         <div class="form-group">
-            <input type="text" class="form-control" name="code" required="required">
+            <input type="phone" class="form-control" name="phone" placeholder="Phone number" required="required">
         </div>
+        <input type="hidden" th:readonly="readonly" id="mode" name="mode" th:value="${mode}">
         <div class="form-group">
-            <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Verify</button>
+            <button id="submit-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
         </div>
     </form>
 </div>

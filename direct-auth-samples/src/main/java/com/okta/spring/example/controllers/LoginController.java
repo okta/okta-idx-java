@@ -140,7 +140,8 @@ public class LoginController {
      */
     @PostMapping(value = "/forgot-password-authenticator")
     public ModelAndView handleForgotPasswordAuthenticator(final @RequestParam("authenticator-type") String authenticatorType,
-            final HttpSession session) {
+                                                          final HttpSession session) {
+
         logger.info(":: Forgot password Authenticator ::");
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
@@ -178,8 +179,7 @@ public class LoginController {
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions();
-        verifyAuthenticatorOptions.setCode(code);
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(code);
 
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.verifyAuthenticator(idxClientContext, verifyAuthenticatorOptions);
@@ -313,15 +313,30 @@ public class LoginController {
             return mav;
         }
 
-        if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
-            return new ModelAndView("verify-email-authenticator-enrollment");
-        } else if (authenticatorType.equals(AuthenticatorType.PASSWORD.toString())) {
-            return new ModelAndView("password-authenticator-enrollment");
-        } else if (authenticatorType.contains(AuthenticatorType.SMS.toString())) {
-            return new ModelAndView("sms-authenticator-enrollment");
-        } else {
-            logger.error("Unsupported authenticator {}", authenticatorType);
-            return new ModelAndView("enroll-authenticators");
+        ModelAndView mav;
+
+        switch (AuthenticatorType.get(authenticatorType)) {
+            case EMAIL:
+                mav = new ModelAndView("verify-email-authenticator-enrollment");
+                return mav;
+
+            case PASSWORD:
+                mav = new ModelAndView("password-authenticator-enrollment");
+                return mav;
+
+            case SMS:
+                mav = new ModelAndView("phone-authenticator-enrollment");
+                mav.addObject("mode", AuthenticatorType.SMS.toString());
+                return mav;
+
+            case VOICE:
+                mav = new ModelAndView("phone-authenticator-enrollment");
+                mav.addObject("mode", AuthenticatorType.VOICE.toString());
+                return mav;
+
+            default:
+                logger.error("Unsupported authenticator {}", authenticatorType);
+                return new ModelAndView("enroll-authenticators");
         }
     }
 
@@ -339,8 +354,7 @@ public class LoginController {
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions();
-        verifyAuthenticatorOptions.setCode(code);
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(code);
 
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.verifyAuthenticator(idxClientContext, verifyAuthenticatorOptions);
@@ -397,8 +411,7 @@ public class LoginController {
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions();
-        verifyAuthenticatorOptions.setCode(confirmNewPassword);
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(confirmNewPassword);
 
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.verifyAuthenticator(idxClientContext, verifyAuthenticatorOptions);
@@ -440,17 +453,20 @@ public class LoginController {
     }
 
     /**
-     * Handle SMS authenticator enrollment functionality.
+     * Handle phone authenticator enrollment functionality.
      *
      * @param phone the phone number
-     * @return the login page view (if login operation is successful), else the enroll-authenticators page.
+     * @param mode the delivery mode - sms or voice
+     * @return the submit phone authenticator enrollment page that allows user to input
+     * the received code (if phone validation is successful), else presents the same page with error message.
      */
-    @PostMapping(value = "/sms-authenticator-enrollment")
-    public ModelAndView handleEnrollSmsAuthenticator(final @RequestParam("phone") String phone) {
-        logger.info(":: Enroll SMS Authenticator ::");
+    @PostMapping(value = "/phone-authenticator-enrollment")
+    public ModelAndView handleEnrollPhoneAuthenticator(final @RequestParam("phone") String phone,
+                                                       final @RequestParam("mode") String mode) {
+        logger.info(":: Enroll Phone Authenticator ::");
 
         if (!Strings.hasText(phone)) {
-            ModelAndView mav = new ModelAndView("sms-authenticator-enrollment");
+            ModelAndView mav = new ModelAndView("phone-authenticator-enrollment");
             mav.addObject("errors", "Phone is required");
             return mav;
         }
@@ -460,54 +476,56 @@ public class LoginController {
 
         // validate phone number
         if (!Util.isValidPhoneNumber(phone)) {
-            ModelAndView mav = new ModelAndView("sms-authenticator-enrollment");
+            ModelAndView mav = new ModelAndView("phone-authenticator-enrollment");
             mav.addObject("errors", "Invalid phone number");
             return mav;
         }
 
-        ModelAndView mav = new ModelAndView("submit-sms-authenticator-enrollment");
+        ModelAndView mav = new ModelAndView("submit-phone-authenticator-enrollment");
         mav.addObject("phone", trimmedPhoneNumber);
+        mav.addObject("mode", mode);
         return mav;
     }
 
     /**
-     * Handle sms authenticator functionality.
+     * Handle phone authenticator submission form.
      *
      * @param phone the phone number
+     * @param mode the delivery mode - sms or voice
      * @param session the session
-     * @return the verify sms authenticator view with phone number.
+     * @return the verify phone authenticator view with phone number.
      */
-    @PostMapping(value = "/submit-sms-authenticator-enrollment")
-    public ModelAndView handleSubmitSmsAuthenticator(final @RequestParam("phone") String phone,
-                                                     final HttpSession session) {
-        logger.info(":: Submit SMS Authenticator :: {}", phone);
+    @PostMapping(value = "/submit-phone-authenticator-enrollment")
+    public ModelAndView handleSubmitPhoneAuthenticator(final @RequestParam("phone") String phone,
+                                                       final @RequestParam("mode") String mode,
+                                                       final HttpSession session) {
+        logger.info(":: Submit Phone Authenticator :: {}", phone);
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
-        idxAuthenticationWrapper.submitSmsAuthenticator(idxClientContext, phone);
+        idxAuthenticationWrapper.submitPhoneAuthenticator(idxClientContext, phone, mode);
 
-        ModelAndView mav = new ModelAndView("verify-sms-authenticator-enrollment");
+        ModelAndView mav = new ModelAndView("verify-phone-authenticator-enrollment");
         mav.addObject("phone", phone);
         session.setAttribute("idxClientContext", idxClientContext);
         return mav;
     }
 
     /**
-     * Handle sms authenticator verification functionality.
+     * Handle phone authenticator verification form.
      *
-     * @param code the sms verification code
+     * @param code the verification code
      * @param session the session
-     * @return the login page view (if login operation is successful), else the enroll-authenticators page.
+     * @return the home page view (if verification is complete), else the enroll-authenticators page.
      */
-    @PostMapping(value = "/verify-sms-authenticator-enrollment")
-    public ModelAndView handleVerifySmsAuthenticator(final @RequestParam("code") String code,
-                                                     final HttpSession session) {
-        logger.info(":: Verify SMS Authenticator ::");
+    @PostMapping(value = "/verify-phone-authenticator-enrollment")
+    public ModelAndView handleVerifyPhoneAuthenticator(final @RequestParam("code") String code,
+                                                       final HttpSession session) {
+        logger.info(":: Verify Phone Authenticator ::");
 
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions();
-        verifyAuthenticatorOptions.setCode(code);
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(code);
 
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.verifyAuthenticator(idxClientContext, verifyAuthenticatorOptions);
