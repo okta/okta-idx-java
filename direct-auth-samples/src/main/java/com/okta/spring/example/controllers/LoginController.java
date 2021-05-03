@@ -17,11 +17,11 @@ package com.okta.spring.example.controllers;
 
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
-import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
 import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
+import com.okta.idx.sdk.api.model.AuthenticatorUIOptions;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.UserProfile;
@@ -130,17 +130,15 @@ public class LoginController {
         switch (authenticationResponse.getAuthenticationStatus()) {
             case AWAITING_AUTHENTICATOR_SELECTION:
                 mav = new ModelAndView("forgot-password-authenticators");
-                List<AuthenticatorUIOption> uiOptions;
-                try {
-                    uiOptions = idxAuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(
+                AuthenticatorUIOptions authenticatorUIOptions =
+                        idxAuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(
                             authenticationResponse.getIdxClientContext());
-                } catch (ProcessingException e) {
-                    idxAuthenticationWrapper.handleProcessingException(e, authenticationResponse);
+                if (authenticatorUIOptions.hasErrors()) {
                     mav = new ModelAndView("login");
-                    mav.addObject("errors", authenticationResponse.getErrors());
+                    mav.addObject("errors", authenticatorUIOptions.getErrors());
                     return mav;
                 }
-                mav.addObject("authenticatorUIOptionList", uiOptions);
+                mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
                 return mav;
 
             case AWAITING_USER_EMAIL_ACTIVATION:

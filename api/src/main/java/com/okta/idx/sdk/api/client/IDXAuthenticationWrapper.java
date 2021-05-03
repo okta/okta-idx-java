@@ -21,6 +21,7 @@ import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
 import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
+import com.okta.idx.sdk.api.model.AuthenticatorUIOptions;
 import com.okta.idx.sdk.api.model.AuthenticatorsValue;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
@@ -55,6 +56,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -318,40 +320,48 @@ public class IDXAuthenticationWrapper {
      * @param idxClientContext the idxClientContext
      * @return the list of AuthenticatorUIOptions
      */
-    public List<AuthenticatorUIOption> populateForgotPasswordAuthenticatorUIOptions(
-            IDXClientContext idxClientContext) throws ProcessingException {
+    public AuthenticatorUIOptions populateForgotPasswordAuthenticatorUIOptions(
+            IDXClientContext idxClientContext) {
 
+        AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
         List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
 
-        AuthenticationTransaction introspectTransaction =
-                AuthenticationTransaction.introspect(client, idxClientContext);
+        try {
+            AuthenticationTransaction introspectTransaction =
+                    AuthenticationTransaction.introspect(client, idxClientContext);
 
-        Recover recover = introspectTransaction.getResponse().getCurrentAuthenticatorEnrollment().getValue().getRecover();
+            Recover recover = introspectTransaction.getResponse()
+                    .getCurrentAuthenticatorEnrollment().getValue().getRecover();
 
-        AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
-            // recover password
-            RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                    .withStateHandle(introspectTransaction.getStateHandle())
-                    .build();
-            return recover.proceed(client, recoverRequest);
-        });
+            AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
+                // recover password
+                RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                        .withStateHandle(introspectTransaction.getStateHandle())
+                        .build();
+                return recover.proceed(client, recoverRequest);
+            });
 
-        RemediationOption remediationOption =
-                recoverTransaction.getRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+            RemediationOption remediationOption =
+                    recoverTransaction.getRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
 
-        Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
 
-        for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
-            if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
-                    !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
-                    !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
-                logger.info("Skipping unsupported authenticator - {}", entry.getKey());
-                continue;
+            for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
+                if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
+                    logger.info("Skipping unsupported authenticator - {}", entry.getKey());
+                    continue;
+                }
+                authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
             }
-            authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
+        } catch (ProcessingException e) {
+            logger.error("Error occurred:", e);
+            authenticatorUIOptions.setErrors(fillProcessingErrors(e));
         }
 
-        return authenticatorUIOptionList;
+        authenticatorUIOptions.setOptions(authenticatorUIOptionList);
+        return authenticatorUIOptions;
     }
 
     /**
@@ -837,8 +847,8 @@ public class IDXAuthenticationWrapper {
      * @param e the {@link ProcessingException} reference
      * @param authenticationResponse the {@link AuthenticationResponse} reference
      */
-    public void handleProcessingException(ProcessingException e,
-                                          AuthenticationResponse authenticationResponse) {
+    private void handleProcessingException(ProcessingException e,
+                                           AuthenticationResponse authenticationResponse) {
         logger.error("Exception occurred", e);
         ErrorResponse errorResponse = e.getErrorResponse();
         if (errorResponse != null) {
@@ -852,6 +862,30 @@ public class IDXAuthenticationWrapper {
             authenticationResponse.addError(e.getMessage());
         }
         logger.error("Error Detail: {}", authenticationResponse.getErrors());
+    }
+
+    /**
+     * Helper to parse {@link ProcessingException} and return a list of error messages.
+     *
+     * @param e the {@link ProcessingException} reference
+     */
+    private List<String> fillProcessingErrors(ProcessingException e) {
+        logger.error("Exception occurred", e);
+        List<String> processingErrors = new LinkedList<>();
+        ErrorResponse errorResponse = e.getErrorResponse();
+        if (errorResponse != null) {
+            if (errorResponse.getMessages() != null) {
+                Arrays.stream(errorResponse.getMessages().getValue())
+                        .forEach(msg -> processingErrors.add(msg.getMessage()));
+            } else {
+                processingErrors.add(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
+            }
+        } else {
+            processingErrors.add(e.getMessage());
+        }
+
+        logger.error("Error Detail: {}", processingErrors);
+        return processingErrors;
     }
 
     /**
