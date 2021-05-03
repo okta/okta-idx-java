@@ -522,8 +522,7 @@ public class IDXAuthenticationWrapper {
 
         try {
             AuthenticationTransaction introspectTransaction = AuthenticationTransaction.introspect(client, idxClientContext);
-            RemediationOption remediationOption =
-                    introspectTransaction.getRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+            RemediationOption remediationOption = getSelectAuthenticatorRemediationOption(introspectTransaction);
             return introspectTransaction.proceed(() -> {
                 Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
                 Authenticator authenticator = new Authenticator();
@@ -778,21 +777,7 @@ public class IDXAuthenticationWrapper {
                 return authenticatorUIOptions;
             }
 
-            RemediationOption remediationOption = null;
-
-            Optional<RemediationOption> selectAuthenticatorEnrollOptional = introspectTransaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_ENROLL);
-            if (selectAuthenticatorEnrollOptional.isPresent()) {
-                remediationOption = selectAuthenticatorEnrollOptional.get();
-            }
-
-            Optional<RemediationOption> selectAuthenticatorAuthenticateOptional = introspectTransaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
-            if (selectAuthenticatorAuthenticateOptional.isPresent()) {
-                remediationOption = selectAuthenticatorAuthenticateOptional.get();
-            }
-
-            if (remediationOption == null) {
-                return authenticatorUIOptions;
-            }
+            RemediationOption remediationOption = getSelectAuthenticatorRemediationOption(introspectTransaction);
 
             Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
 
@@ -806,6 +791,22 @@ public class IDXAuthenticationWrapper {
 
         authenticatorUIOptions.setOptions(authenticatorUIOptionList);
         return authenticatorUIOptions;
+    }
+
+    private RemediationOption getSelectAuthenticatorRemediationOption(AuthenticationTransaction transaction) {
+        RemediationOption remediationOption = null;
+
+        Optional<RemediationOption> selectAuthenticatorEnrollOptional = transaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+        if (selectAuthenticatorEnrollOptional.isPresent()) {
+            remediationOption = selectAuthenticatorEnrollOptional.get();
+        }
+
+        Optional<RemediationOption> selectAuthenticatorAuthenticateOptional = transaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+        if (selectAuthenticatorAuthenticateOptional.isPresent()) {
+            remediationOption = selectAuthenticatorAuthenticateOptional.get();
+        }
+
+        return remediationOption;
     }
 
     /**
