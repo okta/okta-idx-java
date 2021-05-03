@@ -20,7 +20,6 @@ import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
-import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
 import com.okta.idx.sdk.api.model.AuthenticatorUIOptions;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -39,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
-import java.util.List;
 
 @Controller
 public class LoginController {
@@ -85,9 +83,9 @@ public class LoginController {
         if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION) {
             session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
             ModelAndView mav = new ModelAndView("select-authenticators");
-            List<AuthenticatorUIOption> authenticatorUIOptions =
+            AuthenticatorUIOptions authenticatorUIOptions =
                     idxAuthenticationWrapper.populateAuthenticatorUIOptions(authenticationResponse.getIdxClientContext());
-            mav.addObject("authenticatorUIOptionList", authenticatorUIOptions);
+            mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
             return mav;
         }
 
@@ -355,10 +353,10 @@ public class LoginController {
             return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
         }
 
-        List<AuthenticatorUIOption> authenticatorUIOptionList =
+        AuthenticatorUIOptions authenticatorUIOptions =
                 idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
 
-        mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
 
         session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
         return mav;
@@ -457,10 +455,10 @@ public class LoginController {
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
 
-        List<AuthenticatorUIOption> authenticatorUIOptionList =
+        AuthenticatorUIOptions authenticatorUIOptions =
                 idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
 
-        mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
         session.setAttribute("idxClientContext", idxClientContext);
         return mav;
     }
@@ -513,17 +511,17 @@ public class LoginController {
             }
         }
 
-        List<AuthenticatorUIOption> authenticatorUIOptionList =
+        AuthenticatorUIOptions authenticatorUIOptions =
                 idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
 
-        if (authenticatorUIOptionList == null || authenticatorUIOptionList.size() == 0) {
+        if (authenticatorUIOptions.getOptions().size() == 0) {
             ModelAndView mav = new ModelAndView("login");
             mav.addObject("info", "Success");
             return mav;
         }
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
-        mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
         session.setAttribute("idxClientContext", idxClientContext);
         return mav;
     }
@@ -628,10 +626,10 @@ public class LoginController {
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
 
-        List<AuthenticatorUIOption> authenticatorUIOptionList =
+        AuthenticatorUIOptions authenticatorUIOptions =
                 idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
 
-        mav.addObject("authenticatorUIOptionList", authenticatorUIOptionList);
+        mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
         session.setAttribute("idxClientContext", idxClientContext);
         return mav;
     }

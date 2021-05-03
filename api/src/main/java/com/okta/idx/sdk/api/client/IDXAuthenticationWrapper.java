@@ -56,7 +56,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -768,14 +767,15 @@ public class IDXAuthenticationWrapper {
      * @param idxClientContext      the IDX Client context
      * @return the list of {@link AuthenticatorUIOption} options
      */
-    public List<AuthenticatorUIOption> populateAuthenticatorUIOptions(IDXClientContext idxClientContext) {
+    public AuthenticatorUIOptions populateAuthenticatorUIOptions(IDXClientContext idxClientContext) {
 
+        AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
         List<AuthenticatorUIOption> authenticatorUIOptionList = new ArrayList<>();
 
         try {
             AuthenticationTransaction introspectTransaction = AuthenticationTransaction.introspect(client, idxClientContext);
             if (introspectTransaction.getResponse().remediation() == null) {
-                return authenticatorUIOptionList;
+                return authenticatorUIOptions;
             }
 
             RemediationOption remediationOption = null;
@@ -791,7 +791,7 @@ public class IDXAuthenticationWrapper {
             }
 
             if (remediationOption == null) {
-                return new ArrayList<>();
+                return authenticatorUIOptions;
             }
 
             Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
@@ -799,11 +799,13 @@ public class IDXAuthenticationWrapper {
             for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
                 authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
             }
-        } catch (Exception e) {
+        } catch (ProcessingException e) {
             logger.error("Error occurred:", e);
+            authenticatorUIOptions.setErrors(fillProcessingErrors(e));
         }
 
-        return authenticatorUIOptionList;
+        authenticatorUIOptions.setOptions(authenticatorUIOptionList);
+        return authenticatorUIOptions;
     }
 
     /**
