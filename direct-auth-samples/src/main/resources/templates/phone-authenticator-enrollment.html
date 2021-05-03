@@ -64,16 +64,7 @@
         <div class="form-group">
             <input type="phone" class="form-control" name="phone" placeholder="Phone number" required="required">
         </div>
-        <div class="form-group">
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="mode" th:value="sms">
-                <label class="form-check-label" th:text="SMS"></label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="mode" th:value="voice">
-                <label class="form-check-label" th:text="Voice"></label>
-            </div>
-        </div>
+        <input type="hidden" class="form-control" name="mode" th:value="${mode}" required="required">
         <div class="form-group">
             <button id="submit-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
         </div>

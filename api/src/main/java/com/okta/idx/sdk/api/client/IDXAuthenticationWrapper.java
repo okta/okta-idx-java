@@ -770,7 +770,7 @@ public class IDXAuthenticationWrapper {
             try {
                 resetAuthenticator = extractRemediationOption(remediationOptions, RemediationType.RESET_AUTHENTICATOR);
             } catch (IllegalArgumentException e) {
-                logger.info("Missing remediation option {}", e.getMessage());
+                logger.info("{}", e.getMessage());
             }
 
             if (resetAuthenticator != null) {
@@ -781,7 +781,8 @@ public class IDXAuthenticationWrapper {
             if (challengeAuthenticatorResponse.isLoginSuccessful()) {
                 // login successful
                 logger.info("Login Successful!");
-                TokenResponse tokenResponse = challengeAuthenticatorResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
+                TokenResponse tokenResponse =
+                        challengeAuthenticatorResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
                 authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
                 authenticationResponse.setTokenResponse(tokenResponse);
             }
@@ -873,6 +874,15 @@ public class IDXAuthenticationWrapper {
             IDXResponse skipResponse = remediationOption.proceed(client, skipAuthenticatorEnrollmentRequest);
             copyErrorMessages(skipResponse, authenticationResponse);
             authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SKIP_COMPLETE);
+
+            if (skipResponse.isLoginSuccessful()) {
+                // login successful
+                logger.info("Login Successful!");
+                TokenResponse tokenResponse =
+                        skipResponse.getSuccessWithInteractionCode().exchangeCode(client, idxClientContext);
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
+                authenticationResponse.setTokenResponse(tokenResponse);
+            }
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {

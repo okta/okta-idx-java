@@ -345,6 +345,10 @@ public class LoginController {
             return mav;
         }
 
+        if (authenticationResponse.getTokenResponse() != null) {
+            return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
+        }
+
         List<AuthenticatorUIOption> authenticatorUIOptionList =
                 idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
 
