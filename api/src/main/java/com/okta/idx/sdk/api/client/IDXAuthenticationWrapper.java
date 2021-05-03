@@ -21,6 +21,7 @@ import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
 import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
+import com.okta.idx.sdk.api.model.AuthenticatorUIOptions;
 import com.okta.idx.sdk.api.model.AuthenticatorsValue;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
@@ -318,21 +319,25 @@ public class IDXAuthenticationWrapper {
      * @param idxClientContext the idxClientContext
      * @return the list of AuthenticatorUIOptions
      */
-    public List<AuthenticatorUIOption> populateForgotPasswordAuthenticatorUIOptions(
+    public AuthenticatorUIOptions populateForgotPasswordAuthenticatorUIOptions(
             IDXClientContext idxClientContext) {
 
+        AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
         List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
 
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.introspect(client, idxClientContext);
+            AuthenticationTransaction introspectTransaction =
+                    AuthenticationTransaction.introspect(client, idxClientContext);
 
-            Recover recover = introspectTransaction.getResponse().getCurrentAuthenticatorEnrollment().getValue().getRecover();
+            Recover recover = introspectTransaction.getResponse()
+                    .getCurrentAuthenticatorEnrollment().getValue().getRecover();
+
             AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
                 // recover password
                 RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
                         .withStateHandle(introspectTransaction.getStateHandle())
                         .build();
-                return recover .proceed(client, recoverRequest);
+                return recover.proceed(client, recoverRequest);
             });
 
             RemediationOption remediationOption =
@@ -351,9 +356,11 @@ public class IDXAuthenticationWrapper {
             }
         } catch (ProcessingException e) {
             logger.error("Error occurred:", e);
+            authenticatorUIOptions.setErrors(fillProcessingErrors(e));
         }
 
-        return authenticatorUIOptionList;
+        authenticatorUIOptions.setOptions(authenticatorUIOptionList);
+        return authenticatorUIOptions;
     }
 
     /**
@@ -760,14 +767,15 @@ public class IDXAuthenticationWrapper {
      * @param idxClientContext      the IDX Client context
      * @return the list of {@link AuthenticatorUIOption} options
      */
-    public List<AuthenticatorUIOption> populateAuthenticatorUIOptions(IDXClientContext idxClientContext) {
+    public AuthenticatorUIOptions populateAuthenticatorUIOptions(IDXClientContext idxClientContext) {
 
+        AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
         List<AuthenticatorUIOption> authenticatorUIOptionList = new ArrayList<>();
 
         try {
             AuthenticationTransaction introspectTransaction = AuthenticationTransaction.introspect(client, idxClientContext);
             if (introspectTransaction.getResponse().remediation() == null) {
-                return authenticatorUIOptionList;
+                return authenticatorUIOptions;
             }
 
             RemediationOption remediationOption = null;
@@ -783,7 +791,7 @@ public class IDXAuthenticationWrapper {
             }
 
             if (remediationOption == null) {
-                return new ArrayList<>();
+                return authenticatorUIOptions;
             }
 
             Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
@@ -791,11 +799,13 @@ public class IDXAuthenticationWrapper {
             for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
                 authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
             }
-        } catch (Exception e) {
+        } catch (ProcessingException e) {
             logger.error("Error occurred:", e);
+            authenticatorUIOptions.setErrors(fillProcessingErrors(e));
         }
 
-        return authenticatorUIOptionList;
+        authenticatorUIOptions.setOptions(authenticatorUIOptionList);
+        return authenticatorUIOptions;
     }
 
     /**
@@ -854,6 +864,30 @@ public class IDXAuthenticationWrapper {
             authenticationResponse.addError(e.getMessage());
         }
         logger.error("Error Detail: {}", authenticationResponse.getErrors());
+    }
+
+    /**
+     * Helper to parse {@link ProcessingException} and return a list of error messages.
+     *
+     * @param e the {@link ProcessingException} reference
+     */
+    private List<String> fillProcessingErrors(ProcessingException e) {
+        logger.error("Exception occurred", e);
+        List<String> processingErrors = new LinkedList<>();
+        ErrorResponse errorResponse = e.getErrorResponse();
+        if (errorResponse != null) {
+            if (errorResponse.getMessages() != null) {
+                Arrays.stream(errorResponse.getMessages().getValue())
+                        .forEach(msg -> processingErrors.add(msg.getMessage()));
+            } else {
+                processingErrors.add(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
+            }
+        } else {
+            processingErrors.add(e.getMessage());
+        }
+
+        logger.error("Error Detail: {}", processingErrors);
+        return processingErrors;
     }
 
     /**
