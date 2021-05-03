@@ -16,8 +16,10 @@
 package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.lang.Assert;
+import com.okta.commons.lang.Collections;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
+import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
@@ -28,7 +30,9 @@ import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
 final class AuthenticationTransaction {
     static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
@@ -39,7 +43,7 @@ final class AuthenticationTransaction {
         String stateHandle = introspectResponse.getStateHandle();
         Assert.hasText(stateHandle, "State handle may not be null");
 
-        Util.printRemediationOptions(introspectResponse.remediation().remediationOptions());
+        Util.printRemediationOptions(introspectResponse);
 
         return new AuthenticationTransaction(client, idxClientContext, introspectResponse);
     }
@@ -47,7 +51,7 @@ final class AuthenticationTransaction {
     static AuthenticationTransaction introspect(IDXClient client, IDXClientContext clientContext) throws ProcessingException {
         IDXResponse introspectResponse = client.introspect(clientContext);
 
-        Util.printRemediationOptions(introspectResponse.remediation().remediationOptions());
+        Util.printRemediationOptions(introspectResponse);
 
         return new AuthenticationTransaction(client, clientContext, introspectResponse);
     }
@@ -68,21 +72,6 @@ final class AuthenticationTransaction {
         this.idxResponse = idxResponse;
     }
 
-    RemediationOption getRemediationOption(String name) {
-        return Util.extractRemediationOption(idxResponse.remediation().remediationOptions(), name);
-    }
-
-    Optional<RemediationOption> getOptionalRemediationOption(String name) {
-        if (idxResponse == null || idxResponse.remediation() == null) {
-            return Optional.empty();
-        }
-        return Util.extractOptionalRemediationOption(idxResponse.remediation().remediationOptions(), name);
-    }
-
-    boolean containsRemediationOption(String name) {
-        return getOptionalRemediationOption(name).isPresent();
-    }
-
     String getStateHandle() {
         return idxResponse.getStateHandle();
     }
@@ -91,21 +80,56 @@ final class AuthenticationTransaction {
         return idxResponse;
     }
 
+    IDXClientContext getClientContext() {
+        return clientContext;
+    }
+
+    RemediationOption getRemediationOption(String name) {
+        Optional<RemediationOption> remediationOptionsOptional = getOptionalRemediationOption(name);
+        Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + name);
+        return remediationOptionsOptional.get();
+    }
+
+    RemediationOption getRemediationOption(String... names) {
+        if (idxResponse == null || idxResponse.remediation() == null) {
+            throw new IllegalArgumentException("Missing remediation option " + Arrays.toString(names));
+        }
+        Set<String> nameSet = Collections.toSet(names);
+        Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(idxResponse.remediation().remediationOptions())
+                .filter(x -> nameSet.contains(x.getName()))
+                .findFirst();
+        Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + Arrays.toString(names));
+        return remediationOptionsOptional.get();
+    }
+
+    Optional<RemediationOption> getOptionalRemediationOption(String name) {
+        if (idxResponse == null || idxResponse.remediation() == null) {
+            return Optional.empty();
+        }
+        return Arrays.stream(idxResponse.remediation().remediationOptions())
+                .filter(x -> name.equals(x.getName()))
+                .findFirst();
+    }
+
+    boolean containsRemediationOption(String name) {
+        return getOptionalRemediationOption(name).isPresent();
+    }
+
     AuthenticationTransaction proceed(Factory factory) throws ProcessingException {
         IDXResponse idxResponse = factory.create();
-        if (idxResponse.remediation() != null) {
-            Util.printRemediationOptions(idxResponse.remediation().remediationOptions());
-        }
+        Util.printRemediationOptions(idxResponse);
         return new AuthenticationTransaction(client, clientContext, idxResponse);
     }
 
     AuthenticationResponse asAuthenticationResponse() throws ProcessingException {
+        return asAuthenticationResponse(AuthenticationStatus.UNKNOWN);
+    }
+
+    AuthenticationResponse asAuthenticationResponse(AuthenticationStatus defaultStatus) throws ProcessingException {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
         authenticationResponse.setIdxClientContext(clientContext);
 
-        if (idxResponse.getMessages() != null) {
-            Util.copyErrorMessages(idxResponse, authenticationResponse);
-        }
+        copyErrorMessages(idxResponse, authenticationResponse);
 
         if (idxResponse.isLoginSuccessful()) {
             // login successful
@@ -113,17 +137,40 @@ final class AuthenticationTransaction {
             TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, clientContext);
             authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
             authenticationResponse.setTokenResponse(tokenResponse);
+        } else if (isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR)) {
+            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
+        } else if (containsRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE)) {
+            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
         } else {
-            // verify if password expired
-            if (Util.isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR, idxResponse)) {
-                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
-            } else if (containsRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE)) {
-                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
-            } else {
-                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.UNKNOWN);
-            }
+            authenticationResponse.setAuthenticationStatus(defaultStatus);
         }
 
         return authenticationResponse;
+    }
+
+    boolean isRemediationRequireCredentials(String name) {
+        if (idxResponse.remediation() == null) {
+            return false;
+        }
+
+        Optional<RemediationOption> remediationOptionOptional = getOptionalRemediationOption(name);
+        if (!remediationOptionOptional.isPresent()) {
+            return false;
+        }
+        FormValue[] formValues = remediationOptionOptional.get().form();
+
+        Optional<FormValue> credentialsFormValueOptional = Arrays.stream(formValues)
+                .filter(x -> "credentials".equals(x.getName()))
+                .findFirst();
+
+        return credentialsFormValueOptional.isPresent();
+    }
+
+    private static void copyErrorMessages(IDXResponse idxResponse, AuthenticationResponse authenticationResponse) {
+        if (idxResponse.getMessages() == null) {
+            return;
+        }
+        Arrays.stream(idxResponse.getMessages().getValue())
+                .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
     }
 }
