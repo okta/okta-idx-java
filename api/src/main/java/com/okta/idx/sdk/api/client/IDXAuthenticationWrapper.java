@@ -659,6 +659,7 @@ public class IDXAuthenticationWrapper {
             return introspectTransaction.proceed(() ->
                     remediationOption.proceed(client, challengeAuthenticatorRequest)
             ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
@@ -741,6 +742,7 @@ public class IDXAuthenticationWrapper {
             return introspectTransaction.proceed(() ->
                     remediationOption.proceed(client, skipAuthenticatorEnrollmentRequest)
             ).asAuthenticationResponse(AuthenticationStatus.SKIP_COMPLETE);
+
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
