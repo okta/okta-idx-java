@@ -17,6 +17,7 @@ package com.okta.spring.example.controllers;
 
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
+import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
@@ -129,9 +130,16 @@ public class LoginController {
         switch (authenticationResponse.getAuthenticationStatus()) {
             case AWAITING_AUTHENTICATOR_SELECTION:
                 mav = new ModelAndView("forgot-password-authenticators");
-                List<AuthenticatorUIOption> uiOptions =
-                        idxAuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(
-                                authenticationResponse.getIdxClientContext());
+                List<AuthenticatorUIOption> uiOptions;
+                try {
+                    uiOptions = idxAuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(
+                            authenticationResponse.getIdxClientContext());
+                } catch (ProcessingException e) {
+                    idxAuthenticationWrapper.handleProcessingException(e, authenticationResponse);
+                    mav = new ModelAndView("login");
+                    mav.addObject("errors", authenticationResponse.getErrors());
+                    return mav;
+                }
                 mav.addObject("authenticatorUIOptionList", uiOptions);
                 return mav;
 

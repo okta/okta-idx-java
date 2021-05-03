@@ -369,11 +369,10 @@ public class IDXAuthenticationWrapper {
      * @return the list of AuthenticatorUIOptions
      */
     public List<AuthenticatorUIOption> populateForgotPasswordAuthenticatorUIOptions(
-            IDXClientContext idxClientContext) {
+            IDXClientContext idxClientContext) throws ProcessingException {
 
         List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
 
-        try {
             IDXResponse introspectResponse = client.introspect(idxClientContext);
 
             RemediationOption[] remediationOptions = introspectResponse.remediation().remediationOptions();
@@ -404,9 +403,6 @@ public class IDXAuthenticationWrapper {
                 }
                 authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
             }
-        } catch (ProcessingException e) {
-            logger.error("Error occurred:", e);
-        }
 
         return authenticatorUIOptionList;
     }
@@ -985,8 +981,8 @@ public class IDXAuthenticationWrapper {
      * @param e the {@link ProcessingException} reference
      * @param authenticationResponse the {@link AuthenticationResponse} reference
      */
-    private void handleProcessingException(ProcessingException e,
-                                           AuthenticationResponse authenticationResponse) {
+    public void handleProcessingException(ProcessingException e,
+                                          AuthenticationResponse authenticationResponse) {
         logger.error("Exception occurred", e);
         ErrorResponse errorResponse = e.getErrorResponse();
         if (errorResponse != null) {
