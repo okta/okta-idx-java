@@ -323,34 +323,33 @@ public class IDXAuthenticationWrapper {
 
         List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
 
-        try {
-            AuthenticationTransaction introspectTransaction = 
-              AuthenticationTransaction.introspect(client, idxClientContext);
+        AuthenticationTransaction introspectTransaction =
+                AuthenticationTransaction.introspect(client, idxClientContext);
 
-            Recover recover = introspectTransaction.getResponse().getCurrentAuthenticatorEnrollment().getValue().getRecover();
-          
-            AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
-                // recover password
-                RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-                return recover .proceed(client, recoverRequest);
-            });
+        Recover recover = introspectTransaction.getResponse().getCurrentAuthenticatorEnrollment().getValue().getRecover();
 
-            RemediationOption remediationOption =
-                    recoverTransaction.getRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+        AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
+            // recover password
+            RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                    .withStateHandle(introspectTransaction.getStateHandle())
+                    .build();
+            return recover.proceed(client, recoverRequest);
+        });
 
-            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+        RemediationOption remediationOption =
+                recoverTransaction.getRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
 
-            for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
-                if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
-                    logger.info("Skipping unsupported authenticator - {}", entry.getKey());
-                    continue;
-                }
-                authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
+        Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+        for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
+            if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
+                    !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
+                    !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
+                logger.info("Skipping unsupported authenticator - {}", entry.getKey());
+                continue;
             }
+            authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
+        }
 
         return authenticatorUIOptionList;
     }
