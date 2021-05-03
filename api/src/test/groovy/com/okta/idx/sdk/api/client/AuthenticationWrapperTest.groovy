@@ -16,15 +16,9 @@
 
 package com.okta.idx.sdk.api.client
 
-import com.okta.commons.http.DefaultResponse
-import com.okta.commons.http.MediaType
-import com.okta.commons.http.Request
-import com.okta.commons.http.RequestExecutor
-import com.okta.commons.http.Response
-import com.okta.idx.sdk.api.client.BaseIDXClient
-import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper
+import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
-import com.okta.idx.sdk.api.model.AuthenticatorUIOption
+import com.okta.idx.sdk.api.model.AuthenticatorUIOptions
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.response.AuthenticationResponse
@@ -93,10 +87,11 @@ class AuthenticationWrapperTest {
 
         setStubbedEnrollAuthenticatorResponse(requestExecutor)
 
-        List<AuthenticatorUIOption> authenticatorUIOptionList = idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext)
-        assertThat(authenticatorUIOptionList, notNullValue())
-        assertThat(authenticatorUIOptionList, hasSize(1))
-        assertThat(authenticatorUIOptionList.get(0).type, equalTo("security_question"))
+        AuthenticatorUIOptions authenticatorUIOptions =
+                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext)
+        assertThat(authenticatorUIOptions.options, notNullValue())
+        assertThat(authenticatorUIOptions.options, hasSize(1))
+        assertThat(authenticatorUIOptions.options.get(0).type, equalTo("security_question"))
     }
 
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {
