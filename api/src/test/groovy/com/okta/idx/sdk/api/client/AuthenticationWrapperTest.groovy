@@ -23,6 +23,7 @@ import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.response.AuthenticationResponse
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse
+import org.testng.annotations.Ignore
 import org.testng.annotations.Test
 
 import java.lang.reflect.Field
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when
 
 class AuthenticationWrapperTest {
 
+    @Ignore
     @Test
     void registerTest() {
 
