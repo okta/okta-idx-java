@@ -148,6 +148,19 @@ final class AuthenticationTransaction {
         return authenticationResponse;
     }
 
+    AuthenticationResponse asAuthenticationResponseExpecting(AuthenticationStatus status) {
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        authenticationResponse.setIdxClientContext(clientContext);
+
+        copyErrorMessages(idxResponse, authenticationResponse);
+
+        if (authenticationResponse.getErrors().isEmpty()) {
+            authenticationResponse.setAuthenticationStatus(status);
+        }
+
+        return authenticationResponse;
+    }
+
     boolean isRemediationRequireCredentials(String name) {
         if (idxResponse.remediation() == null) {
             return false;
