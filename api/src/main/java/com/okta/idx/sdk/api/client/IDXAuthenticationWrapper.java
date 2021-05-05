@@ -348,7 +348,8 @@ public class IDXAuthenticationWrapper {
             for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
                 if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
                         !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
+                        !entry.getKey().equals(AuthenticatorType.SMS.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.VOICE.getValue())) {
                     logger.info("Skipping unsupported authenticator - {}", entry.getKey());
                     continue;
                 }
@@ -793,6 +794,14 @@ public class IDXAuthenticationWrapper {
             Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
 
             for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
+                if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.SMS.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.VOICE.getValue())
+                ) {
+                    logger.info("Skipping unsupported authenticator - {}", entry.getKey());
+                    continue;
+                }
                 authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
             }
         } catch (ProcessingException e) {
