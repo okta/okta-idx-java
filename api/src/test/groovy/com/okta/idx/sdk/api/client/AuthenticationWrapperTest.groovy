@@ -35,6 +35,8 @@ import static org.mockito.Mockito.when
 
 class AuthenticationWrapperTest {
 
+    final MediaType mediaTypeAppIonJson = MediaType.valueOf("application/ion+json; okta-version=1.0.0")
+
     @Test
     void registerTest() {
 
@@ -94,12 +96,31 @@ class AuthenticationWrapperTest {
         assertThat(authenticatorUIOptions.options.get(0).type, equalTo("security_question"))
     }
 
+    @Test
+    void recoverPasswordTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setStubbedInteractResponse(requestExecutor)
+        setStubbedRecoverResponse(requestExecutor)
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.recoverPassword("some_random_name")
+        println authenticationResponse
+
+        // stateHandle = 02tYS1NHhCPLcOpT3GByBBRHmGU63p7LGRXJx5cOvp
+        //url = https://foo.oktapreview.com/idp/idx/identify
+    }
+
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {
         when(requestExecutor.executeRequest(
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("interact")
                 }) as Request)
-        ).thenReturn(getStubbedInteractResponse())
+        ).thenReturn(getResponseByResourceFileName("interact-response", MediaType.APPLICATION_JSON))
     }
 
     void setStubbedIntrospectResponse(RequestExecutor requestExecutor) {
@@ -107,7 +128,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getStubbedIntrospectResponse())
+        )).thenReturn(getResponseByResourceFileName("introspect-response", mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollProfileResponse(RequestExecutor requestExecutor) {
@@ -115,7 +136,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("enroll")
                 }) as Request
-        )).thenReturn(getStubbedEnrollProfileResponse())
+        )).thenReturn(getResponseByResourceFileName("enroll-user-response", mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollProfileResponseAfterEnroll(RequestExecutor requestExecutor) {
@@ -123,7 +144,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getStubbedEnrollProfileResponse())
+        )).thenReturn(getResponseByResourceFileName("enroll-user-response", mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollNewResponse(RequestExecutor requestExecutor) {
@@ -131,7 +152,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("enroll/new")
                 }) as Request
-        )).thenReturn(getStubbedEnrollNewResponse())
+        )).thenReturn(getResponseByResourceFileName("enroll-profile-response", mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollAuthenticatorResponse(RequestExecutor requestExecutor) {
@@ -139,49 +160,24 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getStubbedEnrollAuthenticatorResponse())
+        )).thenReturn(getResponseByResourceFileName("enroll-response", mediaTypeAppIonJson))
     }
 
-    Response getStubbedInteractResponse() {
+    void setStubbedRecoverResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("recover-response", mediaTypeAppIonJson))
+    }
+
+    Response getResponseByResourceFileName(String responseName, MediaType mediaType) {
         return new DefaultResponse(
                 200,
-                MediaType.valueOf("application/json"),
-                new FileInputStream(getClass().getClassLoader().getResource("interact-response.json").getFile()),
+                mediaType,
+                new FileInputStream(getClass().getClassLoader().getResource(responseName + ".json").getFile()),
                 -1)
     }
-
-    Response getStubbedIntrospectResponse() {
-        return new DefaultResponse(
-                200,
-                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
-                new FileInputStream(getClass().getClassLoader().getResource("introspect-response.json").getFile()),
-                -1)
-    }
-
-    Response getStubbedEnrollProfileResponse() {
-        return new DefaultResponse(
-                200,
-                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
-                new FileInputStream(getClass().getClassLoader().getResource("enroll-user-response.json").getFile()),
-                -1)
-    }
-
-    Response getStubbedEnrollNewResponse() {
-        return new DefaultResponse(
-                200,
-                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
-                new FileInputStream(getClass().getClassLoader().getResource("enroll-profile-response.json").getFile()),
-                -1)
-    }
-
-    Response getStubbedEnrollAuthenticatorResponse() {
-        return new DefaultResponse(
-                200,
-                MediaType.valueOf("application/ion+json; okta-version=1.0.0"),
-                new FileInputStream(getClass().getClassLoader().getResource("enroll-response.json").getFile()),
-                -1)
-    }
-
 
     UserProfile getUserProfile() {
         UserProfile userProfile = new UserProfile()
