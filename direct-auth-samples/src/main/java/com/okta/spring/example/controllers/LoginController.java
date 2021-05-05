@@ -175,12 +175,7 @@ public class LoginController {
             return mav;
         }
 
-        if (authenticatorType.equals(AuthenticatorType.EMAIL.toString())) {
-            return new ModelAndView("verify");
-        } else {
-            logger.error("Unsupported authenticator {}", authenticatorType);
-            return new ModelAndView("forgot-password-authenticators");
-        }
+        return new ModelAndView("verify");
     }
 
     /**

@@ -400,19 +400,25 @@ public class IDXAuthenticationWrapper {
 
             authenticator.setId(authenticatorOptions.get(authenticatorType));
 
+            String enrollmentId = authenticatorOptions.get("enrollmentId");
+            if (enrollmentId != null && (authenticatorType.equals("sms") || authenticatorType.equals("voice"))) {
+                authenticator.setEnrollmentId(enrollmentId);
+                authenticator.setMethodType(authenticatorType);
+            }
+
             ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
                     .withStateHandle(introspectTransaction.getStateHandle())
                     .withAuthenticator(authenticator)
                     .build();
 
-            AuthenticationTransaction selectAuthenticatorResponse = recoverTransaction.proceed(() ->
+            AuthenticationTransaction selectAuthenticatorTransaction = recoverTransaction.proceed(() ->
                     remediationOption.proceed(client, selectAuthenticatorRequest)
             );
 
             // Validate we're in the right state and have the correct authenticator.
-            selectAuthenticatorResponse.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR);
+            selectAuthenticatorTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR);
 
-            return selectAuthenticatorResponse.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
+            return selectAuthenticatorTransaction.asAuthenticationResponseExpecting(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
@@ -527,6 +533,11 @@ public class IDXAuthenticationWrapper {
                 Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
                 Authenticator authenticator = new Authenticator();
                 authenticator.setId(authenticatorOptions.get(authenticatorType));
+                String enrollmentId = authenticatorOptions.get("enrollmentId");
+                if (enrollmentId != null && (authenticatorType.equals("sms") || authenticatorType.equals("voice"))) {
+                    authenticator.setEnrollmentId(enrollmentId);
+                    authenticator.setMethodType(authenticatorType);
+                }
                 ChallengeRequest request = ChallengeRequestBuilder.builder()
                         .withStateHandle(introspectTransaction.getStateHandle())
                         .withAuthenticator(authenticator)
