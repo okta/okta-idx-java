@@ -18,6 +18,7 @@ package com.okta.idx.sdk.api.client
 
 import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
+import com.okta.idx.sdk.api.model.AuthenticationStatus
 import com.okta.idx.sdk.api.model.AuthenticatorUIOptions
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
@@ -106,13 +107,27 @@ class AuthenticationWrapperTest {
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
         setStubbedInteractResponse(requestExecutor)
-        setStubbedRecoverResponse(requestExecutor)
+        setStubbedIntrospectResponse(requestExecutor)
+        setStubbedRecoverTransactionResponse(requestExecutor)
+        setStubbedIdentifyResponse(requestExecutor)
 
-        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.recoverPassword("some_random_name")
-        println authenticationResponse
+        String userEmail = "joe.coder" + (new Random()).nextInt(1000) + "@example.com"
 
-        // stateHandle = 02tYS1NHhCPLcOpT3GByBBRHmGU63p7LGRXJx5cOvp
-        //url = https://foo.oktapreview.com/idp/idx/identify
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.recoverPassword(userEmail)
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                equalTo(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION))
+
+        setChallengeResponse(requestExecutor)
+        setAnswerChallengeResponse(requestExecutor)
+
+        AuthenticatorUIOptions authenticatorUIOptions =
+                idxAuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(
+                        authenticationResponse.getIdxClientContext())
+        assertThat(authenticatorUIOptions, notNullValue())
+        assertThat(authenticatorUIOptions.options, notNullValue())
+        assertThat(authenticatorUIOptions.options, hasSize(1))
+        assertThat(authenticatorUIOptions.options.get(0).type, equalTo("email"))
     }
 
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {
@@ -163,12 +178,36 @@ class AuthenticationWrapperTest {
         )).thenReturn(getResponseByResourceFileName("enroll-response", mediaTypeAppIonJson))
     }
 
-    void setStubbedRecoverResponse(RequestExecutor requestExecutor) {
+    void setStubbedRecoverTransactionResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("recover-transaction-response", mediaTypeAppIonJson))
+    }
+
+    void setStubbedIdentifyResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("identify-response", mediaTypeAppIonJson))
+    }
+
+    void setChallengeResponse(RequestExecutor requestExecutor) {
         when(requestExecutor.executeRequest(
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("recover-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("challenge-response", mediaTypeAppIonJson))
+    }
+
+    void setAnswerChallengeResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("answer-challenge-response", mediaTypeAppIonJson))
     }
 
     Response getResponseByResourceFileName(String responseName, MediaType mediaType) {
