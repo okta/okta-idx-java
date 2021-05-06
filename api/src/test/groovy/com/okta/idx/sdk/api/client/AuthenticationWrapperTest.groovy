@@ -24,6 +24,7 @@ import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.response.AuthenticationResponse
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse
+import org.testng.annotations.Ignore
 import org.testng.annotations.Test
 
 import java.lang.reflect.Field
@@ -38,6 +39,7 @@ class AuthenticationWrapperTest {
 
     final MediaType mediaTypeAppIonJson = MediaType.valueOf("application/ion+json; okta-version=1.0.0")
 
+    @Ignore
     @Test
     void registerTest() {
 

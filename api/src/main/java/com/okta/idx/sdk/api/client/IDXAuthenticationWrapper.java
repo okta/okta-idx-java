@@ -348,7 +348,8 @@ public class IDXAuthenticationWrapper {
             for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
                 if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
                         !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
+                        !entry.getKey().equals(AuthenticatorType.SMS.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.VOICE.getValue())) {
                     logger.info("Skipping unsupported authenticator - {}", entry.getKey());
                     continue;
                 }
@@ -400,19 +401,25 @@ public class IDXAuthenticationWrapper {
 
             authenticator.setId(authenticatorOptions.get(authenticatorType));
 
+            String enrollmentId = authenticatorOptions.get("enrollmentId");
+            if (enrollmentId != null && (authenticatorType.equals("sms") || authenticatorType.equals("voice"))) {
+                authenticator.setEnrollmentId(enrollmentId);
+                authenticator.setMethodType(authenticatorType);
+            }
+
             ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
                     .withStateHandle(introspectTransaction.getStateHandle())
                     .withAuthenticator(authenticator)
                     .build();
 
-            AuthenticationTransaction selectAuthenticatorResponse = recoverTransaction.proceed(() ->
+            AuthenticationTransaction selectAuthenticatorTransaction = recoverTransaction.proceed(() ->
                     remediationOption.proceed(client, selectAuthenticatorRequest)
             );
 
             // Validate we're in the right state and have the correct authenticator.
-            selectAuthenticatorResponse.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR);
+            selectAuthenticatorTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR);
 
-            return selectAuthenticatorResponse.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
+            return selectAuthenticatorTransaction.asAuthenticationResponseExpecting(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
         } catch (IllegalArgumentException e) {
@@ -527,6 +534,11 @@ public class IDXAuthenticationWrapper {
                 Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
                 Authenticator authenticator = new Authenticator();
                 authenticator.setId(authenticatorOptions.get(authenticatorType));
+                String enrollmentId = authenticatorOptions.get("enrollmentId");
+                if (enrollmentId != null && (authenticatorType.equals("sms") || authenticatorType.equals("voice"))) {
+                    authenticator.setEnrollmentId(enrollmentId);
+                    authenticator.setMethodType(authenticatorType);
+                }
                 ChallengeRequest request = ChallengeRequestBuilder.builder()
                         .withStateHandle(introspectTransaction.getStateHandle())
                         .withAuthenticator(authenticator)
@@ -782,6 +794,14 @@ public class IDXAuthenticationWrapper {
             Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
 
             for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
+                if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.SMS.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.VOICE.getValue())
+                ) {
+                    logger.info("Skipping unsupported authenticator - {}", entry.getKey());
+                    continue;
+                }
                 authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
             }
         } catch (ProcessingException e) {
