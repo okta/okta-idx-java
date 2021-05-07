@@ -1,0 +1,154 @@
+{
+  "stateHandle": "025r9Yn758Z-zwhMGDm1saTaW1pVRy4t9oTxM7dLYE",
+  "version": "1.0.0",
+  "expiresAt": "2020-10-29T21:17:28.000Z",
+  "intent": "LOGIN",
+  "remediation": {
+    "type": "array",
+    "value": [
+      {
+        "rel": [
+          "create-form"
+        ],
+        "name": "challenge-authenticator",
+        "relatesTo": [
+          "$.currentAuthenticatorEnrollment"
+        ],
+        "href": "https://foo.oktapreview.com/idp/idx/challenge/answer",
+        "method": "POST",
+        "value": [
+          {
+            "name": "credentials",
+            "type": "object",
+            "form": {
+              "value": [
+                {
+                  "name": "passcode",
+                  "label": "Enter code",
+                  "messages": {
+                    "type": "array",
+                    "value": [
+                      {
+                        "message": "Invalid code. Try again.",
+                        "i18n": {
+                          "key": "api.authn.error.PASSCODE_INVALID",
+                          "params": []
+                        },
+                        "class": "ERROR"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "stateHandle",
+            "required": true,
+            "value": "025r9Yn758Z-zwhMGDm1saTaW1pVRy4t9oTxM7dLYE",
+            "visible": false,
+            "mutable": false
+          }
+        ],
+        "accepts": "application/ion+json; okta-version=1.0.0"
+      }
+    ]
+  },
+  "currentAuthenticatorEnrollment": {
+    "type": "object",
+    "value": {
+      "recover": {
+        "rel": [
+          "create-form"
+        ],
+        "name": "recover",
+        "href": "https://foo.oktapreview.com/idp/idx/recover",
+        "method": "POST",
+        "value": [
+          {
+            "name": "stateHandle",
+            "required": true,
+            "value": "025r9Yn758Z-zwhMGDm1saTaW1pVRy4t9oTxM7dLYE",
+            "visible": false,
+            "mutable": false
+          }
+        ],
+        "accepts": "application/ion+json; okta-version=1.0.0"
+      },
+      "type": "password",
+      "id": "laekusi77LNcWg2rX1d5",
+      "displayName": "Password",
+      "methods": [
+        {
+          "type": "password"
+        }
+      ]
+    }
+  },
+  "authenticators": {
+    "type": "array",
+    "value": [
+      {
+        "type": "email",
+        "id": "aut2ihzk1gHl7ynhd1d6",
+        "displayName": "Email",
+        "methods": [
+          {
+            "type": "email"
+          }
+        ]
+      }
+    ]
+  },
+  "authenticatorEnrollments": {
+    "type": "array",
+    "value": [
+      {
+        "profile": {
+          "email": "*****"
+        },
+        "type": "email",
+        "id": "eae3iyi3yzHZN4Cji1d6",
+        "displayName": "Email",
+        "methods": [
+          {
+            "type": "email"
+          }
+        ]
+      }
+    ]
+  },
+  "user": {
+    "type": "object",
+    "value": {
+      "id": "00u3iyi3x06D2aWUR1d6"
+    }
+  },
+  "cancel": {
+    "rel": [
+      "create-form"
+    ],
+    "name": "cancel",
+    "href": "https://foo.oktapreview.com/idp/idx/cancel",
+    "method": "POST",
+    "value": [
+      {
+        "name": "stateHandle",
+        "required": true,
+        "value": "025r9Yn758Z-zwhMGDm1saTaW1pVRy4t9oTxM7dLYE",
+        "visible": false,
+        "mutable": false
+      }
+    ],
+    "accepts": "application/ion+json; okta-version=1.0.0"
+  },
+  "app": {
+    "type": "object",
+    "value": {
+      "name": "okta_enduser",
+      "label": "okta_enduser",
+      "id": "DEFAULT_APP"
+    }
+  }
+}

@@ -67,6 +67,11 @@ public class FormValue {
      */
     public boolean mutable;
 
+    /**
+     * Error messages could appear here
+     */
+    public Messages messages;
+
     public String relatesTo() {
         return Arrays.stream(options).findFirst().get().getRelatesTo();
     }
