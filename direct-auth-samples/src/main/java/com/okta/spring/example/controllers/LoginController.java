@@ -16,12 +16,12 @@
 package com.okta.spring.example.controllers;
 
 import com.okta.commons.lang.Strings;
+import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
-import com.okta.idx.sdk.api.model.AuthenticatorUIOptions;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
@@ -36,6 +36,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
@@ -82,10 +85,7 @@ public class LoginController {
 
         if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION) {
             ModelAndView mav = new ModelAndView("select-authenticators");
-            // TODO: Update once enrollment types are done.
-//            AuthenticatorUIOptions authenticatorUIOptions =
-//                    idxAuthenticationWrapper.populateAuthenticatorUIOptions(authenticationResponse.getIdxClientContext());
-//            mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
+            mav.addObject("factorList", factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
             return mav;
         }
 
@@ -127,16 +127,7 @@ public class LoginController {
         switch (authenticationResponse.getAuthenticationStatus()) {
             case AWAITING_AUTHENTICATOR_SELECTION:
                 mav = new ModelAndView("forgot-password-authenticators");
-                AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
-                        // TODO: Update once enrollment types are done.
-//                        idxAuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(
-//                            authenticationResponse.getIdxClientContext());
-                if (authenticatorUIOptions.hasErrors()) {
-                    mav = new ModelAndView("login");
-                    mav.addObject("errors", authenticatorUIOptions.getErrors());
-                    return mav;
-                }
-                mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
+                mav.addObject("factorList", factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
                 return mav;
 
             case AWAITING_USER_EMAIL_ACTIVATION:
@@ -165,7 +156,7 @@ public class LoginController {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.selectForgotPasswordAuthenticator(proceedContext, authenticatorType);
+                idxAuthenticationWrapper.selectAuthenticator(proceedContext, getFactorFromMethod(session, authenticatorType));
 
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
@@ -190,7 +181,7 @@ public class LoginController {
             final HttpSession session) {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticatorType);
+                idxAuthenticationWrapper.selectAuthenticator(proceedContext, getFactorFromMethod(session, authenticatorType));
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getErrors().size() > 0) {
@@ -353,11 +344,7 @@ public class LoginController {
             return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
         }
 
-        // TODO: Update once enrollment types are done.
-        AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
-//                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
-
-        mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
+        mav.addObject("factorList", factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
 
         return mav;
     }
@@ -377,7 +364,7 @@ public class LoginController {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authenticatorType);
+                idxAuthenticationWrapper.enrollAuthenticator(proceedContext, getFactorFromMethod(session, authenticatorType));
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getErrors().size() > 0) {
@@ -453,12 +440,7 @@ public class LoginController {
         }
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
-
-        // TODO: Update once enrollment types are done.
-//        AuthenticatorUIOptions authenticatorUIOptions =
-//                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
-//
-//        mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
+        mav.addObject("factorList", factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
         return mav;
     }
 
@@ -510,18 +492,15 @@ public class LoginController {
             }
         }
 
-        // TODO: Update once enrollment types are done.
-//        AuthenticatorUIOptions authenticatorUIOptions =
-//                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
-//
-//        if (authenticatorUIOptions.getOptions().size() == 0) {
-//            ModelAndView mav = new ModelAndView("login");
-//            mav.addObject("info", "Success");
-//            return mav;
-//        }
+        List<String> factorList = factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators());
+        if (factorList.size() == 0) {
+            ModelAndView mav = new ModelAndView("login");
+            mav.addObject("info", "Success");
+            return mav;
+        }
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
-//        mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
+        mav.addObject("factorList", factorList);
         return mav;
     }
 
@@ -577,7 +556,7 @@ public class LoginController {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.submitPhoneAuthenticator(proceedContext, phone, mode);
+                idxAuthenticationWrapper.submitPhoneAuthenticator(proceedContext, phone, getFactorFromMethod(session, mode));
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         ModelAndView mav = new ModelAndView("verify-phone-authenticator-enrollment");
@@ -625,12 +604,30 @@ public class LoginController {
         }
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
-
-        // TODO: Update once enrollment types are done.
-//        AuthenticatorUIOptions authenticatorUIOptions =
-//                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
-//
-//        mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
+        mav.addObject("factorList", factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
         return mav;
+    }
+
+    private List<String> factorMethodsFromAuthenticators(HttpSession session, List<Authenticator> authenticators) {
+        List<String> factorMethods = new ArrayList<>();
+        for (Authenticator authenticator : authenticators) {
+            for (Authenticator.Factor factor : authenticator.getFactors()) {
+                factorMethods.add(factor.getMethod());
+            }
+        }
+        session.setAttribute("authenticators", authenticators);
+        return factorMethods;
+    }
+
+    private Authenticator.Factor getFactorFromMethod(HttpSession session, String method) {
+        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
+        for (Authenticator authenticator : authenticators) {
+            for (Authenticator.Factor factor : authenticator.getFactors()) {
+                if (factor.getMethod().equals(method)) {
+                    return factor;
+                }
+            }
+        }
+        throw new IllegalStateException("Factor not found: " + method);
     }
 }

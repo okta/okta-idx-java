@@ -303,104 +303,6 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Get the authenticator options for the forgot password remediation.
-     *
-     * @param idxClientContext the idxClientContext
-     * @return the list of AuthenticatorUIOptions
-     */
-    public AuthenticatorUIOptions populateForgotPasswordAuthenticatorUIOptions(
-            IDXClientContext idxClientContext) {
-
-        AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
-        List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
-
-        try {
-            AuthenticationTransaction introspectTransaction =
-                    AuthenticationTransaction.introspect(client, idxClientContext);
-
-            Recover recover = introspectTransaction.getResponse()
-                    .getCurrentAuthenticatorEnrollment().getValue().getRecover();
-
-            AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
-                // recover password
-                RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-                return recover.proceed(client, recoverRequest);
-            });
-
-            RemediationOption remediationOption =
-                    recoverTransaction.getRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
-
-            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
-
-            for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
-                if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.SMS.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.VOICE.getValue())) {
-                    logger.info("Skipping unsupported authenticator - {}", entry.getKey());
-                    continue;
-                }
-                authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
-            }
-        } catch (ProcessingException e) {
-            logger.error("Error occurred:", e);
-            authenticatorUIOptions.setErrors(fillProcessingErrors(e));
-        }
-
-        authenticatorUIOptions.setOptions(authenticatorUIOptionList);
-        return authenticatorUIOptions;
-    }
-
-    /**
-     * Select the next authenticator type to remediate.
-     *
-     * @param proceedContext the ProceedContext
-     * @param authenticatorType the authenticator type
-     * @return the Authentication response
-     */
-    public AuthenticationResponse selectForgotPasswordAuthenticator(ProceedContext proceedContext,
-                                                                    String authenticatorType) {
-
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
-        try {
-            Authenticator authenticator = new Authenticator();
-
-            // TODO: Update once enrollment types are done.
-//            authenticator.setId(authenticatorOptions.get(authenticatorType));
-//
-//            String enrollmentId = authenticatorOptions.get("enrollmentId");
-//            if (enrollmentId != null && (authenticatorType.equals("sms") || authenticatorType.equals("voice"))) {
-//                authenticator.setEnrollmentId(enrollmentId);
-//                authenticator.setMethodType(authenticatorType);
-//            }
-
-            ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
-                    .withStateHandle(proceedContext.getStateHandle())
-                    .withAuthenticator(authenticator)
-                    .build();
-
-            AuthenticationTransaction selectAuthenticatorTransaction = AuthenticationTransaction.proceed(client, proceedContext, () ->
-                    client.challenge(selectAuthenticatorRequest, proceedContext.getHref())
-            );
-
-            // Validate we're in the right state and have the correct authenticator.
-            selectAuthenticatorTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR);
-
-            return selectAuthenticatorTransaction.asAuthenticationResponseExpecting(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
-        } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
-        } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
-        }
-
-        return authenticationResponse;
-    }
-
-    /**
      * Populate UI form values for signing up a new user.
      *
      * @return the new user registration response
@@ -485,23 +387,22 @@ public class IDXAuthenticationWrapper {
      * Select authenticator of the supplied type.
      *
      * @param proceedContext      the ProceedContext
-     * @param authenticatorType     the authenticator type
+     * @param factor     the factor
      * @return the Authentication response
      */
-    public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext, String authenticatorType) {
+    public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext, com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
-                // TODO: Update once enrollment types are done.
-//                Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
                 Authenticator authenticator = new Authenticator();
-//                authenticator.setId(authenticatorOptions.get(authenticatorType));
-//                String enrollmentId = authenticatorOptions.get("enrollmentId");
-//                if (enrollmentId != null && (authenticatorType.equals("sms") || authenticatorType.equals("voice"))) {
-//                    authenticator.setEnrollmentId(enrollmentId);
-//                    authenticator.setMethodType(authenticatorType);
-//                }
+                authenticator.setId(factor.getId());
+                String enrollmentId = factor.getEnrollmentId();
+                String factorType = factor.getMethod();
+                if (enrollmentId != null && (factorType.equals("sms") || factorType.equals("voice"))) {
+                    authenticator.setEnrollmentId(enrollmentId);
+                    authenticator.setMethodType(factorType);
+                }
                 ChallengeRequest request = ChallengeRequestBuilder.builder()
                         .withStateHandle(proceedContext.getStateHandle())
                         .withAuthenticator(authenticator)
@@ -556,32 +457,20 @@ public class IDXAuthenticationWrapper {
      * Enroll authenticator of the supplied type.
      *
      * @param proceedContext      the ProceedContext
-     * @param authenticatorType     the authenticator type
+     * @param factor     the factor
      * @return the Authentication response
      */
     public AuthenticationResponse enrollAuthenticator(ProceedContext proceedContext,
-                                                      String authenticatorType) {
+                                                      com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
-//                Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
-//                logger.info("Authenticator Options: {}", authenticatorOptions);
-
                 Authenticator authenticator = new Authenticator();
 
-                AuthenticatorType authType = AuthenticatorType.get(authenticatorType);
-
-                if (authType == null) {
-                    String errMsg = "Unsupported authenticator " + authenticatorType;
-                    logger.error(errMsg);
-                    throw new IllegalArgumentException(errMsg);
-                }
-
-                // TODO: Update once enrollment types are done.
-//                authenticator.setId(authenticatorOptions.get(authType.toString()));
-                authenticator.setMethodType(authType.toString());
+                authenticator.setId(factor.getId());
+                authenticator.setMethodType(factor.getMethod());
 
                 EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
                         .withAuthenticator(authenticator)
@@ -641,27 +530,19 @@ public class IDXAuthenticationWrapper {
      *
      * @param proceedContext    the ProceedContext
      * @param phone               the phone number
-     * @param mode                the delivery mode - sms or voice
+     * @param factor                factor
      * @return the Authentication response
      */
     public AuthenticationResponse submitPhoneAuthenticator(ProceedContext proceedContext,
                                                            String phone,
-                                                           String mode) {
+                                                           com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
         try {
-
-            // TODO: These need to be passed.
-//            AuthenticatorsValue[] authenticators = introspectTransaction.getResponse().getAuthenticators().getValue();
-//            Optional<AuthenticatorsValue> authenticatorsValueOptional = Arrays.stream(authenticators)
-//                    .filter(x -> "phone_number".equals(x.getKey()))
-//                    .findAny();
-//            AuthenticatorsValue authenticatorsValue = authenticatorsValueOptional.get();
-
             Authenticator phoneAuthenticator = new Authenticator();
-//            phoneAuthenticator.setId(authenticatorsValue.getId());
-            phoneAuthenticator.setMethodType(AuthenticatorType.get(mode).toString());
+            phoneAuthenticator.setId(factor.getId());
+            phoneAuthenticator.setMethodType(factor.getMethod());
             phoneAuthenticator.setPhoneNumber(phone);
 
             EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
@@ -709,63 +590,6 @@ public class IDXAuthenticationWrapper {
         }
 
         return authenticationResponse;
-    }
-
-    /**
-     * Helper to populate the UI options to be shown on Authenticator options page.
-     *
-     * @param idxClientContext      the IDX Client context
-     * @return the list of {@link AuthenticatorUIOption} options
-     */
-    public AuthenticatorUIOptions populateAuthenticatorUIOptions(IDXClientContext idxClientContext) {
-
-        AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
-        List<AuthenticatorUIOption> authenticatorUIOptionList = new ArrayList<>();
-
-        try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.introspect(client, idxClientContext);
-            if (introspectTransaction.getResponse().remediation() == null) {
-                return authenticatorUIOptions;
-            }
-
-            RemediationOption remediationOption = getSelectAuthenticatorRemediationOption(introspectTransaction);
-
-            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
-
-            for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
-                if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.SMS.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.VOICE.getValue())
-                ) {
-                    logger.info("Skipping unsupported authenticator - {}", entry.getKey());
-                    continue;
-                }
-                authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
-            }
-        } catch (ProcessingException e) {
-            logger.error("Error occurred:", e);
-            authenticatorUIOptions.setErrors(fillProcessingErrors(e));
-        }
-
-        authenticatorUIOptions.setOptions(authenticatorUIOptionList);
-        return authenticatorUIOptions;
-    }
-
-    private RemediationOption getSelectAuthenticatorRemediationOption(AuthenticationTransaction transaction) {
-        RemediationOption remediationOption = null;
-
-        Optional<RemediationOption> selectAuthenticatorEnrollOptional = transaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_ENROLL);
-        if (selectAuthenticatorEnrollOptional.isPresent()) {
-            remediationOption = selectAuthenticatorEnrollOptional.get();
-        }
-
-        Optional<RemediationOption> selectAuthenticatorAuthenticateOptional = transaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
-        if (selectAuthenticatorAuthenticateOptional.isPresent()) {
-            remediationOption = selectAuthenticatorAuthenticateOptional.get();
-        }
-
-        return remediationOption;
     }
 
     /**
