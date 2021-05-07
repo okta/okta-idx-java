@@ -48,23 +48,22 @@ import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
-import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
-
-import static com.okta.idx.sdk.api.client.WrapperUtil.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.okta.idx.sdk.api.client.WrapperUtil.getSelectAuthenticatorRemediationOption;
+import static com.okta.idx.sdk.api.client.WrapperUtil.handleProcessingException;
 
 /**
  * Wrapper to enable a client to interact with the backend IDX APIs.
@@ -795,9 +794,7 @@ public class IDXAuthenticationWrapper {
         Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
 
         for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
-            if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
-                    !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
-                    !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
+            if (Stream.of(AuthenticatorType.values()).noneMatch(v -> v.getValue().equals(entry.getKey()))) {
                 logger.info("Skipping unsupported authenticator - {}", entry.getKey());
                 continue;
             }
