@@ -178,6 +178,38 @@ class AuthenticationWrapperTest {
         )).thenReturn(getResponseByResourceFileName("enroll-registration-response", mediaTypeAppIonJson))
     }
 
+    void setStubbedRecoverTransactionResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("recover-transaction-response", mediaTypeAppIonJson))
+    }
+
+    void setStubbedIdentifyResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("identify-response", mediaTypeAppIonJson))
+    }
+
+    void setChallengeResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("challenge-response", mediaTypeAppIonJson))
+    }
+
+    void setAnswerChallengeResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("answer-challenge-response", mediaTypeAppIonJson))
+    }
+
     Response getResponseByResourceFileName(String responseName, MediaType mediaType) {
         return new DefaultResponse(
                 200,
