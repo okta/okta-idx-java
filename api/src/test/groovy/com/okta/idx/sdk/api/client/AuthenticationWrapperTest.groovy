@@ -22,11 +22,11 @@ import com.okta.idx.sdk.api.model.AuthenticationStatus
 import com.okta.idx.sdk.api.model.AuthenticatorUIOptions
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
+import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
 import com.okta.idx.sdk.api.response.AuthenticationResponse
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse
+import com.okta.idx.sdk.api.util.ClassUtil
 import org.testng.annotations.Test
-
-import java.lang.reflect.Field
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
@@ -98,6 +98,33 @@ class AuthenticationWrapperTest {
     }
 
     @Test
+    void verifyEmailErrorResponseTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        ClassUtil.setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setStubbedInteractResponse(requestExecutor)
+        setStubbedIntrospectResponse(requestExecutor)
+
+        AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient);
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("wrong_code");
+
+        setStubbedChallengeResponse(requestExecutor)
+        setStubbedChallengeErrorResponse(requestExecutor)
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
+                introspectTransaction.getClientContext(),
+                verifyAuthenticatorOptions
+        )
+
+        assertThat(authenticationResponse.getErrors(), hasSize(1))
+        assertThat(authenticationResponse.getErrors().get(0), equalTo("Invalid code. Try again."))
+    }
+
+    @Test
     void recoverPasswordTest() {
 
         def requestExecutor = mock(RequestExecutor)
@@ -135,7 +162,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("interact")
                 }) as Request)
-        ).thenReturn(getResponseByResourceFileName("interact-response", MediaType.APPLICATION_JSON))
+        ).thenReturn(getResponseByResourceFileName("interact-response", 200, MediaType.APPLICATION_JSON))
     }
 
     void setStubbedIntrospectResponse(RequestExecutor requestExecutor) {
@@ -143,7 +170,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("introspect-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("introspect-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollProfileResponse(RequestExecutor requestExecutor) {
@@ -151,7 +178,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("enroll")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-user-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("enroll-user-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollProfileResponseAfterEnroll(RequestExecutor requestExecutor) {
@@ -159,7 +186,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-user-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("enroll-user-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollNewResponse(RequestExecutor requestExecutor) {
@@ -167,7 +194,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("enroll/new")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-profile-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("enroll-profile-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollAuthenticatorResponse(RequestExecutor requestExecutor) {
@@ -175,7 +202,23 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-registration-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("enroll-registration-response", 200, mediaTypeAppIonJson))
+    }
+
+    void setStubbedChallengeResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("challenge-response", 200, mediaTypeAppIonJson))
+    }
+
+    void setStubbedChallengeErrorResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("challenge/answer")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("challenge-error-response", 401, mediaTypeAppIonJson))
     }
 
     void setStubbedRecoverTransactionResponse(RequestExecutor requestExecutor) {
@@ -210,9 +253,9 @@ class AuthenticationWrapperTest {
         )).thenReturn(getResponseByResourceFileName("answer-challenge-response", mediaTypeAppIonJson))
     }
 
-    Response getResponseByResourceFileName(String responseName, MediaType mediaType) {
+    Response getResponseByResourceFileName(String responseName, Integer httpStatus, MediaType mediaType) {
         return new DefaultResponse(
-                200,
+                httpStatus,
                 mediaType,
                 new FileInputStream(getClass().getClassLoader().getResource(responseName + ".json").getFile()),
                 -1)

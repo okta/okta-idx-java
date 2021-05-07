@@ -35,7 +35,9 @@ import com.okta.commons.lang.Classes;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.config.ClientConfiguration;
 import com.okta.idx.sdk.api.exception.ProcessingException;
+import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
+import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.CancelRequest;
 import com.okta.idx.sdk.api.request.CancelRequestBuilder;
@@ -50,6 +52,7 @@ import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
+import com.okta.idx.sdk.api.util.ClassUtil;
 import com.okta.idx.sdk.api.util.PkceUtil;
 
 import java.io.ByteArrayInputStream;
@@ -502,9 +505,37 @@ final class BaseIDXClient implements IDXClient {
                 response.getHeaders().getContentType().toString().contains("application/ion+json")) {
             errorResponseJson = objectMapper.readTree(response.getBody());
             ErrorResponse errorResponseDetails = objectMapper.convertValue(errorResponseJson, ErrorResponse.class);
+            if (errorResponseDetails.getError() == null && errorResponseDetails.getMessages() == null) {
+                getMessagesFromRemediationOptions(errorResponseDetails, errorResponseJson);
+            }
             throw new ProcessingException(httpStatus, errorMsg, errorResponseDetails);
         } else {
             throw new ProcessingException(httpStatus, errorMsg);
+        }
+    }
+
+    private void getMessagesFromRemediationOptions(ErrorResponse errorResponseDetails, JsonNode errorResponseJson) {
+
+        IDXResponse idxResponse = objectMapper.convertValue(errorResponseJson, IDXResponse.class);
+        if(idxResponse != null && idxResponse.remediation() != null) {
+            for (RemediationOption remediationOption : idxResponse.remediation().remediationOptions()) {
+                if(remediationOption != null) {
+                    for (FormValue formValue : remediationOption.form()) {
+                        if(formValue != null && formValue.form() != null) {
+                            for (FormValue messageFormValue : formValue.form().getValue()) {
+                                if (messageFormValue.messages != null) {
+                                    ClassUtil.setInternalState(
+                                            errorResponseDetails,
+                                            "messages",
+                                            messageFormValue.messages
+                                    );
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
