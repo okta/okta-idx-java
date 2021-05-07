@@ -297,7 +297,7 @@ public class IDXAuthenticationWrapper {
 
         return authenticationResponse;
     }
-
+    
     /**
      * Select the next authenticator type to remediate.
      *
