@@ -25,8 +25,9 @@ import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
 import com.okta.idx.sdk.api.response.AuthenticationResponse
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse
-import com.okta.idx.sdk.api.util.ClassUtil
 import org.testng.annotations.Test
+
+import java.lang.reflect.Field
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
@@ -104,7 +105,7 @@ class AuthenticationWrapperTest {
         def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
         def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
         //replace idxClient with mock idxClient
-        ClassUtil.setInternalState(idxAuthenticationWrapper, "client", idxClient)
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
         setStubbedInteractResponse(requestExecutor)
         setStubbedIntrospectResponse(requestExecutor)
