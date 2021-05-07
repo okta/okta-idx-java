@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -104,6 +106,30 @@ final class WrapperUtil {
             newUserRegistrationResponse.addError(e.getMessage());
         }
         logger.error("Error Detail: {}", newUserRegistrationResponse.getErrors());
+    }
+
+    /**
+     * Helper to parse {@link ProcessingException} and return a list of error messages.
+     *
+     * @param e the {@link ProcessingException} reference
+     */
+    List<String> fillProcessingErrors(ProcessingException e) {
+        logger.error("Exception occurred", e);
+        List<String> processingErrors = new LinkedList<>();
+        ErrorResponse errorResponse = e.getErrorResponse();
+        if (errorResponse != null) {
+            if (errorResponse.getMessages() != null) {
+                Arrays.stream(errorResponse.getMessages().getValue())
+                        .forEach(msg -> processingErrors.add(msg.getMessage()));
+            } else {
+                processingErrors.add(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
+            }
+        } else {
+            processingErrors.add(e.getMessage());
+        }
+
+        logger.error("Error Detail: {}", processingErrors);
+        return processingErrors;
     }
 
     static void printRemediationOptions(IDXResponse idxResponse) {

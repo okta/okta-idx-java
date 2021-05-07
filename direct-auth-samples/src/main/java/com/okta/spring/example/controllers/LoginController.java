@@ -168,7 +168,7 @@ public class LoginController {
 
         if (authenticationResponse.getErrors().size() > 0) {
             ModelAndView mav = new ModelAndView("forgot-password-authenticators");
-            mav.addObject("errors", authenticationResponse.getAuthenticationStatus().toString());
+            mav.addObject("errors", authenticationResponse.getErrors());
             return mav;
         }
 
