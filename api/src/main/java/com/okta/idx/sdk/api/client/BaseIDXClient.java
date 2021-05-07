@@ -52,7 +52,6 @@ import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
-import com.okta.idx.sdk.api.util.ClassUtil;
 import com.okta.idx.sdk.api.util.PkceUtil;
 
 import java.io.ByteArrayInputStream;
@@ -506,7 +505,7 @@ final class BaseIDXClient implements IDXClient {
             errorResponseJson = objectMapper.readTree(response.getBody());
             ErrorResponse errorResponseDetails = objectMapper.convertValue(errorResponseJson, ErrorResponse.class);
             if (errorResponseDetails.getError() == null && errorResponseDetails.getMessages() == null) {
-                getMessagesFromRemediationOptions(errorResponseDetails, errorResponseJson);
+                getErrorsFromRemediationOptions(errorResponseDetails, errorResponseJson);
             }
             throw new ProcessingException(httpStatus, errorMsg, errorResponseDetails);
         } else {
@@ -514,7 +513,7 @@ final class BaseIDXClient implements IDXClient {
         }
     }
 
-    private void getMessagesFromRemediationOptions(ErrorResponse errorResponseDetails, JsonNode errorResponseJson) {
+    private void getErrorsFromRemediationOptions(ErrorResponse errorResponseDetails, JsonNode errorResponseJson) {
 
         IDXResponse idxResponse = objectMapper.convertValue(errorResponseJson, IDXResponse.class);
         if(idxResponse != null && idxResponse.remediation() != null) {
@@ -524,11 +523,7 @@ final class BaseIDXClient implements IDXClient {
                         if(formValue != null && formValue.form() != null) {
                             for (FormValue messageFormValue : formValue.form().getValue()) {
                                 if (messageFormValue.messages != null) {
-                                    ClassUtil.setInternalState(
-                                            errorResponseDetails,
-                                            "messages",
-                                            messageFormValue.messages
-                                    );
+                                    errorResponseDetails.setMessages(messageFormValue.messages);
                                     return;
                                 }
                             }

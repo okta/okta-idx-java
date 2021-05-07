@@ -24,8 +24,9 @@ import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
 import com.okta.idx.sdk.api.response.AuthenticationResponse
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse
-import com.okta.idx.sdk.api.util.ClassUtil
 import org.testng.annotations.Test
+
+import java.lang.reflect.Field
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
@@ -44,7 +45,7 @@ class AuthenticationWrapperTest {
         def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
         def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
         //replace idxClient with mock idxClient
-        ClassUtil.setInternalState(idxAuthenticationWrapper, "client", idxClient)
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
         setStubbedInteractResponse(requestExecutor)
         setStubbedIntrospectResponse(requestExecutor)
@@ -103,7 +104,7 @@ class AuthenticationWrapperTest {
         def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
         def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
         //replace idxClient with mock idxClient
-        ClassUtil.setInternalState(idxAuthenticationWrapper, "client", idxClient)
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
         setStubbedInteractResponse(requestExecutor)
         setStubbedIntrospectResponse(requestExecutor)
@@ -209,5 +210,16 @@ class AuthenticationWrapperTest {
         clientConfiguration.setClientSecret("test-client-secret")
         clientConfiguration.setScopes(["test-scope"] as Set)
         return clientConfiguration
+    }
+
+    static void setInternalState(Object target, String fieldName, Object value) {
+        Class<?> clazz = target.getClass()
+        try {
+            Field field = clazz.getDeclaredField(fieldName)
+            field.setAccessible(true)
+            field.set(target, value)
+        } catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+            throw new RuntimeException("Unable to set internal state on a private field. [...]", e)
+        }
     }
 }
