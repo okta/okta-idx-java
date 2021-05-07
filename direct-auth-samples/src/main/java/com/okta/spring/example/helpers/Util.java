@@ -15,10 +15,36 @@
  */
 package com.okta.spring.example.helpers;
 
+import com.okta.idx.sdk.api.client.ProceedContext;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpSession;
+
 public class Util {
+
+    /**
+     * Updates the proceed context in session.
+     *
+     * @param session the session
+     * @param proceedContext the ProceedContext
+     */
+    public static void updateSession(final HttpSession session, final ProceedContext proceedContext) {
+        if (proceedContext != null) {
+            session.setAttribute("proceedContext", proceedContext);
+        }
+    }
+
+    /**
+     * Fetches the proceedContext from session.
+     *
+     * @param session the session
+     * @return ProceedContext
+     */
+    public static ProceedContext getProceedContextFromSession(final HttpSession session) {
+        return (ProceedContext) session.getAttribute("proceedContext");
+    }
 
     /**
      * Validates if the supplied phone number is a valid international number.

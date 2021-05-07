@@ -56,38 +56,38 @@ class AuthenticationWrapperTest {
         assertThat(newUserRegistrationResponse.getErrors(), nullValue())
         assertThat(newUserRegistrationResponse.getFormValues(), notNullValue())
         assertThat(newUserRegistrationResponse.getFormValues(), hasSize(1))
-        assertThat(newUserRegistrationResponse.getIdxClientContext().state, notNullValue())
-        assertThat(newUserRegistrationResponse.getIdxClientContext().interactionHandle, notNullValue())
-        assertThat(newUserRegistrationResponse.getIdxClientContext().interactionHandle, equalTo("003Q14X7li"))
-        assertThat(newUserRegistrationResponse.getIdxClientContext().codeVerifier, notNullValue())
-        assertThat(newUserRegistrationResponse.getIdxClientContext().codeChallenge, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().state, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle, equalTo("003Q14X7li"))
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge, notNullValue())
 
         setStubbedInteractResponse(requestExecutor)
         setStubbedIntrospectResponse(requestExecutor)
 
-        IDXClientContext idxClientContext = newUserRegistrationResponse.getIdxClientContext()
+        IDXClientContext idxClientContext = newUserRegistrationResponse.getProceedContext().getClientContext()
         assertThat(idxClientContext.state,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().state))
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
         assertThat(idxClientContext.interactionHandle,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().interactionHandle))
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle))
         assertThat(idxClientContext.codeVerifier,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().codeVerifier))
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier))
         assertThat(idxClientContext.codeChallenge,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().codeChallenge))
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
 
         setStubbedEnrollProfileResponseAfterEnroll(requestExecutor)
         setStubbedEnrollNewResponse(requestExecutor)
 
-        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.register(idxClientContext, getUserProfile())
-        assertThat(authenticationResponse.getIdxClientContext(), notNullValue())
-        assertThat(authenticationResponse.getIdxClientContext().state,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().state))
-        assertThat(authenticationResponse.getIdxClientContext().interactionHandle,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().interactionHandle))
-        assertThat(authenticationResponse.getIdxClientContext().codeVerifier,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().codeVerifier))
-        assertThat(authenticationResponse.getIdxClientContext().codeChallenge,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().codeChallenge))
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+        assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
+        assertThat(authenticationResponse.getProceedContext().getClientContext().state,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
+        assertThat(authenticationResponse.getProceedContext().getClientContext().interactionHandle,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle))
+        assertThat(authenticationResponse.getProceedContext().getClientContext().codeVerifier,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier))
+        assertThat(authenticationResponse.getProceedContext().getClientContext().codeChallenge,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
 
         setStubbedEnrollAuthenticatorResponse(requestExecutor)
 
@@ -117,7 +117,7 @@ class AuthenticationWrapperTest {
         setStubbedChallengeErrorResponse(requestExecutor)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
-                introspectTransaction.getClientContext(),
+                new ProceedContext(introspectTransaction.clientContext, introspectTransaction.getStateHandle(), "/challenge/answer", null),
                 verifyAuthenticatorOptions
         )
 

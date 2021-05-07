@@ -15,13 +15,11 @@
  */
 package com.okta.spring.example.controllers;
 
-import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.spring.example.helpers.HomeHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -83,18 +81,6 @@ public class HomeController {
     @GetMapping("/register")
     public ModelAndView displayRegisterPage() {
         return new ModelAndView("register");
-    }
-
-    /**
-     * Display the enroll authenticators page.
-     *
-     * @param model the model
-     * @return the enroll authenticators view
-     */
-    @GetMapping("/enroll-authenticators")
-    public String displayEnrollAuthenticatorsPage(final Model model) {
-        model.addAttribute("authenticatorUIOption", new AuthenticatorUIOption());
-        return "enroll-authenticators";
     }
 
     /**

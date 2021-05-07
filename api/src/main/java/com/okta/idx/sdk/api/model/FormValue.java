@@ -91,6 +91,9 @@ public class FormValue {
      * @return {@link Options} array
      */
     public Options[] options() {
+        if (options == null) {
+            return new Options[0];
+        }
         return Arrays.copyOf(this.options, this.options.length);
     }
 
