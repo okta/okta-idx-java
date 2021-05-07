@@ -65,6 +65,10 @@ public class ErrorResponse {
         return messages;
     }
 
+    public void setMessages(Messages messages) {
+        this.messages = messages;
+    }
+
     public String getError() {
         return error;
     }
