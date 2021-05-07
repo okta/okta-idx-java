@@ -44,7 +44,7 @@ final class AuthenticationTransaction {
         String stateHandle = introspectResponse.getStateHandle();
         Assert.hasText(stateHandle, "State handle may not be null");
 
-        Util.printRemediationOptions(introspectResponse);
+        WrapperUtil.printRemediationOptions(introspectResponse);
 
         return new AuthenticationTransaction(client, idxClientContext, introspectResponse);
     }
@@ -52,7 +52,7 @@ final class AuthenticationTransaction {
     static AuthenticationTransaction introspect(IDXClient client, IDXClientContext clientContext) throws ProcessingException {
         IDXResponse introspectResponse = client.introspect(clientContext);
 
-        Util.printRemediationOptions(introspectResponse);
+        WrapperUtil.printRemediationOptions(introspectResponse);
 
         return new AuthenticationTransaction(client, clientContext, introspectResponse);
     }
@@ -118,7 +118,7 @@ final class AuthenticationTransaction {
 
     AuthenticationTransaction proceed(Factory factory) throws ProcessingException {
         IDXResponse idxResponse = factory.create();
-        Util.printRemediationOptions(idxResponse);
+        WrapperUtil.printRemediationOptions(idxResponse);
         return new AuthenticationTransaction(client, clientContext, idxResponse);
     }
 

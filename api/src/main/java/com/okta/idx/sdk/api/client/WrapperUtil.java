@@ -20,12 +20,14 @@ import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
+import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 final class WrapperUtil {
 
@@ -102,5 +104,16 @@ final class WrapperUtil {
             newUserRegistrationResponse.addError(e.getMessage());
         }
         logger.error("Error Detail: {}", newUserRegistrationResponse.getErrors());
+    }
+
+    static void printRemediationOptions(IDXResponse idxResponse) {
+        if (idxResponse.remediation() != null) {
+            RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+            logger.info("Remediation Options: {}", Arrays.stream(remediationOptions)
+                    .map(RemediationOption::getName)
+                    .collect(Collectors.toList()));
+        } else {
+            logger.info("Remediation Options are missing.");
+        }
     }
 }
