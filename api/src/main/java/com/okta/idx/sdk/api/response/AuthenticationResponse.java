@@ -16,6 +16,7 @@
 package com.okta.idx.sdk.api.response;
 
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
+import com.okta.idx.sdk.api.model.AuthenticatorUIOptions;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 
 import java.util.LinkedList;
@@ -30,6 +31,8 @@ public class AuthenticationResponse {
     private AuthenticationStatus authenticationStatus;
 
     private List<String> errors = new LinkedList<>();
+
+    private AuthenticatorUIOptions authenticatorUIOptions;
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
@@ -61,5 +64,13 @@ public class AuthenticationResponse {
 
     public boolean addError(String error) {
         return getErrors().add(error);
+    }
+
+    public AuthenticatorUIOptions getAuthenticatorUIOptions() {
+        return authenticatorUIOptions;
+    }
+
+    public void setAuthenticatorUIOptions(AuthenticatorUIOptions authenticatorUIOptions) {
+        this.authenticatorUIOptions = authenticatorUIOptions;
     }
 }

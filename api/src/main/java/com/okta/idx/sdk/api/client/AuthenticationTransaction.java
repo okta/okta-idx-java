@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.Set;
 
 final class AuthenticationTransaction {
+
     static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
         IDXClientContext idxClientContext = client.interact();
         Assert.notNull(idxClientContext, "IDX client context may not be null");

@@ -83,8 +83,7 @@ public class LoginController {
         if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION) {
             session.setAttribute("idxClientContext", authenticationResponse.getIdxClientContext());
             ModelAndView mav = new ModelAndView("select-authenticators");
-            AuthenticatorUIOptions authenticatorUIOptions =
-                    idxAuthenticationWrapper.populateAuthenticatorUIOptions(authenticationResponse.getIdxClientContext());
+            AuthenticatorUIOptions authenticatorUIOptions = authenticationResponse.getAuthenticatorUIOptions();
             mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
             return mav;
         }
@@ -112,8 +111,7 @@ public class LoginController {
                                              final HttpSession session) {
         logger.info(":: Forgot Password ::");
 
-        AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.recoverPassword(username);
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.recoverPassword(username);
 
         if (authenticationResponse.getAuthenticationStatus() == null) {
             ModelAndView mav = new ModelAndView("forgot-password");
@@ -129,8 +127,7 @@ public class LoginController {
             case AWAITING_AUTHENTICATOR_SELECTION:
                 mav = new ModelAndView("forgot-password-authenticators");
                 AuthenticatorUIOptions authenticatorUIOptions =
-                        idxAuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(
-                            authenticationResponse.getIdxClientContext());
+                        authenticationResponse.getAuthenticatorUIOptions();
                 if (authenticatorUIOptions.hasErrors()) {
                     mav = new ModelAndView("login");
                     mav.addObject("errors", authenticatorUIOptions.getErrors());
@@ -187,7 +184,7 @@ public class LoginController {
      */
     @PostMapping(value = "/select-authenticator")
     public ModelAndView selectAuthenticator(final @RequestParam("authenticator-type") String authenticatorType,
-            final HttpSession session) {
+                                            final HttpSession session) {
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.selectAuthenticator(idxClientContext, authenticatorType);
@@ -210,10 +207,11 @@ public class LoginController {
      */
     @PostMapping(value = "/authenticate-email")
     public ModelAndView authenticateEmail(final @RequestParam("code") String code,
-            final HttpSession session) {
+                                          final HttpSession session) {
         IDXClientContext idxClientContext = (IDXClientContext) session.getAttribute("idxClientContext");
 
-        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticateEmail(idxClientContext, code);
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.authenticateEmail(idxClientContext, code);
 
         if (authenticationResponse.getErrors().size() > 0) {
             ModelAndView mav = new ModelAndView("authenticate-email");
@@ -325,7 +323,8 @@ public class LoginController {
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
 
-        NewUserRegistrationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues();
+        NewUserRegistrationResponse newUserRegistrationResponse =
+                idxAuthenticationWrapper.fetchRegistrationFormValues();
 
         UserProfile userProfile = new UserProfile();
         userProfile.addAttribute("lastName", lastname);
@@ -348,8 +347,7 @@ public class LoginController {
             return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
         }
 
-        AuthenticatorUIOptions authenticatorUIOptions =
-                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
+        AuthenticatorUIOptions authenticatorUIOptions = authenticationResponse.getAuthenticatorUIOptions();
 
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
 
@@ -448,11 +446,15 @@ public class LoginController {
             }
         }
 
+        AuthenticatorUIOptions authenticatorUIOptions = authenticationResponse.getAuthenticatorUIOptions();
+
+        if (authenticatorUIOptions.getOptions().size() == 0) {
+            ModelAndView mav = new ModelAndView("login");
+            mav.addObject("info", "Success");
+            return mav;
+        }
+
         ModelAndView mav = new ModelAndView("enroll-authenticators");
-
-        AuthenticatorUIOptions authenticatorUIOptions =
-                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
-
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
         session.setAttribute("idxClientContext", idxClientContext);
         return mav;
@@ -506,8 +508,7 @@ public class LoginController {
             }
         }
 
-        AuthenticatorUIOptions authenticatorUIOptions =
-                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
+        AuthenticatorUIOptions authenticatorUIOptions = authenticationResponse.getAuthenticatorUIOptions();
 
         if (authenticatorUIOptions.getOptions().size() == 0) {
             ModelAndView mav = new ModelAndView("login");
@@ -612,8 +613,8 @@ public class LoginController {
                 return homeHelper.proceedToHome(response.getTokenResponse(), session);
             } else if (response.getAuthenticationStatus() == AuthenticationStatus.SKIP_COMPLETE) {
                 ModelAndView mav = new ModelAndView("login");
-                if (response.getErrors().size() == 1) {
-                    mav.addObject("info", response.getErrors().get(0));
+                if (response.getErrors().size() > 0) {
+                    mav.addObject("info", response.getErrors());
                 }
                 return mav;
             }
@@ -621,8 +622,7 @@ public class LoginController {
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
 
-        AuthenticatorUIOptions authenticatorUIOptions =
-                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext);
+        AuthenticatorUIOptions authenticatorUIOptions = authenticationResponse.getAuthenticatorUIOptions();
 
         mav.addObject("authenticatorUIOptionList", authenticatorUIOptions.getOptions());
         session.setAttribute("idxClientContext", idxClientContext);

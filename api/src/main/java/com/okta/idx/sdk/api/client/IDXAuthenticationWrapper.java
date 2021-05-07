@@ -51,6 +51,9 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
+
+import static com.okta.idx.sdk.api.client.WrapperUtil.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,6 +120,9 @@ public class IDXAuthenticationWrapper {
         try {
             AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
 
+            authenticationResponse.setAuthenticatorUIOptions(
+                    populateAuthenticatorUIOptions(introspectTransaction, false));
+
             // Check if identify flow needs to include credentials
             boolean isIdentifyInOneStep = introspectTransaction.isRemediationRequireCredentials(RemediationType.IDENTIFY);
 
@@ -159,7 +165,8 @@ public class IDXAuthenticationWrapper {
                                     .withCredentials(credentials)
                                     .build();
 
-                    return passwordTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR).proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+                    return passwordTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR)
+                            .proceed(client, passwordAuthenticatorAnswerChallengeRequest);
                 });
                 return answerTransaction.asAuthenticationResponse();
             }
@@ -171,30 +178,6 @@ public class IDXAuthenticationWrapper {
         }
 
         return authenticationResponse;
-    }
-
-    // If app sign-on policy is set to "any 1 factor", the next remediation after identify is
-    // select-authenticator-authenticate
-    // Check if that's the case, and proceed to select password authenticator
-    private AuthenticationTransaction selectPasswordAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction) throws ProcessingException {
-        Optional<RemediationOption> remediationOptionOptional = authenticationTransaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
-        if (!remediationOptionOptional.isPresent()) {
-            // We don't need to.
-            return authenticationTransaction;
-        }
-        Map<String, String> authenticatorOptions = remediationOptionOptional.get().getAuthenticatorOptions();
-
-        Authenticator authenticator = new Authenticator();
-        authenticator.setId(authenticatorOptions.get("password"));
-
-        ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
-                .withStateHandle(authenticationTransaction.getStateHandle())
-                .withAuthenticator(authenticator)
-                .build();
-
-        return authenticationTransaction.proceed(() ->
-                remediationOptionOptional.get().proceed(client, selectAuthenticatorRequest)
-        );
     }
 
     /**
@@ -254,6 +237,8 @@ public class IDXAuthenticationWrapper {
         try {
             AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
             authenticationResponse.setIdxClientContext(introspectTransaction.getClientContext());
+            authenticationResponse.setAuthenticatorUIOptions(
+                    populateAuthenticatorUIOptions(introspectTransaction, true));
 
             boolean isIdentifyInOneStep = introspectTransaction.isRemediationRequireCredentials(RemediationType.IDENTIFY);
 
@@ -311,56 +296,6 @@ public class IDXAuthenticationWrapper {
         }
 
         return authenticationResponse;
-    }
-
-    /**
-     * Get the authenticator options for the forgot password remediation.
-     *
-     * @param idxClientContext the idxClientContext
-     * @return the list of AuthenticatorUIOptions
-     */
-    public AuthenticatorUIOptions populateForgotPasswordAuthenticatorUIOptions(
-            IDXClientContext idxClientContext) {
-
-        AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
-        List<AuthenticatorUIOption> authenticatorUIOptionList = new LinkedList<>();
-
-        try {
-            AuthenticationTransaction introspectTransaction =
-                    AuthenticationTransaction.introspect(client, idxClientContext);
-
-            Recover recover = introspectTransaction.getResponse()
-                    .getCurrentAuthenticatorEnrollment().getValue().getRecover();
-
-            AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
-                // recover password
-                RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-                return recover.proceed(client, recoverRequest);
-            });
-
-            RemediationOption remediationOption =
-                    recoverTransaction.getRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
-
-            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
-
-            for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
-                if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
-                        !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
-                    logger.info("Skipping unsupported authenticator - {}", entry.getKey());
-                    continue;
-                }
-                authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
-            }
-        } catch (ProcessingException e) {
-            logger.error("Error occurred:", e);
-            authenticatorUIOptions.setErrors(fillProcessingErrors(e));
-        }
-
-        authenticatorUIOptions.setOptions(authenticatorUIOptionList);
-        return authenticatorUIOptions;
     }
 
     /**
@@ -430,51 +365,6 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Populate UI form values for signing up a new user.
-     *
-     * @return the new user registration response
-     */
-    public NewUserRegistrationResponse fetchSignUpFormValues() {
-
-        List<FormValue> enrollProfileFormValues;
-
-        NewUserRegistrationResponse newUserRegistrationResponse = new NewUserRegistrationResponse();
-
-        try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
-            newUserRegistrationResponse.setIdxClientContext(introspectTransaction.getClientContext());
-
-            // enroll new user
-            AuthenticationTransaction enrollTransaction = introspectTransaction.proceed(() -> {
-                RemediationOption selectEnrollProfileRemediationOption =
-                        introspectTransaction.getRemediationOption(RemediationType.SELECT_ENROLL_PROFILE);
-
-                EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-                return selectEnrollProfileRemediationOption.proceed(client, enrollRequest);
-            });
-
-
-            RemediationOption enrollProfileRemediationOption =
-                    enrollTransaction.getRemediationOption(RemediationType.ENROLL_PROFILE);
-
-            enrollProfileFormValues = Arrays.stream(enrollProfileRemediationOption.form())
-                    .filter(x -> "userProfile".equals(x.getName()))
-                    .collect(Collectors.toList());
-
-            newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
-        } catch (ProcessingException e) {
-            handleProcessingException(e, newUserRegistrationResponse);
-        } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            newUserRegistrationResponse.addError(e.getMessage());
-        }
-
-        return newUserRegistrationResponse;
-    }
-
-    /**
      * Register new user with the supplied user profile reference.
      *
      * @param idxClientContext      the IDX Client context
@@ -488,6 +378,9 @@ public class IDXAuthenticationWrapper {
 
         try {
             AuthenticationTransaction introspectTransaction = AuthenticationTransaction.introspect(client, idxClientContext);
+
+            authenticationResponse.setAuthenticatorUIOptions(populateAuthenticatorUIOptions(
+                    introspectTransaction, true));
 
             AuthenticationTransaction enrollTransaction = introspectTransaction.proceed(() -> {
                 RemediationOption remediationOption =
@@ -523,7 +416,8 @@ public class IDXAuthenticationWrapper {
      * @param authenticatorType     the authenticator type
      * @return the Authentication response
      */
-    public AuthenticationResponse selectAuthenticator(IDXClientContext idxClientContext, String authenticatorType) {
+    public AuthenticationResponse selectAuthenticator(IDXClientContext idxClientContext,
+                                                      String authenticatorType) {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
         try {
@@ -561,12 +455,12 @@ public class IDXAuthenticationWrapper {
      * @param passcode              the user supplied email passcode
      * @return the Authentication response
      */
-    public AuthenticationResponse authenticateEmail(IDXClientContext idxClientContext,
-            String passcode) {
+    public AuthenticationResponse authenticateEmail(IDXClientContext idxClientContext, String passcode) {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.introspect(client, idxClientContext);
+            AuthenticationTransaction introspectTransaction =
+                    AuthenticationTransaction.introspect(client, idxClientContext);
             return introspectTransaction.proceed(() -> {
                 Credentials credentials = new Credentials();
                 credentials.setPasscode(passcode.toCharArray());
@@ -577,7 +471,8 @@ public class IDXAuthenticationWrapper {
                         .withCredentials(credentials)
                         .build();
 
-                return introspectTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR).proceed(client, challengeAuthenticatorRequest);
+                return introspectTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR)
+                        .proceed(client, challengeAuthenticatorRequest);
             }).asAuthenticationResponse();
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
@@ -656,7 +551,11 @@ public class IDXAuthenticationWrapper {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.introspect(client, idxClientContext);
+            AuthenticationTransaction introspectTransaction =
+                    AuthenticationTransaction.introspect(client, idxClientContext);
+
+            authenticationResponse.setAuthenticatorUIOptions(populateAuthenticatorUIOptions(
+                    introspectTransaction, false));
 
             Optional<RemediationOption> enrollAuthenticatorOptional =
                     introspectTransaction.getOptionalRemediationOption(RemediationType.ENROLL_AUTHENTICATOR);
@@ -703,12 +602,14 @@ public class IDXAuthenticationWrapper {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.introspect(client, idxClientContext);
+            AuthenticationTransaction introspectTransaction =
+                    AuthenticationTransaction.introspect(client, idxClientContext);
 
             RemediationOption remediationOption =
                     introspectTransaction.getRemediationOption(RemediationType.AUTHENTICATOR_ENROLLMENT_DATA);
 
-            AuthenticatorsValue[] authenticators = introspectTransaction.getResponse().getAuthenticators().getValue();
+            AuthenticatorsValue[] authenticators =
+                    introspectTransaction.getResponse().getAuthenticators().getValue();
             Optional<AuthenticatorsValue> authenticatorsValueOptional = Arrays.stream(authenticators)
                     .filter(x -> "phone_number".equals(x.getKey()))
                     .findAny();
@@ -772,55 +673,6 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Helper to populate the UI options to be shown on Authenticator options page.
-     *
-     * @param idxClientContext      the IDX Client context
-     * @return the list of {@link AuthenticatorUIOption} options
-     */
-    public AuthenticatorUIOptions populateAuthenticatorUIOptions(IDXClientContext idxClientContext) {
-
-        AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
-        List<AuthenticatorUIOption> authenticatorUIOptionList = new ArrayList<>();
-
-        try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.introspect(client, idxClientContext);
-            if (introspectTransaction.getResponse().remediation() == null) {
-                return authenticatorUIOptions;
-            }
-
-            RemediationOption remediationOption = getSelectAuthenticatorRemediationOption(introspectTransaction);
-
-            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
-
-            for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
-                authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
-            }
-        } catch (ProcessingException e) {
-            logger.error("Error occurred:", e);
-            authenticatorUIOptions.setErrors(fillProcessingErrors(e));
-        }
-
-        authenticatorUIOptions.setOptions(authenticatorUIOptionList);
-        return authenticatorUIOptions;
-    }
-
-    private RemediationOption getSelectAuthenticatorRemediationOption(AuthenticationTransaction transaction) {
-        RemediationOption remediationOption = null;
-
-        Optional<RemediationOption> selectAuthenticatorEnrollOptional = transaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_ENROLL);
-        if (selectAuthenticatorEnrollOptional.isPresent()) {
-            remediationOption = selectAuthenticatorEnrollOptional.get();
-        }
-
-        Optional<RemediationOption> selectAuthenticatorAuthenticateOptional = transaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
-        if (selectAuthenticatorAuthenticateOptional.isPresent()) {
-            remediationOption = selectAuthenticatorAuthenticateOptional.get();
-        }
-
-        return remediationOption;
-    }
-
-    /**
      * Get IDX client context by calling the interact endpoint.
      * ClientContext reference contains the interaction handle and PKCE params.
      *
@@ -842,7 +694,10 @@ public class IDXAuthenticationWrapper {
     /**
      * Revoke the oauth2 token.
      *
-     * @param tokenType the token type (access|refresh)
+     * Revoking an access token does not revoke its associated refresh token. However, revoking
+     * a refresh token will revoke its associated access token.
+     *
+     * @param tokenType the token type (access or refresh)
      * @param token the token
      */
     public void revokeToken(TokenType tokenType, String token) {
@@ -855,27 +710,148 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Helper to parse {@link ProcessingException} and populate {@link AuthenticationResponse}
-     * with appropriate error messages.
+     * Populate UI form values for new user registration.
      *
-     * @param e the {@link ProcessingException} reference
-     * @param authenticationResponse the {@link AuthenticationResponse} reference
+     * @return the new user registration response
      */
-    private void handleProcessingException(ProcessingException e,
-                                           AuthenticationResponse authenticationResponse) {
-        logger.error("Exception occurred", e);
-        ErrorResponse errorResponse = e.getErrorResponse();
-        if (errorResponse != null) {
-            if (errorResponse.getMessages() != null) {
-                Arrays.stream(errorResponse.getMessages().getValue())
-                        .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            } else {
-                authenticationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
-            }
-        } else {
-            authenticationResponse.addError(e.getMessage());
+    public NewUserRegistrationResponse fetchRegistrationFormValues() {
+
+        List<FormValue> enrollProfileFormValues;
+
+        NewUserRegistrationResponse newUserRegistrationResponse = new NewUserRegistrationResponse();
+
+        try {
+            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
+            newUserRegistrationResponse.setIdxClientContext(introspectTransaction.getClientContext());
+
+            // enroll new user
+            AuthenticationTransaction enrollTransaction = introspectTransaction.proceed(() -> {
+                RemediationOption selectEnrollProfileRemediationOption =
+                        introspectTransaction.getRemediationOption(RemediationType.SELECT_ENROLL_PROFILE);
+
+                EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                        .withStateHandle(introspectTransaction.getStateHandle())
+                        .build();
+                return selectEnrollProfileRemediationOption.proceed(client, enrollRequest);
+            });
+
+            RemediationOption enrollProfileRemediationOption =
+                    enrollTransaction.getRemediationOption(RemediationType.ENROLL_PROFILE);
+
+            enrollProfileFormValues = Arrays.stream(enrollProfileRemediationOption.form())
+                    .filter(x -> "userProfile".equals(x.getName()))
+                    .collect(Collectors.toList());
+
+            newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
+        } catch (ProcessingException e) {
+            handleProcessingException(e, newUserRegistrationResponse);
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
+            newUserRegistrationResponse.addError(e.getMessage());
         }
-        logger.error("Error Detail: {}", authenticationResponse.getErrors());
+
+        return newUserRegistrationResponse;
+    }
+
+    /**
+     * Helper to check if we have optional authenticators to skip in current remediation step.
+     *
+     * @param idxClientContext      the IDX Client context
+     * @return true if we have optional authenticators to skip; false otherwise.
+     */
+    public boolean isSkipAuthenticatorPresent(IDXClientContext idxClientContext) {
+        try {
+            AuthenticationTransaction transaction = AuthenticationTransaction.introspect(client, idxClientContext);
+            return transaction.getOptionalRemediationOption(RemediationType.SKIP).isPresent();
+        } catch (IllegalArgumentException e) {
+            return false;
+        } catch (ProcessingException e) {
+            logger.error("Error occurred:", e);
+            return false;
+        }
+    }
+
+    /**
+     * Helper to populate the UI options to be shown on Authenticator options page.
+     *
+     * @param introspectTransaction      the introspect response
+     * @return the list of {@link AuthenticatorUIOption} options
+     */
+    AuthenticatorUIOptions populateAuthenticatorUIOptions(AuthenticationTransaction introspectTransaction,
+                                                          boolean isPasswordRecoveryFlow) {
+
+        AuthenticatorUIOptions authenticatorUIOptions = new AuthenticatorUIOptions();
+        List<AuthenticatorUIOption> authenticatorUIOptionList = new ArrayList<>();
+
+        if (introspectTransaction.getResponse().remediation() == null) {
+            return authenticatorUIOptions;
+        }
+
+        RemediationOption remediationOption;
+
+        try {
+            if (isPasswordRecoveryFlow) {
+                Recover recover = introspectTransaction.getResponse()
+                        .getCurrentAuthenticatorEnrollment().getValue().getRecover();
+
+                AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
+                    // recover password
+                    RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                            .withStateHandle(introspectTransaction.getStateHandle())
+                            .build();
+                    return recover.proceed(client, recoverRequest);
+                });
+
+                remediationOption = recoverTransaction.getRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+            } else {
+                remediationOption = getSelectAuthenticatorRemediationOption(introspectTransaction);
+            }
+
+            Map<String, String> authenticatorOptions = remediationOption.getAuthenticatorOptions();
+
+            for (Map.Entry<String, String> entry : authenticatorOptions.entrySet()) {
+                if (!entry.getKey().equals(AuthenticatorType.PASSWORD.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.EMAIL.getValue()) &&
+                        !entry.getKey().equals(AuthenticatorType.SMS.getValue())) {
+                    logger.info("Skipping unsupported authenticator - {}", entry.getKey());
+                    continue;
+                }
+                authenticatorUIOptionList.add(new AuthenticatorUIOption(entry.getValue(), entry.getKey()));
+            }
+        } catch (ProcessingException e) {
+            logger.error("Error occurred:", e);
+            authenticatorUIOptions.setErrors(fillProcessingErrors(e));
+        }
+
+        authenticatorUIOptions.setOptions(authenticatorUIOptionList);
+        return authenticatorUIOptions;
+    }
+
+    // If app sign-on policy is set to "any 1 factor", the next remediation after identify is
+    // select-authenticator-authenticate
+    // Check if that's the case, and proceed to select password authenticator
+    AuthenticationTransaction selectPasswordAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction)
+            throws ProcessingException {
+
+        Optional<RemediationOption> remediationOptionOptional =
+                authenticationTransaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+        if (!remediationOptionOptional.isPresent()) {
+            // We don't need to.
+            return authenticationTransaction;
+        }
+        Map<String, String> authenticatorOptions = remediationOptionOptional.get().getAuthenticatorOptions();
+
+        Authenticator authenticator = new Authenticator();
+        authenticator.setId(authenticatorOptions.get("password"));
+
+        ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
+                .withStateHandle(authenticationTransaction.getStateHandle())
+                .withAuthenticator(authenticator)
+                .build();
+
+        return authenticationTransaction.proceed(() ->
+                remediationOptionOptional.get().proceed(client, selectAuthenticatorRequest)
+        );
     }
 
     /**
@@ -900,63 +876,5 @@ public class IDXAuthenticationWrapper {
 
         logger.error("Error Detail: {}", processingErrors);
         return processingErrors;
-    }
-
-    /**
-     * Helper to parse {@link ProcessingException} and populate {@link NewUserRegistrationResponse}
-     * with appropriate error messages.
-     *
-     * @param e the {@link ProcessingException} reference
-     * @param newUserRegistrationResponse the {@link NewUserRegistrationResponse} reference
-     */
-    private void handleProcessingException(ProcessingException e,
-                                           NewUserRegistrationResponse newUserRegistrationResponse) {
-        logger.error("Exception occurred", e);
-        ErrorResponse errorResponse = e.getErrorResponse();
-        if (errorResponse != null) {
-            if (errorResponse.getMessages() != null) {
-                Arrays.stream(errorResponse.getMessages().getValue())
-                        .forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
-            } else {
-                newUserRegistrationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
-            }
-        } else {
-            newUserRegistrationResponse.addError(e.getMessage());
-        }
-        logger.error("Error Detail: {}", newUserRegistrationResponse.getErrors());
-    }
-
-    /**
-     * Helper to check if we have landed terminal success/no more remediation steps to follow.
-     *
-     * @param idxClientContext      the IDX Client context
-     * @return true if login is successful and if there are no more remediation steps to follow; false otherwise.
-     */
-    public boolean isTerminalSuccess(IDXClientContext idxClientContext) {
-        try {
-            AuthenticationTransaction transaction = AuthenticationTransaction.introspect(client, idxClientContext);
-            return transaction.getResponse().isLoginSuccessful();
-        } catch (ProcessingException e) {
-            logger.error("Error occurred:", e);
-            return false;
-        }
-    }
-
-    /**
-     * Helper to check if we have optional authenticators to skip in current remediation step.
-     *
-     * @param idxClientContext      the IDX Client context
-     * @return true if we have optional authenticators to skip; false otherwise.
-     */
-    public boolean isSkipAuthenticatorPresent(IDXClientContext idxClientContext) {
-        try {
-            AuthenticationTransaction transaction = AuthenticationTransaction.introspect(client, idxClientContext);
-            return transaction.getOptionalRemediationOption(RemediationType.SKIP).isPresent();
-        } catch (IllegalArgumentException e) {
-            return false;
-        } catch (ProcessingException e) {
-            logger.error("Error occurred:", e);
-            return false;
-        }
     }
 }
