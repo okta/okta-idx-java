@@ -56,6 +56,12 @@ final class AuthenticationTransaction {
         return new AuthenticationTransaction(client, clientContext, introspectResponse);
     }
 
+    static AuthenticationTransaction proceed(IDXClient client, ProceedContext proceedContext, Factory factory) throws ProcessingException {
+        IDXResponse idxResponse = factory.create();
+        Util.printRemediationOptions(idxResponse);
+        return new AuthenticationTransaction(client, proceedContext.getClientContext(), idxResponse);
+    }
+
     interface Factory {
         IDXResponse create() throws ProcessingException;
     }
@@ -80,8 +86,23 @@ final class AuthenticationTransaction {
         return idxResponse;
     }
 
-    IDXClientContext getClientContext() {
-        return clientContext;
+    ProceedContext createProceedContext() {
+        if (idxResponse == null || idxResponse.remediation() == null || idxResponse.remediation().remediationOptions().length == 0) {
+            logger.debug("ProceedContext is null");
+            return null;
+        }
+
+        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+        String href = remediationOptions[0].getHref();
+        logger.debug("ProceedContext href: {}", href);
+
+        String skipHref = null;
+        Optional<RemediationOption> skipOptional = getOptionalRemediationOption(RemediationType.SKIP);
+        if (skipOptional.isPresent()) {
+            skipHref = skipOptional.get().getHref();
+        }
+
+        return new ProceedContext(clientContext, getStateHandle(), href, skipHref);
     }
 
     RemediationOption getRemediationOption(String name) {
@@ -127,7 +148,7 @@ final class AuthenticationTransaction {
 
     AuthenticationResponse asAuthenticationResponse(AuthenticationStatus defaultStatus) throws ProcessingException {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        authenticationResponse.setIdxClientContext(clientContext);
+        authenticationResponse.setProceedContext(createProceedContext());
 
         copyErrorMessages(idxResponse, authenticationResponse);
 
@@ -150,7 +171,7 @@ final class AuthenticationTransaction {
 
     AuthenticationResponse asAuthenticationResponseExpecting(AuthenticationStatus status) {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        authenticationResponse.setIdxClientContext(clientContext);
+        authenticationResponse.setProceedContext(createProceedContext());
 
         copyErrorMessages(idxResponse, authenticationResponse);
 
