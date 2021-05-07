@@ -24,7 +24,6 @@ import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.response.AuthenticationResponse
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse
-import org.testng.annotations.Ignore
 import org.testng.annotations.Test
 
 import java.lang.reflect.Field
@@ -39,7 +38,6 @@ class AuthenticationWrapperTest {
 
     final MediaType mediaTypeAppIonJson = MediaType.valueOf("application/ion+json; okta-version=1.0.0")
 
-    @Ignore
     @Test
     void registerTest() {
 
@@ -96,7 +94,7 @@ class AuthenticationWrapperTest {
                 idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext)
         assertThat(authenticatorUIOptions.options, notNullValue())
         assertThat(authenticatorUIOptions.options, hasSize(1))
-        assertThat(authenticatorUIOptions.options.get(0).type, equalTo("security_question"))
+        assertThat(authenticatorUIOptions.options.get(0).type, equalTo("password"))
     }
 
     @Test
@@ -177,39 +175,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-response", mediaTypeAppIonJson))
-    }
-
-    void setStubbedRecoverTransactionResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("recover-transaction-response", mediaTypeAppIonJson))
-    }
-
-    void setStubbedIdentifyResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("identify-response", mediaTypeAppIonJson))
-    }
-
-    void setChallengeResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("challenge-response", mediaTypeAppIonJson))
-    }
-
-    void setAnswerChallengeResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("answer-challenge-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("enroll-registration-response", mediaTypeAppIonJson))
     }
 
     Response getResponseByResourceFileName(String responseName, MediaType mediaType) {
