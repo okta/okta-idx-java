@@ -109,7 +109,7 @@ class AuthenticationWrapperTest {
         setStubbedChallengeErrorResponse(requestExecutor)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
-                introspectTransaction.getClientContext(),
+                new ProceedContext(introspectTransaction.clientContext, introspectTransaction.getStateHandle(), "/challenge/answer", null),
                 verifyAuthenticatorOptions
         )
 
