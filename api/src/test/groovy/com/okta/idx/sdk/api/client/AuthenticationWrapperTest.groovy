@@ -18,7 +18,6 @@ package com.okta.idx.sdk.api.client
 
 import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
-import com.okta.idx.sdk.api.model.AuthenticatorUIOptions
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.response.AuthenticationResponse
@@ -88,12 +87,6 @@ class AuthenticationWrapperTest {
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
 
         setStubbedEnrollAuthenticatorResponse(requestExecutor)
-
-        AuthenticatorUIOptions authenticatorUIOptions =
-                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext)
-        assertThat(authenticatorUIOptions.options, notNullValue())
-        assertThat(authenticatorUIOptions.options, hasSize(1))
-        assertThat(authenticatorUIOptions.options.get(0).type, equalTo("password"))
     }
 
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {

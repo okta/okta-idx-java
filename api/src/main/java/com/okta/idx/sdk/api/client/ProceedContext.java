@@ -17,6 +17,11 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.idx.sdk.api.model.IDXClientContext;
 
+/**
+ * An opaque to the developer object that's expected to be given back on the next request.
+ *
+ * We use this internally to know the current state of the authentication flow.
+ */
 public final class ProceedContext {
     private final IDXClientContext clientContext;
     private final String stateHandle;

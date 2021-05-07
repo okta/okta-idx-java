@@ -608,7 +608,7 @@ public class LoginController {
         return mav;
     }
 
-    private List<String> factorMethodsFromAuthenticators(HttpSession session, List<Authenticator> authenticators) {
+    private List<String> factorMethodsFromAuthenticators(final HttpSession session, final List<Authenticator> authenticators) {
         List<String> factorMethods = new ArrayList<>();
         for (Authenticator authenticator : authenticators) {
             for (Authenticator.Factor factor : authenticator.getFactors()) {
@@ -619,7 +619,7 @@ public class LoginController {
         return factorMethods;
     }
 
-    private Authenticator.Factor getFactorFromMethod(HttpSession session, String method) {
+    private Authenticator.Factor getFactorFromMethod(final HttpSession session, final String method) {
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
         for (Authenticator authenticator : authenticators) {
             for (Authenticator.Factor factor : authenticator.getFactors()) {

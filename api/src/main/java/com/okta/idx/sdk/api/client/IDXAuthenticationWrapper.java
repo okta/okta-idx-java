@@ -19,9 +19,6 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.Authenticator;
-import com.okta.idx.sdk.api.model.AuthenticatorType;
-import com.okta.idx.sdk.api.model.AuthenticatorUIOption;
-import com.okta.idx.sdk.api.model.AuthenticatorUIOptions;
 import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
@@ -53,9 +50,7 @@ import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -290,7 +285,18 @@ public class IDXAuthenticationWrapper {
                     identifyTransaction = selectPasswordAuthenticatorIfNeeded(identifyTransaction);
                 }
 
-                return identifyTransaction.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
+                Recover recover = identifyTransaction.getResponse()
+                        .getCurrentAuthenticatorEnrollment().getValue().getRecover();
+
+                AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
+                    // recover password
+                    RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                            .withStateHandle(introspectTransaction.getStateHandle())
+                            .build();
+                    return recover.proceed(client, recoverRequest);
+                });
+
+                return recoverTransaction.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
             }
         } catch (ProcessingException e) {
             handleProcessingException(e, authenticationResponse);
@@ -648,30 +654,6 @@ public class IDXAuthenticationWrapper {
             authenticationResponse.addError(e.getMessage());
         }
         logger.error("Error Detail: {}", authenticationResponse.getErrors());
-    }
-
-    /**
-     * Helper to parse {@link ProcessingException} and return a list of error messages.
-     *
-     * @param e the {@link ProcessingException} reference
-     */
-    private List<String> fillProcessingErrors(ProcessingException e) {
-        logger.error("Exception occurred", e);
-        List<String> processingErrors = new LinkedList<>();
-        ErrorResponse errorResponse = e.getErrorResponse();
-        if (errorResponse != null) {
-            if (errorResponse.getMessages() != null) {
-                Arrays.stream(errorResponse.getMessages().getValue())
-                        .forEach(msg -> processingErrors.add(msg.getMessage()));
-            } else {
-                processingErrors.add(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
-            }
-        } else {
-            processingErrors.add(e.getMessage());
-        }
-
-        logger.error("Error Detail: {}", processingErrors);
-        return processingErrors;
     }
 
     /**
