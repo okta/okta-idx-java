@@ -21,6 +21,7 @@ import com.okta.idx.sdk.api.config.ClientConfiguration
 import com.okta.idx.sdk.api.model.AuthenticationStatus
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
+import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
 import com.okta.idx.sdk.api.response.AuthenticationResponse
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse
 import org.testng.annotations.Test
@@ -87,13 +88,11 @@ class AuthenticationWrapperTest {
         assertThat(authenticationResponse.getProceedContext().getClientContext().codeChallenge,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
 
-        setStubbedEnrollAuthenticatorResponse(requestExecutor)
-
-        AuthenticatorUIOptions authenticatorUIOptions =
-                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext)
-        assertThat(authenticatorUIOptions.options, notNullValue())
-        assertThat(authenticatorUIOptions.options, hasSize(1))
-        assertThat(authenticatorUIOptions.options.get(0).type, equalTo("password"))
+        List<Authenticator> authenticators = authenticationResponse.getAuthenticators()
+        assertThat(authenticators, notNullValue())
+        assertThat(authenticators, hasItem(
+                hasProperty("method", is("password")))
+        )
     }
 
     @Test
@@ -147,13 +146,11 @@ class AuthenticationWrapperTest {
         setChallengeResponse(requestExecutor)
         setAnswerChallengeResponse(requestExecutor)
 
-        AuthenticatorUIOptions authenticatorUIOptions =
-                idxAuthenticationWrapper.populateForgotPasswordAuthenticatorUIOptions(
-                        authenticationResponse.getIdxClientContext())
-        assertThat(authenticatorUIOptions, notNullValue())
-        assertThat(authenticatorUIOptions.options, notNullValue())
-        assertThat(authenticatorUIOptions.options, hasSize(1))
-        assertThat(authenticatorUIOptions.options.get(0).type, equalTo("email"))
+        List<Authenticator> authenticators = authenticationResponse.getAuthenticators()
+        assertThat(authenticators, notNullValue())
+        assertThat(authenticators, hasItem(
+                hasProperty("method", is("email")))
+        )
     }
 
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {
