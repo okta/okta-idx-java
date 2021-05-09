@@ -19,6 +19,20 @@
             "label": "Username"
           },
           {
+            "name": "credentials",
+            "type": "object",
+            "form": {
+              "value": [
+                {
+                  "name": "passcode",
+                  "label": "Password",
+                  "secret": true
+                }
+              ]
+            },
+            "required": true
+          },
+          {
             "name": "rememberMe",
             "type": "boolean",
             "label": "Remember this device"
