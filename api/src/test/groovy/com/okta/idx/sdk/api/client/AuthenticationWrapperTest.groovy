@@ -19,10 +19,8 @@ package com.okta.idx.sdk.api.client
 import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
 import com.okta.idx.sdk.api.model.AuthenticationStatus
-import com.okta.idx.sdk.api.model.AuthenticatorUIOptions
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
-import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
 import com.okta.idx.sdk.api.response.AuthenticationResponse
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse
 import org.testng.annotations.Test
@@ -227,7 +225,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("recover-transaction-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("recover-transaction-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedIdentifyResponse(RequestExecutor requestExecutor) {
@@ -235,7 +233,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("identify-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("identify-response", 200, mediaTypeAppIonJson))
     }
 
     void setChallengeResponse(RequestExecutor requestExecutor) {
@@ -243,7 +241,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("challenge-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("challenge-response", 200, mediaTypeAppIonJson))
     }
 
     void setAnswerChallengeResponse(RequestExecutor requestExecutor) {
@@ -251,7 +249,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("answer-challenge-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("answer-challenge-response", 200, mediaTypeAppIonJson))
     }
 
     Response getResponseByResourceFileName(String responseName, Integer httpStatus, MediaType mediaType) {
