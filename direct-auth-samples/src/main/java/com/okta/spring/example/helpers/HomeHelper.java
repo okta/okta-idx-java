@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Component
 public class HomeHelper {
@@ -42,21 +44,26 @@ public class HomeHelper {
 
     /**
      * Go to the home page, setting the session, and creating the view.
-     * @param tokenResponse
-     * @param session
+     * @param tokenResponse the token response reference
+     * @param session the http session object
      * @return the ModelAndView for the home page.
      */
     public ModelAndView proceedToHome(final TokenResponse tokenResponse, final HttpSession session) {
+
+        Map<String, Object> claims = new LinkedHashMap<>();
+
         // success
         ModelAndView mav = new ModelAndView("home");
         mav.addObject("tokenResponse", tokenResponse);
         String user = null;
         try {
-            user = (String) accessTokenVerifier.decode(tokenResponse.idToken).getClaims().get("email");
+            claims = accessTokenVerifier.decode(tokenResponse.idToken).getClaims();
+            user = (String) claims.get("email");
         } catch (JwtVerificationException e) {
             logger.error("Error verifying email claim from access token response", e);
         }
         mav.addObject("user", user);
+        mav.addObject("claims", claims);
 
         // store token in session
         session.setAttribute("tokenResponse", tokenResponse);
