@@ -20,7 +20,6 @@ import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
-import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,16 +30,23 @@ final class WrapperUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(WrapperUtil.class);
 
+    static AuthenticationResponse handleIllegalArgumentException(IllegalArgumentException e) {
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        logger.error("Exception occurred", e);
+        authenticationResponse.addError(e.getMessage());
+        return authenticationResponse;
+    }
+
     /**
      * Helper to parse {@link ProcessingException} and populate {@link AuthenticationResponse}
      * with appropriate error messages.
      *
      * @param e the {@link ProcessingException} reference
-     * @param authenticationResponse the {@link AuthenticationResponse} reference
      */
-    static void handleProcessingException(ProcessingException e,
-                                          AuthenticationResponse authenticationResponse) {
+    static AuthenticationResponse handleProcessingException(ProcessingException e) {
         logger.error("Exception occurred", e);
+
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
         ErrorResponse errorResponse = e.getErrorResponse();
         if (errorResponse != null) {
             if (errorResponse.getMessages() != null) {
@@ -53,30 +59,7 @@ final class WrapperUtil {
             authenticationResponse.addError(e.getMessage());
         }
         logger.error("Error Detail: {}", authenticationResponse.getErrors());
-    }
-
-    /**
-     * Helper to parse {@link ProcessingException} and populate {@link NewUserRegistrationResponse}
-     * with appropriate error messages.
-     *
-     * @param e the {@link ProcessingException} reference
-     * @param newUserRegistrationResponse the {@link NewUserRegistrationResponse} reference
-     */
-    static void handleProcessingException(ProcessingException e,
-                                          NewUserRegistrationResponse newUserRegistrationResponse) {
-        logger.error("Exception occurred", e);
-        ErrorResponse errorResponse = e.getErrorResponse();
-        if (errorResponse != null) {
-            if (errorResponse.getMessages() != null) {
-                Arrays.stream(errorResponse.getMessages().getValue())
-                        .forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
-            } else {
-                newUserRegistrationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
-            }
-        } else {
-            newUserRegistrationResponse.addError(e.getMessage());
-        }
-        logger.error("Error Detail: {}", newUserRegistrationResponse.getErrors());
+        return authenticationResponse;
     }
 
     static void printRemediationOptions(IDXResponse idxResponse) {
