@@ -34,6 +34,8 @@
         <p>You have successfully authenticated against your Okta Org.</p>
     </div>
 
+    <h2 class="text-center">Token Details</h2>
+
     <div th:if="${tokenResponse.accessToken}">
         <p><label>Access Token: </label>
             <span th:text="${tokenResponse.accessToken}">2</span></p>
@@ -63,6 +65,23 @@
         <p><label>Token Type: </label>
             <span th:text="${tokenResponse.tokenType}">1</span></p>
     </div>
+</div>
+
+<div class="container">
+    <h2 class="text-center">Profile</h2>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">Key</th>
+            <th scope="col">Value</th>
+        </tr>
+        </thead>
+        <tr th:each="claim : ${claims}">
+            <td th:text="${claim.key}"></td>
+            <td th:text="${claim.value}"></td>
+        </tr>
+    </table>
 </div>
 
 <div th:replace="fragments/footer :: footer"></div>
