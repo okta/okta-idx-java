@@ -73,28 +73,30 @@ class AuthenticationWrapperTest {
         assertThat(idxClientContext.codeChallenge,
                 equalTo(newUserRegistrationResponse.getIdxClientContext().codeChallenge))
 
-        //TODO: fix the below test failures
-//        setStubbedEnrollProfileResponseAfterEnroll(requestExecutor)
-//        setStubbedEnrollNewResponse(requestExecutor)
-//
-//        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.register(idxClientContext, getUserProfile())
-//        assertThat(authenticationResponse.getIdxClientContext(), notNullValue())
-//        assertThat(authenticationResponse.getIdxClientContext().state,
-//                equalTo(newUserRegistrationResponse.getIdxClientContext().state))
-//        assertThat(authenticationResponse.getIdxClientContext().interactionHandle,
-//                equalTo(newUserRegistrationResponse.getIdxClientContext().interactionHandle))
-//        assertThat(authenticationResponse.getIdxClientContext().codeVerifier,
-//                equalTo(newUserRegistrationResponse.getIdxClientContext().codeVerifier))
-//        assertThat(authenticationResponse.getIdxClientContext().codeChallenge,
-//                equalTo(newUserRegistrationResponse.getIdxClientContext().codeChallenge))
-//
-//        setStubbedEnrollAuthenticatorResponse(requestExecutor)
-//
-//        AuthenticatorUIOptions authenticatorUIOptions =
-//                idxAuthenticationWrapper.populateAuthenticatorUIOptions(idxClientContext)
-//        assertThat(authenticatorUIOptions.options, notNullValue())
-//        assertThat(authenticatorUIOptions.options, hasSize(1))
-//        assertThat(authenticatorUIOptions.options.get(0).type, equalTo("password"))
+        setStubbedEnrollProfileResponseAfterEnroll(requestExecutor)
+        setStubbedEnrollNewResponse(requestExecutor)
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.register(idxClientContext, getUserProfile())
+        assertThat(authenticationResponse.getIdxClientContext(), notNullValue())
+        assertThat(authenticationResponse.getIdxClientContext().state,
+                equalTo(newUserRegistrationResponse.getIdxClientContext().state))
+        assertThat(authenticationResponse.getIdxClientContext().interactionHandle,
+                equalTo(newUserRegistrationResponse.getIdxClientContext().interactionHandle))
+        assertThat(authenticationResponse.getIdxClientContext().codeVerifier,
+                equalTo(newUserRegistrationResponse.getIdxClientContext().codeVerifier))
+        assertThat(authenticationResponse.getIdxClientContext().codeChallenge,
+                equalTo(newUserRegistrationResponse.getIdxClientContext().codeChallenge))
+
+        setStubbedInteractResponse(requestExecutor)
+        setStubbedEnrollAuthenticatorResponse(requestExecutor)
+
+        AuthenticationTransaction authenticationTransaction = AuthenticationTransaction.create(idxClient);
+
+        AuthenticatorUIOptions authenticatorUIOptions =
+                idxAuthenticationWrapper.populateAuthenticatorUIOptions(authenticationTransaction)
+        assertThat(authenticatorUIOptions.options, notNullValue())
+        assertThat(authenticatorUIOptions.options, hasSize(1))
+        assertThat(authenticatorUIOptions.options.get(0).type, equalTo("password"))
     }
 
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {
