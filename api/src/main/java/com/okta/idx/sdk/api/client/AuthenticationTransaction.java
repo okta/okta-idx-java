@@ -61,7 +61,7 @@ final class AuthenticationTransaction {
 
     static AuthenticationTransaction proceed(IDXClient client, ProceedContext proceedContext, Factory factory) throws ProcessingException {
         IDXResponse idxResponse = factory.create();
-        Util.printRemediationOptions(idxResponse);
+        WrapperUtil.printRemediationOptions(idxResponse);
         return new AuthenticationTransaction(client, proceedContext.getClientContext(), idxResponse);
     }
 
