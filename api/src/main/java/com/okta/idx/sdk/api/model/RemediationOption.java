@@ -109,6 +109,10 @@ public class RemediationOption {
         return type;
     }
 
+    public String getHref() {
+        return href;
+    }
+
     /**
      * Get a key-value pair map of Authenticator options available for the current remediation option.
      *

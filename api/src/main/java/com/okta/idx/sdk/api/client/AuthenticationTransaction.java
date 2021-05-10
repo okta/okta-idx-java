@@ -16,11 +16,12 @@
 package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.lang.Assert;
-import com.okta.commons.lang.Collections;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
+import com.okta.idx.sdk.api.model.Options;
+import com.okta.idx.sdk.api.model.OptionsForm;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -30,9 +31,10 @@ import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 final class AuthenticationTransaction {
 
@@ -55,6 +57,12 @@ final class AuthenticationTransaction {
         WrapperUtil.printRemediationOptions(introspectResponse);
 
         return new AuthenticationTransaction(client, clientContext, introspectResponse);
+    }
+
+    static AuthenticationTransaction proceed(IDXClient client, ProceedContext proceedContext, Factory factory) throws ProcessingException {
+        IDXResponse idxResponse = factory.create();
+        Util.printRemediationOptions(idxResponse);
+        return new AuthenticationTransaction(client, proceedContext.getClientContext(), idxResponse);
     }
 
     interface Factory {
@@ -81,25 +89,28 @@ final class AuthenticationTransaction {
         return idxResponse;
     }
 
-    IDXClientContext getClientContext() {
-        return clientContext;
+    ProceedContext createProceedContext() {
+        if (idxResponse == null || idxResponse.remediation() == null || idxResponse.remediation().remediationOptions().length == 0) {
+            logger.debug("ProceedContext is null");
+            return null;
+        }
+
+        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+        String href = remediationOptions[0].getHref();
+        logger.debug("ProceedContext href: {}", href);
+
+        String skipHref = null;
+        Optional<RemediationOption> skipOptional = getOptionalRemediationOption(RemediationType.SKIP);
+        if (skipOptional.isPresent()) {
+            skipHref = skipOptional.get().getHref();
+        }
+
+        return new ProceedContext(clientContext, getStateHandle(), href, skipHref);
     }
 
     RemediationOption getRemediationOption(String name) {
         Optional<RemediationOption> remediationOptionsOptional = getOptionalRemediationOption(name);
         Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + name);
-        return remediationOptionsOptional.get();
-    }
-
-    RemediationOption getRemediationOption(String... names) {
-        if (idxResponse == null || idxResponse.remediation() == null) {
-            throw new IllegalArgumentException("Missing remediation option " + Arrays.toString(names));
-        }
-        Set<String> nameSet = Collections.toSet(names);
-        Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(idxResponse.remediation().remediationOptions())
-                .filter(x -> nameSet.contains(x.getName()))
-                .findFirst();
-        Assert.isTrue(remediationOptionsOptional.isPresent(), "Missing remediation option " + Arrays.toString(names));
         return remediationOptionsOptional.get();
     }
 
@@ -128,9 +139,10 @@ final class AuthenticationTransaction {
 
     AuthenticationResponse asAuthenticationResponse(AuthenticationStatus defaultStatus) throws ProcessingException {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        authenticationResponse.setIdxClientContext(clientContext);
+        authenticationResponse.setProceedContext(createProceedContext());
 
         copyErrorMessages(idxResponse, authenticationResponse);
+        fillOutAuthenticators(authenticationResponse);
 
         if (idxResponse.isLoginSuccessful()) {
             // login successful
@@ -151,9 +163,10 @@ final class AuthenticationTransaction {
 
     AuthenticationResponse asAuthenticationResponseExpecting(AuthenticationStatus status) {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        authenticationResponse.setIdxClientContext(clientContext);
+        authenticationResponse.setProceedContext(createProceedContext());
 
         copyErrorMessages(idxResponse, authenticationResponse);
+        fillOutAuthenticators(authenticationResponse);
 
         if (authenticationResponse.getErrors().isEmpty()) {
             authenticationResponse.setAuthenticationStatus(status);
@@ -186,5 +199,66 @@ final class AuthenticationTransaction {
         }
         Arrays.stream(idxResponse.getMessages().getValue())
                 .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+    }
+
+    private void fillOutAuthenticators(AuthenticationResponse authenticationResponse) {
+        if (idxResponse == null || idxResponse.remediation() == null) {
+            return;
+        }
+        for (RemediationOption remediationOption : idxResponse.remediation().remediationOptions()) {
+            fillOutAuthenticators(remediationOption, authenticationResponse);
+        }
+    }
+
+    private void fillOutAuthenticators(RemediationOption remediationOption, AuthenticationResponse authenticationResponse) {
+        FormValue[] formValues = remediationOption.form();
+
+        Optional<FormValue> formValueOptional = Arrays.stream(formValues)
+                .filter(x -> "authenticator".equals(x.getName()))
+                .findFirst();
+
+        if (formValueOptional.isPresent()) {
+            List<Authenticator> authenticators = new ArrayList<>();
+            Options[] options = formValueOptional.get().options();
+
+            for (Options option : options) {
+                String methodType = null;
+                String id = null;
+                String enrollmentId = null;
+                List<String> nestedMethods = new ArrayList<>();
+
+                FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
+                for (FormValue formValue : optionFormValues) {
+                    if (formValue.getName().equals("methodType")) {
+                        methodType = String.valueOf(formValue.getValue());
+
+                        // parse value from children
+                        Options[] nestedOptions = formValue.options();
+                        if (nestedOptions.length == 0) {
+                            nestedMethods.add(methodType);
+                        } else {
+                            for (Options children : nestedOptions) {
+                                nestedMethods.add(String.valueOf(children.getValue()));
+                            }
+                        }
+                    }
+                    if (formValue.getName().equals("id")) {
+                        id = String.valueOf(formValue.getValue());
+                    }
+                    if (formValue.getName().equals("enrollmentId")) {
+                        enrollmentId = String.valueOf(formValue.getValue());
+                    }
+                }
+                if (!nestedMethods.isEmpty()) {
+                    List<Authenticator.Factor> factors = new ArrayList<>();
+                    for (String method : nestedMethods) {
+                        factors.add(new Authenticator.Factor(id, method, enrollmentId));
+                    }
+                    authenticators.add(new Authenticator(methodType, factors));
+                }
+            }
+
+            authenticationResponse.setAuthenticators(authenticators);
+        }
     }
 }

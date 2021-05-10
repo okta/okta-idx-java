@@ -15,15 +15,15 @@
  */
 package com.okta.idx.sdk.api.response;
 
+import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.FormValue;
-import com.okta.idx.sdk.api.model.IDXClientContext;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class NewUserRegistrationResponse {
 
-    private IDXClientContext idxClientContext;
+    private ProceedContext proceedContext;
 
     private List<String> errors;
 
@@ -53,11 +53,11 @@ public class NewUserRegistrationResponse {
         return getErrors().add(error);
     }
 
-    public IDXClientContext getIdxClientContext() {
-        return idxClientContext;
+    public ProceedContext getProceedContext() {
+        return proceedContext;
     }
 
-    public void setIdxClientContext(IDXClientContext idxClientContext) {
-        this.idxClientContext = idxClientContext;
+    public void setProceedContext(ProceedContext proceedContext) {
+        this.proceedContext = proceedContext;
     }
 }

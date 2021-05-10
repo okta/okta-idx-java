@@ -18,9 +18,9 @@ package com.okta.idx.sdk.api.client
 
 import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
-import com.okta.idx.sdk.api.model.AuthenticatorUIOptions
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
+import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
 import com.okta.idx.sdk.api.response.AuthenticationResponse
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse
 import org.testng.annotations.Test
@@ -54,49 +54,68 @@ class AuthenticationWrapperTest {
         assertThat(newUserRegistrationResponse.getErrors(), nullValue())
         assertThat(newUserRegistrationResponse.getFormValues(), notNullValue())
         assertThat(newUserRegistrationResponse.getFormValues(), hasSize(1))
-        assertThat(newUserRegistrationResponse.getIdxClientContext().state, notNullValue())
-        assertThat(newUserRegistrationResponse.getIdxClientContext().interactionHandle, notNullValue())
-        assertThat(newUserRegistrationResponse.getIdxClientContext().interactionHandle, equalTo("003Q14X7li"))
-        assertThat(newUserRegistrationResponse.getIdxClientContext().codeVerifier, notNullValue())
-        assertThat(newUserRegistrationResponse.getIdxClientContext().codeChallenge, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().state, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle, equalTo("003Q14X7li"))
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge, notNullValue())
 
         setStubbedInteractResponse(requestExecutor)
         setStubbedIntrospectResponse(requestExecutor)
 
-        IDXClientContext idxClientContext = newUserRegistrationResponse.getIdxClientContext()
+        IDXClientContext idxClientContext = newUserRegistrationResponse.getProceedContext().getClientContext()
         assertThat(idxClientContext.state,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().state))
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
         assertThat(idxClientContext.interactionHandle,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().interactionHandle))
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle))
         assertThat(idxClientContext.codeVerifier,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().codeVerifier))
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier))
         assertThat(idxClientContext.codeChallenge,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().codeChallenge))
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
 
         setStubbedEnrollProfileResponseAfterEnroll(requestExecutor)
         setStubbedEnrollNewResponse(requestExecutor)
 
-        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.register(idxClientContext, getUserProfile())
-        assertThat(authenticationResponse.getIdxClientContext(), notNullValue())
-        assertThat(authenticationResponse.getIdxClientContext().state,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().state))
-        assertThat(authenticationResponse.getIdxClientContext().interactionHandle,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().interactionHandle))
-        assertThat(authenticationResponse.getIdxClientContext().codeVerifier,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().codeVerifier))
-        assertThat(authenticationResponse.getIdxClientContext().codeChallenge,
-                equalTo(newUserRegistrationResponse.getIdxClientContext().codeChallenge))
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+        assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
+        assertThat(authenticationResponse.getProceedContext().getClientContext().state,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
+        assertThat(authenticationResponse.getProceedContext().getClientContext().interactionHandle,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle))
+        assertThat(authenticationResponse.getProceedContext().getClientContext().codeVerifier,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier))
+        assertThat(authenticationResponse.getProceedContext().getClientContext().codeChallenge,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
 
         setStubbedInteractResponse(requestExecutor)
         setStubbedEnrollAuthenticatorResponse(requestExecutor)
+    }
 
-        AuthenticationTransaction authenticationTransaction = AuthenticationTransaction.create(idxClient);
+    @Test
+    void verifyEmailErrorResponseTest() {
 
-        AuthenticatorUIOptions authenticatorUIOptions =
-                idxAuthenticationWrapper.populateAuthenticatorUIOptions(authenticationTransaction)
-        assertThat(authenticatorUIOptions.options, notNullValue())
-        assertThat(authenticatorUIOptions.options, hasSize(1))
-        assertThat(authenticatorUIOptions.options.get(0).type, equalTo("password"))
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setStubbedInteractResponse(requestExecutor)
+        setStubbedIntrospectResponse(requestExecutor)
+
+        AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient);
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("wrong_code");
+
+        setStubbedChallengeResponse(requestExecutor)
+        setStubbedChallengeErrorResponse(requestExecutor)
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
+                new ProceedContext(introspectTransaction.clientContext, introspectTransaction.getStateHandle(), "/challenge/answer", null),
+                verifyAuthenticatorOptions
+        )
+
+        assertThat(authenticationResponse.getErrors(), hasSize(1))
+        assertThat(authenticationResponse.getErrors().get(0), equalTo("Invalid code. Try again."))
     }
 
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {
@@ -104,7 +123,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("interact")
                 }) as Request)
-        ).thenReturn(getResponseByResourceFileName("interact-response", MediaType.APPLICATION_JSON))
+        ).thenReturn(getResponseByResourceFileName("interact-response", 200, MediaType.APPLICATION_JSON))
     }
 
     void setStubbedIntrospectResponse(RequestExecutor requestExecutor) {
@@ -112,7 +131,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("introspect-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("introspect-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollProfileResponse(RequestExecutor requestExecutor) {
@@ -120,7 +139,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("enroll")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-user-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("enroll-user-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollProfileResponseAfterEnroll(RequestExecutor requestExecutor) {
@@ -128,7 +147,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-user-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("enroll-user-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollNewResponse(RequestExecutor requestExecutor) {
@@ -136,7 +155,7 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("enroll/new")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-profile-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("enroll-profile-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedEnrollAuthenticatorResponse(RequestExecutor requestExecutor) {
@@ -144,12 +163,28 @@ class AuthenticationWrapperTest {
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
                 }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-registration-response", mediaTypeAppIonJson))
+        )).thenReturn(getResponseByResourceFileName("enroll-registration-response", 200, mediaTypeAppIonJson))
     }
 
-    Response getResponseByResourceFileName(String responseName, MediaType mediaType) {
+    void setStubbedChallengeResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("challenge-response", 200, mediaTypeAppIonJson))
+    }
+
+    void setStubbedChallengeErrorResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("challenge/answer")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("challenge-error-response", 401, mediaTypeAppIonJson))
+    }
+
+    Response getResponseByResourceFileName(String responseName, Integer httpStatus, MediaType mediaType) {
         return new DefaultResponse(
-                200,
+                httpStatus,
                 mediaType,
                 new FileInputStream(getClass().getClassLoader().getResource(responseName + ".json").getFile()),
                 -1)
