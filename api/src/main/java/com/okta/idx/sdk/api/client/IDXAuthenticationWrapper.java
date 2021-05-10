@@ -44,7 +44,6 @@ import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
-import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import org.slf4j.Logger;
@@ -56,6 +55,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.okta.idx.sdk.api.client.WrapperUtil.handleProcessingException;
 
 /**
  * Wrapper to enable a client to interact with the backend IDX APIs.
@@ -112,7 +113,8 @@ public class IDXAuthenticationWrapper {
             AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
 
             // Check if identify flow needs to include credentials
-            boolean isIdentifyInOneStep = introspectTransaction.isRemediationRequireCredentials(RemediationType.IDENTIFY);
+            boolean isIdentifyInOneStep =
+                    introspectTransaction.isRemediationRequireCredentials(RemediationType.IDENTIFY);
 
             IdentifyRequest identifyRequest;
 
@@ -153,7 +155,8 @@ public class IDXAuthenticationWrapper {
                                     .withCredentials(credentials)
                                     .build();
 
-                    return passwordTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR).proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+                    return passwordTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR)
+                            .proceed(client, passwordAuthenticatorAnswerChallengeRequest);
                 });
                 return answerTransaction.asAuthenticationResponse();
             }
@@ -167,34 +170,11 @@ public class IDXAuthenticationWrapper {
         return authenticationResponse;
     }
 
-    // If app sign-on policy is set to "any 1 factor", the next remediation after identify is
-    // select-authenticator-authenticate
-    // Check if that's the case, and proceed to select password authenticator
-    private AuthenticationTransaction selectPasswordAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction) throws ProcessingException {
-        Optional<RemediationOption> remediationOptionOptional = authenticationTransaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
-        if (!remediationOptionOptional.isPresent()) {
-            // We don't need to.
-            return authenticationTransaction;
-        }
-        Map<String, String> authenticatorOptions = remediationOptionOptional.get().getAuthenticatorOptions();
-
-        Authenticator authenticator = new Authenticator();
-        authenticator.setId(authenticatorOptions.get("password"));
-
-        ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
-                .withStateHandle(authenticationTransaction.getStateHandle())
-                .withAuthenticator(authenticator)
-                .build();
-
-        return authenticationTransaction.proceed(() ->
-                remediationOptionOptional.get().proceed(client, selectAuthenticatorRequest)
-        );
-    }
-
     /**
      * Change password with the supplied change password options reference.
      *
      * @param proceedContext      the ProceedContext
+     * @param changePasswordOptions the change password options reference
      * @return the Authentication response
      */
     public AuthenticationResponse changePassword(ProceedContext proceedContext,
@@ -309,51 +289,6 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Populate UI form values for signing up a new user.
-     *
-     * @return the new user registration response
-     */
-    public NewUserRegistrationResponse fetchSignUpFormValues() {
-
-        List<FormValue> enrollProfileFormValues;
-
-        NewUserRegistrationResponse newUserRegistrationResponse = new NewUserRegistrationResponse();
-
-        try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
-
-            // enroll new user
-            AuthenticationTransaction enrollTransaction = introspectTransaction.proceed(() -> {
-                RemediationOption selectEnrollProfileRemediationOption =
-                        introspectTransaction.getRemediationOption(RemediationType.SELECT_ENROLL_PROFILE);
-
-                EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-                return selectEnrollProfileRemediationOption.proceed(client, enrollRequest);
-            });
-
-
-            RemediationOption enrollProfileRemediationOption =
-                    enrollTransaction.getRemediationOption(RemediationType.ENROLL_PROFILE);
-
-            enrollProfileFormValues = Arrays.stream(enrollProfileRemediationOption.form())
-                    .filter(x -> "userProfile".equals(x.getName()))
-                    .collect(Collectors.toList());
-
-            newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
-            newUserRegistrationResponse.setProceedContext(enrollTransaction.createProceedContext());
-        } catch (ProcessingException e) {
-            handleProcessingException(e, newUserRegistrationResponse);
-        } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            newUserRegistrationResponse.addError(e.getMessage());
-        }
-
-        return newUserRegistrationResponse;
-    }
-
-    /**
      * Register new user with the supplied user profile reference.
      *
      * @param proceedContext      the ProceedContext
@@ -396,8 +331,10 @@ public class IDXAuthenticationWrapper {
      * @param factor     the factor
      * @return the Authentication response
      */
-    public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext, com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+    public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext, 
+                                                      com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
+
+      AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
@@ -429,12 +366,13 @@ public class IDXAuthenticationWrapper {
      * Verify the email code from the authentication process with the user supplied email passcode.
      *
      * @param proceedContext      the ProceedContext
-     * @param passcode              the user supplied email passcode
+     * @param passcode            the user supplied email passcode
      * @return the Authentication response
      */
     public AuthenticationResponse authenticateEmail(ProceedContext proceedContext,
-            String passcode) {
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+                                                    String passcode) {
+
+      AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
@@ -602,6 +540,9 @@ public class IDXAuthenticationWrapper {
      * Get IDX client context by calling the interact endpoint.
      * ClientContext reference contains the interaction handle and PKCE params.
      *
+     * This function can be used by the client applications to get a handle
+     * of {@link IDXClientContext} which can be used to reenter/resume the flow.
+     *
      * @return the idx client context
      */
     public IDXClientContext getClientContext() {
@@ -633,67 +574,73 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Helper to parse {@link ProcessingException} and populate {@link AuthenticationResponse}
-     * with appropriate error messages.
+     * Populate UI form values for signing up a new user.
      *
-     * @param e the {@link ProcessingException} reference
-     * @param authenticationResponse the {@link AuthenticationResponse} reference
+     * @return the new user registration response
      */
-    private void handleProcessingException(ProcessingException e,
-                                           AuthenticationResponse authenticationResponse) {
-        logger.error("Exception occurred", e);
-        ErrorResponse errorResponse = e.getErrorResponse();
-        if (errorResponse != null) {
-            if (errorResponse.getMessages() != null) {
-                Arrays.stream(errorResponse.getMessages().getValue())
-                        .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
-            } else {
-                authenticationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
-            }
-        } else {
-            authenticationResponse.addError(e.getMessage());
-        }
-        logger.error("Error Detail: {}", authenticationResponse.getErrors());
-    }
+    public NewUserRegistrationResponse fetchSignUpFormValues() {
 
-    /**
-     * Helper to parse {@link ProcessingException} and populate {@link NewUserRegistrationResponse}
-     * with appropriate error messages.
-     *
-     * @param e the {@link ProcessingException} reference
-     * @param newUserRegistrationResponse the {@link NewUserRegistrationResponse} reference
-     */
-    private void handleProcessingException(ProcessingException e,
-                                           NewUserRegistrationResponse newUserRegistrationResponse) {
-        logger.error("Exception occurred", e);
-        ErrorResponse errorResponse = e.getErrorResponse();
-        if (errorResponse != null) {
-            if (errorResponse.getMessages() != null) {
-                Arrays.stream(errorResponse.getMessages().getValue())
-                        .forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
-            } else {
-                newUserRegistrationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
-            }
-        } else {
+        List<FormValue> enrollProfileFormValues;
+
+        NewUserRegistrationResponse newUserRegistrationResponse = new NewUserRegistrationResponse();
+
+        try {
+            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
+
+            // enroll new user
+            AuthenticationTransaction enrollTransaction = introspectTransaction.proceed(() -> {
+                RemediationOption selectEnrollProfileRemediationOption =
+                        introspectTransaction.getRemediationOption(RemediationType.SELECT_ENROLL_PROFILE);
+
+                EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                        .withStateHandle(introspectTransaction.getStateHandle())
+                        .build();
+                return selectEnrollProfileRemediationOption.proceed(client, enrollRequest);
+            });
+
+            RemediationOption enrollProfileRemediationOption =
+                    enrollTransaction.getRemediationOption(RemediationType.ENROLL_PROFILE);
+
+            enrollProfileFormValues = Arrays.stream(enrollProfileRemediationOption.form())
+                    .filter(x -> "userProfile".equals(x.getName()))
+                    .collect(Collectors.toList());
+
+            newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
+            newUserRegistrationResponse.setProceedContext(enrollTransaction.createProceedContext());
+        } catch (ProcessingException e) {
+            handleProcessingException(e, newUserRegistrationResponse);
+        } catch (IllegalArgumentException e) {
+            logger.error("Exception occurred", e);
             newUserRegistrationResponse.addError(e.getMessage());
         }
-        logger.error("Error Detail: {}", newUserRegistrationResponse.getErrors());
+
+        return newUserRegistrationResponse;
     }
 
-    /**
-     * Helper to check if we have landed terminal success/no more remediation steps to follow.
-     *
-     * @param idxClientContext      the IDX Client context
-     * @return true if login is successful and if there are no more remediation steps to follow; false otherwise.
-     */
-    public boolean isTerminalSuccess(IDXClientContext idxClientContext) {
-        try {
-            AuthenticationTransaction transaction = AuthenticationTransaction.introspect(client, idxClientContext);
-            return transaction.getResponse().isLoginSuccessful();
-        } catch (ProcessingException e) {
-            logger.error("Error occurred:", e);
-            return false;
+    // If app sign-on policy is set to "any 1 factor", the next remediation after identify is
+    // select-authenticator-authenticate
+    // Check if that's the case, and proceed to select password authenticator
+    private AuthenticationTransaction selectPasswordAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction)
+            throws ProcessingException {
+        Optional<RemediationOption> remediationOptionOptional =
+                authenticationTransaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+        if (!remediationOptionOptional.isPresent()) {
+            // We don't need to.
+            return authenticationTransaction;
         }
+        Map<String, String> authenticatorOptions = remediationOptionOptional.get().getAuthenticatorOptions();
+
+        Authenticator authenticator = new Authenticator();
+        authenticator.setId(authenticatorOptions.get("password"));
+
+        ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
+                .withStateHandle(authenticationTransaction.getStateHandle())
+                .withAuthenticator(authenticator)
+                .build();
+
+        return authenticationTransaction.proceed(() ->
+                remediationOptionOptional.get().proceed(client, selectAuthenticatorRequest)
+        );
     }
 
     /**

@@ -77,7 +77,8 @@ class AuthenticationWrapperTest {
         setStubbedEnrollProfileResponseAfterEnroll(requestExecutor)
         setStubbedEnrollNewResponse(requestExecutor)
 
-        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
         assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
         assertThat(authenticationResponse.getProceedContext().getClientContext().state,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
@@ -88,6 +89,7 @@ class AuthenticationWrapperTest {
         assertThat(authenticationResponse.getProceedContext().getClientContext().codeChallenge,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
 
+        setStubbedInteractResponse(requestExecutor)
         setStubbedEnrollAuthenticatorResponse(requestExecutor)
     }
 
@@ -103,14 +105,15 @@ class AuthenticationWrapperTest {
         setStubbedInteractResponse(requestExecutor)
         setStubbedIntrospectResponse(requestExecutor)
 
-        AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient);
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("wrong_code");
+        AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient)
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("wrong_code")
 
         setStubbedChallengeResponse(requestExecutor)
         setStubbedChallengeErrorResponse(requestExecutor)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
-                new ProceedContext(introspectTransaction.clientContext, introspectTransaction.getStateHandle(), "/challenge/answer", null),
+                new ProceedContext(introspectTransaction.clientContext,
+                        introspectTransaction.getStateHandle(), "/challenge/answer", null),
                 verifyAuthenticatorOptions
         )
 
@@ -253,14 +256,15 @@ class AuthenticationWrapperTest {
                 -1)
     }
 
-    UserProfile getUserProfile() {
+    static UserProfile getUserProfile() {
         UserProfile userProfile = new UserProfile()
         userProfile.addAttribute("lastName", "Last")
         userProfile.addAttribute("firstName", "First")
         userProfile.addAttribute("email", "email@test.com")
+        return userProfile;
     }
 
-    ClientConfiguration getClientConfiguration() {
+    static ClientConfiguration getClientConfiguration() {
         ClientConfiguration clientConfiguration = new ClientConfiguration()
         clientConfiguration.setIssuer("http://example.com")
         clientConfiguration.setClientId("test-client-id")

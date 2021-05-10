@@ -114,7 +114,9 @@ public class SuccessResponse {
      * Exchange interaction code for token
      *
      * @param client the idx client instance
+     * @param idxClientContext the idc client context instance
      * @return TokenResponse
+     * @throws ProcessingException if processing error is encountered
      */
     public TokenResponse exchangeCode(IDXClient client, IDXClientContext idxClientContext) throws ProcessingException {
         String grantType = this.parseGrantType();

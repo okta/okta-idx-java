@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 
 final class AuthenticationTransaction {
+
     static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
         IDXClientContext idxClientContext = client.interact();
         Assert.notNull(idxClientContext, "IDX client context may not be null");
@@ -45,7 +46,7 @@ final class AuthenticationTransaction {
         String stateHandle = introspectResponse.getStateHandle();
         Assert.hasText(stateHandle, "State handle may not be null");
 
-        Util.printRemediationOptions(introspectResponse);
+        WrapperUtil.printRemediationOptions(introspectResponse);
 
         return new AuthenticationTransaction(client, idxClientContext, introspectResponse);
     }
@@ -53,14 +54,14 @@ final class AuthenticationTransaction {
     static AuthenticationTransaction introspect(IDXClient client, IDXClientContext clientContext) throws ProcessingException {
         IDXResponse introspectResponse = client.introspect(clientContext);
 
-        Util.printRemediationOptions(introspectResponse);
+        WrapperUtil.printRemediationOptions(introspectResponse);
 
         return new AuthenticationTransaction(client, clientContext, introspectResponse);
     }
 
     static AuthenticationTransaction proceed(IDXClient client, ProceedContext proceedContext, Factory factory) throws ProcessingException {
         IDXResponse idxResponse = factory.create();
-        Util.printRemediationOptions(idxResponse);
+        WrapperUtil.printRemediationOptions(idxResponse);
         return new AuthenticationTransaction(client, proceedContext.getClientContext(), idxResponse);
     }
 
@@ -128,7 +129,7 @@ final class AuthenticationTransaction {
 
     AuthenticationTransaction proceed(Factory factory) throws ProcessingException {
         IDXResponse idxResponse = factory.create();
-        Util.printRemediationOptions(idxResponse);
+        WrapperUtil.printRemediationOptions(idxResponse);
         return new AuthenticationTransaction(client, clientContext, idxResponse);
     }
 

@@ -85,7 +85,8 @@ public class LoginController {
 
         if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION) {
             ModelAndView mav = new ModelAndView("select-authenticators");
-            mav.addObject("factorList", factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
+            mav.addObject("factorList",
+                    getFactorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
             return mav;
         }
 
@@ -127,7 +128,8 @@ public class LoginController {
         switch (authenticationResponse.getAuthenticationStatus()) {
             case AWAITING_AUTHENTICATOR_SELECTION:
                 mav = new ModelAndView("forgot-password-authenticators");
-                mav.addObject("factorList", factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
+                mav.addObject("factorList",
+                        getFactorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
                 return mav;
 
             case AWAITING_USER_EMAIL_ACTIVATION:
@@ -156,13 +158,14 @@ public class LoginController {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.selectAuthenticator(proceedContext, getFactorFromMethod(session, authenticatorType));
+                idxAuthenticationWrapper.selectAuthenticator(proceedContext,
+                        getFactorFromMethod(session, authenticatorType));
 
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getErrors().size() > 0) {
             ModelAndView mav = new ModelAndView("forgot-password-authenticators");
-            mav.addObject("errors", authenticationResponse.getAuthenticationStatus().toString());
+            mav.addObject("errors", authenticationResponse.getErrors());
             return mav;
         }
 
@@ -178,10 +181,12 @@ public class LoginController {
      */
     @PostMapping(value = "/select-authenticator")
     public ModelAndView selectAuthenticator(final @RequestParam("authenticator-type") String authenticatorType,
-            final HttpSession session) {
+                                            final HttpSession session) {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
-        AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.selectAuthenticator(proceedContext, getFactorFromMethod(session, authenticatorType));
+
+      AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.selectAuthenticator(proceedContext,
+                        getFactorFromMethod(session, authenticatorType));
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getErrors().size() > 0) {
@@ -202,10 +207,11 @@ public class LoginController {
      */
     @PostMapping(value = "/authenticate-email")
     public ModelAndView authenticateEmail(final @RequestParam("code") String code,
-            final HttpSession session) {
+                                          final HttpSession session) {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticateEmail(proceedContext, code);
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.authenticateEmail(proceedContext, code);
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getErrors().size() > 0) {
@@ -320,7 +326,8 @@ public class LoginController {
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
 
-        NewUserRegistrationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues();
+        NewUserRegistrationResponse newUserRegistrationResponse =
+                idxAuthenticationWrapper.fetchSignUpFormValues();
 
         UserProfile userProfile = new UserProfile();
         userProfile.addAttribute("lastName", lastname);
@@ -344,8 +351,8 @@ public class LoginController {
             return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
         }
 
-        mav.addObject("factorList", factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
-
+        mav.addObject("factorList",
+                getFactorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
         return mav;
     }
 
@@ -364,7 +371,8 @@ public class LoginController {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.enrollAuthenticator(proceedContext, getFactorFromMethod(session, authenticatorType));
+                idxAuthenticationWrapper.enrollAuthenticator(proceedContext,
+                        getFactorFromMethod(session, authenticatorType));
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getErrors().size() > 0) {
@@ -440,7 +448,8 @@ public class LoginController {
         }
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
-        mav.addObject("factorList", factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
+        mav.addObject("factorList",
+                getFactorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
         return mav;
     }
 
@@ -492,7 +501,9 @@ public class LoginController {
             }
         }
 
-        List<String> factorList = factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators());
+        List<String> factorList =
+                getFactorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators());
+
         if (factorList.size() == 0) {
             ModelAndView mav = new ModelAndView("login");
             mav.addObject("info", "Success");
@@ -556,7 +567,8 @@ public class LoginController {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.submitPhoneAuthenticator(proceedContext, phone, getFactorFromMethod(session, mode));
+                idxAuthenticationWrapper.submitPhoneAuthenticator(proceedContext,
+                        phone, getFactorFromMethod(session, mode));
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         ModelAndView mav = new ModelAndView("verify-phone-authenticator-enrollment");
@@ -596,19 +608,21 @@ public class LoginController {
                 return homeHelper.proceedToHome(response.getTokenResponse(), session);
             } else if (response.getAuthenticationStatus() == AuthenticationStatus.SKIP_COMPLETE) {
                 ModelAndView mav = new ModelAndView("login");
-                if (response.getErrors().size() == 1) {
-                    mav.addObject("info", response.getErrors().get(0));
+                if (response.getErrors().size() > 0) {
+                    mav.addObject("info", response.getErrors());
                 }
                 return mav;
             }
         }
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
-        mav.addObject("factorList", factorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
+        mav.addObject("factorList",
+                getFactorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators()));
         return mav;
     }
 
-    private List<String> factorMethodsFromAuthenticators(final HttpSession session, final List<Authenticator> authenticators) {
+    private List<String> getFactorMethodsFromAuthenticators(final HttpSession session,
+                                                            final List<Authenticator> authenticators) {
         List<String> factorMethods = new ArrayList<>();
         for (Authenticator authenticator : authenticators) {
             for (Authenticator.Factor factor : authenticator.getFactors()) {
@@ -619,7 +633,8 @@ public class LoginController {
         return factorMethods;
     }
 
-    private Authenticator.Factor getFactorFromMethod(final HttpSession session, final String method) {
+    private Authenticator.Factor getFactorFromMethod(final HttpSession session,
+                                                     final String method) {
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
         for (Authenticator authenticator : authenticators) {
             for (Authenticator.Factor factor : authenticator.getFactors()) {

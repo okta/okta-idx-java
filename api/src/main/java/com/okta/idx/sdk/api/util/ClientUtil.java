@@ -32,9 +32,10 @@ public class ClientUtil {
      * @param issuer the issuer url
      * @param resourceUri the uri of resource
      * @return the normalized full url
+     * @throws MalformedURLException if the issuer URi is malformed
      */
     public static String getNormalizedUri(String issuer, String resourceUri) throws MalformedURLException {
-        // remove trailing /
+        // remove trailing forward slash
         String normalizedUri = issuer.replaceAll("$/", "");
 
         if (isRootOrgIssuer(issuer)) {
@@ -56,8 +57,9 @@ public class ClientUtil {
      *      https://sample.okta.com/oauth2/default (non-root issuer/org url)
      *      https://sample.okta.com/oauth2/ausar5cbq5TRRsbcJ0h7 (non-root issuer/org url)
      *
-     * @param issuerUri
+     * @param issuerUri the issuer uri
      * @return true if root/org, false otherwise
+     * @throws MalformedURLException if the issuer uri is invalid
      */
     public static boolean isRootOrgIssuer(String issuerUri) throws MalformedURLException {
         String uriPath = new URL(issuerUri).getPath();
