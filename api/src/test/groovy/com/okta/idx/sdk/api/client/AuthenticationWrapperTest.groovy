@@ -18,6 +18,7 @@ package com.okta.idx.sdk.api.client
 
 import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
+import com.okta.idx.sdk.api.model.AuthenticationStatus
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
@@ -117,6 +118,37 @@ class AuthenticationWrapperTest {
         assertThat(authenticationResponse.getErrors().get(0), equalTo("Invalid code. Try again."))
     }
 
+    @Test
+    void recoverPasswordTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setStubbedInteractResponse(requestExecutor)
+        setStubbedIntrospectResponse(requestExecutor)
+        setStubbedRecoverTransactionResponse(requestExecutor)
+        setStubbedIdentifyResponse(requestExecutor)
+
+        String userEmail = "joe.coder" + (new Random()).nextInt(1000) + "@example.com"
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.recoverPassword(userEmail)
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                equalTo(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION))
+
+        setChallengeResponse(requestExecutor)
+        setAnswerChallengeResponse(requestExecutor)
+
+        List<Authenticator> authenticators = authenticationResponse.getAuthenticators()
+        assertThat(authenticators, notNullValue())
+        assertThat(authenticators, hasItem(
+                hasProperty("method", is("email")))
+        )
+    }
+
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {
         when(requestExecutor.executeRequest(
                 argThat({
@@ -179,6 +211,38 @@ class AuthenticationWrapperTest {
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("challenge/answer")
                 }) as Request
         )).thenReturn(getResponseByResourceFileName("challenge-error-response", 401, mediaTypeAppIonJson))
+    }
+
+    void setStubbedRecoverTransactionResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("recover-transaction-response", 200, mediaTypeAppIonJson))
+    }
+
+    void setStubbedIdentifyResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("identify-response", 200, mediaTypeAppIonJson))
+    }
+
+    void setChallengeResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("challenge-response", 200, mediaTypeAppIonJson))
+    }
+
+    void setAnswerChallengeResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("answer-challenge-response", 200, mediaTypeAppIonJson))
     }
 
     Response getResponseByResourceFileName(String responseName, Integer httpStatus, MediaType mediaType) {
