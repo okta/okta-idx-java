@@ -17,7 +17,6 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.RemediationOption;
-import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
@@ -26,37 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 final class WrapperUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(WrapperUtil.class);
-
-    /**
-     * Helper to conditionally extract select authenticator enroll or authenticate
-     * remediation option from {@link AuthenticationTransaction} reference.
-     *
-     * @param transaction      the authentication transaction reference
-     * @return remediation option (either select auth enroll or select auth authenticate)
-     */
-    static RemediationOption getSelectAuthenticatorRemediationOption(AuthenticationTransaction transaction) {
-        RemediationOption remediationOption = null;
-
-        Optional<RemediationOption> selectAuthenticatorEnrollOptional =
-                transaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_ENROLL);
-        if (selectAuthenticatorEnrollOptional.isPresent()) {
-            remediationOption = selectAuthenticatorEnrollOptional.get();
-        }
-
-        Optional<RemediationOption> selectAuthenticatorAuthenticateOptional =
-                transaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
-        if (selectAuthenticatorAuthenticateOptional.isPresent()) {
-            remediationOption = selectAuthenticatorAuthenticateOptional.get();
-        }
-
-        return remediationOption;
-    }
 
     /**
      * Helper to parse {@link ProcessingException} and populate {@link AuthenticationResponse}

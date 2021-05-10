@@ -32,7 +32,8 @@ public class PkceUtil {
      *
      * @param codeVerifier the code verifier
      * @return generated code challenge
-     * @throws NoSuchAlgorithmException
+     * @throws NoSuchAlgorithmException if no Provider supports a MessageDigestSpi
+     *         implementation for the specified algorithm.
      */
     public static String generateCodeChallenge(String codeVerifier) throws NoSuchAlgorithmException {
 

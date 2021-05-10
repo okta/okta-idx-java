@@ -26,6 +26,7 @@ import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.Recover;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
+import com.okta.idx.sdk.api.model.TokenType;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
@@ -173,6 +174,7 @@ public class IDXAuthenticationWrapper {
      * Change password with the supplied change password options reference.
      *
      * @param proceedContext      the ProceedContext
+     * @param changePasswordOptions the change password options reference
      * @return the Authentication response
      */
     public AuthenticationResponse changePassword(ProceedContext proceedContext,
@@ -556,30 +558,19 @@ public class IDXAuthenticationWrapper {
         return idxClientContext;
     }
 
-    // If app sign-on policy is set to "any 1 factor", the next remediation after identify is
-    // select-authenticator-authenticate
-    // Check if that's the case, and proceed to select password authenticator
-    private AuthenticationTransaction selectPasswordAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction)
-            throws ProcessingException {
-        Optional<RemediationOption> remediationOptionOptional =
-                authenticationTransaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
-        if (!remediationOptionOptional.isPresent()) {
-            // We don't need to.
-            return authenticationTransaction;
+    /**
+     * Revoke the oauth2 token.
+     *
+     * @param tokenType the token type (access|refresh)
+     * @param token the token
+     */
+    public void revokeToken(TokenType tokenType, String token) {
+
+        try {
+            client.revokeToken(tokenType.toString(), token);
+        } catch (ProcessingException e) {
+            logger.error("Exception occurred", e);
         }
-        Map<String, String> authenticatorOptions = remediationOptionOptional.get().getAuthenticatorOptions();
-
-        Authenticator authenticator = new Authenticator();
-        authenticator.setId(authenticatorOptions.get("password"));
-
-        ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
-                .withStateHandle(authenticationTransaction.getStateHandle())
-                .withAuthenticator(authenticator)
-                .build();
-
-        return authenticationTransaction.proceed(() ->
-                remediationOptionOptional.get().proceed(client, selectAuthenticatorRequest)
-        );
     }
 
     /**
@@ -624,6 +615,32 @@ public class IDXAuthenticationWrapper {
         }
 
         return newUserRegistrationResponse;
+    }
+
+    // If app sign-on policy is set to "any 1 factor", the next remediation after identify is
+    // select-authenticator-authenticate
+    // Check if that's the case, and proceed to select password authenticator
+    private AuthenticationTransaction selectPasswordAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction)
+            throws ProcessingException {
+        Optional<RemediationOption> remediationOptionOptional =
+                authenticationTransaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
+        if (!remediationOptionOptional.isPresent()) {
+            // We don't need to.
+            return authenticationTransaction;
+        }
+        Map<String, String> authenticatorOptions = remediationOptionOptional.get().getAuthenticatorOptions();
+
+        Authenticator authenticator = new Authenticator();
+        authenticator.setId(authenticatorOptions.get("password"));
+
+        ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
+                .withStateHandle(authenticationTransaction.getStateHandle())
+                .withAuthenticator(authenticator)
+                .build();
+
+        return authenticationTransaction.proceed(() ->
+                remediationOptionOptional.get().proceed(client, selectAuthenticatorRequest)
+        );
     }
 
     /**
