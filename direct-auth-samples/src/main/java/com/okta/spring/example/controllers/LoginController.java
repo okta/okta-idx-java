@@ -211,7 +211,7 @@ public class LoginController {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.authenticateEmail(proceedContext, code);
+                idxAuthenticationWrapper.verifyAuthenticator(proceedContext, new VerifyAuthenticatorOptions(code));
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getErrors().size() > 0) {

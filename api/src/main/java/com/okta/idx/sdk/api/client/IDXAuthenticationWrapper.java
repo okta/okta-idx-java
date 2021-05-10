@@ -44,6 +44,7 @@ import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
+import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.okta.idx.sdk.api.client.WrapperUtil.handleIllegalArgumentException;
 import static com.okta.idx.sdk.api.client.WrapperUtil.handleProcessingException;
 
 /**
@@ -107,8 +109,6 @@ public class IDXAuthenticationWrapper {
      * @return the Authentication response
      */
     public AuthenticationResponse authenticate(AuthenticationOptions authenticationOptions) {
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
         try {
             AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
 
@@ -161,13 +161,10 @@ public class IDXAuthenticationWrapper {
                 return answerTransaction.asAuthenticationResponse();
             }
         } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
+            return handleIllegalArgumentException(e);
         }
-
-        return authenticationResponse;
     }
 
     /**
@@ -179,9 +176,6 @@ public class IDXAuthenticationWrapper {
      */
     public AuthenticationResponse changePassword(ProceedContext proceedContext,
                                                  ChangePasswordOptions changePasswordOptions) {
-
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 // set new password
@@ -197,13 +191,10 @@ public class IDXAuthenticationWrapper {
                 return client.answerChallenge(passwordAuthenticatorAnswerChallengeRequest, proceedContext.getHref());
             }).asAuthenticationResponse();
         } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
+            return handleIllegalArgumentException(e);
         }
-
-        return authenticationResponse;
     }
 
     /**
@@ -213,9 +204,6 @@ public class IDXAuthenticationWrapper {
      * @return the Authentication response
      */
     public AuthenticationResponse recoverPassword(String username) {
-
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
         try {
             AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
 
@@ -279,13 +267,10 @@ public class IDXAuthenticationWrapper {
                 return recoverTransaction.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
             }
         } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
+            return handleIllegalArgumentException(e);
         }
-
-        return authenticationResponse;
     }
 
     /**
@@ -297,9 +282,6 @@ public class IDXAuthenticationWrapper {
      */
     public AuthenticationResponse register(ProceedContext proceedContext,
                                            UserProfile userProfile) {
-
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
         try {
             AuthenticationTransaction enrollTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest =
@@ -315,13 +297,10 @@ public class IDXAuthenticationWrapper {
 
             return enrollTransaction.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
         } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
+            return handleIllegalArgumentException(e);
         }
-
-        return authenticationResponse;
     }
 
     /**
@@ -331,11 +310,8 @@ public class IDXAuthenticationWrapper {
      * @param factor     the factor
      * @return the Authentication response
      */
-    public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext, 
+    public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext,
                                                       com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
-
-      AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 Authenticator authenticator = new Authenticator();
@@ -353,48 +329,10 @@ public class IDXAuthenticationWrapper {
                 return client.challenge(request, proceedContext.getHref());
             }).asAuthenticationResponse();
         } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
+            return handleIllegalArgumentException(e);
         }
-
-        return authenticationResponse;
-    }
-
-    /**
-     * Verify the email code from the authentication process with the user supplied email passcode.
-     *
-     * @param proceedContext      the ProceedContext
-     * @param passcode            the user supplied email passcode
-     * @return the Authentication response
-     */
-    public AuthenticationResponse authenticateEmail(ProceedContext proceedContext,
-                                                    String passcode) {
-
-      AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
-        try {
-            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
-                Credentials credentials = new Credentials();
-                credentials.setPasscode(passcode.toCharArray());
-
-                // build answer password authenticator challenge request
-                AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
-                        .withStateHandle(proceedContext.getStateHandle())
-                        .withCredentials(credentials)
-                        .build();
-
-                return client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref());
-            }).asAuthenticationResponse();
-        } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
-        } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
-        }
-
-        return authenticationResponse;
     }
 
     /**
@@ -406,9 +344,6 @@ public class IDXAuthenticationWrapper {
      */
     public AuthenticationResponse enrollAuthenticator(ProceedContext proceedContext,
                                                       com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
-
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 Authenticator authenticator = new Authenticator();
@@ -424,13 +359,10 @@ public class IDXAuthenticationWrapper {
                 return client.enroll(enrollRequest, proceedContext.getHref());
             }).asAuthenticationResponse();
         } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
+            return handleIllegalArgumentException(e);
         }
-
-        return authenticationResponse;
     }
 
     /**
@@ -442,9 +374,6 @@ public class IDXAuthenticationWrapper {
      */
     public AuthenticationResponse verifyAuthenticator(ProceedContext proceedContext,
                                                       VerifyAuthenticatorOptions verifyAuthenticatorOptions) {
-
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
         try {
             Credentials credentials = new Credentials();
             credentials.setPasscode(verifyAuthenticatorOptions.getCode().toCharArray());
@@ -460,13 +389,10 @@ public class IDXAuthenticationWrapper {
             ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
 
         } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
+            return handleIllegalArgumentException(e);
         }
-
-        return authenticationResponse;
     }
 
     /**
@@ -480,9 +406,6 @@ public class IDXAuthenticationWrapper {
     public AuthenticationResponse submitPhoneAuthenticator(ProceedContext proceedContext,
                                                            String phone,
                                                            com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
-
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
         try {
             Authenticator phoneAuthenticator = new Authenticator();
             phoneAuthenticator.setId(factor.getId());
@@ -498,12 +421,10 @@ public class IDXAuthenticationWrapper {
                     client.enroll(enrollRequest, proceedContext.getHref())
             ).asAuthenticationResponse();
         } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
+            return handleIllegalArgumentException(e);
         }
-
-        return authenticationResponse;
     }
 
     /**
@@ -513,9 +434,6 @@ public class IDXAuthenticationWrapper {
      * @return the Authentication response
      */
     public AuthenticationResponse skipAuthenticatorEnrollment(ProceedContext proceedContext) {
-
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
         try {
             SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest =
                     SkipAuthenticatorEnrollmentRequestBuilder.builder()
@@ -527,13 +445,10 @@ public class IDXAuthenticationWrapper {
             ).asAuthenticationResponse(AuthenticationStatus.SKIP_COMPLETE);
 
         } catch (ProcessingException e) {
-            handleProcessingException(e, authenticationResponse);
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            authenticationResponse.addError(e.getMessage());
+            return handleIllegalArgumentException(e);
         }
-
-        return authenticationResponse;
     }
 
     /**
@@ -574,14 +489,26 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
+     * Introspect to get the current state of the authentication.
+     * This is useful when doing social auth, and not getting back an interaction_code.
+     *
+     * @param clientContext the client context
+     * @return a AuthenticationResponse with a status representing the current location in the authentnication flow.
+     */
+    public AuthenticationResponse introspect(IDXClientContext clientContext) {
+        try {
+            return AuthenticationTransaction.introspect(client, clientContext).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        }
+    }
+
+    /**
      * Populate UI form values for signing up a new user.
      *
      * @return the new user registration response
      */
     public NewUserRegistrationResponse fetchSignUpFormValues() {
-
-        List<FormValue> enrollProfileFormValues;
-
         NewUserRegistrationResponse newUserRegistrationResponse = new NewUserRegistrationResponse();
 
         try {
@@ -601,14 +528,26 @@ public class IDXAuthenticationWrapper {
             RemediationOption enrollProfileRemediationOption =
                     enrollTransaction.getRemediationOption(RemediationType.ENROLL_PROFILE);
 
-            enrollProfileFormValues = Arrays.stream(enrollProfileRemediationOption.form())
+            List<FormValue> enrollProfileFormValues = Arrays.stream(enrollProfileRemediationOption.form())
                     .filter(x -> "userProfile".equals(x.getName()))
                     .collect(Collectors.toList());
 
             newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
             newUserRegistrationResponse.setProceedContext(enrollTransaction.createProceedContext());
         } catch (ProcessingException e) {
-            handleProcessingException(e, newUserRegistrationResponse);
+            logger.error("Exception occurred", e);
+            ErrorResponse errorResponse = e.getErrorResponse();
+            if (errorResponse != null) {
+                if (errorResponse.getMessages() != null) {
+                    Arrays.stream(errorResponse.getMessages().getValue())
+                            .forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
+                } else {
+                    newUserRegistrationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
+                }
+            } else {
+                newUserRegistrationResponse.addError(e.getMessage());
+            }
+            logger.error("Error Detail: {}", newUserRegistrationResponse.getErrors());
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
             newUserRegistrationResponse.addError(e.getMessage());
