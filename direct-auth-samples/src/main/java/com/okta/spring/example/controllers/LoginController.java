@@ -117,7 +117,8 @@ public class LoginController {
                 idxAuthenticationWrapper.recoverPassword(username);
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
-        if (authenticationResponse.getAuthenticationStatus() == null) {
+        if (authenticationResponse.getAuthenticationStatus() == null ||
+                authenticationResponse.getAuthenticators() == null) {
             ModelAndView mav = new ModelAndView("forgot-password");
             mav.addObject("result", authenticationResponse.getErrors());
             return mav;
