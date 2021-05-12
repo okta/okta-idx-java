@@ -31,7 +31,7 @@ public class AuthenticationResponse {
 
     private AuthenticationStatus authenticationStatus;
 
-    private List<String> errors = new LinkedList<>();
+    private final List<String> errors = new LinkedList<>();
 
     private List<FormValue> formValues;
 
@@ -65,8 +65,8 @@ public class AuthenticationResponse {
         return errors;
     }
 
-    public boolean addError(String error) {
-        return getErrors().add(error);
+    public void addError(String error) {
+        getErrors().add(error);
     }
 
     public List<FormValue> getFormValues() {
