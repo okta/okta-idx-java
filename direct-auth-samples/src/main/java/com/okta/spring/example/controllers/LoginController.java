@@ -502,6 +502,12 @@ public class LoginController {
             }
         }
 
+        if (authenticationResponse.getAuthenticators() == null) {
+            ModelAndView mav = new ModelAndView("password-authenticator-enrollment");
+            mav.addObject("errors", authenticationResponse.getErrors());
+            return mav;
+        }
+
         List<String> factorList =
                 getFactorMethodsFromAuthenticators(session, authenticationResponse.getAuthenticators());
 
