@@ -34,11 +34,11 @@
         <p>You have successfully authenticated against your Okta Org.</p>
     </div>
 
-    <h2 class="text-center">Token Details</h2>
+    <h2 class="text-center">Token Info</h2>
 
     <div th:if="${tokenResponse.accessToken}">
         <p><label>Access Token: </label>
-            <span th:text="${tokenResponse.accessToken}">2</span></p>
+            <span th:text="${tokenResponse.accessToken}">1</span></p>
     </div>
 
     <div th:if="${tokenResponse.expiresIn}">
@@ -68,7 +68,7 @@
 </div>
 
 <div class="container">
-    <h2 class="text-center">Profile</h2>
+    <h2 class="text-center">User Profile</h2>
 
     <table class="table table-striped">
         <thead>
