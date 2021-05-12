@@ -55,7 +55,7 @@
         </div>
         <tr th:each="item : ${factorList}">
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="authenticator-type" th:value="${item}">
+                <input class="form-check-input" type="radio" name="authenticator-type" th:value="${item}" checked="true">
                 <label class="form-check-label" th:text="${item}"></label>
             </div>
         </tr>
