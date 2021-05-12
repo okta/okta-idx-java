@@ -435,7 +435,11 @@ public class LoginController {
                 idxAuthenticationWrapper.verifyAuthenticator(proceedContext, verifyAuthenticatorOptions);
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
-        if (authenticationResponse.getTokenResponse() != null) {
+        if (authenticationResponse.getErrors().size() > 0) {
+            ModelAndView mav = new ModelAndView("verify-email-authenticator-enrollment");
+            mav.addObject("errors", authenticationResponse.getErrors());
+            return mav;
+        } else if (authenticationResponse.getTokenResponse() != null) {
             return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
         }
 
@@ -506,6 +510,12 @@ public class LoginController {
                 }
                 return mav;
             }
+        }
+
+        if (authenticationResponse.getAuthenticators() == null) {
+            ModelAndView mav = new ModelAndView("password-authenticator-enrollment");
+            mav.addObject("errors", authenticationResponse.getErrors());
+            return mav;
         }
 
         List<String> factorList =

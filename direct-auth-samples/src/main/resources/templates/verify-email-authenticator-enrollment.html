@@ -56,6 +56,9 @@
 <div class="verify-email-authenticator-form">
     <form th:action="@{/verify-email-authenticator-enrollment}" method="post">
         <h2 class="text-center">Verify Code</h2>
+        <div th:if="${errors}" class="alert alert-danger">
+            <span th:text="${errors}">1</span>
+        </div>
         <div th:if="${result}" class="alert alert-danger">
             <span th:text="${result}">1</span>
         </div>
