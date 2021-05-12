@@ -330,6 +330,12 @@ public class LoginController {
         NewUserRegistrationResponse newUserRegistrationResponse =
                 idxAuthenticationWrapper.fetchSignUpFormValues();
 
+        if (newUserRegistrationResponse.getErrors().size() > 0) {
+            mav = new ModelAndView("register");
+            mav.addObject("errors", newUserRegistrationResponse.getErrors());
+            return mav;
+        }
+
         UserProfile userProfile = new UserProfile();
         userProfile.addAttribute("lastName", lastname);
         userProfile.addAttribute("firstName", firstname);
