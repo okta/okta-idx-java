@@ -22,7 +22,6 @@ import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.AuthenticatorType;
-import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -158,9 +157,7 @@ public class LoginController {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-        AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.selectAuthenticator(proceedContext,
-                        getFactorFromMethod(session, authenticatorType));
+        AuthenticationResponse authenticationResponse = selectAuthenticator(session, authenticatorType, proceedContext);
 
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
@@ -185,9 +182,7 @@ public class LoginController {
                                             final HttpSession session) {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-      AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.selectAuthenticator(proceedContext,
-                        getFactorFromMethod(session, authenticatorType));
+        AuthenticationResponse authenticationResponse = selectAuthenticator(session, authenticatorType, proceedContext);
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getErrors().size() > 0) {
@@ -287,11 +282,9 @@ public class LoginController {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-        ChangePasswordOptions changePasswordOptions = new ChangePasswordOptions();
-        changePasswordOptions.setNewPassword(newPassword);
-
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(newPassword);
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.changePassword(proceedContext, changePasswordOptions);
+                idxAuthenticationWrapper.verifyAuthenticator(proceedContext, verifyAuthenticatorOptions);
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getErrors().size() > 0) {
@@ -330,7 +323,7 @@ public class LoginController {
         NewUserRegistrationResponse newUserRegistrationResponse =
                 idxAuthenticationWrapper.fetchSignUpFormValues();
 
-        if (newUserRegistrationResponse.getErrors().size() > 0) {
+        if (newUserRegistrationResponse.getErrors() != null && newUserRegistrationResponse.getErrors().size() > 0) {
             mav = new ModelAndView("register");
             mav.addObject("errors", newUserRegistrationResponse.getErrors());
             return mav;
@@ -657,6 +650,24 @@ public class LoginController {
             for (Authenticator.Factor factor : authenticator.getFactors()) {
                 if (factor.getMethod().equals(method)) {
                     return factor;
+                }
+            }
+        }
+        throw new IllegalStateException("Factor not found: " + method);
+    }
+
+    private AuthenticationResponse selectAuthenticator(final HttpSession session,
+            final String method,
+            final ProceedContext proceedContext) {
+        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
+        for (Authenticator authenticator : authenticators) {
+            for (Authenticator.Factor factor : authenticator.getFactors()) {
+                if (factor.getMethod().equals(method)) {
+                    if (authenticator.getFactors().size() == 1) {
+                        return idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
+                    } else {
+                        return idxAuthenticationWrapper.selectFactor(proceedContext, factor);
+                    }
                 }
             }
         }

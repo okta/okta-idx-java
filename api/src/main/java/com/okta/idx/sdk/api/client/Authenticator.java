@@ -22,36 +22,48 @@ public final class Authenticator {
         private final String id;
         private final String method;
         private final String enrollmentId;
+        private final String label;
 
-        Factor(String id, String method, String enrollmentId) {
+        Factor(String id, String method, String enrollmentId, String label) {
             this.id = id;
             this.method = method;
             this.enrollmentId = enrollmentId;
-        }
-
-        public String getMethod() {
-            return method;
+            this.label = label;
         }
 
         String getId() {
             return id;
         }
 
+        public String getMethod() {
+            return method;
+        }
+
         String getEnrollmentId() {
             return enrollmentId;
         }
+
+        public String getLabel() {
+            return label;
+        }
     }
 
-    private final String method;
+    private final String id;
+    private final String label;
     private final List<Factor> factors;
 
-    Authenticator(String method, List<Factor> factors) {
-        this.method = method;
+    Authenticator(String id, String label, List<Factor> factors) {
+        this.id = id;
+        this.label = label;
         this.factors = factors;
     }
 
-    public String getMethod() {
-        return method;
+    public String getId() {
+        return id;
+    }
+
+    public String getLabel() {
+        return label;
     }
 
     public List<Factor> getFactors() {

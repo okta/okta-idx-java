@@ -148,7 +148,7 @@ class AuthenticationWrapperTest {
         List<Authenticator> authenticators = authenticationResponse.getAuthenticators()
         assertThat(authenticators, notNullValue())
         assertThat(authenticators, hasItem(
-                hasProperty("method", is("email")))
+                hasProperty("label", is("Email")))
         )
     }
 
