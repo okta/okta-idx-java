@@ -19,7 +19,6 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.Authenticator;
-import com.okta.idx.sdk.api.model.ChangePasswordOptions;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -168,36 +167,6 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Change password with the supplied change password options reference.
-     *
-     * @param proceedContext      the ProceedContext
-     * @param changePasswordOptions the change password options reference
-     * @return the Authentication response
-     */
-    public AuthenticationResponse changePassword(ProceedContext proceedContext,
-                                                 ChangePasswordOptions changePasswordOptions) {
-        try {
-            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
-                // set new password
-                Credentials credentials = new Credentials();
-                credentials.setPasscode(changePasswordOptions.getNewPassword().toCharArray());
-
-                // build answer password authenticator challenge request
-                AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest =
-                        AnswerChallengeRequestBuilder.builder()
-                                .withStateHandle(proceedContext.getStateHandle())
-                                .withCredentials(credentials)
-                                .build();
-                return client.answerChallenge(passwordAuthenticatorAnswerChallengeRequest, proceedContext.getHref());
-            }).asAuthenticationResponse();
-        } catch (ProcessingException e) {
-            return handleProcessingException(e);
-        } catch (IllegalArgumentException e) {
-            return handleIllegalArgumentException(e);
-        }
-    }
-
-    /**
      * Recover Password with the supplied username.
      *
      * @param username the username
@@ -307,21 +276,43 @@ public class IDXAuthenticationWrapper {
      * Select authenticator of the supplied type.
      *
      * @param proceedContext      the ProceedContext
-     * @param factor     the factor
+     * @param authenticator     the authenticator
      * @return the Authentication response
      */
     public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext,
+            com.okta.idx.sdk.api.client.Authenticator authenticator) {
+        try {
+            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                Authenticator authenticatorRequest = new Authenticator();
+                authenticatorRequest.setId(authenticator.getId());
+                ChallengeRequest request = ChallengeRequestBuilder.builder()
+                        .withStateHandle(proceedContext.getStateHandle())
+                        .withAuthenticator(authenticatorRequest)
+                        .build();
+                return client.challenge(request, proceedContext.getHref());
+            }).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Select authenticator of the supplied type.
+     *
+     * @param proceedContext      the ProceedContext
+     * @param factor     the factor
+     * @return the Authentication response
+     */
+    public AuthenticationResponse selectFactor(ProceedContext proceedContext,
                                                       com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 Authenticator authenticator = new Authenticator();
                 authenticator.setId(factor.getId());
-                String enrollmentId = factor.getEnrollmentId();
-                String factorType = factor.getMethod();
-                if (enrollmentId != null && (factorType.equals("sms") || factorType.equals("voice"))) {
-                    authenticator.setEnrollmentId(enrollmentId);
-                    authenticator.setMethodType(factorType);
-                }
+                authenticator.setEnrollmentId(factor.getEnrollmentId());
+                authenticator.setMethodType(factor.getMethod());
                 ChallengeRequest request = ChallengeRequestBuilder.builder()
                         .withStateHandle(proceedContext.getStateHandle())
                         .withAuthenticator(authenticator)

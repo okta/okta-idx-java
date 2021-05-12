@@ -27,9 +27,19 @@ public enum AuthenticationStatus {
 
     AWAITING_AUTHENTICATOR_SELECTION("awaiting_authenticator_selection"),
 
+    AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION("awaiting_authenticator_enrollment_selection"),
+
     AWAITING_AUTHENTICATOR_VERIFICATION("awaiting_authenticator_verification"),
 
+    AWAITING_AUTHENTICATOR_VERIFICATION_DATA("awaiting_authenticator_verification_data"),
+
+    AWAITING_AUTHENTICATOR_ENROLLMENT_DATA("awaiting_authenticator_enrollment_data"),
+
     AWAITING_PASSWORD_RESET("awaiting_password_reset"),
+
+    AWAITING_PROFILE_ENROLLMENT("awaiting_profile_enrollment"),
+
+    AWAITING_AUTHENTICATOR_ENROLLMENT("awaiting_authenticator_enrollment"),
 
     UNKNOWN("unknown");
 

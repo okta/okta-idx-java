@@ -44,5 +44,7 @@ public class RemediationType {
 
     public static final String AUTHENTICATOR_ENROLLMENT_DATA  = "authenticator-enrollment-data";
 
+    public static final String AUTHENTICATOR_VERIFICATION_DATA = "authenticator-verification-data";
+
     public static final String UNKNOWN = "unknown";
 }

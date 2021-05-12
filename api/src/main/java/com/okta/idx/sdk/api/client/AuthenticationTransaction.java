@@ -33,7 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 final class AuthenticationTransaction {
@@ -150,26 +152,42 @@ final class AuthenticationTransaction {
             TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, clientContext);
             authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
             authenticationResponse.setTokenResponse(tokenResponse);
-        } else if (isRemediationRequireCredentials(RemediationType.REENROLL_AUTHENTICATOR)) {
-            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
-        } else if (containsRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE)) {
-            authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
-        } else {
-            authenticationResponse.setAuthenticationStatus(defaultStatus);
+            return authenticationResponse;
         }
 
-        return authenticationResponse;
-    }
+        String firstRemediation = "";
+        if (idxResponse.remediation() != null && idxResponse.remediation().remediationOptions().length > 0) {
+            firstRemediation = idxResponse.remediation().remediationOptions()[0].getName();
+        }
 
-    AuthenticationResponse asAuthenticationResponseExpecting(AuthenticationStatus status) {
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        authenticationResponse.setProceedContext(createProceedContext());
-
-        copyErrorMessages(idxResponse, authenticationResponse);
-        fillOutAuthenticators(authenticationResponse);
-
-        if (authenticationResponse.getErrors().isEmpty()) {
-            authenticationResponse.setAuthenticationStatus(status);
+        switch (firstRemediation) {
+            case RemediationType.REENROLL_AUTHENTICATOR:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.PASSWORD_EXPIRED);
+                break;
+            case RemediationType.AUTHENTICATOR_VERIFICATION_DATA:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION_DATA);
+                break;
+            case RemediationType.AUTHENTICATOR_ENROLLMENT_DATA:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_DATA);
+                break;
+            case RemediationType.CHALLENGE_AUTHENTICATOR:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
+                break;
+            case RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
+                break;
+            case RemediationType.SELECT_AUTHENTICATOR_ENROLL:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION);
+                break;
+            case RemediationType.ENROLL_PROFILE:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_PROFILE_ENROLLMENT);
+                break;
+            case RemediationType.ENROLL_AUTHENTICATOR:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT);
+                break;
+            default:
+                authenticationResponse.setAuthenticationStatus(defaultStatus);
+                break;
         }
 
         return authenticationResponse;
@@ -205,8 +223,10 @@ final class AuthenticationTransaction {
         if (idxResponse == null || idxResponse.remediation() == null) {
             return;
         }
-        for (RemediationOption remediationOption : idxResponse.remediation().remediationOptions()) {
-            fillOutAuthenticators(remediationOption, authenticationResponse);
+        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+        if (remediationOptions.length > 0) {
+            // We only care about the first remediation.
+            fillOutAuthenticators(remediationOptions[0], authenticationResponse);
         }
     }
 
@@ -218,47 +238,50 @@ final class AuthenticationTransaction {
                 .findFirst();
 
         if (formValueOptional.isPresent()) {
-            List<Authenticator> authenticators = new ArrayList<>();
             Options[] options = formValueOptional.get().options();
+            authenticationResponse.setAuthenticators(getAuthenticators(options));
+        }
+    }
 
-            for (Options option : options) {
-                String methodType = null;
-                String id = null;
-                String enrollmentId = null;
-                List<String> nestedMethods = new ArrayList<>();
+    private List<Authenticator> getAuthenticators(Options[] options) {
+        if (options == null || options.length == 0) {
+            return null;
+        }
+        List<Authenticator> authenticators = new ArrayList<>();
 
-                FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
-                for (FormValue formValue : optionFormValues) {
-                    if (formValue.getName().equals("methodType")) {
-                        methodType = String.valueOf(formValue.getValue());
+        for (Options option : options) {
+            String id = null;
+            String label = option.getLabel();
+            String enrollmentId = null;
+            Map<String, String> nestedMethods = new LinkedHashMap<>();
 
-                        // parse value from children
-                        Options[] nestedOptions = formValue.options();
-                        if (nestedOptions.length == 0) {
-                            nestedMethods.add(methodType);
-                        } else {
-                            for (Options children : nestedOptions) {
-                                nestedMethods.add(String.valueOf(children.getValue()));
-                            }
+            FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
+            for (FormValue formValue : optionFormValues) {
+                if (formValue.getName().equals("methodType")) {
+                    // parse value from children
+                    Options[] nestedOptions = formValue.options();
+                    if (nestedOptions.length > 0) {
+                        for (Options children : nestedOptions) {
+                            nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
                         }
-                    }
-                    if (formValue.getName().equals("id")) {
-                        id = String.valueOf(formValue.getValue());
-                    }
-                    if (formValue.getName().equals("enrollmentId")) {
-                        enrollmentId = String.valueOf(formValue.getValue());
+                    } else {
+                        nestedMethods.put(String.valueOf(formValue.getValue()), label);
                     }
                 }
-                if (!nestedMethods.isEmpty()) {
-                    List<Authenticator.Factor> factors = new ArrayList<>();
-                    for (String method : nestedMethods) {
-                        factors.add(new Authenticator.Factor(id, method, enrollmentId));
-                    }
-                    authenticators.add(new Authenticator(methodType, factors));
+                if (formValue.getName().equals("id")) {
+                    id = String.valueOf(formValue.getValue());
+                }
+                if (formValue.getName().equals("enrollmentId")) {
+                    enrollmentId = String.valueOf(formValue.getValue());
                 }
             }
 
-            authenticationResponse.setAuthenticators(authenticators);
+            List<Authenticator.Factor> factors = new ArrayList<>();
+            for (Map.Entry<String, String> entry : nestedMethods.entrySet()) {
+                factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue()));
+            }
+            authenticators.add(new Authenticator(id, label, factors));
         }
+        return authenticators;
     }
 }
