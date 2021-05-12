@@ -550,7 +550,7 @@ public class IDXAuthenticationWrapper {
             logger.error("Error Detail: {}", newUserRegistrationResponse.getErrors());
         } catch (IllegalArgumentException e) {
             logger.error("Exception occurred", e);
-            newUserRegistrationResponse.addError(e.getMessage());
+            newUserRegistrationResponse.addError("The current flow is not supported. Please check you policy configuration");
         }
 
         return newUserRegistrationResponse;
