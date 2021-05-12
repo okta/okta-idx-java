@@ -45,7 +45,6 @@ import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
-import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -497,10 +496,10 @@ public class IDXAuthenticationWrapper {
     /**
      * Populate UI form values for signing up a new user.
      *
-     * @return the new user registration response
+     * @return the authentication response
      */
-    public NewUserRegistrationResponse fetchSignUpFormValues() {
-        NewUserRegistrationResponse newUserRegistrationResponse = new NewUserRegistrationResponse();
+    public AuthenticationResponse fetchSignUpFormValues() {
+        AuthenticationResponse newUserRegistrationResponse = new AuthenticationResponse();
 
         try {
             AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);

@@ -23,7 +23,7 @@ import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
 import com.okta.idx.sdk.api.response.AuthenticationResponse
-import com.okta.idx.sdk.api.response.NewUserRegistrationResponse
+
 import org.testng.annotations.Test
 
 import java.lang.reflect.Field
@@ -51,8 +51,8 @@ class AuthenticationWrapperTest {
         setStubbedIntrospectResponse(requestExecutor)
         setStubbedEnrollProfileResponse(requestExecutor)
 
-        NewUserRegistrationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues()
-        assertThat(newUserRegistrationResponse.getErrors(), nullValue())
+        AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues()
+        assertThat(newUserRegistrationResponse.getErrors(), empty())
         assertThat(newUserRegistrationResponse.getFormValues(), notNullValue())
         assertThat(newUserRegistrationResponse.getFormValues(), hasSize(1))
         assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().state, notNullValue())
