@@ -25,7 +25,6 @@ import com.okta.idx.sdk.api.model.AuthenticatorType;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
-import com.okta.idx.sdk.api.response.NewUserRegistrationResponse;
 import com.okta.spring.example.helpers.HomeHelper;
 import com.okta.spring.example.helpers.Util;
 import org.slf4j.Logger;
@@ -320,8 +319,7 @@ public class LoginController {
 
         ModelAndView mav = new ModelAndView("enroll-authenticators");
 
-        NewUserRegistrationResponse newUserRegistrationResponse =
-                idxAuthenticationWrapper.fetchSignUpFormValues();
+        AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues();
 
         if (newUserRegistrationResponse.getErrors() != null && newUserRegistrationResponse.getErrors().size() > 0) {
             mav = new ModelAndView("register");
