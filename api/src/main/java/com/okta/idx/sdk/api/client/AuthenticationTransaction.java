@@ -253,6 +253,7 @@ final class AuthenticationTransaction {
             String id = null;
             String label = option.getLabel();
             String enrollmentId = null;
+            boolean hasNestedFactors = false;
             Map<String, String> nestedMethods = new LinkedHashMap<>();
 
             FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
@@ -264,6 +265,7 @@ final class AuthenticationTransaction {
                         for (Options children : nestedOptions) {
                             nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
                         }
+                        hasNestedFactors = true;
                     } else {
                         nestedMethods.put(String.valueOf(formValue.getValue()), label);
                     }
@@ -280,7 +282,7 @@ final class AuthenticationTransaction {
             for (Map.Entry<String, String> entry : nestedMethods.entrySet()) {
                 factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue()));
             }
-            authenticators.add(new Authenticator(id, label, factors));
+            authenticators.add(new Authenticator(id, label, factors, hasNestedFactors));
         }
         return authenticators;
     }
