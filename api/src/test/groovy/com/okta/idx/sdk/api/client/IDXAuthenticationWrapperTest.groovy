@@ -36,7 +36,7 @@ import static org.mockito.ArgumentMatchers.argThat
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
-class AuthenticationWrapperTest {
+class IDXAuthenticationWrapperTest {
 
     final MediaType mediaTypeAppIonJson = MediaType.valueOf("application/ion+json; okta-version=1.0.0")
 
