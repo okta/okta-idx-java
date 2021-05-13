@@ -30,7 +30,6 @@ This project includes:
   Okta Commons :: HTTP :: API under The Apache License, Version 2.0
   Okta Commons :: Lang under The Apache License, Version 2.0
   Okta IDX Java SDK :: Impl under The Apache License, Version 2.0
-  Okta JWT Verifier :: API under The Apache License, Version 2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
   Spring AOP under Apache License, Version 2.0

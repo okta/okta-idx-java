@@ -16,26 +16,12 @@
 package com.okta.spring.example.config;
 
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
-import com.okta.jwt.AccessTokenVerifier;
-import com.okta.jwt.JwtVerifiers;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class ApplicationConfig {
-
-    /**
-     * The issuer url.
-     */
-    @Value("${okta.idx.issuer}")
-    private String issuer;
-
-    /**
-     * The client id.
-     */
-    @Value("${okta.idx.clientId}")
-    private String clientId;
 
     /**
      * The IDX authentication wrapper.
@@ -48,15 +34,12 @@ public class ApplicationConfig {
     }
 
     /**
-     * The accessTokenVerifier bean definition.
+     * The rest template bean definition.
      *
-     * @return the accessTokenVerifier
+     * @return the rest template
      */
     @Bean
-    public AccessTokenVerifier accessTokenVerifier() {
-        return JwtVerifiers.accessTokenVerifierBuilder()
-                .setIssuer(issuer)
-                .setAudience(clientId)
-                .build();
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }
