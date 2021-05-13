@@ -165,19 +165,22 @@ class IDXAuthenticationWrapperTest {
 
         setStubbedInteractResponse(requestExecutor)
         setStubbedIntrospectResponse(requestExecutor)
-        setStubbedIdentifyResponse(requestExecutor)
+        setStubbedIdentifySuccessResponse(requestExecutor)
+        setStubbedTokenResponse(requestExecutor)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
                 new AuthenticationOptions("username", "password")
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
-        assertThat(authenticationResponse.getAuthenticationStatus(),
-                equalTo(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION))
-        assertThat(authenticationResponse.getAuthenticators(), hasItems(
-                hasProperty("label", Matchers.is("Email")),
-                hasProperty("label", Matchers.is("Password"))
-        ))
+        assertThat(authenticationResponse.getAuthenticationStatus(), is(AuthenticationStatus.SUCCESS))
+        assertThat(authenticationResponse.getTokenResponse(), notNullValue())
+        assertThat(authenticationResponse.getTokenResponse().getScope(), is("openid email"))
+        assertThat(authenticationResponse.getTokenResponse().getTokenType(), is("Bearer"))
+        assertThat(authenticationResponse.getTokenResponse().getExpiresIn(), is(3600))
+        assertThat(authenticationResponse.getTokenResponse().getAccessToken(), notNullValue())
+        assertThat(authenticationResponse.getTokenResponse().getRefreshToken(), notNullValue())
+        assertThat(authenticationResponse.getTokenResponse().getIdToken(), notNullValue())
     }
 
     @Test
@@ -279,12 +282,29 @@ class IDXAuthenticationWrapperTest {
                 }) as Request
         )).thenReturn(getResponseByResourceFileName("identify-response", 200, mediaTypeAppIonJson))
     }
+
+    void setStubbedIdentifySuccessResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("success-response", 200, mediaTypeAppIonJson))
+    }
+
     void setStubbedIdentifyErrorResponse(RequestExecutor requestExecutor) {
         when(requestExecutor.executeRequest(
                 argThat({
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
                 }) as Request
         )).thenReturn(getResponseByResourceFileName("identify-error-response", 400, mediaTypeAppIonJson))
+    }
+
+    void setStubbedTokenResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("token")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("token-response", 200, mediaTypeAppIonJson))
     }
 
     void setChallengeResponse(RequestExecutor requestExecutor) {
