@@ -63,6 +63,6 @@ public class LogoutController {
 
         // invalidate session
         session.invalidate();
-        return "redirect:/custom-login";
+        return "redirect:/";
     }
 }

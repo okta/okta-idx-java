@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
@@ -279,11 +280,13 @@ public class IDXAuthenticationWrapper {
      * @return the Authentication response
      */
     public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext,
-            com.okta.idx.sdk.api.client.Authenticator authenticator) {
+                                                      com.okta.idx.sdk.api.client.Authenticator authenticator) {
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 Authenticator authenticatorRequest = new Authenticator();
                 authenticatorRequest.setId(authenticator.getId());
+                authenticatorRequest.setEnrollmentId(authenticator.getFactors().get(0).getEnrollmentId());
+                authenticatorRequest.setMethodType(authenticator.getFactors().get(0).getMethod());
                 ChallengeRequest request = ChallengeRequestBuilder.builder()
                         .withStateHandle(proceedContext.getStateHandle())
                         .withAuthenticator(authenticatorRequest)
