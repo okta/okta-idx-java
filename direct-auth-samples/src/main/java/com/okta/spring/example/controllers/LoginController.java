@@ -68,7 +68,7 @@ public class LoginController {
      * @param session the session
      * @return the home page view (if login is successful), else the login page with errors.
      */
-    @PostMapping("/custom-login")
+    @PostMapping("/login")
     public ModelAndView handleLogin(final @RequestParam("username") String username,
                                     final @RequestParam("password") String password,
                                     final HttpSession session) {
@@ -166,7 +166,22 @@ public class LoginController {
             return mav;
         }
 
-        return new ModelAndView("verify");
+        ModelAndView mav;
+
+        switch (AuthenticatorType.get(authenticatorType)) {
+            case EMAIL:
+                mav = new ModelAndView("verify-email-authenticator-enrollment");
+                return mav;
+
+            case SMS:
+            case VOICE:
+                mav = new ModelAndView("verify-phone-authenticator-enrollment");
+                return mav;
+
+            default:
+                logger.error("Unsupported authenticator {}", authenticatorType);
+                return new ModelAndView("forgot-password-authenticators");
+        }
     }
 
     /**
@@ -655,8 +670,8 @@ public class LoginController {
     }
 
     private AuthenticationResponse selectAuthenticator(final HttpSession session,
-            final String method,
-            final ProceedContext proceedContext) {
+                                                       final String method,
+                                                       final ProceedContext proceedContext) {
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
         for (Authenticator authenticator : authenticators) {
             for (Authenticator.Factor factor : authenticator.getFactors()) {

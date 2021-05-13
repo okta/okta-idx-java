@@ -279,7 +279,7 @@ public class IDXAuthenticationWrapper {
      * @return the Authentication response
      */
     public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext,
-            com.okta.idx.sdk.api.client.Authenticator authenticator) {
+                                                      com.okta.idx.sdk.api.client.Authenticator authenticator) {
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 Authenticator authenticatorRequest = new Authenticator();

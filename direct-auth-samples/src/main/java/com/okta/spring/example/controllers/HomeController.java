@@ -35,23 +35,22 @@ public class HomeController {
     private HomeHelper homeHelper;
 
     /**
-     * Display the home page.
+     * Display the index page.
      *
-     * @return the redirection to login view
+     * @return the index page view with table of contents
      */
     @GetMapping("/")
-    public String displayHomePage() {
-        return "redirect:/custom-login";
+    public String displayIndexPage() {
+        return "index";
     }
 
     /**
      * Display the login page.
      *
-     * @param session
-     *
+     * @param session the http session
      * @return the login view
      */
-    @GetMapping(value = "/custom-login")
+    @GetMapping(value = "/login")
     public ModelAndView displayLoginPage(final HttpSession session) {
         TokenResponse tokenResponse =
                 (TokenResponse) session.getAttribute("tokenResponse");

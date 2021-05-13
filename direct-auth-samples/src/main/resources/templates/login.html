@@ -46,19 +46,13 @@
             font-size: 15px;
             font-weight: bold;
         }
-        .alignleft {
-            float: left;
-        }
-        .alignright {
-            float: right;
-        }
     </style>
 </head>
 
 <body>
 <div class="login-form">
 
-    <form th:action="@{/custom-login}" method="post">
+    <form th:action="@{/login}" method="post">
         <h2 class="text-center">Direct Auth Sample</h2>
         <div th:if="${errors}" class="alert alert-danger">
             <span th:text="${errors}">1</span>
@@ -76,8 +70,6 @@
             <button id="sign-in-btn" type="submit" class="btn btn-primary btn-block">Sign In</button>
         </div>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-        <a class="alignleft" href="/forgot-password">Forgot Password?</a>
-        <a class="alignright" href="/register">Sign Up</a>
     </form>
 
 </div>
