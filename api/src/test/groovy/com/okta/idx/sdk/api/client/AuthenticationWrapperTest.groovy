@@ -18,11 +18,13 @@ package com.okta.idx.sdk.api.client
 
 import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
+import com.okta.idx.sdk.api.model.AuthenticationOptions
 import com.okta.idx.sdk.api.model.AuthenticationStatus
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
 import com.okta.idx.sdk.api.response.AuthenticationResponse
+import org.hamcrest.Matchers
 
 import org.testng.annotations.Test
 
@@ -152,6 +154,52 @@ class AuthenticationWrapperTest {
         )
     }
 
+    @Test
+    void authenticateSuccessTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setStubbedInteractResponse(requestExecutor)
+        setStubbedIntrospectResponse(requestExecutor)
+        setStubbedIdentifyResponse(requestExecutor)
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("username", "password")
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                equalTo(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION))
+        assertThat(authenticationResponse.getAuthenticators(), hasItems(
+                hasProperty("label", Matchers.is("Email")),
+                hasProperty("label", Matchers.is("Password"))
+        ))
+    }
+
+    @Test
+    void authenticateFailTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setStubbedInteractResponse(requestExecutor)
+        setStubbedIntrospectResponse(requestExecutor)
+        setStubbedIdentifyErrorResponse(requestExecutor)
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("username", "password")
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), hasItem("Authentication failed"))
+    }
+
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {
         when(requestExecutor.executeRequest(
                 argThat({
@@ -230,6 +278,13 @@ class AuthenticationWrapperTest {
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
                 }) as Request
         )).thenReturn(getResponseByResourceFileName("identify-response", 200, mediaTypeAppIonJson))
+    }
+    void setStubbedIdentifyErrorResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("identify-error-response", 400, mediaTypeAppIonJson))
     }
 
     void setChallengeResponse(RequestExecutor requestExecutor) {
