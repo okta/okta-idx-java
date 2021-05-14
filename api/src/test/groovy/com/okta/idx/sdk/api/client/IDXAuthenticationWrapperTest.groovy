@@ -251,6 +251,34 @@ class IDXAuthenticationWrapperTest {
         assertThat(authenticationResponse.getErrors(), hasItem("Password is incorrect"))
     }
 
+    @Test
+    void authenticateIdentifyFirstFactorSuccessTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setStubbedInteractResponse(requestExecutor)
+        setStubbedIntrospectIdentifyFirstResponse(requestExecutor)
+        setStubbedIdentifyFirstSuccessResponse(requestExecutor)
+        setStubbedChallengeIdentifyFirstFactorResponse(requestExecutor)
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("username", "password")
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                is(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION)
+        )
+        assertThat(authenticationResponse.getAuthenticators(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticators(),
+                hasItem(hasProperty("label", is("Email")))
+        )
+    }
+
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {
         when(requestExecutor.executeRequest(
                 argThat({
@@ -361,6 +389,14 @@ class IDXAuthenticationWrapperTest {
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("answer")
                 }) as Request
         )).thenReturn(getResponseByResourceFileName("challenge-identify-first-response", 200, mediaTypeAppIonJson))
+    }
+
+    void setStubbedChallengeIdentifyFirstFactorResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("answer")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("challenge-identify-first-factor-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedIdentifyErrorResponse(RequestExecutor requestExecutor) {
