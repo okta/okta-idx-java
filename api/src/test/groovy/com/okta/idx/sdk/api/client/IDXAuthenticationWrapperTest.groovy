@@ -279,6 +279,35 @@ class IDXAuthenticationWrapperTest {
         )
     }
 
+    @Test
+    void authenticateIdentifyFirstFactorPasswordSuccessTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setStubbedInteractResponse(requestExecutor)
+        setStubbedIntrospectIdentifyFirstResponse(requestExecutor)
+        setStubbedIdentifyFirstFactorSuccessResponse(requestExecutor)
+        setStubbedChallengeIdentifyFirstFactorSuccessResponse(requestExecutor)
+        setStubbedChallengeIdentifyFirstFactorResponse(requestExecutor)
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("username", "password")
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                is(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION)
+        )
+        assertThat(authenticationResponse.getAuthenticators(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticators(),
+                hasItem(hasProperty("label", is("Email")))
+        )
+    }
+
     void setStubbedInteractResponse(RequestExecutor requestExecutor) {
         when(requestExecutor.executeRequest(
                 argThat({
@@ -381,6 +410,22 @@ class IDXAuthenticationWrapperTest {
                     request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
                 }) as Request
         )).thenReturn(getResponseByResourceFileName("identify-first-success-response", 200, mediaTypeAppIonJson))
+    }
+
+    void setStubbedIdentifyFirstFactorSuccessResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("identify-first-factor-password-response", 200, mediaTypeAppIonJson))
+    }
+
+    void setStubbedChallengeIdentifyFirstFactorSuccessResponse(RequestExecutor requestExecutor) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("challenge")
+                }) as Request
+        )).thenReturn(getResponseByResourceFileName("challenge-response", 200, mediaTypeAppIonJson))
     }
 
     void setStubbedChallengeIdentifyFirstResponse(RequestExecutor requestExecutor) {
