@@ -47,9 +47,9 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedIntrospectResponse(requestExecutor)
-        setStubbedEnrollProfileResponse(requestExecutor)
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "enroll", "enroll-user-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues()
         assertThat(newUserRegistrationResponse.getErrors(), empty())
@@ -61,8 +61,8 @@ class IDXAuthenticationWrapperTest {
         assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier, notNullValue())
         assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge, notNullValue())
 
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedIntrospectResponse(requestExecutor)
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
 
         IDXClientContext idxClientContext = newUserRegistrationResponse.getProceedContext().getClientContext()
         assertThat(idxClientContext.state,
@@ -74,8 +74,8 @@ class IDXAuthenticationWrapperTest {
         assertThat(idxClientContext.codeChallenge,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
 
-        setStubbedEnrollProfileResponseAfterEnroll(requestExecutor)
-        setStubbedEnrollNewResponse(requestExecutor)
+        setMockResponse(requestExecutor, "introspect", "enroll-user-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "enroll/new", "enroll-profile-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
@@ -88,9 +88,6 @@ class IDXAuthenticationWrapperTest {
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier))
         assertThat(authenticationResponse.getProceedContext().getClientContext().codeChallenge,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
-
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedEnrollAuthenticatorResponse(requestExecutor)
     }
 
     @Test
@@ -102,14 +99,14 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedIntrospectResponse(requestExecutor)
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
 
         AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient)
         VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("wrong_code")
 
-        setStubbedChallengeResponse(requestExecutor)
-        setStubbedChallengeErrorResponse(requestExecutor)
+        setMockResponse(requestExecutor, "introspect", "challenge-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "challenge/answer", "challenge-error-response", 401, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
                 new ProceedContext(introspectTransaction.clientContext,
@@ -130,10 +127,10 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedIntrospectResponse(requestExecutor)
-        setStubbedRecoverTransactionResponse(requestExecutor)
-        setStubbedIdentifyResponse(requestExecutor)
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "recover", "recover-transaction-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", "identify-response", 200, mediaTypeAppIonJson)
 
         String userEmail = "joe.coder" + (new Random()).nextInt(1000) + "@example.com"
 
@@ -142,8 +139,8 @@ class IDXAuthenticationWrapperTest {
         assertThat(authenticationResponse.getAuthenticationStatus(),
                 equalTo(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION))
 
-        setChallengeResponse(requestExecutor)
-        setAnswerChallengeResponse(requestExecutor)
+        setMockResponse(requestExecutor, "introspect", "challenge-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "recover", "answer-challenge-response", 200, mediaTypeAppIonJson)
 
         List<Authenticator> authenticators = authenticationResponse.getAuthenticators()
         assertThat(authenticators, notNullValue())
@@ -161,10 +158,10 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedIntrospectResponse(requestExecutor)
-        setStubbedIdentifySuccessResponse(requestExecutor)
-        setStubbedTokenResponse(requestExecutor)
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", "success-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "token", "token-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
                 new AuthenticationOptions("username", "password")
@@ -190,9 +187,9 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedIntrospectResponse(requestExecutor)
-        setStubbedIdentifyErrorResponse(requestExecutor)
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", "identify-error-response", 400, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
                 new AuthenticationOptions("username", "password")
@@ -210,11 +207,11 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedIntrospectIdentifyFirstResponse(requestExecutor)
-        setStubbedIdentifyFirstSuccessResponse(requestExecutor)
-        setStubbedChallengeIdentifyFirstResponse(requestExecutor)
-        setStubbedTokenResponse(requestExecutor)
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-identify-first-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", "identify-first-success-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", "challenge-identify-first-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "token", "token-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
                 new AuthenticationOptions("username", "password")
@@ -240,9 +237,9 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedIntrospectIdentifyFirstResponse(requestExecutor)
-        setStubbedIdentifyFirstErrorResponse(requestExecutor)
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-identify-first-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", "identify-first-error-response", 400, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
                 new AuthenticationOptions("username", "password")
@@ -260,10 +257,10 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedIntrospectIdentifyFirstResponse(requestExecutor)
-        setStubbedIdentifyFirstSuccessResponse(requestExecutor)
-        setStubbedChallengeIdentifyFirstFactorResponse(requestExecutor)
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-identify-first-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", "identify-first-success-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", "challenge-identify-first-factor-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
                 new AuthenticationOptions("username", "password")
@@ -288,11 +285,11 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setStubbedInteractResponse(requestExecutor)
-        setStubbedIntrospectIdentifyFirstResponse(requestExecutor)
-        setStubbedIdentifyFirstFactorSuccessResponse(requestExecutor)
-        setStubbedChallengeIdentifyFirstFactorSuccessResponse(requestExecutor)
-        setStubbedChallengeIdentifyFirstFactorResponse(requestExecutor)
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-identify-first-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", "identify-first-factor-password-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "challenge", "challenge-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", "challenge-identify-first-factor-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
                 new AuthenticationOptions("username", "password")
@@ -308,180 +305,13 @@ class IDXAuthenticationWrapperTest {
         )
     }
 
-    void setStubbedInteractResponse(RequestExecutor requestExecutor) {
+    void setMockResponse(RequestExecutor requestExecutor,
+                         String resourceUrlEndsWith, String responseName, Integer httpStatus, MediaType mediaType ) {
         when(requestExecutor.executeRequest(
                 argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("interact")
+                    request -> request != null && (request as Request).getResourceUrl().getPath().endsWith(resourceUrlEndsWith)
                 }) as Request)
-        ).thenReturn(getResponseByResourceFileName("interact-response", 200, MediaType.APPLICATION_JSON))
-    }
-
-    void setStubbedIntrospectResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("introspect-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedIntrospectIdentifyFirstResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("introspect-identify-first-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedEnrollProfileResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("enroll")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-user-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedEnrollProfileResponseAfterEnroll(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-user-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedEnrollNewResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("enroll/new")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-profile-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedEnrollAuthenticatorResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("enroll-registration-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedChallengeResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("challenge-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedChallengeErrorResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("challenge/answer")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("challenge-error-response", 401, mediaTypeAppIonJson))
-    }
-
-    void setStubbedRecoverTransactionResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("recover-transaction-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedIdentifyResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("identify-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedIdentifySuccessResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("success-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedIdentifyFirstSuccessResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("identify-first-success-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedIdentifyFirstFactorSuccessResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("identify-first-factor-password-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedChallengeIdentifyFirstFactorSuccessResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("challenge")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("challenge-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedChallengeIdentifyFirstResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("answer")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("challenge-identify-first-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedChallengeIdentifyFirstFactorResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("answer")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("challenge-identify-first-factor-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setStubbedIdentifyErrorResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("identify-error-response", 400, mediaTypeAppIonJson))
-    }
-
-    void setStubbedIdentifyFirstErrorResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("identify")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("identify-first-error-response", 400, mediaTypeAppIonJson))
-    }
-
-    void setStubbedTokenResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("token")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("token-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setChallengeResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("introspect")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("challenge-response", 200, mediaTypeAppIonJson))
-    }
-
-    void setAnswerChallengeResponse(RequestExecutor requestExecutor) {
-        when(requestExecutor.executeRequest(
-                argThat({
-                    request -> request != null && ((Request) request).getResourceUrl().toString().endsWith("recover")
-                }) as Request
-        )).thenReturn(getResponseByResourceFileName("answer-challenge-response", 200, mediaTypeAppIonJson))
+        ).thenReturn(getResponseByResourceFileName(responseName, httpStatus, mediaType))
     }
 
     Response getResponseByResourceFileName(String responseName, Integer httpStatus, MediaType mediaType) {
