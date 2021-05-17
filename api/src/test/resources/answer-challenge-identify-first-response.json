@@ -9,7 +9,7 @@
       {
         "rel": ["create-form"],
         "name": "select-authenticator-enroll",
-        "href": "https://dev-90108051.okta.com/idp/idx/credential/enroll",
+        "href": "https://foo.oktapreview.com/idp/idx/credential/enroll",
         "method": "POST",
         "produces": "application/ion+json; okta-version=1.0.0",
         "value": [
@@ -132,7 +132,7 @@
       {
         "rel": ["create-form"],
         "name": "skip",
-        "href": "https://dev-90108051.okta.com/idp/idx/skip",
+        "href": "https://foo.oktapreview.com/idp/idx/skip",
         "method": "POST",
         "produces": "application/ion+json; okta-version=1.0.0",
         "value": [
@@ -204,7 +204,7 @@
   "cancel": {
     "rel": ["create-form"],
     "name": "cancel",
-    "href": "https://dev-90108051.okta.com/idp/idx/cancel",
+    "href": "https://foo.oktapreview.com/idp/idx/cancel",
     "method": "POST",
     "produces": "application/ion+json; okta-version=1.0.0",
     "value": [
