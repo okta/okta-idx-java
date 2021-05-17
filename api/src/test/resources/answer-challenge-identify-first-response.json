@@ -18,32 +18,6 @@
             "type": "object",
             "options": [
               {
-                "label": "Okta Verify",
-                "value": {
-                  "form": {
-                    "value": [
-                      {
-                        "name": "id",
-                        "required": true,
-                        "value": "autl0by1fSntw1UJv5d6",
-                        "mutable": false
-                      },
-                      {
-                        "name": "channel",
-                        "type": "string",
-                        "required": false,
-                        "options": [
-                          { "label": "QRCODE", "value": "qrcode" },
-                          { "label": "EMAIL", "value": "email" },
-                          { "label": "SMS", "value": "sms" }
-                        ]
-                      }
-                    ]
-                  }
-                },
-                "relatesTo": "$.authenticators.value[0]"
-              },
-              {
                 "label": "Phone",
                 "value": {
                   "form": {
@@ -94,28 +68,6 @@
                   }
                 },
                 "relatesTo": "$.authenticators.value[2]"
-              },
-              {
-                "label": "Security Question",
-                "value": {
-                  "form": {
-                    "value": [
-                      {
-                        "name": "id",
-                        "required": true,
-                        "value": "autl0dfr92NW7T4et5d6",
-                        "mutable": false
-                      },
-                      {
-                        "name": "methodType",
-                        "required": false,
-                        "value": "security_question",
-                        "mutable": false
-                      }
-                    ]
-                  }
-                },
-                "relatesTo": "$.authenticators.value[3]"
               }
             ]
           },
