@@ -39,7 +39,29 @@ class IDXAuthenticationWrapperTest {
     final MediaType mediaTypeAppIonJson = MediaType.valueOf("application/ion+json; okta-version=1.0.0")
 
     @Test
-    void registerTest() {
+    void basicIDXAuthenticationWrapperTest() {
+        def clientConfig = getClientConfiguration()
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper(
+                clientConfig.getIssuer(),
+                clientConfig.getClientId(),
+                clientConfig.getClientSecret(),
+                clientConfig.getScopes(),
+                clientConfig.getRedirectUri()
+        )
+        IDXClient client = getInternalState(idxAuthenticationWrapper, "client") as IDXClient
+        assertThat(client, notNullValue())
+
+        ClientConfiguration config =  getInternalState(client, "clientConfiguration") as ClientConfiguration
+        assertThat(config, notNullValue())
+        assertThat(config.issuer, is(clientConfig.getIssuer()))
+        assertThat(config.clientId, is(clientConfig.getClientId()))
+        assertThat(config.clientSecret, is(clientConfig.getClientSecret()))
+        assertThat(config.getScopes(), is(clientConfig.getScopes()))
+        assertThat(config.redirectUri, is(clientConfig.getRedirectUri()))
+    }
+
+    @Test
+    void registerSuccessTest() {
 
         def requestExecutor = mock(RequestExecutor)
         def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
@@ -88,6 +110,68 @@ class IDXAuthenticationWrapperTest {
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier))
         assertThat(authenticationResponse.getProceedContext().getClientContext().codeChallenge,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
+    }
+
+    @Test
+    void registerFailTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "enroll", "enroll-user-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues()
+        assertThat(newUserRegistrationResponse.getErrors(), empty())
+        assertThat(newUserRegistrationResponse.getFormValues(), notNullValue())
+
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "enroll-user-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "enroll/new", "enroll-profile-error-response", 400, mediaTypeAppIonJson)
+
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+        assertThat(authenticationResponse.getAuthenticationStatus(), nullValue())
+        assertThat(authenticationResponse.getErrors(), notNullValue())
+        assertThat(authenticationResponse.getErrors(), hasItems(
+                "Provided value for property 'Email' does not match required pattern",
+                "'Email' must be in the form of an email address"
+        ))
+    }
+
+    @Test
+    void verifyEmailSuccessResponseTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient)
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("wrong_code")
+
+        setMockResponse(requestExecutor, "introspect", "challenge-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "challenge/answer", "challenge-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
+                new ProceedContext(introspectTransaction.clientContext,
+                        introspectTransaction.getStateHandle(), "/challenge/answer", null),
+                verifyAuthenticatorOptions
+        )
+
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                is(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION))
     }
 
     @Test
@@ -146,6 +230,33 @@ class IDXAuthenticationWrapperTest {
         assertThat(authenticators, notNullValue())
         assertThat(authenticators, hasItem(
                 hasProperty("label", is("Email")))
+        )
+    }
+
+    @Test
+    void recoverPasswordIdentifyFirstTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-identify-first-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", "identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "challenge", "identify-first-success-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "recover", "recover-identify-first-response", 200, mediaTypeAppIonJson)
+
+        String userEmail = "joe.coder" + (new Random()).nextInt(1000) + "@example.com"
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.recoverPassword(userEmail)
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                equalTo(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION))
+        assertThat(authenticationResponse.getAuthenticators(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticators(),
+                hasItem(hasProperty("label", is("Email")))
         )
     }
 
@@ -332,10 +443,11 @@ class IDXAuthenticationWrapperTest {
 
     static ClientConfiguration getClientConfiguration() {
         ClientConfiguration clientConfiguration = new ClientConfiguration()
-        clientConfiguration.setIssuer("http://example.com")
+        clientConfiguration.setIssuer("https://example.com")
         clientConfiguration.setClientId("test-client-id")
         clientConfiguration.setClientSecret("test-client-secret")
         clientConfiguration.setScopes(["test-scope"] as Set)
+        clientConfiguration.setRedirectUri("https://example.com/login/callback")
         return clientConfiguration
     }
 
@@ -345,6 +457,17 @@ class IDXAuthenticationWrapperTest {
             Field field = clazz.getDeclaredField(fieldName)
             field.setAccessible(true)
             field.set(target, value)
+        } catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+            throw new RuntimeException("Unable to set internal state on a private field. [...]", e)
+        }
+    }
+
+    static Object getInternalState(Object target, String fieldName) {
+        Class<?> clazz = target.getClass()
+        try {
+            Field field = clazz.getDeclaredField(fieldName)
+            field.setAccessible(true)
+            return field.get(target)
         } catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
             throw new RuntimeException("Unable to set internal state on a private field. [...]", e)
         }
