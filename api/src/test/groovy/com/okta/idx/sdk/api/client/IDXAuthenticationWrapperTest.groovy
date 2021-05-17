@@ -416,11 +416,12 @@ class IDXAuthenticationWrapperTest {
         )
     }
 
-    void setMockResponse(RequestExecutor requestExecutor,
-                         String resourceUrlEndsWith, String responseName, Integer httpStatus, MediaType mediaType ) {
+    void setMockResponse(RequestExecutor requestExecutor, String resourceUrlEndsWith,
+                         String responseName, Integer httpStatus, MediaType mediaType ) {
         when(requestExecutor.executeRequest(
                 argThat({
-                    request -> request != null && (request as Request).getResourceUrl().getPath().endsWith(resourceUrlEndsWith)
+                    request -> request != null &&
+                            (request as Request).getResourceUrl().getPath().endsWith(resourceUrlEndsWith)
                 }) as Request)
         ).thenReturn(getResponseByResourceFileName(responseName, httpStatus, mediaType))
     }
