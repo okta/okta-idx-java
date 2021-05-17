@@ -20,6 +20,7 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
+import com.okta.idx.sdk.api.model.Idp;
 import com.okta.idx.sdk.api.model.Options;
 import com.okta.idx.sdk.api.model.OptionsForm;
 import com.okta.idx.sdk.api.model.RemediationOption;
@@ -34,9 +35,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 final class AuthenticationTransaction {
 
@@ -125,10 +128,6 @@ final class AuthenticationTransaction {
                 .findFirst();
     }
 
-    boolean containsRemediationOption(String name) {
-        return getOptionalRemediationOption(name).isPresent();
-    }
-
     AuthenticationTransaction proceed(Factory factory) throws ProcessingException {
         IDXResponse idxResponse = factory.create();
         WrapperUtil.printRemediationOptions(idxResponse);
@@ -144,6 +143,8 @@ final class AuthenticationTransaction {
         authenticationResponse.setProceedContext(createProceedContext());
 
         copyErrorMessages(idxResponse, authenticationResponse);
+
+        fillOutIdps(authenticationResponse);
         fillOutAuthenticators(authenticationResponse);
 
         if (idxResponse.isLoginSuccessful()) {
@@ -230,16 +231,40 @@ final class AuthenticationTransaction {
         }
     }
 
+    private void fillOutIdps(AuthenticationResponse authenticationResponse) {
+        if (idxResponse == null || idxResponse.remediation() == null) {
+            return;
+        }
+
+        List<Idp> idpList = new LinkedList<>();
+
+        RemediationOption[] remediationOptions = this.getResponse().remediation().remediationOptions();
+
+        List<RemediationOption> remediationOptionList = Arrays.stream(remediationOptions)
+                .filter(x -> "redirect-idps".equals(x.getName()) || "redirect-idp".equals(x.getName()))
+                .collect(Collectors.toList());
+
+        for (RemediationOption remediationOption : remediationOptionList) {
+            idpList.add(new Idp(remediationOption.getType(), remediationOption.getHref()));
+        }
+
+        authenticationResponse.setIdps(idpList);
+    }
+
     private void fillOutAuthenticators(RemediationOption remediationOption, AuthenticationResponse authenticationResponse) {
-        FormValue[] formValues = remediationOption.form();
+        if (remediationOption != null) {
+            FormValue[] formValues = remediationOption.form();
 
-        Optional<FormValue> formValueOptional = Arrays.stream(formValues)
-                .filter(x -> "authenticator".equals(x.getName()))
-                .findFirst();
+            if (formValues != null) {
+                Optional<FormValue> formValueOptional = Arrays.stream(formValues)
+                        .filter(x -> "authenticator".equals(x.getName()))
+                        .findFirst();
 
-        if (formValueOptional.isPresent()) {
-            Options[] options = formValueOptional.get().options();
-            authenticationResponse.setAuthenticators(getAuthenticators(options));
+                if (formValueOptional.isPresent()) {
+                    Options[] options = formValueOptional.get().options();
+                    authenticationResponse.setAuthenticators(getAuthenticators(options));
+                }
+            }
         }
     }
 

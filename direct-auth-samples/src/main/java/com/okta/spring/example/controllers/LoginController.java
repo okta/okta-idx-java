@@ -105,7 +105,7 @@ public class LoginController {
      */
     @PostMapping("/login-with-idp")
     public void handleLoginWithIdp(final HttpSession session) {
-        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.getIdps();
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.getRedirectIdps();
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return;
     }

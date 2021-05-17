@@ -22,7 +22,6 @@ import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
-import com.okta.idx.sdk.api.model.Idp;
 import com.okta.idx.sdk.api.model.Recover;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
@@ -53,7 +52,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -592,32 +590,15 @@ public class IDXAuthenticationWrapper {
         return proceedContext.getSkipHref() != null;
     }
 
-    public AuthenticationResponse getIdps() {
-
-        List<Idp> idpList = new LinkedList<>();
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+    public AuthenticationResponse getRedirectIdps() {
 
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
-            authenticationResponse.setProceedContext(introspectTransaction.createProceedContext());
-
-            RemediationOption[] remediationOptions = introspectTransaction.getResponse().remediation().remediationOptions();
-
-            List<RemediationOption> remediationOptionList = Arrays.stream(remediationOptions)
-                    .collect(Collectors.toList());
-
-            for (RemediationOption remediationOption : remediationOptionList) {
-                idpList.add(new Idp(remediationOption.getType(), remediationOption.getHref()));
-            }
-
-            authenticationResponse.setIdps(idpList);
+            return AuthenticationTransaction.create(client).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
             return handleIllegalArgumentException(e);
         }
-
-        return authenticationResponse;
     }
 
     public AuthenticationResponse fetchTokenWithInteractionCode(String issuer,

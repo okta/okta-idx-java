@@ -117,7 +117,7 @@ public class HomeController {
     @GetMapping(value = "/login-with-idp")
     public ModelAndView displayLoginWithIdpPage(final HttpSession session) {
 
-        AuthenticationResponse authenticationResponse = authenticationWrapper.getIdps();
+        AuthenticationResponse authenticationResponse = authenticationWrapper.getRedirectIdps();
         Util.updateSession(session, authenticationResponse.getProceedContext());
         ModelAndView modelAndView = new ModelAndView("login-with-idp");
         modelAndView.addObject("idps", authenticationResponse.getIdps());
