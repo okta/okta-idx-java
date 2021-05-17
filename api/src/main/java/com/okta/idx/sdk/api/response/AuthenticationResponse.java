@@ -19,6 +19,7 @@ import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.FormValue;
+import com.okta.idx.sdk.api.model.Idp;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +37,8 @@ public class AuthenticationResponse {
     private List<FormValue> formValues;
 
     private List<Authenticator> authenticators;
+
+    private List<Idp> idps;
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
@@ -83,5 +86,13 @@ public class AuthenticationResponse {
 
     public void setAuthenticators(List<Authenticator> authenticators) {
         this.authenticators = authenticators;
+    }
+
+    public List<Idp> getIdps() {
+        return idps;
+    }
+
+    public void setIdps(List<Idp> idps) {
+        this.idps = idps;
     }
 }

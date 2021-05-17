@@ -98,7 +98,7 @@ public class RemediationOption {
      * @return array an array of FormValue
      */
     public FormValue[] form() {
-        return Arrays.copyOf(value, value.length);
+        return value != null ? Arrays.copyOf(value, value.length) : null;
     }
 
     public String getName() {

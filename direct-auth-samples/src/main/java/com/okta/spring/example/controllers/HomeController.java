@@ -15,12 +15,21 @@
  */
 package com.okta.spring.example.controllers;
 
+import com.okta.commons.lang.Strings;
+import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
+import com.okta.idx.sdk.api.client.ProceedContext;
+import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.spring.example.helpers.HomeHelper;
 
+import com.okta.spring.example.helpers.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
@@ -29,19 +38,56 @@ import javax.servlet.http.HttpSession;
 public class HomeController {
 
     /**
+     * logger instance.
+     */
+    private final Logger logger = LoggerFactory.getLogger(HomeController.class);
+
+    /**
+     * The issuer url.
+     */
+    @Value("${okta.idx.issuer}")
+    private String issuer;
+
+    /**
      * homeHelper instance.
      */
     @Autowired
     private HomeHelper homeHelper;
 
     /**
-     * Display the index page.
+     * idx authentication wrapper instance.
+     */
+    @Autowired
+    private IDXAuthenticationWrapper authenticationWrapper;
+
+    /**
+     * Display the index page or home page (if we have obtained a token from the interaction code in callback).
      *
-     * @return the index page view with table of contents
+     * @param interactionCode the interaction code from callback (optional)
+     * @param error  the error from callback when interaction_code could not be sent (optional)
+     * @param session the http session
+     * @return the index page view with table of contents or the home page if we have a token.
      */
     @GetMapping("/")
-    public String displayIndexPage() {
-        return "index";
+    public ModelAndView displayIndexPage(final @RequestParam(name = "interaction_code", required = false) String interactionCode,
+                                         final @RequestParam(name = "error", required = false) String error,
+                                         final HttpSession session) {
+
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        if (!Strings.hasText(interactionCode) || proceedContext == null) {
+            // more remediation steps required
+            if (Strings.hasText(error) && error.equals("interaction_required")) {
+                ModelAndView mav = new ModelAndView("error");
+                mav.addObject("errors", "interaction_required");
+                return mav;
+            }
+            return new ModelAndView("index");
+        }
+
+        AuthenticationResponse authenticationResponse =
+                authenticationWrapper.fetchTokenWithInteractionCode(issuer, proceedContext, interactionCode);
+        return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
     }
 
     /**
@@ -60,6 +106,22 @@ public class HomeController {
             return homeHelper.proceedToHome(tokenResponse, session);
         }
         return new ModelAndView("login");
+    }
+
+    /**
+     * Display the login with IDP page.
+     *
+     * @param session the http session
+     * @return the login with IDP view
+     */
+    @GetMapping(value = "/login-with-idp")
+    public ModelAndView displayLoginWithIdpPage(final HttpSession session) {
+
+        AuthenticationResponse authenticationResponse = authenticationWrapper.getRedirectIdps();
+        Util.updateSession(session, authenticationResponse.getProceedContext());
+        ModelAndView modelAndView = new ModelAndView("login-with-idp");
+        modelAndView.addObject("idps", authenticationResponse.getIdps());
+        return modelAndView;
     }
 
     /**
@@ -100,5 +162,15 @@ public class HomeController {
     @GetMapping("/password-authenticator-enrollment")
     public ModelAndView displayPasswordAuthenticatorEnrollmentPage() {
         return new ModelAndView("password-authenticator-enrollment");
+    }
+
+    /**
+     * Display the error page.
+     *
+     * @return the error page view
+     */
+    @GetMapping("/error")
+    public ModelAndView displayErrorPage() {
+        return new ModelAndView("error");
     }
 }

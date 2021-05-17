@@ -45,9 +45,12 @@ import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
+import com.okta.idx.sdk.api.response.TokenResponse;
+import com.okta.idx.sdk.api.util.ClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -310,7 +313,7 @@ public class IDXAuthenticationWrapper {
      * @return the Authentication response
      */
     public AuthenticationResponse selectFactor(ProceedContext proceedContext,
-                                                      com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
+                                               com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 Authenticator authenticator = new Authenticator();
@@ -585,5 +588,35 @@ public class IDXAuthenticationWrapper {
      */
     public boolean isSkipAuthenticatorPresent(ProceedContext proceedContext) {
         return proceedContext.getSkipHref() != null;
+    }
+
+    public AuthenticationResponse getRedirectIdps() {
+
+        try {
+            return AuthenticationTransaction.create(client).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    public AuthenticationResponse fetchTokenWithInteractionCode(String issuer,
+                                                                ProceedContext proceedContext,
+                                                                String interactionCode) {
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+
+        try {
+            TokenResponse tokenResponse =
+                    client.token(ClientUtil.getNormalizedUri(issuer, "/v1/token"),
+                            "interaction_code", interactionCode, proceedContext.getClientContext());
+            authenticationResponse.setTokenResponse(tokenResponse);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (MalformedURLException e) {
+            logger.error("Error occurred", e);
+        }
+
+        return authenticationResponse;
     }
 }

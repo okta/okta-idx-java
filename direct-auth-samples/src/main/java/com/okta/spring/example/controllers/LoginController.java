@@ -99,6 +99,18 @@ public class LoginController {
     }
 
     /**
+     * Handle login with external Identity Provider.
+     *
+     * @param session the session
+     */
+    @PostMapping("/login-with-idp")
+    public void handleLoginWithIdp(final HttpSession session) {
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.getRedirectIdps();
+        Util.updateSession(session, authenticationResponse.getProceedContext());
+        return;
+    }
+
+    /**
      * Handle forgot password (password recovery) functionality.
      *
      * @param username the username

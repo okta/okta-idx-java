@@ -54,7 +54,7 @@
         </tr>
         <tr>
             <th scope="row">Client Secret</th>
-            <td th:text="${'****' + #strings.substring(@environment.getProperty('okta.idx.clientSecret'),36)}"></td>
+            <td th:text="${'****' + #strings.substring(@environment.getProperty('okta.idx.clientSecret'),35)}"></td>
         </tr>
         <tr>
             <th scope="row">Scopes</th>
@@ -72,11 +72,14 @@
     <div class="container-fluid">
         <ul class="list-group">
             <li class="list-group-item"><a href="/login">Login with username and password</a></li>
+            <li class="list-group-item"><a href="/login-with-idp">Login with username and password factor, or Social Provider</a></li>
             <li class="list-group-item"><a href="/register">Self Service Registration</a></li>
             <li class="list-group-item"><a href="/forgot-password">Password Recovery</a></li>
         </ul>
     </div>
 </div>
+
+<br>
 
 <div th:replace="fragments/footer :: footer"></div>
 
