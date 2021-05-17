@@ -160,7 +160,7 @@ class IDXAuthenticationWrapperTest {
         VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("correct_code")
 
         setMockResponse(requestExecutor, "introspect", "challenge-response", 200, mediaTypeAppIonJson)
-        setMockResponse(requestExecutor, "challenge/answer", "challenge-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "challenge/answer", "answer-challenge-identify-first-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
                 new ProceedContext(introspectTransaction.clientContext,
@@ -171,7 +171,7 @@ class IDXAuthenticationWrapperTest {
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
         assertThat(authenticationResponse.getAuthenticationStatus(),
-                is(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION))
+                is(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION))
     }
 
     @Test
