@@ -64,16 +64,24 @@ public class HomeController {
      * Display the index page or home page (if we have obtained a token from the interaction code in callback).
      *
      * @param interactionCode the interaction code from callback (optional)
+     * @param error  the error from callback when interaction_code could not be sent (optional)
      * @param session the http session
      * @return the index page view with table of contents or the home page if we have a token.
      */
     @GetMapping("/")
     public ModelAndView displayIndexPage(final @RequestParam(name = "interaction_code", required = false) String interactionCode,
+                                         final @RequestParam(name = "error", required = false) String error,
                                          final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         if (!Strings.hasText(interactionCode) || proceedContext == null) {
+            // more remediation steps required
+            if (Strings.hasText(error) && error.equals("interaction_required")) {
+                ModelAndView mav = new ModelAndView("error");
+                mav.addObject("errors", "interaction_required");
+                return mav;
+            }
             return new ModelAndView("index");
         }
 
@@ -154,5 +162,15 @@ public class HomeController {
     @GetMapping("/password-authenticator-enrollment")
     public ModelAndView displayPasswordAuthenticatorEnrollmentPage() {
         return new ModelAndView("password-authenticator-enrollment");
+    }
+
+    /**
+     * Display the error page.
+     *
+     * @return the error page view
+     */
+    @GetMapping("/error")
+    public ModelAndView displayErrorPage() {
+        return new ModelAndView("error");
     }
 }

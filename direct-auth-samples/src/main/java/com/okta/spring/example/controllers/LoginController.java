@@ -102,13 +102,12 @@ public class LoginController {
      * Handle login with external Identity Provider.
      *
      * @param session the session
-     * @return todo
      */
     @PostMapping("/login-with-idp")
-    public ModelAndView handleLoginWithIdp(final HttpSession session) {
+    public void handleLoginWithIdp(final HttpSession session) {
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.getIdps();
         Util.updateSession(session, authenticationResponse.getProceedContext());
-        return null;
+        return;
     }
 
     /**
