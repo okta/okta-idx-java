@@ -157,7 +157,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
 
         AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient)
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("wrong_code")
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("correct_code")
 
         setMockResponse(requestExecutor, "introspect", "challenge-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "challenge/answer", "challenge-response", 200, mediaTypeAppIonJson)
@@ -470,7 +470,7 @@ class IDXAuthenticationWrapperTest {
             field.setAccessible(true)
             return field.get(target)
         } catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-            throw new RuntimeException("Unable to set internal state on a private field. [...]", e)
+            throw new RuntimeException("Unable to get internal state on a private field. [...]", e)
         }
     }
 }
