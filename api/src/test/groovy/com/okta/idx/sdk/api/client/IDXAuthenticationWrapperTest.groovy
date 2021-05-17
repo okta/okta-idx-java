@@ -497,12 +497,12 @@ class IDXAuthenticationWrapperTest {
         userProfile.addAttribute("lastName", "Last")
         userProfile.addAttribute("firstName", "First")
         userProfile.addAttribute("email", "email@test.com")
-        return userProfile;
+        return userProfile
     }
 
     static ClientConfiguration getClientConfiguration() {
         ClientConfiguration clientConfiguration = new ClientConfiguration()
-        clientConfiguration.setIssuer("http://example.com")
+        clientConfiguration.setIssuer("https://example.com")
         clientConfiguration.setClientId("test-client-id")
         clientConfiguration.setClientSecret("test-client-secret")
         clientConfiguration.setScopes(["test-scope"] as Set)
