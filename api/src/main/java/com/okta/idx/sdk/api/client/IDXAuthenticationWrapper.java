@@ -43,7 +43,6 @@ import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
-import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.api.util.ClientUtil;
@@ -496,23 +495,19 @@ public class IDXAuthenticationWrapper {
     /**
      * Populate UI form values for signing up a new user.
      *
+     * @param proceedContext the proceedContext
      * @return the authentication response
      */
-    public AuthenticationResponse fetchSignUpFormValues() {
+    public AuthenticationResponse fetchSignUpFormValues(ProceedContext proceedContext) {
         AuthenticationResponse newUserRegistrationResponse = new AuthenticationResponse();
 
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
-
             // enroll new user
-            AuthenticationTransaction enrollTransaction = introspectTransaction.proceed(() -> {
-                RemediationOption selectEnrollProfileRemediationOption =
-                        introspectTransaction.getRemediationOption(RemediationType.SELECT_ENROLL_PROFILE);
-
+            AuthenticationTransaction enrollTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
-                        .withStateHandle(introspectTransaction.getStateHandle())
+                        .withStateHandle(proceedContext.getStateHandle())
                         .build();
-                return selectEnrollProfileRemediationOption.proceed(client, enrollRequest);
+                return client.enroll(enrollRequest, proceedContext.getSelectProfileEnrollHref());
             });
 
             RemediationOption enrollProfileRemediationOption =
@@ -524,26 +519,12 @@ public class IDXAuthenticationWrapper {
 
             newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
             newUserRegistrationResponse.setProceedContext(enrollTransaction.createProceedContext());
+            return newUserRegistrationResponse;
         } catch (ProcessingException e) {
-            logger.error("Exception occurred", e);
-            ErrorResponse errorResponse = e.getErrorResponse();
-            if (errorResponse != null) {
-                if (errorResponse.getMessages() != null) {
-                    Arrays.stream(errorResponse.getMessages().getValue())
-                            .forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
-                } else {
-                    newUserRegistrationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
-                }
-            } else {
-                newUserRegistrationResponse.addError(e.getMessage());
-            }
-            logger.error("Error Detail: {}", newUserRegistrationResponse.getErrors());
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            newUserRegistrationResponse.addError("The current flow is not supported. Please check your policy configuration.");
+            return handleIllegalArgumentException(e);
         }
-
-        return newUserRegistrationResponse;
     }
 
     // If app sign-on policy is set to "any 1 factor", the next remediation after identify is

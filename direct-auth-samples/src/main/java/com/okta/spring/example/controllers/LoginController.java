@@ -243,7 +243,8 @@ public class LoginController {
                                  final HttpSession session) {
         logger.info(":: Register ::");
 
-        AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues();
+        ProceedContext beginProceedContext = Util.getProceedContextFromSession(session);
+        AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues(beginProceedContext);
 
         if (responseHandler.needsToShowErrors(newUserRegistrationResponse)) {
             ModelAndView mav = new ModelAndView("register");

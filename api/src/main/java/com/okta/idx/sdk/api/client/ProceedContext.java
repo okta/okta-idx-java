@@ -28,13 +28,16 @@ public final class ProceedContext {
     private final String href;
     private final String skipHref;
     private final boolean isIdentifyInOneStep;
+    private final String selectProfileEnrollHref;
 
-    ProceedContext(IDXClientContext clientContext, String stateHandle, String href, String skipHref, boolean isIdentifyInOneStep) {
+    ProceedContext(IDXClientContext clientContext, String stateHandle, String href, String skipHref, boolean isIdentifyInOneStep,
+                   String selectProfileEnrollHref) {
         this.clientContext = clientContext;
         this.stateHandle = stateHandle;
         this.href = href;
         this.skipHref = skipHref;
         this.isIdentifyInOneStep = isIdentifyInOneStep;
+        this.selectProfileEnrollHref = selectProfileEnrollHref;
     }
 
     public IDXClientContext getClientContext() {
@@ -55,5 +58,9 @@ public final class ProceedContext {
 
     boolean isIdentifyInOneStep() {
         return isIdentifyInOneStep;
+    }
+
+    String getSelectProfileEnrollHref() {
+        return selectProfileEnrollHref;
     }
 }
