@@ -97,7 +97,7 @@ public class HomeController {
                 return homeHelper.proceedToHome(tokenResponse, session);
             }
 
-            Util.updateSession(session, null);
+            Util.removeProceedContextFromSession(session);
 
             return new ModelAndView("index");
         }
@@ -122,20 +122,9 @@ public class HomeController {
         if (tokenResponse != null) {
             return homeHelper.proceedToHome(tokenResponse, session);
         }
-        return new ModelAndView("login");
-    }
 
-    /**
-     * Display the login with IDP page.
-     *
-     * @param session the http session
-     * @return the login with IDP view
-     */
-    @GetMapping(value = "/login-with-idp")
-    public ModelAndView displayLoginWithIdpPage(final HttpSession session) {
-        AuthenticationResponse authenticationResponse = authenticationWrapper.begin();
-        Util.updateSession(session, authenticationResponse.getProceedContext());
-        ModelAndView modelAndView = new ModelAndView("login-with-idp");
+        AuthenticationResponse authenticationResponse = begin(session);
+        ModelAndView modelAndView = new ModelAndView("login");
         modelAndView.addObject("idps", authenticationResponse.getIdps());
         return modelAndView;
     }
@@ -146,7 +135,8 @@ public class HomeController {
      * @return the forgot password view
      */
     @GetMapping("/forgot-password")
-    public ModelAndView displayForgotPasswordPage() {
+    public ModelAndView displayForgotPasswordPage(final HttpSession session) {
+        begin(session);
         return new ModelAndView("forgot-password");
     }
 
@@ -156,28 +146,9 @@ public class HomeController {
      * @return the register view
      */
     @GetMapping("/register")
-    public ModelAndView displayRegisterPage() {
+    public ModelAndView displayRegisterPage(final HttpSession session) {
+        begin(session);
         return new ModelAndView("register");
-    }
-
-    /**
-     * Display the verify email authenticator enrollment page.
-     *
-     * @return the verify email authenticators view
-     */
-    @GetMapping("/verify-email-authenticator-enrollment")
-    public ModelAndView displayVerifyEmailAuthenticatorEnrollmentPage() {
-        return new ModelAndView("verify-email-authenticator-enrollment");
-    }
-
-    /**
-     * Display the password authenticator enrollment page.
-     *
-     * @return the password authenticator enrollment view
-     */
-    @GetMapping("/password-authenticator-enrollment")
-    public ModelAndView displayPasswordAuthenticatorEnrollmentPage() {
-        return new ModelAndView("password-authenticator-enrollment");
     }
 
     /**
@@ -188,5 +159,12 @@ public class HomeController {
     @GetMapping("/error")
     public ModelAndView displayErrorPage() {
         return new ModelAndView("error");
+    }
+
+    private AuthenticationResponse begin(HttpSession session) {
+        // TODO: Accept a skip param so we can link to other pages from the auth page.
+        AuthenticationResponse authenticationResponse = authenticationWrapper.begin();
+        Util.updateSession(session, authenticationResponse.getProceedContext());
+        return authenticationResponse;
     }
 }

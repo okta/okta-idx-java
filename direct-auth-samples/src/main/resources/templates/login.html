@@ -75,6 +75,20 @@
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
     </form>
 
+    <a class="alignleft" href="/forgot-password">Forgot Password?</a>
+
+    <hr/>
+
+    <div class="container" align="center">
+
+        <th:block th:each="idp: ${idps}">
+            <br><a th:href="@{${idp.href}}" class="btn btn-primary">Sign In with [[${idp.type}]]</a><br>
+        </th:block>
+    </div>
+
+    <hr/>
+
+    <a class="alignright" href="/register">Sign Up</a>
 </div>
 
 <div th:replace="fragments/footer :: footer"></div>

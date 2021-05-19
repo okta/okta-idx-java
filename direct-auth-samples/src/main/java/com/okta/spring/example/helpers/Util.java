@@ -22,7 +22,16 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpSession;
 
-public class Util {
+public final class Util {
+
+    /**
+     * removeProceedContextFromSession.
+     *
+     * @param session the session
+     */
+    public static void removeProceedContextFromSession(final HttpSession session) {
+        session.removeAttribute("proceedContext");
+    }
 
     /**
      * Updates the proceed context in session.
