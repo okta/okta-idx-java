@@ -20,11 +20,13 @@
 
     <div th:replace="fragments/header :: header-css"></div>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 </head>
 <body>
 
 <div th:if="${tokenResponse}">
-    <a href="/logout" class="btn btn-danger pull-right">Logout</a>
+    <a href="/logout" class="btn btn-danger pull-right">Logout</a><br/>
 </div>
 
 <div class="container">
@@ -38,32 +40,32 @@
 
     <div th:if="${tokenResponse.accessToken}">
         <p><label>Access Token: </label>
-            <span th:text="${tokenResponse.accessToken}">1</span></p>
+            <span th:text="${tokenResponse.accessToken}"></span></p>
     </div>
 
     <div th:if="${tokenResponse.expiresIn}">
         <p><label>Expires In: </label>
-            <span th:text="${tokenResponse.expiresIn}">1</span></p>
+            <span th:text="${tokenResponse.expiresIn} + ' ms'"></span></p>
     </div>
 
     <div th:if="${tokenResponse.idToken}">
         <p><label>ID Token: </label>
-            <span th:text="${tokenResponse.idToken}">1</span></p>
+            <span th:text="${tokenResponse.idToken}"></span></p>
     </div>
 
     <div th:if="${tokenResponse.refreshToken}">
         <p><label>Refresh Token: </label>
-            <span th:text="${tokenResponse.refreshToken}">1</span></p>
+            <span th:text="${tokenResponse.refreshToken}"></span></p>
     </div>
 
     <div th:if="${tokenResponse.scope}">
         <p><label>Scope(s): </label>
-            <span th:text="${tokenResponse.scope}">1</span></p>
+            <span th:text="${tokenResponse.scope}"></span></p>
     </div>
 
     <div th:if="${tokenResponse.tokenType}">
         <p><label>Token Type: </label>
-            <span th:text="${tokenResponse.tokenType}">1</span></p>
+            <span th:text="${tokenResponse.tokenType}"></span></p>
     </div>
 </div>
 

@@ -61,17 +61,23 @@ public class HomeController {
     private IDXAuthenticationWrapper authenticationWrapper;
 
     /**
-     * Display the index page or home page (if we have obtained a token from the interaction code in callback).
+     * Display one of:
+     *
+     * a) index page - if the user is not authenticated yet (does not have token response in session).
+     * b) home page - if the user is authenticated (or) we have obtained a token for the user from the interaction code in callback.
+     *
+     * where index page refers to the root view with table of contents,
+     * and home page refers to the view that shows the user profile information along with token information.
      *
      * @param interactionCode the interaction code from callback (optional)
      * @param error  the error from callback when interaction_code could not be sent (optional)
      * @param session the http session
-     * @return the index page view with table of contents or the home page if we have a token.
+     * @return the index page view with table of contents or the home page view if we have a token.
      */
     @GetMapping("/")
-    public ModelAndView displayIndexPage(final @RequestParam(name = "interaction_code", required = false) String interactionCode,
-                                         final @RequestParam(name = "error", required = false) String error,
-                                         final HttpSession session) {
+    public ModelAndView displayIndexOrHomePage(final @RequestParam(name = "interaction_code", required = false) String interactionCode,
+                                               final @RequestParam(name = "error", required = false) String error,
+                                               final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
@@ -82,6 +88,15 @@ public class HomeController {
                 mav.addObject("errors", "interaction_required");
                 return mav;
             }
+
+            TokenResponse tokenResponse =
+                    (TokenResponse) session.getAttribute("tokenResponse");
+
+            // render home page if token is already present in session
+            if (tokenResponse != null) {
+                return homeHelper.proceedToHome(tokenResponse, session);
+            }
+
             return new ModelAndView("index");
         }
 
