@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -90,6 +91,12 @@ public class HomeController {
                                                final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+        TokenResponse tokenResponse = (TokenResponse) session.getAttribute("tokenResponse");
+
+        // render home page if token is already present in session
+        if (tokenResponse != null) {
+            return homeHelper.proceedToHome(tokenResponse, session);
+        }
 
 //        if (Strings.hasText(error) && error.equals("interaction_required")) {
 //            AuthenticationResponse authenticationResponse =
@@ -97,30 +104,20 @@ public class HomeController {
 //            return responseHandler.handleKnownTransitions(authenticationResponse, session);
 //        }
 
-        if (!Strings.hasText(interactionCode) || proceedContext == null) {
-            // more remediation steps required
-            if (Strings.hasText(error) && error.equals("interaction_required")) {
-                ModelAndView mav = new ModelAndView("error");
-                mav.addObject("errors", errorDescription);
-                return mav;
-            }
+        if (Strings.hasText(interactionCode)) {
+            AuthenticationResponse authenticationResponse =
+                    authenticationWrapper.fetchTokenWithInteractionCode(issuer, proceedContext, interactionCode);
 
-            TokenResponse tokenResponse =
-                    (TokenResponse) session.getAttribute("tokenResponse");
-
-            // render home page if token is already present in session
-            if (tokenResponse != null) {
-                return homeHelper.proceedToHome(tokenResponse, session);
-            }
-
-            Util.removeProceedContextFromSession(session);
-
-            return new ModelAndView("index");
+            return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
 
-        AuthenticationResponse authenticationResponse =
-                authenticationWrapper.fetchTokenWithInteractionCode(issuer, proceedContext, interactionCode);
-        return responseHandler.handleKnownTransitions(authenticationResponse, session);
+        if (Strings.hasText(error)) {
+            ModelAndView mav = new ModelAndView("error");
+            mav.addObject("errors", errorDescription);
+            return mav;
+        }
+
+        return new ModelAndView("index");
     }
 
     /**
@@ -141,7 +138,9 @@ public class HomeController {
 
         AuthenticationResponse authenticationResponse = begin(session);
         ModelAndView modelAndView = new ModelAndView("login");
-        modelAndView.addObject("idps", authenticationResponse.getIdps());
+        if (!CollectionUtils.isEmpty(authenticationResponse.getIdps())) {
+            modelAndView.addObject("idps", authenticationResponse.getIdps());
+        }
         return modelAndView;
     }
 
