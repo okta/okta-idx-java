@@ -171,27 +171,25 @@ public class IDXAuthenticationWrapper {
      * @param username the username
      * @return the Authentication response
      */
-    public AuthenticationResponse recoverPassword(String username) {
+    public AuthenticationResponse recoverPassword(String username, ProceedContext proceedContext) {
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
-
-            boolean isIdentifyInOneStep = introspectTransaction.isRemediationRequireCredentials(RemediationType.IDENTIFY);
+            boolean isIdentifyInOneStep = proceedContext.isIdentifyInOneStep();
 
             if (isIdentifyInOneStep) {
                 // recover
-                RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
+                AuthenticationTransaction recoverTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                    RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                            .withStateHandle(proceedContext.getStateHandle())
+                            .build();
 
-                AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() ->
-                        client.recover(recoverRequest, null)
-                );
+                    return client.recover(recoverRequest, null);
+                });
 
                 RemediationOption remediationOption = recoverTransaction.getRemediationOption(RemediationType.IDENTIFY_RECOVERY);
 
                 IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                         .withIdentifier(username)
-                        .withStateHandle(introspectTransaction.getStateHandle())
+                        .withStateHandle(proceedContext.getStateHandle())
                         .build();
 
                 // identify user
@@ -199,17 +197,14 @@ public class IDXAuthenticationWrapper {
                         remediationOption.proceed(client, identifyRequest)
                 ).asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
             } else {
-                RemediationOption remediationOption = introspectTransaction.getRemediationOption(RemediationType.IDENTIFY);
-
-                IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
-                        .withIdentifier(username)
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-
                 // identify user
-                AuthenticationTransaction identifyTransaction = introspectTransaction.proceed(() ->
-                        remediationOption.proceed(client, identifyRequest)
-                );
+                AuthenticationTransaction identifyTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                    IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
+                            .withIdentifier(username)
+                            .withStateHandle(proceedContext.getStateHandle())
+                            .build();
+                    return client.identify(identifyRequest, proceedContext.getHref());
+                });
                 IDXResponse identifyResponse = identifyTransaction.getResponse();
 
                 if (identifyResponse.getMessages() != null) {
@@ -224,10 +219,10 @@ public class IDXAuthenticationWrapper {
                 Recover recover = identifyTransaction.getResponse()
                         .getCurrentAuthenticatorEnrollment().getValue().getRecover();
 
-                AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
+                AuthenticationTransaction recoverTransaction = identifyTransaction.proceed(() -> {
                     // recover password
                     RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                            .withStateHandle(introspectTransaction.getStateHandle())
+                            .withStateHandle(proceedContext.getStateHandle())
                             .build();
                     return recover.proceed(client, recoverRequest);
                 });

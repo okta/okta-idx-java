@@ -116,9 +116,15 @@ public class LoginController {
     public ModelAndView handleForgotPassword(final @RequestParam("username") String username,
                                              final HttpSession session) {
         logger.info(":: Forgot Password ::");
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+        if (proceedContext == null) {
+            // proceedContext is null when we didn't start with social auth.
+            AuthenticationResponse beingResponse = idxAuthenticationWrapper.begin();
+            proceedContext = beingResponse.getProceedContext();
+        }
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.recoverPassword(username);
+                idxAuthenticationWrapper.recoverPassword(username, proceedContext);
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getAuthenticationStatus() == null
