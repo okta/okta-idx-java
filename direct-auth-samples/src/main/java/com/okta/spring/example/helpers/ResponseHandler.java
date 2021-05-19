@@ -25,7 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.*;
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_PASSWORD_RESET;
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.PASSWORD_EXPIRED;
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION;
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION;
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION;
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.SKIP_COMPLETE;
 
 @Component
 public final class ResponseHandler {
@@ -42,10 +47,22 @@ public final class ResponseHandler {
     @Autowired
     private IDXAuthenticationWrapper authenticationWrapper;
 
+    /**
+     * needsToShowErrors.
+     *
+     * @param response the response
+     * @return if the caller should show errors
+     */
     public boolean needsToShowErrors(AuthenticationResponse response) {
         return !response.getErrors().isEmpty();
     }
 
+    /**
+     * handleTerminalTransitions.
+     * @param response the response
+     * @param session the session
+     * @return the ModelAndView with the status associated to the response or null.
+     */
     public ModelAndView handleTerminalTransitions(AuthenticationResponse response, HttpSession session) {
         Util.updateSession(session, response.getProceedContext());
         if (response.getTokenResponse() != null) {
@@ -59,6 +76,12 @@ public final class ResponseHandler {
         return null;
     }
 
+    /**
+     * handleKnownTransitions.
+     * @param response the response
+     * @param session the session
+     * @return the ModelAndView with the status associated to the response.
+     */
     public ModelAndView handleKnownTransitions(AuthenticationResponse response, HttpSession session) {
         ModelAndView terminalModelAndView = handleTerminalTransitions(response, session);
         if (terminalModelAndView != null) {
@@ -97,6 +120,11 @@ public final class ResponseHandler {
         return modelAndView;
     }
 
+    /**
+     * registerVerifyForm.
+     * @param factor the factor
+     * @return the ModelAndView for the register verify form.
+     */
     public ModelAndView registerVerifyForm(Authenticator.Factor factor) {
         switch (factor.getMethod()) {
             case "email":
@@ -113,6 +141,10 @@ public final class ResponseHandler {
         }
     }
 
+    /**
+     * verifyForm.
+     * @return the ModelAndView for the verifyForm.
+     */
     public ModelAndView verifyForm() {
         return new ModelAndView("verify");
     }

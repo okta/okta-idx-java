@@ -78,13 +78,15 @@ public class HomeController {
      *
      * @param interactionCode the interaction code from callback (optional)
      * @param error the error from callback when interaction_code could not be sent (optional)
+     * @param errorDescription the error_description from callback (optional)
      * @param session the http session
      * @return the index page view with table of contents or the home page view if we have a token.
      */
     @GetMapping("/")
     public ModelAndView displayIndexOrHomePage(final @RequestParam(name = "interaction_code", required = false) String interactionCode,
                                                final @RequestParam(name = "error", required = false) String error,
-                                               final @RequestParam(name = "error_description", required = false) String errorDescription,
+                                               final @RequestParam(name = "error_description", required = false)
+                                                           String errorDescription,
                                                final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
@@ -146,6 +148,7 @@ public class HomeController {
     /**
      * Display the forgot password page.
      *
+     * @param session the http session
      * @return the forgot password view
      */
     @GetMapping("/forgot-password")
@@ -157,6 +160,7 @@ public class HomeController {
     /**
      * Display the registration page.
      *
+     * @param session the http session
      * @return the register view
      */
     @GetMapping("/register")
@@ -176,7 +180,6 @@ public class HomeController {
     }
 
     private AuthenticationResponse begin(HttpSession session) {
-        // TODO: Accept a skip param so we can link to other pages from the auth page. (optimization)
         AuthenticationResponse authenticationResponse = authenticationWrapper.begin();
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;

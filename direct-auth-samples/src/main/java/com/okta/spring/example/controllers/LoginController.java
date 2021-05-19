@@ -275,6 +275,7 @@ public class LoginController {
      *
      * @param phone the phone number
      * @param mode the delivery mode - sms or voice
+     * @param session the session
      * @return the submit phone authenticator enrollment page that allows user to input
      * the received code (if phone validation is successful), else presents the same page with error message.
      */
