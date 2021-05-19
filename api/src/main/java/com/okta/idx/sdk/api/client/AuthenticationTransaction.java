@@ -119,7 +119,15 @@ final class AuthenticationTransaction {
             selectProfileEnrollHref = selectEnrollProfileRemediationOption.get().getHref();
         }
 
-        return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep, selectProfileEnrollHref);
+        String resendHref = null;
+        if (idxResponse.getCurrentAuthenticatorEnrollment() != null &&
+                idxResponse.getCurrentAuthenticatorEnrollment().getValue() != null &&
+                idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend() != null) {
+            resendHref = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend().getHref();
+        }
+
+        return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep, selectProfileEnrollHref,
+                resendHref);
     }
 
     RemediationOption getRemediationOption(String name) {

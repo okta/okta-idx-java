@@ -238,8 +238,8 @@ public class IDXAuthenticationWrapper {
     /**
      * Register new user with the supplied user profile reference.
      *
-     * @param proceedContext      the ProceedContext
-     * @param userProfile           the user profile
+     * @param proceedContext the ProceedContext
+     * @param userProfile the user profile
      * @return the Authentication response
      */
     public AuthenticationResponse register(ProceedContext proceedContext,
@@ -268,8 +268,8 @@ public class IDXAuthenticationWrapper {
     /**
      * Select authenticator of the supplied type.
      *
-     * @param proceedContext      the ProceedContext
-     * @param authenticator     the authenticator
+     * @param proceedContext the ProceedContext
+     * @param authenticator the authenticator
      * @return the Authentication response
      */
     public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext,
@@ -299,8 +299,8 @@ public class IDXAuthenticationWrapper {
     /**
      * Select authenticator of the supplied type.
      *
-     * @param proceedContext      the ProceedContext
-     * @param factor     the factor
+     * @param proceedContext the ProceedContext
+     * @param factor the factor
      * @return the Authentication response
      */
     public AuthenticationResponse selectFactor(ProceedContext proceedContext,
@@ -327,8 +327,8 @@ public class IDXAuthenticationWrapper {
     /**
      * Enroll authenticator of the supplied type.
      *
-     * @param proceedContext      the ProceedContext
-     * @param factor     the factor
+     * @param proceedContext the ProceedContext
+     * @param factor the factor
      * @return the Authentication response
      */
     public AuthenticationResponse enrollAuthenticator(ProceedContext proceedContext,
@@ -357,7 +357,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Verify Authenticator with the supplied authenticator options.
      *
-     * @param proceedContext      the ProceedContext
+     * @param proceedContext the ProceedContext
      * @param verifyAuthenticatorOptions the verify Authenticator options
      * @return the Authentication response
      */
@@ -376,7 +376,6 @@ public class IDXAuthenticationWrapper {
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
                     client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
             ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
-
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -387,9 +386,9 @@ public class IDXAuthenticationWrapper {
     /**
      * Submit phone authenticator enrollment with the provided phone number.
      *
-     * @param proceedContext    the ProceedContext
-     * @param phone               the phone number
-     * @param factor                factor
+     * @param proceedContext the ProceedContext
+     * @param phone the phone number
+     * @param factor factor
      * @return the Authentication response
      */
     public AuthenticationResponse submitPhoneAuthenticator(ProceedContext proceedContext,
@@ -419,7 +418,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Skip optional authenticator enrollment.
      *
-     * @param proceedContext      the ProceedContext
+     * @param proceedContext the ProceedContext
      * @return the Authentication response
      */
     public AuthenticationResponse skipAuthenticatorEnrollment(ProceedContext proceedContext) {
@@ -432,7 +431,28 @@ public class IDXAuthenticationWrapper {
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
                     client.skip(skipAuthenticatorEnrollmentRequest, proceedContext.getSkipHref())
             ).asAuthenticationResponse(AuthenticationStatus.SKIP_COMPLETE);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
 
+    /**
+     * Resend code.
+     *
+     * @param proceedContext the ProceedContext
+     * @return the Authentication response
+     */
+    public AuthenticationResponse resend(ProceedContext proceedContext) {
+        try {
+            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest =
+                        SkipAuthenticatorEnrollmentRequestBuilder.builder()
+                                .withStateHandle(proceedContext.getStateHandle())
+                                .build();
+                return client.skip(skipAuthenticatorEnrollmentRequest, proceedContext.getResendHref());
+            }).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -443,7 +463,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Get IDX client context by calling the interact endpoint.
      * ClientContext reference contains the interaction handle and PKCE params.
-     *
+     * <p>
      * This function can be used by the client applications to get a handle
      * of {@link IDXClientContext} which can be used to reenter/resume the flow.
      *
@@ -556,7 +576,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Helper to check if we have optional authenticators to skip in current remediation step.
      *
-     * @param proceedContext      the ProceedContext
+     * @param proceedContext the ProceedContext
      * @return true if we have optional authenticators to skip; false otherwise.
      */
     public boolean isSkipAuthenticatorPresent(ProceedContext proceedContext) {
