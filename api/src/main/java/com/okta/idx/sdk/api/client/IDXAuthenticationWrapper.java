@@ -43,7 +43,6 @@ import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
-import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.api.util.ClientUtil;
@@ -109,36 +108,33 @@ public class IDXAuthenticationWrapper {
      * @param authenticationOptions the Authenticator options
      * @return the Authentication response
      */
-    public AuthenticationResponse authenticate(AuthenticationOptions authenticationOptions) {
+    public AuthenticationResponse authenticate(AuthenticationOptions authenticationOptions, ProceedContext proceedContext) {
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
-
             // Check if identify flow needs to include credentials
-            boolean isIdentifyInOneStep =
-                    introspectTransaction.isRemediationRequireCredentials(RemediationType.IDENTIFY);
+            boolean isIdentifyInOneStep = proceedContext.isIdentifyInOneStep();
 
-            IdentifyRequest identifyRequest;
+            AuthenticationTransaction identifyTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                IdentifyRequest identifyRequest;
 
-            if (isIdentifyInOneStep) {
-                Credentials credentials = new Credentials();
-                credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
+                if (isIdentifyInOneStep) {
+                    Credentials credentials = new Credentials();
+                    credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
 
-                identifyRequest = IdentifyRequestBuilder.builder()
-                        .withIdentifier(authenticationOptions.getUsername())
-                        .withCredentials(credentials)
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-            } else {
-                identifyRequest = IdentifyRequestBuilder.builder()
-                        .withIdentifier(authenticationOptions.getUsername())
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-            }
+                    identifyRequest = IdentifyRequestBuilder.builder()
+                            .withIdentifier(authenticationOptions.getUsername())
+                            .withCredentials(credentials)
+                            .withStateHandle(proceedContext.getStateHandle())
+                            .build();
+                } else {
+                    identifyRequest = IdentifyRequestBuilder.builder()
+                            .withIdentifier(authenticationOptions.getUsername())
+                            .withStateHandle(proceedContext.getStateHandle())
+                            .build();
+                }
 
-            // identify user
-            AuthenticationTransaction identifyTransaction = introspectTransaction.proceed(() ->
-                    introspectTransaction.getRemediationOption(RemediationType.IDENTIFY).proceed(client, identifyRequest)
-            );
+                // identify user
+                return client.identify(identifyRequest, proceedContext.getHref());
+            });
 
             if (isIdentifyInOneStep) {
                 return identifyTransaction.asAuthenticationResponse();
@@ -174,27 +170,25 @@ public class IDXAuthenticationWrapper {
      * @param username the username
      * @return the Authentication response
      */
-    public AuthenticationResponse recoverPassword(String username) {
+    public AuthenticationResponse recoverPassword(String username, ProceedContext proceedContext) {
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
-
-            boolean isIdentifyInOneStep = introspectTransaction.isRemediationRequireCredentials(RemediationType.IDENTIFY);
+            boolean isIdentifyInOneStep = proceedContext.isIdentifyInOneStep();
 
             if (isIdentifyInOneStep) {
                 // recover
-                RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
+                AuthenticationTransaction recoverTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                    RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
+                            .withStateHandle(proceedContext.getStateHandle())
+                            .build();
 
-                AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() ->
-                        client.recover(recoverRequest, null)
-                );
+                    return client.recover(recoverRequest, null);
+                });
 
                 RemediationOption remediationOption = recoverTransaction.getRemediationOption(RemediationType.IDENTIFY_RECOVERY);
 
                 IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                         .withIdentifier(username)
-                        .withStateHandle(introspectTransaction.getStateHandle())
+                        .withStateHandle(proceedContext.getStateHandle())
                         .build();
 
                 // identify user
@@ -202,17 +196,14 @@ public class IDXAuthenticationWrapper {
                         remediationOption.proceed(client, identifyRequest)
                 ).asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
             } else {
-                RemediationOption remediationOption = introspectTransaction.getRemediationOption(RemediationType.IDENTIFY);
-
-                IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
-                        .withIdentifier(username)
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-
                 // identify user
-                AuthenticationTransaction identifyTransaction = introspectTransaction.proceed(() ->
-                        remediationOption.proceed(client, identifyRequest)
-                );
+                AuthenticationTransaction identifyTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                    IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
+                            .withIdentifier(username)
+                            .withStateHandle(proceedContext.getStateHandle())
+                            .build();
+                    return client.identify(identifyRequest, proceedContext.getHref());
+                });
                 IDXResponse identifyResponse = identifyTransaction.getResponse();
 
                 if (identifyResponse.getMessages() != null) {
@@ -227,10 +218,10 @@ public class IDXAuthenticationWrapper {
                 Recover recover = identifyTransaction.getResponse()
                         .getCurrentAuthenticatorEnrollment().getValue().getRecover();
 
-                AuthenticationTransaction recoverTransaction = introspectTransaction.proceed(() -> {
+                AuthenticationTransaction recoverTransaction = identifyTransaction.proceed(() -> {
                     // recover password
                     RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                            .withStateHandle(introspectTransaction.getStateHandle())
+                            .withStateHandle(proceedContext.getStateHandle())
                             .build();
                     return recover.proceed(client, recoverRequest);
                 });
@@ -247,8 +238,8 @@ public class IDXAuthenticationWrapper {
     /**
      * Register new user with the supplied user profile reference.
      *
-     * @param proceedContext      the ProceedContext
-     * @param userProfile           the user profile
+     * @param proceedContext the ProceedContext
+     * @param userProfile the user profile
      * @return the Authentication response
      */
     public AuthenticationResponse register(ProceedContext proceedContext,
@@ -277,8 +268,8 @@ public class IDXAuthenticationWrapper {
     /**
      * Select authenticator of the supplied type.
      *
-     * @param proceedContext      the ProceedContext
-     * @param authenticator     the authenticator
+     * @param proceedContext the ProceedContext
+     * @param authenticator the authenticator
      * @return the Authentication response
      */
     public AuthenticationResponse selectAuthenticator(ProceedContext proceedContext,
@@ -308,8 +299,8 @@ public class IDXAuthenticationWrapper {
     /**
      * Select authenticator of the supplied type.
      *
-     * @param proceedContext      the ProceedContext
-     * @param factor     the factor
+     * @param proceedContext the ProceedContext
+     * @param factor the factor
      * @return the Authentication response
      */
     public AuthenticationResponse selectFactor(ProceedContext proceedContext,
@@ -336,8 +327,8 @@ public class IDXAuthenticationWrapper {
     /**
      * Enroll authenticator of the supplied type.
      *
-     * @param proceedContext      the ProceedContext
-     * @param factor     the factor
+     * @param proceedContext the ProceedContext
+     * @param factor the factor
      * @return the Authentication response
      */
     public AuthenticationResponse enrollAuthenticator(ProceedContext proceedContext,
@@ -366,7 +357,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Verify Authenticator with the supplied authenticator options.
      *
-     * @param proceedContext      the ProceedContext
+     * @param proceedContext the ProceedContext
      * @param verifyAuthenticatorOptions the verify Authenticator options
      * @return the Authentication response
      */
@@ -385,7 +376,6 @@ public class IDXAuthenticationWrapper {
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
                     client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
             ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
-
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -396,9 +386,9 @@ public class IDXAuthenticationWrapper {
     /**
      * Submit phone authenticator enrollment with the provided phone number.
      *
-     * @param proceedContext    the ProceedContext
-     * @param phone               the phone number
-     * @param factor                factor
+     * @param proceedContext the ProceedContext
+     * @param phone the phone number
+     * @param factor factor
      * @return the Authentication response
      */
     public AuthenticationResponse submitPhoneAuthenticator(ProceedContext proceedContext,
@@ -428,7 +418,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Skip optional authenticator enrollment.
      *
-     * @param proceedContext      the ProceedContext
+     * @param proceedContext the ProceedContext
      * @return the Authentication response
      */
     public AuthenticationResponse skipAuthenticatorEnrollment(ProceedContext proceedContext) {
@@ -441,7 +431,28 @@ public class IDXAuthenticationWrapper {
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
                     client.skip(skipAuthenticatorEnrollmentRequest, proceedContext.getSkipHref())
             ).asAuthenticationResponse(AuthenticationStatus.SKIP_COMPLETE);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
 
+    /**
+     * Resend code.
+     *
+     * @param proceedContext the ProceedContext
+     * @return the Authentication response
+     */
+    public AuthenticationResponse resend(ProceedContext proceedContext) {
+        try {
+            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest =
+                        SkipAuthenticatorEnrollmentRequestBuilder.builder()
+                                .withStateHandle(proceedContext.getStateHandle())
+                                .build();
+                return client.skip(skipAuthenticatorEnrollmentRequest, proceedContext.getResendHref());
+            }).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -452,7 +463,7 @@ public class IDXAuthenticationWrapper {
     /**
      * Get IDX client context by calling the interact endpoint.
      * ClientContext reference contains the interaction handle and PKCE params.
-     *
+     * <p>
      * This function can be used by the client applications to get a handle
      * of {@link IDXClientContext} which can be used to reenter/resume the flow.
      *
@@ -504,23 +515,19 @@ public class IDXAuthenticationWrapper {
     /**
      * Populate UI form values for signing up a new user.
      *
+     * @param proceedContext the proceedContext
      * @return the authentication response
      */
-    public AuthenticationResponse fetchSignUpFormValues() {
+    public AuthenticationResponse fetchSignUpFormValues(ProceedContext proceedContext) {
         AuthenticationResponse newUserRegistrationResponse = new AuthenticationResponse();
 
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
-
             // enroll new user
-            AuthenticationTransaction enrollTransaction = introspectTransaction.proceed(() -> {
-                RemediationOption selectEnrollProfileRemediationOption =
-                        introspectTransaction.getRemediationOption(RemediationType.SELECT_ENROLL_PROFILE);
-
+            AuthenticationTransaction enrollTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
-                        .withStateHandle(introspectTransaction.getStateHandle())
+                        .withStateHandle(proceedContext.getStateHandle())
                         .build();
-                return selectEnrollProfileRemediationOption.proceed(client, enrollRequest);
+                return client.enroll(enrollRequest, proceedContext.getSelectProfileEnrollHref());
             });
 
             RemediationOption enrollProfileRemediationOption =
@@ -532,26 +539,12 @@ public class IDXAuthenticationWrapper {
 
             newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
             newUserRegistrationResponse.setProceedContext(enrollTransaction.createProceedContext());
+            return newUserRegistrationResponse;
         } catch (ProcessingException e) {
-            logger.error("Exception occurred", e);
-            ErrorResponse errorResponse = e.getErrorResponse();
-            if (errorResponse != null) {
-                if (errorResponse.getMessages() != null) {
-                    Arrays.stream(errorResponse.getMessages().getValue())
-                            .forEach(msg -> newUserRegistrationResponse.addError(msg.getMessage()));
-                } else {
-                    newUserRegistrationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
-                }
-            } else {
-                newUserRegistrationResponse.addError(e.getMessage());
-            }
-            logger.error("Error Detail: {}", newUserRegistrationResponse.getErrors());
+            return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
-            logger.error("Exception occurred", e);
-            newUserRegistrationResponse.addError("The current flow is not supported. Please check your policy configuration.");
+            return handleIllegalArgumentException(e);
         }
-
-        return newUserRegistrationResponse;
     }
 
     // If app sign-on policy is set to "any 1 factor", the next remediation after identify is
@@ -583,15 +576,14 @@ public class IDXAuthenticationWrapper {
     /**
      * Helper to check if we have optional authenticators to skip in current remediation step.
      *
-     * @param proceedContext      the ProceedContext
+     * @param proceedContext the ProceedContext
      * @return true if we have optional authenticators to skip; false otherwise.
      */
     public boolean isSkipAuthenticatorPresent(ProceedContext proceedContext) {
         return proceedContext.getSkipHref() != null;
     }
 
-    public AuthenticationResponse getRedirectIdps() {
-
+    public AuthenticationResponse begin() {
         try {
             return AuthenticationTransaction.create(client).asAuthenticationResponse();
         } catch (ProcessingException e) {

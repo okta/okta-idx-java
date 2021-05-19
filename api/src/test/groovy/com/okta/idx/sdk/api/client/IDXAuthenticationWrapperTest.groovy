@@ -73,7 +73,8 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "enroll", "enroll-user-response", 200, mediaTypeAppIonJson)
 
-        AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues()
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues(beginResponse.proceedContext)
         assertThat(newUserRegistrationResponse.getErrors(), empty())
         assertThat(newUserRegistrationResponse.getFormValues(), notNullValue())
         assertThat(newUserRegistrationResponse.getFormValues(), hasSize(1))
@@ -125,7 +126,8 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "enroll", "enroll-user-response", 200, mediaTypeAppIonJson)
 
-        AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues()
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues(beginResponse.proceedContext)
         assertThat(newUserRegistrationResponse.getErrors(), empty())
         assertThat(newUserRegistrationResponse.getFormValues(), notNullValue())
 
@@ -164,7 +166,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
                 new ProceedContext(introspectTransaction.clientContext,
-                        introspectTransaction.getStateHandle(), "/challenge/answer", null),
+                        introspectTransaction.getStateHandle(), "/challenge/answer", null, false, null, null),
                 verifyAuthenticatorOptions
         )
 
@@ -194,7 +196,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
                 new ProceedContext(introspectTransaction.clientContext,
-                        introspectTransaction.getStateHandle(), "/challenge/answer", null),
+                        introspectTransaction.getStateHandle(), "/challenge/answer", null, false, null, null),
                 verifyAuthenticatorOptions
         )
 
@@ -218,7 +220,8 @@ class IDXAuthenticationWrapperTest {
 
         String userEmail = "joe.coder" + (new Random()).nextInt(1000) + "@example.com"
 
-        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.recoverPassword(userEmail)
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.recoverPassword(userEmail, beginResponse.proceedContext)
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getAuthenticationStatus(),
                 equalTo(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION))
@@ -250,7 +253,8 @@ class IDXAuthenticationWrapperTest {
 
         String userEmail = "joe.coder" + (new Random()).nextInt(1000) + "@example.com"
 
-        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.recoverPassword(userEmail)
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.recoverPassword(userEmail, beginResponse.proceedContext)
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getAuthenticationStatus(),
                 equalTo(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION))
@@ -274,8 +278,9 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "identify", "success-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "token", "token-response", 200, mediaTypeAppIonJson)
 
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password")
+                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -302,8 +307,9 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "identify", "identify-error-response", 400, mediaTypeAppIonJson)
 
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password")
+                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("Authentication failed"))
@@ -324,8 +330,9 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "answer", "challenge-identify-first-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "token", "token-response", 200, mediaTypeAppIonJson)
 
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password")
+                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -352,8 +359,9 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "introspect", "introspect-identify-first-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "identify", "identify-first-error-response", 400, mediaTypeAppIonJson)
 
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password")
+                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("Password is incorrect"))
@@ -373,8 +381,9 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "identify", "identify-first-success-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "answer", "challenge-identify-first-factor-response", 200, mediaTypeAppIonJson)
 
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password")
+                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -402,8 +411,9 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "challenge", "challenge-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "answer", "challenge-identify-first-factor-response", 200, mediaTypeAppIonJson)
 
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password")
+                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())

@@ -30,6 +30,8 @@ public class CurrentAuthenticatorEnrollmentValue {
 
     private String displayName;
 
+    private RemediationOption resend;
+
     public Recover getRecover() {
         return recover;
     }
@@ -44,5 +46,9 @@ public class CurrentAuthenticatorEnrollmentValue {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public RemediationOption getResend() {
+        return resend;
     }
 }

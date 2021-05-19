@@ -18,24 +18,24 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Enroll Password Authenticator</title>
+    <title>Enroll Phone Authenticator</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
     <style>
-        .enroll-password-authenticator-form {
+        .enroll-phone-authenticator-form {
             width: 440px;
             margin: 50px auto;
         }
-        .enroll-password-authenticator-form form {
+        .enroll-phone-authenticator-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .enroll-password-authenticator-form h2 {
+        .enroll-phone-authenticator-form h2 {
             margin: 0 0 15px;
         }
         .form-control, .btn {
@@ -53,20 +53,20 @@
 
 <a href="/" class="btn btn-info pull-left">Index Page</a>
 
-<div class="enroll-password-authenticator-form">
-    <form th:action="@{/password-authenticator-enrollment}" method="post">
-        <h2 class="text-center">Enroll Password Authenticator</h2>
+<div class="enroll-phone-authenticator-form">
+    <form th:action="@{/register-phone}" method="post">
+        <h2 class="text-center">Enroll Phone Authenticator</h2>
         <div th:if="${errors}" class="alert alert-danger">
             <span th:text="${errors}">1</span>
         </div>
+        <p class="font-weight-light">Format: (+) {country code} {area code} {number}
+            <br> For e.g. +1 555 666 7777 (US)</p>
         <div class="form-group">
-            <input type="password" class="form-control" name="new-password" placeholder="Password" required="required">
+            <input type="phone" class="form-control" name="phone" placeholder="Phone number" required="required">
         </div>
+        <input type="hidden" class="form-control" name="mode" th:value="${mode}" required="required">
         <div class="form-group">
-            <input type="password" class="form-control" name="confirm-new-password" placeholder="Confirm password" required="required">
-        </div>
-        <div class="form-group">
-            <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
+            <button id="submit-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
         </div>
     </form>
 </div>

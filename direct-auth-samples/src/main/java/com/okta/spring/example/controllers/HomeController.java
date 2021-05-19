@@ -22,6 +22,7 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.spring.example.helpers.HomeHelper;
 
+import com.okta.spring.example.helpers.ResponseHandler;
 import com.okta.spring.example.helpers.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,12 @@ public class HomeController {
     private HomeHelper homeHelper;
 
     /**
+     * homeHelper instance.
+     */
+    @Autowired
+    private ResponseHandler responseHandler;
+
+    /**
      * idx authentication wrapper instance.
      */
     @Autowired
@@ -63,21 +70,24 @@ public class HomeController {
 
     /**
      * Display one of:
-     *
+     * <p>
      * a) index page - if the user is not authenticated yet (does not have token response in session).
      * b) home page - if the user is authenticated (or) we have obtained a token for the user from the interaction code in callback.
-     *
+     * <p>
      * where index page refers to the root view with table of contents,
      * and home page refers to the view that shows the user profile information along with token information.
      *
      * @param interactionCode the interaction code from callback (optional)
-     * @param error  the error from callback when interaction_code could not be sent (optional)
+     * @param error the error from callback when interaction_code could not be sent (optional)
+     * @param errorDescription the error_description from callback (optional)
      * @param session the http session
      * @return the index page view with table of contents or the home page view if we have a token.
      */
     @GetMapping("/")
     public ModelAndView displayIndexOrHomePage(final @RequestParam(name = "interaction_code", required = false) String interactionCode,
                                                final @RequestParam(name = "error", required = false) String error,
+                                               final @RequestParam(name = "error_description", required = false)
+                                                           String errorDescription,
                                                final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
@@ -88,16 +98,22 @@ public class HomeController {
             return homeHelper.proceedToHome(tokenResponse, session);
         }
 
+//        if (Strings.hasText(error) && error.equals("interaction_required")) {
+//            AuthenticationResponse authenticationResponse =
+//                    authenticationWrapper.introspect(proceedContext.getClientContext());
+//            return responseHandler.handleKnownTransitions(authenticationResponse, session);
+//        }
+
         if (Strings.hasText(interactionCode)) {
             AuthenticationResponse authenticationResponse =
                     authenticationWrapper.fetchTokenWithInteractionCode(issuer, proceedContext, interactionCode);
 
-            return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
+            return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
 
-        if (Strings.hasText(error) && error.equals("interaction_required")) {
+        if (Strings.hasText(error)) {
             ModelAndView mav = new ModelAndView("error");
-            mav.addObject("errors", "interaction_required");
+            mav.addObject("errors", errorDescription);
             return mav;
         }
 
@@ -112,7 +128,6 @@ public class HomeController {
      */
     @GetMapping(value = "/login")
     public ModelAndView displayLoginPage(final HttpSession session) {
-
         TokenResponse tokenResponse =
                 (TokenResponse) session.getAttribute("tokenResponse");
 
@@ -121,57 +136,36 @@ public class HomeController {
             return homeHelper.proceedToHome(tokenResponse, session);
         }
 
+        AuthenticationResponse authenticationResponse = begin(session);
         ModelAndView modelAndView = new ModelAndView("login");
-
-        // get list of idps
-        AuthenticationResponse authenticationResponse = authenticationWrapper.getRedirectIdps();
-        Util.updateSession(session, authenticationResponse.getProceedContext());
-
         if (!CollectionUtils.isEmpty(authenticationResponse.getIdps())) {
             modelAndView.addObject("idps", authenticationResponse.getIdps());
         }
-
         return modelAndView;
     }
 
     /**
      * Display the forgot password page.
      *
+     * @param session the http session
      * @return the forgot password view
      */
     @GetMapping("/forgot-password")
-    public ModelAndView displayForgotPasswordPage() {
+    public ModelAndView displayForgotPasswordPage(final HttpSession session) {
+        begin(session);
         return new ModelAndView("forgot-password");
     }
 
     /**
      * Display the registration page.
      *
+     * @param session the http session
      * @return the register view
      */
     @GetMapping("/register")
-    public ModelAndView displayRegisterPage() {
+    public ModelAndView displayRegisterPage(final HttpSession session) {
+        begin(session);
         return new ModelAndView("register");
-    }
-
-    /**
-     * Display the verify email authenticator enrollment page.
-     *
-     * @return the verify email authenticators view
-     */
-    @GetMapping("/verify-email-authenticator-enrollment")
-    public ModelAndView displayVerifyEmailAuthenticatorEnrollmentPage() {
-        return new ModelAndView("verify-email-authenticator-enrollment");
-    }
-
-    /**
-     * Display the password authenticator enrollment page.
-     *
-     * @return the password authenticator enrollment view
-     */
-    @GetMapping("/password-authenticator-enrollment")
-    public ModelAndView displayPasswordAuthenticatorEnrollmentPage() {
-        return new ModelAndView("password-authenticator-enrollment");
     }
 
     /**
@@ -182,5 +176,11 @@ public class HomeController {
     @GetMapping("/error")
     public ModelAndView displayErrorPage() {
         return new ModelAndView("error");
+    }
+
+    private AuthenticationResponse begin(HttpSession session) {
+        AuthenticationResponse authenticationResponse = authenticationWrapper.begin();
+        Util.updateSession(session, authenticationResponse.getProceedContext());
+        return authenticationResponse;
     }
 }
