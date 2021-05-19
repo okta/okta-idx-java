@@ -18,14 +18,11 @@ package com.okta.spring.example.helpers;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.http.HttpSession;
 
 import static com.okta.idx.sdk.api.model.AuthenticationStatus.*;
@@ -45,6 +42,10 @@ public final class ResponseHandler {
     @Autowired
     private IDXAuthenticationWrapper authenticationWrapper;
 
+    public boolean needsToShowErrors(AuthenticationResponse response) {
+        return !response.getErrors().isEmpty();
+    }
+
     public ModelAndView handleTerminalTransitions(AuthenticationResponse response, HttpSession session) {
         Util.updateSession(session, response.getProceedContext());
         if (response.getTokenResponse() != null) {
@@ -52,12 +53,8 @@ public final class ResponseHandler {
         }
         if (response.getAuthenticationStatus() == SKIP_COMPLETE) {
             ModelAndView modelAndView = homeHelper.proceedToHome(response.getTokenResponse(), session);
-            // TODO: Need to test this.
             modelAndView.addObject("info", response.getErrors());
             return modelAndView;
-        }
-        if (!response.getErrors().isEmpty()) {
-            // TODO: Go to the current page, and show the errors.
         }
         return null;
     }

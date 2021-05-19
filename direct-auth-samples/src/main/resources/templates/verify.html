@@ -56,10 +56,10 @@
 <div class="verify-form">
     <form th:action="@{/verify}" method="post">
         <h2 class="text-center">Verify Code</h2>
-        <div th:if="${result}" class="alert alert-danger">
-            <span th:text="${result}">1</span>
+        <div th:if="${errors}" class="alert alert-danger">
+            <span th:text="${errors}">1</span>
         </div>
-        <p class="font-weight-light">Please check your email and enter the code below.</p>
+        <p class="font-weight-light">Please enter the code below.</p>
         <div class="form-group">
             <input type="text" class="form-control" name="code" required="required">
         </div>

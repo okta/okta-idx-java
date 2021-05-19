@@ -22,6 +22,7 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.spring.example.helpers.HomeHelper;
 
+import com.okta.spring.example.helpers.ResponseHandler;
 import com.okta.spring.example.helpers.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,12 @@ public class HomeController {
     private HomeHelper homeHelper;
 
     /**
+     * homeHelper instance.
+     */
+    @Autowired
+    private ResponseHandler responseHandler;
+
+    /**
      * idx authentication wrapper instance.
      */
     @Autowired
@@ -62,30 +69,37 @@ public class HomeController {
 
     /**
      * Display one of:
-     *
+     * <p>
      * a) index page - if the user is not authenticated yet (does not have token response in session).
      * b) home page - if the user is authenticated (or) we have obtained a token for the user from the interaction code in callback.
-     *
+     * <p>
      * where index page refers to the root view with table of contents,
      * and home page refers to the view that shows the user profile information along with token information.
      *
      * @param interactionCode the interaction code from callback (optional)
-     * @param error  the error from callback when interaction_code could not be sent (optional)
+     * @param error the error from callback when interaction_code could not be sent (optional)
      * @param session the http session
      * @return the index page view with table of contents or the home page view if we have a token.
      */
     @GetMapping("/")
     public ModelAndView displayIndexOrHomePage(final @RequestParam(name = "interaction_code", required = false) String interactionCode,
                                                final @RequestParam(name = "error", required = false) String error,
+                                               final @RequestParam(name = "error_description", required = false) String errorDescription,
                                                final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+//        if (Strings.hasText(error) && error.equals("interaction_required")) {
+//            AuthenticationResponse authenticationResponse =
+//                    authenticationWrapper.introspect(proceedContext.getClientContext());
+//            return responseHandler.handleKnownTransitions(authenticationResponse, session);
+//        }
 
         if (!Strings.hasText(interactionCode) || proceedContext == null) {
             // more remediation steps required
             if (Strings.hasText(error) && error.equals("interaction_required")) {
                 ModelAndView mav = new ModelAndView("error");
-                mav.addObject("errors", "interaction_required");
+                mav.addObject("errors", errorDescription);
                 return mav;
             }
 
@@ -104,7 +118,7 @@ public class HomeController {
 
         AuthenticationResponse authenticationResponse =
                 authenticationWrapper.fetchTokenWithInteractionCode(issuer, proceedContext, interactionCode);
-        return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
 
     /**
@@ -162,7 +176,7 @@ public class HomeController {
     }
 
     private AuthenticationResponse begin(HttpSession session) {
-        // TODO: Accept a skip param so we can link to other pages from the auth page.
+        // TODO: Accept a skip param so we can link to other pages from the auth page. (optimization)
         AuthenticationResponse authenticationResponse = authenticationWrapper.begin();
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;

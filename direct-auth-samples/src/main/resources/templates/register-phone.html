@@ -54,7 +54,7 @@
 <a href="/" class="btn btn-info pull-left">Index Page</a>
 
 <div class="enroll-phone-authenticator-form">
-    <form th:action="@{/phone-authenticator-enrollment}" method="post">
+    <form th:action="@{/register-phone}" method="post">
         <h2 class="text-center">Enroll Phone Authenticator</h2>
         <div th:if="${errors}" class="alert alert-danger">
             <span th:text="${errors}">1</span>
