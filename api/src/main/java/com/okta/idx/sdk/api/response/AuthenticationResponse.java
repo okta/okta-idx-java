@@ -38,7 +38,7 @@ public class AuthenticationResponse {
 
     private List<Authenticator> authenticators;
 
-    private List<Idp> idps;
+    private List<Idp> idps = new LinkedList<>();
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
