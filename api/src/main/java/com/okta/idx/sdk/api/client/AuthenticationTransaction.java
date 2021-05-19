@@ -110,7 +110,9 @@ final class AuthenticationTransaction {
             skipHref = skipOptional.get().getHref();
         }
 
-        return new ProceedContext(clientContext, getStateHandle(), href, skipHref);
+        boolean isIdentifyInOneStep = isRemediationRequireCredentials(RemediationType.IDENTIFY);
+
+        return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep);
     }
 
     RemediationOption getRemediationOption(String name) {

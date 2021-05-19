@@ -109,36 +109,33 @@ public class IDXAuthenticationWrapper {
      * @param authenticationOptions the Authenticator options
      * @return the Authentication response
      */
-    public AuthenticationResponse authenticate(AuthenticationOptions authenticationOptions) {
+    public AuthenticationResponse authenticate(AuthenticationOptions authenticationOptions, ProceedContext proceedContext) {
         try {
-            AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(client);
-
             // Check if identify flow needs to include credentials
-            boolean isIdentifyInOneStep =
-                    introspectTransaction.isRemediationRequireCredentials(RemediationType.IDENTIFY);
+            boolean isIdentifyInOneStep = proceedContext.isIdentifyInOneStep();
 
-            IdentifyRequest identifyRequest;
+            AuthenticationTransaction identifyTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                IdentifyRequest identifyRequest;
 
-            if (isIdentifyInOneStep) {
-                Credentials credentials = new Credentials();
-                credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
+                if (isIdentifyInOneStep) {
+                    Credentials credentials = new Credentials();
+                    credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
 
-                identifyRequest = IdentifyRequestBuilder.builder()
-                        .withIdentifier(authenticationOptions.getUsername())
-                        .withCredentials(credentials)
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-            } else {
-                identifyRequest = IdentifyRequestBuilder.builder()
-                        .withIdentifier(authenticationOptions.getUsername())
-                        .withStateHandle(introspectTransaction.getStateHandle())
-                        .build();
-            }
+                    identifyRequest = IdentifyRequestBuilder.builder()
+                            .withIdentifier(authenticationOptions.getUsername())
+                            .withCredentials(credentials)
+                            .withStateHandle(proceedContext.getStateHandle())
+                            .build();
+                } else {
+                    identifyRequest = IdentifyRequestBuilder.builder()
+                            .withIdentifier(authenticationOptions.getUsername())
+                            .withStateHandle(proceedContext.getStateHandle())
+                            .build();
+                }
 
-            // identify user
-            AuthenticationTransaction identifyTransaction = introspectTransaction.proceed(() ->
-                    introspectTransaction.getRemediationOption(RemediationType.IDENTIFY).proceed(client, identifyRequest)
-            );
+                // identify user
+                return client.identify(identifyRequest, proceedContext.getHref());
+            });
 
             if (isIdentifyInOneStep) {
                 return identifyTransaction.asAuthenticationResponse();
@@ -590,8 +587,7 @@ public class IDXAuthenticationWrapper {
         return proceedContext.getSkipHref() != null;
     }
 
-    public AuthenticationResponse getRedirectIdps() {
-
+    public AuthenticationResponse begin() {
         try {
             return AuthenticationTransaction.create(client).asAuthenticationResponse();
         } catch (ProcessingException e) {

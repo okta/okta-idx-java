@@ -164,7 +164,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
                 new ProceedContext(introspectTransaction.clientContext,
-                        introspectTransaction.getStateHandle(), "/challenge/answer", null),
+                        introspectTransaction.getStateHandle(), "/challenge/answer", null, false),
                 verifyAuthenticatorOptions
         )
 
@@ -194,7 +194,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
                 new ProceedContext(introspectTransaction.clientContext,
-                        introspectTransaction.getStateHandle(), "/challenge/answer", null),
+                        introspectTransaction.getStateHandle(), "/challenge/answer", null, false),
                 verifyAuthenticatorOptions
         )
 

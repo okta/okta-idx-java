@@ -27,12 +27,14 @@ public final class ProceedContext {
     private final String stateHandle;
     private final String href;
     private final String skipHref;
+    private final boolean isIdentifyInOneStep;
 
-    ProceedContext(IDXClientContext clientContext, String stateHandle, String href, String skipHref) {
+    ProceedContext(IDXClientContext clientContext, String stateHandle, String href, String skipHref, boolean isIdentifyInOneStep) {
         this.clientContext = clientContext;
         this.stateHandle = stateHandle;
         this.href = href;
         this.skipHref = skipHref;
+        this.isIdentifyInOneStep = isIdentifyInOneStep;
     }
 
     public IDXClientContext getClientContext() {
@@ -49,5 +51,9 @@ public final class ProceedContext {
 
     String getSkipHref() {
         return skipHref;
+    }
+
+    boolean isIdentifyInOneStep() {
+        return isIdentifyInOneStep;
     }
 }

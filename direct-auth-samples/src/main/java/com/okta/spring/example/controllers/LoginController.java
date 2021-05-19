@@ -72,9 +72,15 @@ public class LoginController {
     public ModelAndView handleLogin(final @RequestParam("username") String username,
                                     final @RequestParam("password") String password,
                                     final HttpSession session) {
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+        if (proceedContext == null) {
+            // proceedContext is null when we didn't start with social auth.
+            AuthenticationResponse beingResponse = idxAuthenticationWrapper.begin();
+            proceedContext = beingResponse.getProceedContext();
+        }
         // trigger authentication
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password));
+                idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password), proceedContext);
         Util.updateSession(session, authenticationResponse.getProceedContext());
 
         if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.PASSWORD_EXPIRED) {
@@ -96,18 +102,6 @@ public class LoginController {
         }
 
         return homeHelper.proceedToHome(authenticationResponse.getTokenResponse(), session);
-    }
-
-    /**
-     * Handle login with external Identity Provider.
-     *
-     * @param session the session
-     */
-    @PostMapping("/login-with-idp")
-    public void handleLoginWithIdp(final HttpSession session) {
-        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.getRedirectIdps();
-        Util.updateSession(session, authenticationResponse.getProceedContext());
-        return;
     }
 
     /**

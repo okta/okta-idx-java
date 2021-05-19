@@ -97,6 +97,8 @@ public class HomeController {
                 return homeHelper.proceedToHome(tokenResponse, session);
             }
 
+            Util.updateSession(session, null);
+
             return new ModelAndView("index");
         }
 
@@ -131,8 +133,7 @@ public class HomeController {
      */
     @GetMapping(value = "/login-with-idp")
     public ModelAndView displayLoginWithIdpPage(final HttpSession session) {
-
-        AuthenticationResponse authenticationResponse = authenticationWrapper.getRedirectIdps();
+        AuthenticationResponse authenticationResponse = authenticationWrapper.begin();
         Util.updateSession(session, authenticationResponse.getProceedContext());
         ModelAndView modelAndView = new ModelAndView("login-with-idp");
         modelAndView.addObject("idps", authenticationResponse.getIdps());
