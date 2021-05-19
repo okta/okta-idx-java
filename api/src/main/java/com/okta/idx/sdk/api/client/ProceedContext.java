@@ -35,7 +35,7 @@ public final class ProceedContext {
         this.skipHref = skipHref;
     }
 
-    IDXClientContext getClientContext() {
+    public IDXClientContext getClientContext() {
         return clientContext;
     }
 
