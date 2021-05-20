@@ -61,7 +61,7 @@ public class UserStepDefinitions extends CucumberRoot {
 		By selection = By.id("profileTable");
         (new WebDriverWait(driver, 30)).until(
                 ExpectedConditions.visibilityOfElementLocated(selection));
-		String email = driver.findElement(By.id("email")).getText();
+		String email = driver.findElement(By.id("username")).getText();
 		Assert.assertTrue("Can't access profile information", email.contains(USERNAME));
 	}
 
