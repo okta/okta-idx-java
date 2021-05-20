@@ -97,19 +97,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Used to parse the email out of the id token -->
-        <dependency>
-            <groupId>com.okta.jwt</groupId>
-            <artifactId>okta-jwt-verifier</artifactId>
-            <version>${okta.jwt.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.okta.jwt</groupId>
-            <artifactId>okta-jwt-verifier-impl</artifactId>
-            <version>${okta.jwt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
+        <!-- These are the selenium dependencies -->
         <dependency>
             <groupId>io.appium</groupId>
             <artifactId>java-client</artifactId>
@@ -128,6 +116,8 @@
             <version>3.141.59</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- These are the cucumber dependencies -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
@@ -146,14 +136,11 @@
             <version>6.10.3</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- These are the cucumber dependencies -->
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-java</artifactId>
             <version>1.2.5</version>
         </dependency>
-
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-spring</artifactId>
@@ -161,14 +148,14 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- These are the cucumber-junit dependencies -->
+        <!-- cucumber-junit dependencies -->
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-junit</artifactId>
             <version>1.2.5</version>
         </dependency>
 
-        <!-- These are the junit dependencies -->
+        <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -191,6 +178,7 @@
 
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
+
         <plugins>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -231,6 +219,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -274,6 +263,7 @@
                             </systemPropertyVariables>
                         </configuration>
                     </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
@@ -310,6 +300,7 @@
                             </execution>
                         </executions>
                     </plugin>
+
                     <plugin>
                         <!-- use the frontend plugin to drive javascript based selenium tests -->
                         <groupId>com.github.eirslett</groupId>
@@ -348,19 +339,6 @@
                              </configuration>
                          </execution>
                         </executions>
-                    </plugin>
-
-                    <!-- Below plug-in is used to execute tests -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M5</version>
-                        <configuration>
-                            <suiteXmlFiles>
-                                <!-- TestNG suite XML files -->
-                                <suiteXmlFile>testng.xml</suiteXmlFile>
-                            </suiteXmlFiles>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
