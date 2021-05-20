@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 package info.seleniumcucumber.userStepDefintions;
+
 import cucumber.api.java.en.And;
+import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import env.CucumberRoot;
+import env.DriverUtil;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import cucumber.api.java.en.Given;
-import env.DriverUtil;
-
-import java.util.concurrent.TimeUnit;
-
-public class UserStepDefinitions {
+public class UserStepDefinitions extends CucumberRoot {
 	
 	protected WebDriver driver = DriverUtil.getDefaultDriver();
 	private String USERNAME = System.getenv("USERNAME");

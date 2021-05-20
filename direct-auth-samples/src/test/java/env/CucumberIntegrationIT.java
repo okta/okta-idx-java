@@ -34,5 +34,5 @@ import cucumber.api.junit.Cucumber;
 			   }
 )
 
-public class RunCukeTest { 	
+public class CucumberIntegrationIT {
 }
