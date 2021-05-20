@@ -46,7 +46,7 @@ class DefaultIDXClientBuilderTest {
         RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_IDX_ISSUER", null)
         RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_IDX_CLIENTID", null)
         RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_IDX_CLIENTSECRET", null)
-        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_CLIENT_SCOPES", null)
+        RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_IDX_SCOPES", null)
         RestoreEnvironmentVariables.setEnvironmentVariable("OKTA_IDX_REDIRECTURI", null)
     }
 
