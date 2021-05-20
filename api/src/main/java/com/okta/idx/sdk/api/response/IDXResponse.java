@@ -67,6 +67,8 @@ public class IDXResponse {
 
     private CurrentAuthenticatorEnrollment currentAuthenticatorEnrollment;
 
+    private CurrentAuthenticatorEnrollment currentAuthenticator;
+
     private Authenticators authenticators;
 
     // TODO: model below objects (they are not used for processing anyway)?
@@ -152,6 +154,10 @@ public class IDXResponse {
     }
 
     public CurrentAuthenticatorEnrollment getCurrentAuthenticatorEnrollment() { return currentAuthenticatorEnrollment; }
+
+    public CurrentAuthenticatorEnrollment getCurrentAuthenticator() {
+        return currentAuthenticator;
+    }
 
     public SuccessResponse getSuccessWithInteractionCode() {
         return successWithInteractionCode;

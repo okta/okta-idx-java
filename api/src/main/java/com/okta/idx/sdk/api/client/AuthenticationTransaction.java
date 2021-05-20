@@ -124,6 +124,10 @@ final class AuthenticationTransaction {
                 idxResponse.getCurrentAuthenticatorEnrollment().getValue() != null &&
                 idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend() != null) {
             resendHref = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend().getHref();
+        } else if (idxResponse.getCurrentAuthenticator() != null &&
+                idxResponse.getCurrentAuthenticator().getValue() != null &&
+                idxResponse.getCurrentAuthenticator().getValue().getResend() != null) {
+            resendHref = idxResponse.getCurrentAuthenticator().getValue().getResend().getHref();
         }
 
         return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep, selectProfileEnrollHref,
