@@ -21,21 +21,20 @@
     <title>Errors</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
-
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
 
-<a href="/" class="btn btn-info pull-left">Index Page</a>
+<div style="padding:1em">
+    <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
+</div>
 
 <div class="container">
-
-        <h2 class="text-center">Errors</h2>
-
-        <div th:if="${errors}" class="alert alert-danger">
-            <span th:text="${errors}">1</span>
-        </div>
+    <div th:if="${errors}" class="alert alert-danger">
+        <span th:text="${errors}"></span>
+    </div>
 </div>
 
 <br>

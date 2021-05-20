@@ -21,11 +21,8 @@ import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.spring.example.helpers.HomeHelper;
-
 import com.okta.spring.example.helpers.ResponseHandler;
 import com.okta.spring.example.helpers.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -38,11 +35,6 @@ import javax.servlet.http.HttpSession;
 
 @Controller
 public class HomeController {
-
-    /**
-     * logger instance.
-     */
-    private final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     /**
      * The issuer url.
@@ -78,6 +70,7 @@ public class HomeController {
      * and home page refers to the view that shows the user profile information along with token information.
      *
      * @param interactionCode the interaction code from callback (optional)
+     * @param state the state value from callback (optional)
      * @param error the error from callback when interaction_code could not be sent (optional)
      * @param errorDescription the error_description from callback (optional)
      * @param session the http session
@@ -85,9 +78,9 @@ public class HomeController {
      */
     @GetMapping("/")
     public ModelAndView displayIndexOrHomePage(final @RequestParam(name = "interaction_code", required = false) String interactionCode,
+                                               final @RequestParam(name = "state", required = false) String state,
                                                final @RequestParam(name = "error", required = false) String error,
-                                               final @RequestParam(name = "error_description", required = false)
-                                                           String errorDescription,
+                                               final @RequestParam(name = "error_description", required = false) String errorDescription,
                                                final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
@@ -104,19 +97,29 @@ public class HomeController {
 //            return responseHandler.handleKnownTransitions(authenticationResponse, session);
 //        }
 
+        // if interaction code is received in callback, exchange it for a token
         if (Strings.hasText(interactionCode)) {
+            // validate state param
+            if (Strings.isEmpty(state) || !state.equals(proceedContext.getClientContext().getState())) {
+                ModelAndView mav = new ModelAndView("error");
+                mav.addObject("errors", "Could not correlate received 'state' value in callback");
+                return mav;
+            }
+
             AuthenticationResponse authenticationResponse =
                     authenticationWrapper.fetchTokenWithInteractionCode(issuer, proceedContext, interactionCode);
 
             return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
 
+        // if error is received in callback, show error page
         if (Strings.hasText(error)) {
             ModelAndView mav = new ModelAndView("error");
             mav.addObject("errors", errorDescription);
             return mav;
         }
 
+        // none of the above cases hold good, so return to root view
         return new ModelAndView("index");
     }
 
@@ -178,7 +181,7 @@ public class HomeController {
         return new ModelAndView("error");
     }
 
-    private AuthenticationResponse begin(HttpSession session) {
+    private AuthenticationResponse begin(final HttpSession session) {
         AuthenticationResponse authenticationResponse = authenticationWrapper.begin();
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;

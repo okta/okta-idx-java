@@ -21,7 +21,6 @@
     <title>Login</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
-
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -47,21 +46,31 @@
             font-size: 15px;
             font-weight: bold;
         }
+        .btn-google {
+            color: #fff;
+            background-color: #dd4b39;
+            border-color: rgba(0,0,0,0.2);
+            width: 250px;
+        }
         .btn-facebook {
             color: #fff;
             background-color: #3b5998;
             border-color: rgba(0,0,0,0.2);
+            width: 250px;
+        }
+        .btn-linkedin {
+            color: #fff;
+            background-color: #0082ca;
+            border-color: rgba(0,0,0,0.2);
+            width: 250px;
         }
         .btn-social {
             position: relative;
             padding-left: 44px;
-            text-align: left;
+            text-align: center;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-        .btn-social:hover {
-            color: #eee;
         }
         .btn-social :first-child {
             position: absolute;
@@ -79,7 +88,9 @@
 
 <body>
 
-<a href="/">Back to Home</a>
+<div style="padding:1em">
+    <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
+</div>
 
 <div class="login-form">
 
@@ -87,10 +98,10 @@
     <form th:action="@{/login}" method="post">
         <h2 class="text-center">Login</h2>
         <div th:if="${errors}" class="alert alert-danger">
-            <span th:text="${errors}">1</span>
+            <span th:text="${errors}"></span>
         </div>
         <div th:if="${info}" class="alert alert-info">
-            <span th:text="${info}">1</span>
+            <span th:text="${info}"></span>
         </div>
         <div class="form-group">
             <input type="text" class="form-control" name="username" placeholder="Username" required="required">
@@ -113,6 +124,8 @@
     </div>
 
     <hr/>
+
+    <!-- delete the below div if you only want the username and password form -->
 
     <!-- display the social login button(s), if the org is setup to support it -->
     <div th:if="${not #lists.isEmpty(idps)}" class="container" th:align="center">
@@ -137,7 +150,7 @@
                     <br><a th:href="@{${idp.href}}" class="btn btn-primary">Login with [[${idp.type}]]</a><br>
                 </div>
             </div>
-
+            <p/>
         </th:block>
     </div>
 </div>
