@@ -119,7 +119,7 @@ public class HomeController {
             return mav;
         }
 
-        // none of the above cases hold good, so return to root view
+        // return the root view
         return new ModelAndView("index");
     }
 
