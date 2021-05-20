@@ -93,10 +93,10 @@
             <span th:text="${info}">1</span>
         </div>
         <div class="form-group">
-            <input type="text" class="form-control" name="username" placeholder="Username" required="required">
+            <input type="text" class="form-control" name="username" placeholder="Username" id="username" required="required">
         </div>
         <div class="form-group">
-            <input type="password" class="form-control" name="password" placeholder="Password" required="required">
+            <input type="password" class="form-control" name="password" placeholder="Password" id="password" required="required">
         </div>
         <div class="form-group">
             <button id="sign-in-btn" type="submit" class="btn btn-primary btn-block">Login</button>
@@ -109,7 +109,7 @@
     </div>
 
     <div class="col-12 text-center">
-        <a href="/register">Sign Up</a>
+        <a href="/register" id="sign-up">Sign Up</a>
     </div>
 
     <hr/>

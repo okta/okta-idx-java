@@ -16,6 +16,10 @@ This project includes:
   Apache Log4j API under Apache License, Version 2.0
   Apache Log4j to SLF4J Adapter under Apache License, Version 2.0
   attoparser under The Apache Software License, Version 2.0
+  Cucumber-HTML under MIT License
+  Cucumber-JVM Repackaged Dependencies under BSD License or The Apache Software License, Version 2.0
+  Gherkin under MIT License
+  Hamcrest Core under BSD License 3
   Jackson datatype: jdk8 under The Apache Software License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
@@ -26,10 +30,12 @@ This project includes:
   Jakarta Expression Language 3.0 under EPL 2.0 or GPL2 w/ CPE
   javax.annotation API under CDDL + GPLv2 with classpath exception
   JUL to SLF4J bridge under MIT License
+  JUnit under Eclipse Public License 1.0
   Okta Commons :: Config Check under The Apache License, Version 2.0
   Okta Commons :: HTTP :: API under The Apache License, Version 2.0
   Okta Commons :: Lang under The Apache License, Version 2.0
   Okta IDX Java SDK :: Impl under The Apache License, Version 2.0
+  Okta JWT Verifier :: API under The Apache License, Version 2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
   Spring AOP under Apache License, Version 2.0

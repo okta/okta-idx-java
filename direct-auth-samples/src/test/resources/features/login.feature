@@ -19,5 +19,5 @@ Feature: Login
     And  she submits the Login form
     Then she should see incorrect password error
 
-  Scenario: Close browser
+  Scenario: Tests completed. Close browser
     Then I close browser
