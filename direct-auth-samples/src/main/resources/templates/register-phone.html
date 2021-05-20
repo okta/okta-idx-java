@@ -21,8 +21,8 @@
     <title>Enroll Phone Authenticator</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
-
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style>
         .enroll-phone-authenticator-form {
@@ -51,13 +51,15 @@
 
 <body>
 
-<a href="/" class="btn btn-info pull-left">Index Page</a>
+<div style="padding:1em">
+    <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
+</div>
 
 <div class="enroll-phone-authenticator-form">
     <form th:action="@{/register-phone}" method="post">
         <h2 class="text-center">Enroll Phone Authenticator</h2>
         <div th:if="${errors}" class="alert alert-danger">
-            <span th:text="${errors}">1</span>
+            <span th:text="${errors}"></span>
         </div>
         <p class="font-weight-light">Format: (+) {country code} {area code} {number}
             <br> For e.g. +1 555 666 7777 (US)</p>

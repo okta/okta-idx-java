@@ -18,11 +18,11 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Select Authenticator</title>
+    <title th:text="${title}"></title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
-
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style>
         .select-authenticators-form {
@@ -47,14 +47,16 @@
 
 <body>
 
-<a href="/" class="btn btn-info pull-left">Index Page</a>
+<div style="padding:1em">
+    <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
+</div>
 
 <div class="select-authenticators-form">
 
     <form th:action="@{/select-authenticator}" method="post">
-        <h2 class="text-center">Select authenticator</h2>
+        <h2 class="text-center"><span th:text="${title}"></span></h2>
         <div th:if="${errors}" class="alert alert-danger">
-            <span th:text="${errors}">1</span>
+            <span th:text="${errors}"></span>
         </div>
         <tr th:each="item : ${factorList}">
             <div class="form-check">
