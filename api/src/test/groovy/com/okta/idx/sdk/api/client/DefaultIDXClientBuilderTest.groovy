@@ -92,6 +92,7 @@ class DefaultIDXClientBuilderTest {
 
     @Test
     void testMissingIssuer() {
+        clearOktaEnvAndSysProps()
         TestUtil.expect(IllegalArgumentException) {
             new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
                     .setClientId("test-client-id")
@@ -104,6 +105,7 @@ class DefaultIDXClientBuilderTest {
 
     @Test
     void testMissingScopes() {
+        clearOktaEnvAndSysProps()
         TestUtil.expect(IllegalArgumentException) {
             new DefaultIDXClientBuilder(noDefaultYamlNoAppYamlResourceFactory())
                     .setIssuer("https://sample.com")
