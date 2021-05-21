@@ -23,21 +23,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script type="text/javascript">
-
-        $(document).ready(function(){
-
-        });
-
-        $('input:radio[name="authenticator-type"]').change(
-            function() {
-                if($('input[name="authenticator-type"]:checked').val() == "Email") {
-                    $('input[name="phone-authenticator-mode"]').prop('checked', false);
-                }
-            });
-
-    </script>
 
     <style>
         .select-authenticators-form {
@@ -58,8 +43,6 @@
             font-weight: bold;
         }
     </style>
-
-
 </head>
 
 <body>
