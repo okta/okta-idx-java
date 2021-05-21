@@ -348,6 +348,9 @@ public class DriverUtil {
 				if (headless) {
 					chromeOptions.addArguments("--headless");
 				}
+				if (System.getenv("TRAVIS") != null) {
+					chromeOptions.addArguments("--headless", "--verbose", "--disable-dev-shm-usage");
+				}
 				try
 				{
 					driver = new ChromeDriver(chromeOptions);
