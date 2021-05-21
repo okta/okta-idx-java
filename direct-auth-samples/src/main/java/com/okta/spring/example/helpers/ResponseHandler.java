@@ -115,6 +115,7 @@ public final class ResponseHandler {
             }
         }
         session.setAttribute("authenticators", response.getAuthenticators());
+        modelAndView.addObject("authenticators", response.getAuthenticators());
         modelAndView.addObject("factorList", factorMethods);
         modelAndView.addObject("title", title);
         return modelAndView;
@@ -122,19 +123,19 @@ public final class ResponseHandler {
 
     /**
      * registerVerifyForm.
-     * @param factor the factor
+     * @param authenticator the authenticator
+     * @param phoneAuthenticatorMode sms or voice phone auth mode (optional)
      * @return the ModelAndView for the register verify form.
      */
-    public ModelAndView registerVerifyForm(Authenticator.Factor factor) {
-        switch (factor.getMethod()) {
-            case "email":
+    public ModelAndView registerVerifyForm(Authenticator authenticator, String phoneAuthenticatorMode) {
+        switch (authenticator.getLabel()) {
+            case "Email":
                 return verifyForm();
-            case "password":
+            case "Password":
                 return registerPasswordForm("Setup Password");
-            case "voice":
-            case "sms":
+            case "Phone":
                 ModelAndView modelAndView = new ModelAndView("register-phone");
-                modelAndView.addObject("mode", factor.getMethod());
+                modelAndView.addObject("mode", phoneAuthenticatorMode);
                 return modelAndView;
             default:
                 return unsupportedPolicy();

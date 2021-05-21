@@ -113,40 +113,29 @@ public class LoginController {
      * Handle authenticator selection during authentication.
      *
      * @param authenticatorType the authenticatorType
+     * @param phoneAuthenticatorMode the phone auth mode (optional)
      * @param session the session
      * @return authenticate-email view
      */
     @PostMapping(value = "/select-authenticator")
     public ModelAndView selectAuthenticator(final @RequestParam("authenticator-type") String authenticatorType,
+                                            final @RequestParam(value = "phone-authenticator-mode", required = false)
+                                                    String phoneAuthenticatorMode,
                                             final HttpSession session) {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-        Authenticator.Factor foundFactor = null;
-        AuthenticationResponse authenticationResponse = null;
+        AuthenticationResponse authenticationResponse;
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
+
+        Authenticator selectedAuthenticatorToProceed = null;
+
         for (Authenticator authenticator : authenticators) {
-            for (Authenticator.Factor factor : authenticator.getFactors()) {
-                if (factor.getMethod().equals(authenticatorType)) {
-                    foundFactor = factor;
-                    if (authenticator.getFactors().size() == 1) {
-                        authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
-                    } else {
-                        authenticationResponse = idxAuthenticationWrapper.selectFactor(proceedContext, factor);
-                    }
-                    break;
-                }
+            if (authenticator.getLabel().equals(authenticatorType)) {
+                selectedAuthenticatorToProceed = authenticator;
             }
         }
 
-        if (foundFactor == null) {
-            throw new IllegalStateException("Factor Not found.");
-        }
-
-        if (responseHandler.needsToShowErrors(authenticationResponse)) {
-            ModelAndView modelAndView = new ModelAndView("select-authenticator");
-            modelAndView.addObject("errors", authenticationResponse.getErrors());
-            return modelAndView;
-        }
+        authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, selectedAuthenticatorToProceed);
 
         ModelAndView terminalTransition = responseHandler.handleTerminalTransitions(authenticationResponse, session);
         if (terminalTransition != null) {
@@ -158,7 +147,7 @@ public class LoginController {
                 return responseHandler.verifyForm();
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
-                return responseHandler.registerVerifyForm(foundFactor);
+                return responseHandler.registerVerifyForm(selectedAuthenticatorToProceed, phoneAuthenticatorMode);
             default:
                 return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
