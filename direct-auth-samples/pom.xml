@@ -81,14 +81,7 @@
             <artifactId>logback-classic</artifactId>
             <scope>runtime</scope>
         </dependency>
-
-        <!-- Okta's standard OAuth/OIDC tests, you do not need this in your project -->
-        <dependency>
-            <groupId>com.okta.oidc.tck</groupId>
-            <artifactId>okta-oidc-tck</artifactId>
-            <version>0.5.6</version>
-            <scope>test</scope>
-        </dependency>
+        
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
@@ -181,19 +174,29 @@
 
         <plugins>
             <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <skipTests>false</skipTests>
-                    <includes>
-                        <include>**/*IT.java</include>
-                    </includes>
-                </configuration>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit47</artifactId>
+                        <version>3.0.0-M5</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
+                        <phase>integration-test</phase>
                         <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
+                            <goal>test</goal>
                         </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>none</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT</include>
+                            </includes>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -237,111 +240,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <!-- Everything below here is to test this project, you wouldn't need the remaining in your own project -->
-    <profiles>
-        <profile>
-            <id>okta-tck</id>
-
-            <properties>
-                <node.version>v10.15.1</node.version>
-            </properties>
-
-            <build>
-                <plugins>
-                    <!-- Tell failsafe to run Okta's oidc-tck -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.1</version>
-                        <configuration>
-                            <dependenciesToScan>
-                                <dependency>com.okta.oidc.tck:okta-oidc-tck</dependency>
-                            </dependenciesToScan>
-                            <systemPropertyVariables>
-                                <okta.tck.redirectOnError>true</okta.tck.redirectOnError>
-                            </systemPropertyVariables>
-                        </configuration>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>3.1.1</version>
-                        <executions>
-                            <execution>
-                             <id>unpack</id>
-                             <phase>package</phase>
-                             <goals>
-                               <goal>unpack</goal>
-                             </goals>
-                             <configuration>
-                                <artifactItems>
-                                    <!-- extract the tck UI tests -->
-                                    <artifactItem>
-                                        <groupId>com.okta.oidc.tck</groupId>
-                                        <artifactId>okta-oidc-tck</artifactId>
-                                        <classifier>e2e</classifier>
-                                        <type>zip</type>
-                                        <outputDirectory>${project.build.testOutputDirectory}/</outputDirectory>
-                                    </artifactItem>
-                                    <!-- extract the tck keystore -->
-                                    <artifactItem>
-                                        <groupId>com.okta.oidc.tck</groupId>
-                                        <artifactId>okta-oidc-tck</artifactId>
-                                        <outputDirectory>${project.build.directory}</outputDirectory>
-                                        <destFileName>tck-keystore.jks</destFileName>
-                                        <includes>tck-keystore.jks</includes>
-                                    </artifactItem>
-                                </artifactItems>
-                                <overWriteReleases>false</overWriteReleases>
-                                <overWriteSnapshots>true</overWriteSnapshots>
-                             </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <!-- use the frontend plugin to drive javascript based selenium tests -->
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.7.5</version>
-                        <configuration>
-                            <nodeVersion>${node.version}</nodeVersion>
-                            <workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
-                        </configuration>
-                        <executions>
-                         <execution>
-                             <id>install node</id>
-                             <phase>verify</phase>
-                             <goals>
-                                 <goal>install-node-and-npm</goal>
-                             </goals>
-                         </execution>
-                         <execution>
-                             <id>npm install</id>
-                             <phase>verify</phase>
-                             <goals>
-                                 <goal>npm</goal>
-                             </goals>
-                             <configuration>
-                                 <arguments>install</arguments>
-                             </configuration>
-                         </execution>
-                         <execution>
-                             <id>npm test</id>
-                             <phase>verify</phase>
-                             <goals>
-                                 <goal>npm</goal>
-                             </goals>
-                             <configuration>
-                                 <arguments>test</arguments>
-                             </configuration>
-                         </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
