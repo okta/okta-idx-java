@@ -348,8 +348,9 @@ public class DriverUtil {
 				if (headless) {
 					chromeOptions.addArguments("--headless");
 				}
-				// Remove headless option to see browser during test run locally
-				chromeOptions.addArguments("--headless", "--verbose", "--disable-dev-shm-usage");
+				if (System.getenv("TRAVIS") != null) {
+					chromeOptions.addArguments("--headless", "--verbose", "--disable-dev-shm-usage");
+				}
 				try
 				{
 					driver = new ChromeDriver(chromeOptions);
