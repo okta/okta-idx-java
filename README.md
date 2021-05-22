@@ -42,7 +42,8 @@ If you run into problems using the SDK, you can
 
 ### Prerequisites
 
-* JDK 8 or later
+- [JDK 8](#jdk-8) or later
+- [Apache Maven](#apache-maven) 3.6.x or later
 
 To use this SDK, you will need to include the following dependencies:
 
@@ -54,19 +55,12 @@ For Apache Maven:
     <artifactId>okta-idx-java-api</artifactId>
     <version>${okta.sdk.version}</version>
 </dependency>
-<dependency>
-    <groupId>com.okta.idx.sdk</groupId>
-    <artifactId>okta-idx-java-impl</artifactId>
-    <version>${okta.sdk.version}</version>
-    <scope>runtime</scope>
-</dependency>
 ```
 
 For Gradle:
 
 ```groovy
 compile "com.okta.idx.sdk:okta-idx-java-api:${okta.sdk.version}"
-runtime "com.okta.idx.sdk:okta-idx-java-impl:${okta.sdk.version}"
 ```
 
 where `okta.sdk.version` is the latest stable release version listed [here](#release-status).
@@ -81,8 +75,6 @@ https://oss.sonatype.org/content/repositories/snapshots/
 You will also need:
 
 * An Okta account, called an _organization_ (sign up for a free [developer organization](https://developer.okta.com/signup) if you need one). 
-
-[//]: # (NOTE: code snippets in this README are updated automatically via a Maven plugin by running: mvn okta-code-snippet:snip)
 
 ## Usage guide
 
@@ -158,6 +150,10 @@ Each one of the configuration values written in 'dot' notation to be used as a J
 
 In most cases, you won't need to build the SDK from source. If you want to build it yourself, clone the repo and run `mvn install`.
 
+By default, the Cucumber Integration Tests are run on Maven builds (see [here](direct-auth-samples/pom.xml)). 
+If you wish to skip these Cucumber integration tests, 
+simply disable the associated maven profile using `mvn clean install -P '!cucumber-it'`
+
 ## Contributing
  
 We are happy to accept contributions and PRs! Please see the [contribution guide](CONTRIBUTING.md) to understand how to structure a contribution.
@@ -168,3 +164,5 @@ We are happy to accept contributions and PRs! Please see the [contribution guide
 [github-issues]: https://github.com/okta/okta-idx-java/issues
 [github-releases]: https://github.com/okta/okta-idx-java/releases
 [okta-library-versioning]: https://developer.okta.com/code/library-versions
+[jdk-8]: https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html
+[apache-maven]: https://maven.apache.org/download.cgi
