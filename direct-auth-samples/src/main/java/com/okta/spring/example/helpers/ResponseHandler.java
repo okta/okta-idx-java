@@ -21,15 +21,9 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
-import java.util.ArrayList;
-import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_PASSWORD_RESET;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.PASSWORD_EXPIRED;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION;
 import static com.okta.idx.sdk.api.model.AuthenticationStatus.SKIP_COMPLETE;
 
 @Component
@@ -108,15 +102,8 @@ public final class ResponseHandler {
         boolean canSkip = authenticationWrapper.isSkipAuthenticatorPresent(response.getProceedContext());
         ModelAndView modelAndView = new ModelAndView("select-authenticator");
         modelAndView.addObject("canSkip", canSkip);
-        List<String> factorMethods = new ArrayList<>();
-        for (Authenticator authenticator : response.getAuthenticators()) {
-            for (Authenticator.Factor factor : authenticator.getFactors()) {
-                factorMethods.add(factor.getMethod());
-            }
-        }
         session.setAttribute("authenticators", response.getAuthenticators());
         modelAndView.addObject("authenticators", response.getAuthenticators());
-        modelAndView.addObject("factorList", factorMethods);
         modelAndView.addObject("title", title);
         return modelAndView;
     }

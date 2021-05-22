@@ -27,8 +27,19 @@
 
     <script>
         $(document).ready(function() {
+            // initialize
+            const val = $('input[name=authenticator-type]:checked').val();
+            if (val !== 'Phone') {
+                $("input[name=phone-authenticator-mode]").attr('disabled', 'disabled');
+            }
+
             $("input[name=authenticator-type]").bind('change', function() {
-                $("input[name=phone-authenticator-mode]").prop("checked", false);
+                const val = $('input[name=authenticator-type]:checked').val();
+                if (val === 'Phone') {
+                    $('input[name="phone-authenticator-mode"]').removeAttr('disabled');
+                } else {
+                    $("input[name=phone-authenticator-mode]").attr('disabled', 'disabled');
+                }
             });
         });
     </script>
