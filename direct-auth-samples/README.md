@@ -30,7 +30,7 @@ export OKTA_IDX_SCOPES="space separated scopes" # e.g. openid email profile
 export OKTA_IDX_REDIRECTURI={redirectUri}
 ```
 
-> :information_source: For root Org AS case, set issuer to https://{yourOktaDomain}
+> :information_source: For root Org AS case, set issuer url to https://{yourOktaDomain}
 
 Now navigate to http://localhost:8080 in your browser.
 
