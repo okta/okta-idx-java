@@ -17,7 +17,27 @@ Feature: Login
   Scenario: Mary doesn't know her password
     When she fills in her correct username with incorrect password
     And  she submits the Login form
-    Then she should see incorrect password error
+    Then she should see authentication failed error
+
+  Scenario: Mary is not assigned to the application
+    When she enters valid credentials for unassigned user
+    And  she submits the Login form
+    Then she should see user not assigned to app error
+
+  Scenario: Mary's account is suspended
+    When she enters valid credentials for suspended user
+    And  she submits the Login form
+    Then she should see authentication failed error
+
+  Scenario: Mary's account is locked
+    When she enters valid credentials for locked user
+    And  she submits the Login form
+    Then she should see authentication failed error
+
+  Scenario: Mary's account is deactivated
+    When she enters valid credentials for deactivated user
+    And  she submits the Login form
+    Then she should see user not assigned to app error
 
   Scenario: Tests completed. Close browser
     Then I close browser

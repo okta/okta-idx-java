@@ -47,3 +47,6 @@ npm-debug.log
 travis_phantomjs
 .DS_Store
 .vscode
+
+chromedriver.zip
+direct-auth-samples/chromedriver
