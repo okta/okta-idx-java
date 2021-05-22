@@ -26,8 +26,8 @@ Apart from these, we'd of course need to set the variables needed to run the sam
 For example,
 ```
 export OKTA_IDX_ISSUER=https://dev-1234.okta.com/oauth2/default
-export OKTA_IDX_CLIENTSECRET=xxxxxx
 export OKTA_IDX_CLIENTID=xxxxxx
+export OKTA_IDX_CLIENTSECRET=xxxxxx
 export OKTA_IDX_SCOPES="openid email profile"
 export OKTA_IDX_REDIRECTURI=http://localhost:8080/authorization-code/callback
 ```
