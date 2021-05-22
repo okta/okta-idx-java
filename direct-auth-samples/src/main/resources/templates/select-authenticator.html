@@ -30,15 +30,19 @@
             // initialize
             const val = $('input[name=authenticator-type]:checked').val();
             if (val !== 'Phone') {
-                $("input[name=phone-authenticator-mode]").attr('disabled', 'disabled');
+                $("phone-auth-mode").hide();
             }
 
+            // show phone-auth-mode div only for Phone authenticator
             $("input[name=authenticator-type]").bind('change', function() {
                 const val = $('input[name=authenticator-type]:checked').val();
                 if (val === 'Phone') {
                     $('input[name="phone-authenticator-mode"]').removeAttr('disabled');
+                    $("#phone-auth-mode").show();
                 } else {
+                    $("input[name=phone-authenticator-mode]").removeAttr("checked");
                     $("input[name=phone-authenticator-mode]").attr('disabled', 'disabled');
+                    $("#phone-auth-mode").hide();
                 }
             });
         });
@@ -85,7 +89,7 @@
                 <label class="form-check-label" th:text="${authenticator.label}"></label>
             </div>
             <!-- show sms/voice selection if authenticator is phone -->
-            <div th:if="${authenticator.label} == 'Phone'">
+            <div id="phone-auth-mode" th:if="${authenticator.label} == 'Phone'" style="margin-left: 25px">
                 <div id="phone-authenticator-mode" class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="phone-authenticator-mode" th:value="sms" checked="true">
                     <label class="radio-inline" th:text="SMS"></label>
