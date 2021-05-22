@@ -26,7 +26,7 @@
 <body>
 
 <div th:if="${tokenResponse}">
-    <a href="/logout" class="btn btn-danger pull-right">Logout</a><br/>
+    <a href="/logout" class="btn btn-danger pull-right" id="logout-btn">Logout</a><br/>
 </div>
 
 <div class="container">
@@ -72,7 +72,7 @@
 <div class="container">
     <h2 class="text-center">User Profile</h2>
 
-    <table class="table table-striped">
+    <table class="table table-striped" id="profileTable">
         <thead class="thead-dark">
         <tr>
             <th scope="col">Attribute</th>
@@ -81,7 +81,7 @@
         </thead>
         <tr th:each="claim : ${claims}">
             <td th:text="${claim.key}"></td>
-            <td th:text="${claim.value}"></td>
+            <td th:text="${claim.value}" th:id="${claim.key}"></td>
         </tr>
     </table>
 </div>

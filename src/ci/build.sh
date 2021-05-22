@@ -18,6 +18,7 @@
 set -e
 
 COMMON_SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/common.sh"
+CHROMEDRIVER_DOWNLOAD_SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/download_chromedriver.sh"
 # shellcheck source=src/ci/common.sh
 source "${COMMON_SCRIPT}"
 
@@ -39,6 +40,8 @@ deploy () {
 }
 
 full_build () {
+    echo "Downloading chromedriver"
+    "${CHROMEDRIVER_DOWNLOAD_SCRIPT}"
     echo "Running mvn install"
     ${MVN_CMD} install -Pci
 }

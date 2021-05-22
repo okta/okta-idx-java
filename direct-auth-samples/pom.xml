@@ -34,8 +34,14 @@
         <checkstyle-maven-plugin.version>3.1.2</checkstyle-maven-plugin.version>
         <java.version>1.8</java.version>
         <okta.sdk.version>0.1.0-beta.6-SNAPSHOT</okta.sdk.version>
-        <okta.jwt.version>0.5.1</okta.jwt.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -75,32 +81,148 @@
             <artifactId>logback-classic</artifactId>
             <scope>runtime</scope>
         </dependency>
-
-        <!-- Okta's standard OAuth/OIDC tests, you do not need this in your project -->
-        <dependency>
-            <groupId>com.okta.oidc.tck</groupId>
-            <artifactId>okta-oidc-tck</artifactId>
-            <version>0.5.6</version>
-            <scope>test</scope>
-        </dependency>
+        
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
             <version>2.5.14</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- These are the selenium dependencies -->
+        <dependency>
+            <groupId>io.appium</groupId>
+            <artifactId>java-client</artifactId>
+            <version>7.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-chrome-driver</artifactId>
+            <version>3.141.59</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>3.141.59</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- These are the cucumber dependencies -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>6.10.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit</artifactId>
+            <version>6.10.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-core</artifactId>
+            <version>6.10.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>info.cukes</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>1.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-spring</artifactId>
+            <version>6.10.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- cucumber-junit dependencies -->
+        <dependency>
+            <groupId>info.cukes</groupId>
+            <artifactId>cucumber-junit</artifactId>
+            <version>1.2.5</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+            <version>2.4.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>5.3.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
+
         <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit47</artifactId>
+                        <version>3.0.0-M5</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>none</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <fork>false</fork>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>pre-integration-test</id>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>post-integration-test</id>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -118,109 +240,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <!-- Everything below here is to test this project, you wouldn't need the remaining in your own project -->
-    <profiles>
-        <profile>
-            <id>okta-tck</id>
-
-            <properties>
-                <node.version>v10.15.1</node.version>
-            </properties>
-
-            <build>
-                <plugins>
-                    <!-- Tell failsafe to run Okta's oidc-tck -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.1</version>
-                        <configuration>
-                            <dependenciesToScan>
-                                <dependency>com.okta.oidc.tck:okta-oidc-tck</dependency>
-                            </dependenciesToScan>
-                            <systemPropertyVariables>
-                                <okta.tck.redirectOnError>true</okta.tck.redirectOnError>
-                            </systemPropertyVariables>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>3.1.1</version>
-                        <executions>
-                            <execution>
-                             <id>unpack</id>
-                             <phase>package</phase>
-                             <goals>
-                               <goal>unpack</goal>
-                             </goals>
-                             <configuration>
-                                <artifactItems>
-                                    <!-- extract the tck UI tests -->
-                                    <artifactItem>
-                                        <groupId>com.okta.oidc.tck</groupId>
-                                        <artifactId>okta-oidc-tck</artifactId>
-                                        <classifier>e2e</classifier>
-                                        <type>zip</type>
-                                        <outputDirectory>${project.build.testOutputDirectory}/</outputDirectory>
-                                    </artifactItem>
-                                    <!-- extract the tck keystore -->
-                                    <artifactItem>
-                                        <groupId>com.okta.oidc.tck</groupId>
-                                        <artifactId>okta-oidc-tck</artifactId>
-                                        <outputDirectory>${project.build.directory}</outputDirectory>
-                                        <destFileName>tck-keystore.jks</destFileName>
-                                        <includes>tck-keystore.jks</includes>
-                                    </artifactItem>
-                                </artifactItems>
-                                <overWriteReleases>false</overWriteReleases>
-                                <overWriteSnapshots>true</overWriteSnapshots>
-                             </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <!-- use the frontend plugin to drive javascript based selenium tests -->
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.7.5</version>
-                        <configuration>
-                            <nodeVersion>${node.version}</nodeVersion>
-                            <workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
-                        </configuration>
-                        <executions>
-                         <execution>
-                             <id>install node</id>
-                             <phase>verify</phase>
-                             <goals>
-                                 <goal>install-node-and-npm</goal>
-                             </goals>
-                         </execution>
-                         <execution>
-                             <id>npm install</id>
-                             <phase>verify</phase>
-                             <goals>
-                                 <goal>npm</goal>
-                             </goals>
-                             <configuration>
-                                 <arguments>install</arguments>
-                             </configuration>
-                         </execution>
-                         <execution>
-                             <id>npm test</id>
-                             <phase>verify</phase>
-                             <goals>
-                                 <goal>npm</goal>
-                             </goals>
-                             <configuration>
-                                 <arguments>test</arguments>
-                             </configuration>
-                         </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
