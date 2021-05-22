@@ -24,8 +24,8 @@ mvn -Dokta.idx.issuer=https://{yourOktaDomain}/oauth2/default \
 
 ```
 export OKTA_IDX_ISSUER=https://{yourOktaDomain}/oauth2/default
-export OKTA_IDX_CLIENTSECRET={clientId}
-export OKTA_IDX_CLIENTID={clientSecret}
+export OKTA_IDX_CLIENTID={clientId}
+export OKTA_IDX_CLIENTSECRET={clientSecret}
 export OKTA_IDX_SCOPES="space separated scopes" # e.g. openid email profile
 export OKTA_IDX_REDIRECTURI=http://localhost:8080/authorization-code/callback
 ```
