@@ -31,19 +31,21 @@ public class UserStepDefinitions extends CucumberRoot {
 	
 	protected WebDriver driver = DriverUtil.getDefaultDriver();
 	private String USERNAME = System.getenv("USERNAME");
+	private String USERNAME_WITH_APP_UNASSIGNED = System.getenv("USERNAME_WITH_APP_UNASSIGNED");
+	private String USERNAME_SUSPENDED = System.getenv("USERNAME_SUSPENDED");
+	private String USERNAME_LOCKED = System.getenv("USERNAME_LOCKED");
+	private String USERNAME_DEACTIVATED = System.getenv("USERNAME_DEACTIVATED");
 	private String PASSWORD = System.getenv("PASSWORD");
 
 	@Given("^Mary navigates to the login page$")
-	public void navigate_to_home_page() throws Throwable
-	{
+	public void navigate_to_home_page() {
 		driver.manage().window().maximize();
 		driver.get("http://localhost:8080");
 		driver.findElement(By.id("login")).click();
 	}
 
 	@When("^she enters valid credentials$")
-	public void enter_valid_credentials() throws Throwable
-	{
+	public void enter_valid_credentials() throws Throwable {
 		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
 		// The below block doesn't help either. Only sleep works. (╯°□°）╯︵ ┻━┻
 		// new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.name("username"))).click();
@@ -52,7 +54,7 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 
 	@And("^she submits the Login form$")
-	public void clicks_login_button() throws Throwable {
+	public void clicks_login_button() {
 		driver.findElement(By.id("sign-in-btn")).click();
 	}
 	
@@ -66,15 +68,14 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 
 	@When("^she fills in her incorrect username with password$")
-	public void enter_invalid_username() throws Throwable
-	{
+	public void enter_invalid_username() throws Throwable {
 		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
 		driver.findElement(By.name("username")).sendKeys("invalid@acme.com");
 		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
 
 	@Then("^she should see invalid user error$")
-	public void invalid_user_error() throws Throwable {
+	public void invalid_user_error() {
 		By selection = By.className("alert-danger");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
@@ -85,15 +86,14 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 
 	@When("^she fills in her correct username with incorrect password$")
-	public void enter_valid_username_invalid_password() throws Throwable
-	{
+	public void enter_valid_username_invalid_password() throws Throwable {
 		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
 		driver.findElement(By.name("username")).sendKeys(USERNAME);
 		driver.findElement(By.name("password")).sendKeys("invalid123");
 	}
 
-	@Then("^she should see incorrect password error$")
-	public void incorrect_password_error() throws Throwable {
+	@Then("^she should see authentication failed error$")
+	public void authentication_failed_error() throws Throwable {
 		By selection = By.className("alert-danger");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
@@ -102,9 +102,64 @@ public class UserStepDefinitions extends CucumberRoot {
 		Assert.assertTrue("Authentication failed error is not shown'", error.contains("Authentication failed"));
 	}
 
+	@When("^she enters valid credentials for unassigned user$")
+	public void enter_valid_credentials_for_unassigned_user() throws Throwable {
+		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+		driver.findElement(By.name("username")).sendKeys(USERNAME_WITH_APP_UNASSIGNED);
+		driver.findElement(By.name("password")).sendKeys(PASSWORD);
+	}
+
+	@Then("^she should see user not assigned to app error$")
+	public void user_not_assigned_app_error() throws Throwable {
+		By selection = By.className("alert-danger");
+		(new WebDriverWait(driver, 30)).until(
+				ExpectedConditions.visibilityOfElementLocated(selection));
+		String error = driver.findElement(By.className("alert-danger")).getText();
+		Assert.assertTrue("Error is not shown", !error.isEmpty());
+//		TODO: If Profile enrollment policy allows sign-up, this error in not shown. Commenting until we get clarity on this
+//		Assert.assertTrue("User not assigned error is not shown", error.contains("User is not assigned to this application"));
+	}
+
+	@When("^she enters valid credentials for suspended user$")
+	public void enter_valid_credentials_for_suspended_user() throws Throwable {
+		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+		driver.findElement(By.name("username")).sendKeys(USERNAME_SUSPENDED);
+		driver.findElement(By.name("password")).sendKeys(PASSWORD);
+	}
+
+	@When("^she enters valid credentials for locked user$")
+	public void enter_valid_credentials_for_locked_user() throws Throwable {
+		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+		driver.findElement(By.name("username")).sendKeys(USERNAME_LOCKED);
+		driver.findElement(By.name("password")).sendKeys(PASSWORD);
+	}
+
+	@When("^she enters valid credentials for deactivated user$")
+	public void enter_valid_credentials_for_deactivated_user() throws Throwable {
+		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+		driver.findElement(By.name("username")).sendKeys(USERNAME_DEACTIVATED);
+		driver.findElement(By.name("password")).sendKeys(PASSWORD);
+	}
+
+	@When("^she clicks on the \"Forgot Password Link\"$")
+	public void clicks_forgot_password_link() throws Throwable {
+		By selection = By.id("forgot-password");
+		(new WebDriverWait(driver, 30)).until(
+				ExpectedConditions.visibilityOfElementLocated(selection));
+		driver.findElement(By.id("forgot-password")).click();
+	}
+
+	@Then("^she is redirected to the Self Service Password Reset View$")
+	public void redirect_to_sspr_view() throws Throwable {
+		By selection = By.className("forgotpassword-form");
+		(new WebDriverWait(driver, 30)).until(
+				ExpectedConditions.visibilityOfElementLocated(selection));
+		String URL = driver.getCurrentUrl();
+		Assert.assertEquals(URL, "http://localhost:8080/forgot-password" );
+	}
+
 	@Then("^I close browser$")
 	public void close_browser() {
 		driver.close();
 	}
-
 }
