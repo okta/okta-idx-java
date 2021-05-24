@@ -65,10 +65,10 @@
 
         <div id="phone-authenticator-mode" class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="mode" th:value="sms" checked="true">
-            <label class="radio-inline" th:text="SMS"></label>
+            <label class="form-check-label" th:text="SMS"></label>
 
             <input class="form-check-input" type="radio" name="mode" th:value="voice">
-            <label class="radio-inline" th:text="Voice"></label>
+            <label class="form-check-label" th:text="Voice"></label>
         </div>
         <input type="hidden" class="form-control" name="phone" th:value="${phone}" required="required">
         <div class="form-group">

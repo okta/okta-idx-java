@@ -23,30 +23,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            // initialize
-            const val = $('input[name=authenticator-type]:checked').val();
-            if (val !== 'Phone') {
-                $("phone-auth-mode").hide();
-            }
-
-            // show phone-auth-mode div only for Phone authenticator
-            $("input[name=authenticator-type]").bind('change', function() {
-                const val = $('input[name=authenticator-type]:checked').val();
-                if (val === 'Phone') {
-                    $('input[name="phone-authenticator-mode"]').removeAttr('disabled');
-                    $("#phone-auth-mode").show();
-                } else {
-                    $("input[name=phone-authenticator-mode]").removeAttr("checked");
-                    $("input[name=phone-authenticator-mode]").attr('disabled', 'disabled');
-                    $("#phone-auth-mode").hide();
-                }
-            });
-        });
-    </script>
 
     <style>
         .enroll-phone-authenticator-form {
