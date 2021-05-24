@@ -63,10 +63,10 @@
         </div>
         <p class="font-weight-light">Please choose the method for this factor</p>
 
-        <div id="phone-authenticator-mode" class="form-check form-check-inline">
+        <div id="phone-authenticator-mode" class="form-check">
             <input class="form-check-input" type="radio" name="mode" th:value="sms" checked="true">
             <label class="form-check-label" th:text="SMS"></label>
-
+            <br>
             <input class="form-check-input" type="radio" name="mode" th:value="voice">
             <label class="form-check-label" th:text="Voice"></label>
         </div>
