@@ -14,29 +14,33 @@
   ~ limitations under the License.
   -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en"><html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title th:text="${title}"></title>
+    <title>Select Factor</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style>
-        .select-authenticators-form {
-            width: 340px;
+        .select-factor-form {
+            width: 440px;
             margin: 50px auto;
         }
-        .select-authenticators-form form {
+        .select-factor-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .select-authenticators-form h2 {
+        .select-factor-form h2 {
             margin: 0 0 15px;
+        }
+        .form-control, .btn {
+            min-height: 38px;
+            border-radius: 2px;
         }
         .btn {
             font-size: 15px;
@@ -51,30 +55,26 @@
     <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
 </div>
 
-<div class="select-authenticators-form">
-
-    <form th:action="@{/select-authenticator}" method="post">
+<div class="select-factor-form">
+    <form th:action="@{/select-factor}" method="post">
         <h2 class="text-center"><span th:text="${title}"></span></h2>
         <div th:if="${errors}" class="alert alert-danger">
             <span th:text="${errors}"></span>
         </div>
-        <tr th:each="authenticator : ${authenticators}"
-            th:if="${authenticator} != 'security_question'"> <!-- not supported by app at this point -->
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="authenticator-type" th:value="${authenticator.label}" checked="true">
-                <label class="form-check-label" th:text="${authenticator.label}"></label>
-            </div>
-        </tr>
+        <p class="font-weight-light">Please choose the method for this factor</p>
 
-        <br>
+        <div id="phone-authenticator-mode" class="form-check">
+            <input class="form-check-input" type="radio" name="mode" th:value="sms" checked="true">
+            <label class="form-check-label" th:text="SMS"></label>
+            <br>
+            <input class="form-check-input" type="radio" name="mode" th:value="voice">
+            <label class="form-check-label" th:text="Voice"></label>
+        </div>
+        <input type="hidden" class="form-control" name="authenticatorId" th:value="${authenticatorId}" required="required">
         <div class="form-group">
-            <button id="proceed-btn" name="action" value="proceed" type="submit" class="btn btn-primary btn-block">Proceed</button>
-            <tr th:if="${canSkip}">
-                <button id="skip-btn" name="action" value="skip" type="submit" class="btn btn-primary btn-block">Skip</button>
-            </tr>
+            <button id="submit-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
         </div>
     </form>
-
 </div>
 
 <div th:replace="fragments/footer :: footer"></div>

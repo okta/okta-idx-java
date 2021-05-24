@@ -15,6 +15,7 @@
  */
 package com.okta.spring.example.controllers;
 
+import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
@@ -33,9 +34,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.List;
-
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @Controller
 public class LoginController {
@@ -114,32 +114,43 @@ public class LoginController {
      *
      * @param authenticatorType the authenticatorType
      * @param session the session
+     * @param action the submit or cancel action from form post
      * @return authenticate-email view
      */
     @PostMapping(value = "/select-authenticator")
     public ModelAndView selectAuthenticator(final @RequestParam("authenticator-type") String authenticatorType,
+                                            final @RequestParam(value = "action") String action,
                                             final HttpSession session) {
+
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-        Authenticator.Factor foundFactor = null;
         AuthenticationResponse authenticationResponse = null;
-        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
-        for (Authenticator authenticator : authenticators) {
-            for (Authenticator.Factor factor : authenticator.getFactors()) {
-                if (factor.getMethod().equals(authenticatorType)) {
-                    foundFactor = factor;
-                    if (authenticator.getFactors().size() == 1) {
-                        authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
-                    } else {
-                        authenticationResponse = idxAuthenticationWrapper.selectFactor(proceedContext, factor);
-                    }
-                    break;
-                }
-            }
+
+        if ("skip".equals(action)) {
+            logger.info("Skipping {} authenticator", authenticatorType);
+            authenticationResponse = idxAuthenticationWrapper.skipAuthenticatorEnrollment(proceedContext);
+            return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
 
-        if (foundFactor == null) {
-            throw new IllegalStateException("Factor Not found.");
+        Authenticator foundAuthenticator = null;
+
+        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
+
+        for (Authenticator authenticator : authenticators) {
+            if (authenticatorType.equals(authenticator.getLabel())) {
+                foundAuthenticator = authenticator;
+
+                if (foundAuthenticator.getFactors().size() == 1) {
+                    authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
+                } else {
+                    // user should select the factor in a separate view
+                    ModelAndView modelAndView = new ModelAndView("select-factor");
+                    modelAndView.addObject("title", "Select Factor");
+                    modelAndView.addObject("authenticatorId", foundAuthenticator.getId());
+                    modelAndView.addObject("factors", foundAuthenticator.getFactors());
+                    return modelAndView;
+                }
+            }
         }
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
@@ -147,6 +158,62 @@ public class LoginController {
             modelAndView.addObject("errors", authenticationResponse.getErrors());
             return modelAndView;
         }
+
+        ModelAndView terminalTransition = responseHandler.handleTerminalTransitions(authenticationResponse, session);
+        if (terminalTransition != null) {
+            return terminalTransition;
+        }
+
+        switch (authenticationResponse.getAuthenticationStatus()) {
+            case AWAITING_AUTHENTICATOR_VERIFICATION_DATA:
+                return responseHandler.verifyForm();
+            case AWAITING_AUTHENTICATOR_ENROLLMENT:
+            case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
+                return responseHandler.registerVerifyForm(foundAuthenticator);
+            default:
+                return responseHandler.handleKnownTransitions(authenticationResponse, session);
+        }
+    }
+
+    /**
+     * Handle factor selection during authentication.
+     *
+     * @param authenticatorId the authenticator ID of selected authenticator
+     * @param mode the sms or voice factor mode
+     * @param session the session
+     * @return select factor view
+     */
+    @PostMapping("/select-factor")
+    public ModelAndView selectFactor(final @RequestParam("authenticatorId") String authenticatorId,
+                                     final @RequestParam("mode") String mode,
+                                     final HttpSession session) {
+
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
+
+        Authenticator foundAuthenticator = null;
+
+        for (Authenticator auth : authenticators) {
+            if (auth.getId().equals(authenticatorId)) {
+                foundAuthenticator = auth;
+            }
+        }
+
+        Assert.notNull(foundAuthenticator, "Authenticator not found");
+
+        AuthenticationResponse authenticationResponse = null;
+        Authenticator.Factor foundFactor = null;
+
+        for (Authenticator.Factor factor : foundAuthenticator.getFactors()) {
+            if (factor.getMethod().equals(mode)) {
+                foundFactor = factor;
+                authenticationResponse = idxAuthenticationWrapper.selectFactor(proceedContext, foundFactor);
+                break;
+            }
+        }
+
+        Assert.notNull(foundFactor, "Factor not found");
 
         ModelAndView terminalTransition = responseHandler.handleTerminalTransitions(authenticationResponse, session);
         if (terminalTransition != null) {
@@ -167,7 +234,7 @@ public class LoginController {
     /**
      * Handle email verification functionality.
      *
-     * @param code the email verification code
+     * @param code    the email verification code
      * @param session the session
      * @return the change password view (if awaiting password reset), else the login page.
      */
@@ -282,7 +349,7 @@ public class LoginController {
      */
     @PostMapping(value = "/register-phone")
     public ModelAndView registerPhone(final @RequestParam("phone") String phone,
-                                      final @RequestParam("mode") String mode,
+                                      final @RequestParam(value = "mode", required = false) String mode,
                                       final HttpSession session) {
         logger.info(":: Enroll Phone Authenticator ::");
 
@@ -300,6 +367,12 @@ public class LoginController {
             ModelAndView mav = new ModelAndView("register-phone");
             mav.addObject("errors", "Invalid phone number");
             return mav;
+        }
+
+        if (!Strings.hasText(mode)) {
+            ModelAndView modelAndView = new ModelAndView("select-phone-factor");
+            modelAndView.addObject("phone", trimmedPhoneNumber);
+            return modelAndView;
         }
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);

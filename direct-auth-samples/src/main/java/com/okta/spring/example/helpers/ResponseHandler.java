@@ -21,15 +21,11 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.http.HttpSession;
 
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_PASSWORD_RESET;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.PASSWORD_EXPIRED;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION;
 import static com.okta.idx.sdk.api.model.AuthenticationStatus.SKIP_COMPLETE;
 
 @Component
@@ -68,6 +64,13 @@ public final class ResponseHandler {
         if (response.getTokenResponse() != null) {
             return homeHelper.proceedToHome(response.getTokenResponse(), session);
         }
+
+        if (response.getAuthenticators() == null && response.getErrors().size() > 0) {
+            ModelAndView modelAndView = new ModelAndView("error");
+            modelAndView.addObject("errors", response.getErrors());
+            return modelAndView;
+        }
+
         if (response.getAuthenticationStatus() == SKIP_COMPLETE) {
             ModelAndView modelAndView = homeHelper.proceedToHome(response.getTokenResponse(), session);
             modelAndView.addObject("info", response.getErrors());
@@ -104,7 +107,14 @@ public final class ResponseHandler {
         }
     }
 
-    private ModelAndView selectAuthenticatorForm(AuthenticationResponse response, String title, HttpSession session) {
+    /**
+     * select authenticator form.
+     * @param response the response
+     * @param title the view title
+     * @param session the session
+     * @return the ModelAndView with the status associated to the response.
+     */
+    public ModelAndView selectAuthenticatorForm(AuthenticationResponse response, String title, HttpSession session) {
         boolean canSkip = authenticationWrapper.isSkipAuthenticatorPresent(response.getProceedContext());
         ModelAndView modelAndView = new ModelAndView("select-authenticator");
         modelAndView.addObject("canSkip", canSkip);
@@ -116,6 +126,7 @@ public final class ResponseHandler {
         }
         session.setAttribute("authenticators", response.getAuthenticators());
         modelAndView.addObject("factorList", factorMethods);
+        modelAndView.addObject("authenticators", response.getAuthenticators());
         modelAndView.addObject("title", title);
         return modelAndView;
     }
@@ -136,6 +147,24 @@ public final class ResponseHandler {
                 ModelAndView modelAndView = new ModelAndView("register-phone");
                 modelAndView.addObject("mode", factor.getMethod());
                 return modelAndView;
+            default:
+                return unsupportedPolicy();
+        }
+    }
+
+    /**
+     * registerVerifyForm.
+     * @param authenticator the authenticator
+     * @return the ModelAndView for the register verify form.
+     */
+    public ModelAndView registerVerifyForm(Authenticator authenticator) {
+        switch (authenticator.getLabel()) {
+            case "Email":
+                return verifyForm();
+            case "Password":
+                return registerPasswordForm("Setup Password");
+            case "Phone":
+                return new ModelAndView("register-phone");
             default:
                 return unsupportedPolicy();
         }
