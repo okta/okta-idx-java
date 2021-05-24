@@ -44,20 +44,20 @@ public final class ResponseHandler {
     private IDXAuthenticationWrapper authenticationWrapper;
 
     /**
-     * needsToShowErrors.
+     * Check if response contains presentable errors.
      *
      * @param response the response
-     * @return if the caller should show errors
+     * @return true if the caller should show errors; false otherwise
      */
     public boolean needsToShowErrors(AuthenticationResponse response) {
         return !response.getErrors().isEmpty();
     }
 
     /**
-     * handleTerminalTransitions.
+     * Return terminal views based on the authentication status in response.
      * @param response the response
      * @param session the session
-     * @return the ModelAndView with the status associated to the response or null.
+     * @return the view associated with the response authentication status or null.
      */
     public ModelAndView handleTerminalTransitions(AuthenticationResponse response, HttpSession session) {
         Util.updateSession(session, response.getProceedContext());
@@ -80,10 +80,11 @@ public final class ResponseHandler {
     }
 
     /**
-     * handleKnownTransitions.
+     * Return view based on the authentication status in response.
+     *
      * @param response the response
      * @param session the session
-     * @return the ModelAndView with the status associated to the response.
+     * @return the view with the status associated with the response.
      */
     public ModelAndView handleKnownTransitions(AuthenticationResponse response, HttpSession session) {
         ModelAndView terminalModelAndView = handleTerminalTransitions(response, session);
@@ -108,11 +109,11 @@ public final class ResponseHandler {
     }
 
     /**
-     * select authenticator form.
+     * Return the view for select authenticator form.
      * @param response the response
      * @param title the view title
      * @param session the session
-     * @return the ModelAndView with the status associated to the response.
+     * @return the view associated with the response authentication status.
      */
     public ModelAndView selectAuthenticatorForm(AuthenticationResponse response, String title, HttpSession session) {
         boolean canSkip = authenticationWrapper.isSkipAuthenticatorPresent(response.getProceedContext());
@@ -132,9 +133,9 @@ public final class ResponseHandler {
     }
 
     /**
-     * registerVerifyForm.
+     * Return the view for register verify form.
      * @param factor the factor
-     * @return the ModelAndView for the register verify form.
+     * @return the view for the register verify form.
      */
     public ModelAndView registerVerifyForm(Authenticator.Factor factor) {
         switch (factor.getMethod()) {
@@ -153,9 +154,9 @@ public final class ResponseHandler {
     }
 
     /**
-     * registerVerifyForm.
+     * Return the view for verify form.
      * @param authenticator the authenticator
-     * @return the ModelAndView for the register verify form.
+     * @return the view for the register verify form.
      */
     public ModelAndView registerVerifyForm(Authenticator authenticator) {
         switch (authenticator.getLabel()) {
@@ -171,19 +172,28 @@ public final class ResponseHandler {
     }
 
     /**
-     * verifyForm.
-     * @return the ModelAndView for the verifyForm.
+     * Return the view for verify form.
+     * @return the view for verifyForm.
      */
     public ModelAndView verifyForm() {
         return new ModelAndView("verify");
     }
 
+    /**
+     * Return the view for register password form.
+     * @param title the title of form
+     * @return the view for password registration form.
+     */
     private ModelAndView registerPasswordForm(String title) {
         ModelAndView modelAndView = new ModelAndView("register-password");
         modelAndView.addObject("title", title);
         return modelAndView;
     }
 
+    /**
+     * Return the view for unsupported policy.
+     * @return the view for policy errors.
+     */
     private ModelAndView unsupportedPolicy() {
         ModelAndView modelAndView = new ModelAndView("error");
         modelAndView.addObject("errors", "Unsupported Policy.");
