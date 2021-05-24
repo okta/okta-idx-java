@@ -112,4 +112,8 @@ public class FormValue {
     public OptionsFormVal getForm() {
         return form;
     }
+
+    public String getLabel() {
+        return label;
+    }
 }
