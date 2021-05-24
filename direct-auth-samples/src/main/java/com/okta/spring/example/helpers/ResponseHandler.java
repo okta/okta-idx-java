@@ -21,15 +21,11 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.http.HttpSession;
 
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_PASSWORD_RESET;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.PASSWORD_EXPIRED;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION;
-import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION;
 import static com.okta.idx.sdk.api.model.AuthenticationStatus.SKIP_COMPLETE;
 
 @Component
@@ -111,7 +107,14 @@ public final class ResponseHandler {
         }
     }
 
-    private ModelAndView selectAuthenticatorForm(AuthenticationResponse response, String title, HttpSession session) {
+    /**
+     * select authenticator form.
+     * @param response the response
+     * @param title the view title
+     * @param session the session
+     * @return the ModelAndView with the status associated to the response.
+     */
+    public ModelAndView selectAuthenticatorForm(AuthenticationResponse response, String title, HttpSession session) {
         boolean canSkip = authenticationWrapper.isSkipAuthenticatorPresent(response.getProceedContext());
         ModelAndView modelAndView = new ModelAndView("select-authenticator");
         modelAndView.addObject("canSkip", canSkip);
@@ -161,8 +164,7 @@ public final class ResponseHandler {
             case "Password":
                 return registerPasswordForm("Setup Password");
             case "Phone":
-                ModelAndView modelAndView = new ModelAndView("register-phone");
-                return modelAndView;
+                return new ModelAndView("register-phone");
             default:
                 return unsupportedPolicy();
         }
