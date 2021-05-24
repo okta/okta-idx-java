@@ -115,7 +115,7 @@ public class LoginController {
      * @param authenticatorType the authenticatorType
      * @param session the session
      * @param action the submit or cancel action from form post
-     * @return authenticate-email view
+     * @return select authenticator view or select factor view or error view
      */
     @PostMapping(value = "/select-authenticator")
     public ModelAndView selectAuthenticator(final @RequestParam("authenticator-type") String authenticatorType,
@@ -181,7 +181,7 @@ public class LoginController {
      * @param authenticatorId the authenticator ID of selected authenticator
      * @param mode the sms or voice factor mode
      * @param session the session
-     * @return select factor view
+     * @return the view associated with authentication response.
      */
     @PostMapping("/select-factor")
     public ModelAndView selectFactor(final @RequestParam("authenticatorId") String authenticatorId,
@@ -232,11 +232,11 @@ public class LoginController {
     }
 
     /**
-     * Handle email verification functionality.
+     * Handle authenticator verification functionality.
      *
-     * @param code    the email verification code
+     * @param code    the verification code
      * @param session the session
-     * @return the change password view (if awaiting password reset), else the login page.
+     * @return the view associated with authentication response.
      */
     @PostMapping("/verify")
     public ModelAndView verify(final @RequestParam("code") String code,
@@ -265,7 +265,7 @@ public class LoginController {
      * @param newPassword the new password
      * @param confirmNewPassword the confirmation of the new password
      * @param session the session
-     * @return the login view
+     * @return the view associated with authentication response.
      */
     @PostMapping("/register-password")
     public ModelAndView registerPassword(final @RequestParam("new-password") String newPassword,
@@ -344,8 +344,7 @@ public class LoginController {
      * @param phone the phone number
      * @param mode the delivery mode - sms or voice
      * @param session the session
-     * @return the submit phone authenticator enrollment page that allows user to input
-     * the received code (if phone validation is successful), else presents the same page with error message.
+     * @return the view associated with authentication response.
      */
     @PostMapping(value = "/register-phone")
     public ModelAndView registerPhone(final @RequestParam("phone") String phone,
@@ -396,6 +395,13 @@ public class LoginController {
         return responseHandler.verifyForm();
     }
 
+    /**
+     * Fetch the factor associated with factor method.
+     * @param session the http session
+     * @param method the factor method
+     * @return the factor associated with the supplied factor method.
+     * @throws {@link IllegalArgumentException} if factor could not be found.
+     */
     private Authenticator.Factor getFactorFromMethod(final HttpSession session,
                                                      final String method) {
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
