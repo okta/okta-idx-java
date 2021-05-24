@@ -283,7 +283,13 @@ final class AuthenticationTransaction {
 
                 if (formValueOptional.isPresent()) {
                     Options[] options = formValueOptional.get().options();
-                    authenticationResponse.setAuthenticators(getAuthenticators(options));
+
+                    List<Authenticator> authenticators = getAuthenticators(options);
+                    if (authenticators == null) {
+                        authenticators = getAuthenticators(formValueOptional.get());
+                    }
+
+                    authenticationResponse.setAuthenticators(authenticators);
                 }
             }
         }
@@ -330,6 +336,48 @@ final class AuthenticationTransaction {
             }
             authenticators.add(new Authenticator(id, label, factors, hasNestedFactors));
         }
+        return authenticators;
+    }
+
+    private List<Authenticator> getAuthenticators(FormValue parent) {
+        if (parent == null) {
+            return null;
+        }
+        List<Authenticator> authenticators = new ArrayList<>();
+
+        String id = null;
+        String label = parent.getLabel();
+        String enrollmentId = null;
+        Map<String, String> nestedMethods = new LinkedHashMap<>();
+        boolean hasNestedFactors = false;
+
+        for (FormValue formValue : parent.form().getValue()) {
+            if (formValue.getName().equals("methodType")) {
+                // parse value from children
+                Options[] nestedOptions = formValue.options();
+                if (nestedOptions.length > 0) {
+                    for (Options children : nestedOptions) {
+                        nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
+                    }
+                    hasNestedFactors = true;
+                } else {
+                    nestedMethods.put(String.valueOf(formValue.getValue()), label);
+                }
+            }
+            if (formValue.getName().equals("id")) {
+                id = String.valueOf(formValue.getValue());
+            }
+            if (formValue.getName().equals("enrollmentId")) {
+                enrollmentId = String.valueOf(formValue.getValue());
+            }
+        }
+
+        List<Authenticator.Factor> factors = new ArrayList<>();
+        for (Map.Entry<String, String> entry : nestedMethods.entrySet()) {
+            factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue()));
+        }
+        authenticators.add(new Authenticator(id, label, factors, hasNestedFactors));
+
         return authenticators;
     }
 }
