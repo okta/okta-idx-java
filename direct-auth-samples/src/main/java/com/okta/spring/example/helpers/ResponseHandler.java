@@ -21,9 +21,15 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
-
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_PASSWORD_RESET;
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.PASSWORD_EXPIRED;
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION;
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION;
+import static com.okta.idx.sdk.api.model.AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION;
 import static com.okta.idx.sdk.api.model.AuthenticationStatus.SKIP_COMPLETE;
 
 @Component
@@ -62,6 +68,13 @@ public final class ResponseHandler {
         if (response.getTokenResponse() != null) {
             return homeHelper.proceedToHome(response.getTokenResponse(), session);
         }
+
+        if (response.getAuthenticators() == null && response.getErrors().size() > 0) {
+            ModelAndView modelAndView = new ModelAndView("error");
+            modelAndView.addObject("errors", response.getErrors());
+            return modelAndView;
+        }
+
         if (response.getAuthenticationStatus() == SKIP_COMPLETE) {
             ModelAndView modelAndView = homeHelper.proceedToHome(response.getTokenResponse(), session);
             modelAndView.addObject("info", response.getErrors());
@@ -102,7 +115,14 @@ public final class ResponseHandler {
         boolean canSkip = authenticationWrapper.isSkipAuthenticatorPresent(response.getProceedContext());
         ModelAndView modelAndView = new ModelAndView("select-authenticator");
         modelAndView.addObject("canSkip", canSkip);
+        List<String> factorMethods = new ArrayList<>();
+        for (Authenticator authenticator : response.getAuthenticators()) {
+            for (Authenticator.Factor factor : authenticator.getFactors()) {
+                factorMethods.add(factor.getMethod());
+            }
+        }
         session.setAttribute("authenticators", response.getAuthenticators());
+        modelAndView.addObject("factorList", factorMethods);
         modelAndView.addObject("authenticators", response.getAuthenticators());
         modelAndView.addObject("title", title);
         return modelAndView;
@@ -110,11 +130,31 @@ public final class ResponseHandler {
 
     /**
      * registerVerifyForm.
-     * @param authenticator the authenticator
-     * @param phoneAuthenticatorMode sms or voice phone auth mode (optional)
+     * @param factor the factor
      * @return the ModelAndView for the register verify form.
      */
-    public ModelAndView registerVerifyForm(Authenticator authenticator, String phoneAuthenticatorMode) {
+    public ModelAndView registerVerifyForm(Authenticator.Factor factor) {
+        switch (factor.getMethod()) {
+            case "email":
+                return verifyForm();
+            case "password":
+                return registerPasswordForm("Setup Password");
+            case "voice":
+            case "sms":
+                ModelAndView modelAndView = new ModelAndView("register-phone");
+                modelAndView.addObject("mode", factor.getMethod());
+                return modelAndView;
+            default:
+                return unsupportedPolicy();
+        }
+    }
+
+    /**
+     * registerVerifyForm.
+     * @param authenticator the authenticator
+     * @return the ModelAndView for the register verify form.
+     */
+    public ModelAndView registerVerifyForm(Authenticator authenticator) {
         switch (authenticator.getLabel()) {
             case "Email":
                 return verifyForm();
@@ -122,7 +162,6 @@ public final class ResponseHandler {
                 return registerPasswordForm("Setup Password");
             case "Phone":
                 ModelAndView modelAndView = new ModelAndView("register-phone");
-                modelAndView.addObject("mode", phoneAuthenticatorMode);
                 return modelAndView;
             default:
                 return unsupportedPolicy();

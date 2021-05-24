@@ -18,48 +18,24 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Enroll Phone Authenticator</title>
+    <title>Select Phone Factor</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            // initialize
-            const val = $('input[name=authenticator-type]:checked').val();
-            if (val !== 'Phone') {
-                $("phone-auth-mode").hide();
-            }
-
-            // show phone-auth-mode div only for Phone authenticator
-            $("input[name=authenticator-type]").bind('change', function() {
-                const val = $('input[name=authenticator-type]:checked').val();
-                if (val === 'Phone') {
-                    $('input[name="phone-authenticator-mode"]').removeAttr('disabled');
-                    $("#phone-auth-mode").show();
-                } else {
-                    $("input[name=phone-authenticator-mode]").removeAttr("checked");
-                    $("input[name=phone-authenticator-mode]").attr('disabled', 'disabled');
-                    $("#phone-auth-mode").hide();
-                }
-            });
-        });
-    </script>
 
     <style>
-        .enroll-phone-authenticator-form {
+        .select-phone-factor-form {
             width: 440px;
             margin: 50px auto;
         }
-        .enroll-phone-authenticator-form form {
+        .select-phone-factor-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .enroll-phone-authenticator-form h2 {
+        .select-phone-factor-form h2 {
             margin: 0 0 15px;
         }
         .form-control, .btn {
@@ -79,17 +55,22 @@
     <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
 </div>
 
-<div class="enroll-phone-authenticator-form">
+<div class="select-phone-factor-form">
     <form th:action="@{/register-phone}" method="post">
-        <h2 class="text-center">Enroll Phone Authenticator</h2>
+        <h2 class="text-center">Select Phone Factor</h2>
         <div th:if="${errors}" class="alert alert-danger">
             <span th:text="${errors}"></span>
         </div>
-        <p class="font-weight-light">Format: (+) {country code} {area code} {number}
-            <br> For e.g. +1 555 666 7777 (US)</p>
-        <div class="form-group">
-            <input type="phone" class="form-control" name="phone" placeholder="Phone number" required="required">
+        <p class="font-weight-light">Please choose the method for this factor</p>
+
+        <div id="phone-authenticator-mode" class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="mode" th:value="sms" checked="true">
+            <label class="radio-inline" th:text="SMS"></label>
+
+            <input class="form-check-input" type="radio" name="mode" th:value="voice">
+            <label class="radio-inline" th:text="Voice"></label>
         </div>
+        <input type="hidden" class="form-control" name="phone" th:value="${phone}" required="required">
         <div class="form-group">
             <button id="submit-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
         </div>

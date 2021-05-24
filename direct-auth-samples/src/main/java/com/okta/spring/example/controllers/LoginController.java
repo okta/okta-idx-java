@@ -33,9 +33,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.List;
-
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @Controller
 public class LoginController {
@@ -113,29 +112,43 @@ public class LoginController {
      * Handle authenticator selection during authentication.
      *
      * @param authenticatorType the authenticatorType
-     * @param phoneAuthenticatorMode the phone auth mode (optional)
      * @param session the session
+     * @param action the submit or cancel action from form post
      * @return authenticate-email view
      */
     @PostMapping(value = "/select-authenticator")
     public ModelAndView selectAuthenticator(final @RequestParam("authenticator-type") String authenticatorType,
-                                            final @RequestParam(value = "phone-authenticator-mode", required = false)
-                                                    String phoneAuthenticatorMode,
+                                            final @RequestParam(value = "action") String action,
                                             final HttpSession session) {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-        AuthenticationResponse authenticationResponse;
+        AuthenticationResponse authenticationResponse = null;
+
+        if ("skip".equals(action)) {
+            logger.info("Skipping {} authenticator", authenticatorType);
+            authenticationResponse = idxAuthenticationWrapper.skipAuthenticatorEnrollment(proceedContext);
+            return responseHandler.handleKnownTransitions(authenticationResponse, session);
+        }
+
+        Authenticator foundAuthenticator = null;
+        Authenticator.Factor foundFactor = null;
+
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
 
-        Authenticator selectedAuthenticatorToProceed = null;
-
         for (Authenticator authenticator : authenticators) {
-            if (authenticator.getLabel().equals(authenticatorType)) {
-                selectedAuthenticatorToProceed = authenticator;
+            if (authenticatorType.equals(authenticator.getLabel())) {
+                foundAuthenticator = authenticator;
+                logger.info(" == Found {} authenticator with {} factors ==",
+                        authenticator.getLabel(), foundAuthenticator.getFactors().size());
+                authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
             }
         }
 
-        authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, selectedAuthenticatorToProceed);
+        if (responseHandler.needsToShowErrors(authenticationResponse)) {
+            ModelAndView modelAndView = new ModelAndView("select-authenticator");
+            modelAndView.addObject("errors", authenticationResponse.getErrors());
+            return modelAndView;
+        }
 
         ModelAndView terminalTransition = responseHandler.handleTerminalTransitions(authenticationResponse, session);
         if (terminalTransition != null) {
@@ -147,7 +160,12 @@ public class LoginController {
                 return responseHandler.verifyForm();
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
-                return responseHandler.registerVerifyForm(selectedAuthenticatorToProceed, phoneAuthenticatorMode);
+                if (foundFactor != null) {
+                    logger.info("=== Verifying found factor {} ===", foundFactor.getMethod());
+                    return responseHandler.registerVerifyForm(foundFactor);
+                }
+                logger.info("=== Verifying found authenticator {} ===", foundAuthenticator.getLabel());
+                return responseHandler.registerVerifyForm(foundAuthenticator);
             default:
                 return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
@@ -271,7 +289,7 @@ public class LoginController {
      */
     @PostMapping(value = "/register-phone")
     public ModelAndView registerPhone(final @RequestParam("phone") String phone,
-                                      final @RequestParam("mode") String mode,
+                                      final @RequestParam(value = "mode", required = false) String mode,
                                       final HttpSession session) {
         logger.info(":: Enroll Phone Authenticator ::");
 
@@ -289,6 +307,12 @@ public class LoginController {
             ModelAndView mav = new ModelAndView("register-phone");
             mav.addObject("errors", "Invalid phone number");
             return mav;
+        }
+
+        if (!Strings.hasText(mode)) {
+            ModelAndView modelAndView = new ModelAndView("select-phone-factor");
+            modelAndView.addObject("phone", trimmedPhoneNumber);
+            return modelAndView;
         }
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);

@@ -23,30 +23,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            // initialize
-            const val = $('input[name=authenticator-type]:checked').val();
-            if (val !== 'Phone') {
-                $("phone-auth-mode").hide();
-            }
-
-            // show phone-auth-mode div only for Phone authenticator
-            $("input[name=authenticator-type]").bind('change', function() {
-                const val = $('input[name=authenticator-type]:checked').val();
-                if (val === 'Phone') {
-                    $('input[name="phone-authenticator-mode"]').removeAttr('disabled');
-                    $("#phone-auth-mode").show();
-                } else {
-                    $("input[name=phone-authenticator-mode]").removeAttr("checked");
-                    $("input[name=phone-authenticator-mode]").attr('disabled', 'disabled');
-                    $("#phone-auth-mode").hide();
-                }
-            });
-        });
-    </script>
 
     <style>
         .select-authenticators-form {
@@ -88,21 +64,14 @@
                 <input class="form-check-input" type="radio" name="authenticator-type" th:value="${authenticator.label}" checked="true">
                 <label class="form-check-label" th:text="${authenticator.label}"></label>
             </div>
-            <!-- show sms/voice selection if authenticator is phone -->
-            <div id="phone-auth-mode" th:if="${authenticator.label} == 'Phone'" style="margin-left: 25px">
-                <div id="phone-authenticator-mode" class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="phone-authenticator-mode" th:value="sms" checked="true">
-                    <label class="radio-inline" th:text="SMS"></label>
-
-                    <input class="form-check-input" type="radio" name="phone-authenticator-mode" th:value="voice">
-                    <label class="radio-inline" th:text="Voice"></label>
-                </div>
-            </div>
         </tr>
 
         <br>
         <div class="form-group">
-            <button id="proceed-btn" type="submit" class="btn btn-primary btn-block">Proceed</button>
+            <button id="proceed-btn" name="action" value="proceed" type="submit" class="btn btn-primary btn-block">Proceed</button>
+            <tr th:if="${canSkip}">
+                <button id="skip-btn" name="action" value="skip" type="submit" class="btn btn-primary btn-block">Skip</button>
+            </tr>
         </div>
     </form>
 
