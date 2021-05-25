@@ -29,7 +29,7 @@ import cucumber.api.junit.Cucumber;
 		     },
 		features = "classpath:features",
 		glue = {"info.seleniumcucumber.stepdefinitions",   // predefined step definitions package
-				"info.seleniumcucumber.userStepDefintions", // user step definitions package
+				"info.seleniumcucumber.userStepDefinitions", // user step definitions package
 				"env"
 			   }
 )

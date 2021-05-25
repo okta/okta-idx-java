@@ -45,5 +45,5 @@ Feature: Login
     When she clicks on the "Forgot Password Link"
     Then she is redirected to the Self Service Password Reset View
 
-  Scenario: Tests completed. Close browser
-    Then I close browser
+#  Scenario: Tests completed. Close browser
+#    Then I close browser

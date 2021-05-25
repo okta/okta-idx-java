@@ -13,29 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.seleniumcucumber.userStepDefintions;
+package info.seleniumcucumber.userStepDefinitions;
 
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import env.CucumberRoot;
-import env.DriverUtil;
 import org.junit.Assert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class UserStepDefinitions extends CucumberRoot {
-	
-	protected WebDriver driver = DriverUtil.getDefaultDriver();
-	private String USERNAME = System.getenv("USERNAME");
-	private String USERNAME_WITH_APP_UNASSIGNED = System.getenv("USERNAME_WITH_APP_UNASSIGNED");
-	private String USERNAME_SUSPENDED = System.getenv("USERNAME_SUSPENDED");
-	private String USERNAME_LOCKED = System.getenv("USERNAME_LOCKED");
-	private String USERNAME_DEACTIVATED = System.getenv("USERNAME_DEACTIVATED");
-	private String PASSWORD = System.getenv("PASSWORD");
+public class Login extends BasicDefinitions {
 
 	@Given("^Mary navigates to the login page$")
 	public void navigate_to_home_page() {
@@ -45,10 +34,8 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 
 	@When("^she enters valid credentials$")
-	public void enter_valid_credentials() throws Throwable {
-		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
-		// The below block doesn't help either. Only sleep works. (╯°□°）╯︵ ┻━┻
-		// new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.name("username"))).click();
+	public void enter_valid_credentials() {
+		sleep();
 		driver.findElement(By.name("username")).sendKeys(USERNAME);
 		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
@@ -59,7 +46,7 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 	
 	@Then("^Mary should get logged-in$")
-	public void should_logged_in() throws Throwable {
+	public void should_logged_in() {
 		By selection = By.id("profileTable");
         (new WebDriverWait(driver, 30)).until(
                 ExpectedConditions.visibilityOfElementLocated(selection));
@@ -68,8 +55,8 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 
 	@When("^she fills in her incorrect username with password$")
-	public void enter_invalid_username() throws Throwable {
-		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+	public void enter_invalid_username() {
+		sleep();
 		driver.findElement(By.name("username")).sendKeys("invalid@acme.com");
 		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
@@ -86,14 +73,14 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 
 	@When("^she fills in her correct username with incorrect password$")
-	public void enter_valid_username_invalid_password() throws Throwable {
-		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+	public void enter_valid_username_invalid_password() {
+		sleep();
 		driver.findElement(By.name("username")).sendKeys(USERNAME);
 		driver.findElement(By.name("password")).sendKeys("invalid123");
 	}
 
 	@Then("^she should see authentication failed error$")
-	public void authentication_failed_error() throws Throwable {
+	public void authentication_failed_error() {
 		By selection = By.className("alert-danger");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
@@ -103,14 +90,14 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 
 	@When("^she enters valid credentials for unassigned user$")
-	public void enter_valid_credentials_for_unassigned_user() throws Throwable {
-		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+	public void enter_valid_credentials_for_unassigned_user() {
+		sleep();
 		driver.findElement(By.name("username")).sendKeys(USERNAME_WITH_APP_UNASSIGNED);
 		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
 
 	@Then("^she should see user not assigned to app error$")
-	public void user_not_assigned_app_error() throws Throwable {
+	public void user_not_assigned_app_error() {
 		By selection = By.className("alert-danger");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
@@ -121,28 +108,29 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 
 	@When("^she enters valid credentials for suspended user$")
-	public void enter_valid_credentials_for_suspended_user() throws Throwable {
-		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+	public void enter_valid_credentials_for_suspended_user() {
+		sleep();
 		driver.findElement(By.name("username")).sendKeys(USERNAME_SUSPENDED);
 		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
 
 	@When("^she enters valid credentials for locked user$")
-	public void enter_valid_credentials_for_locked_user() throws Throwable {
-		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+	public void enter_valid_credentials_for_locked_user() {
+		sleep();
 		driver.findElement(By.name("username")).sendKeys(USERNAME_LOCKED);
 		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
 
 	@When("^she enters valid credentials for deactivated user$")
-	public void enter_valid_credentials_for_deactivated_user() throws Throwable {
-		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+	public void enter_valid_credentials_for_deactivated_user() {
+		sleep();
 		driver.findElement(By.name("username")).sendKeys(USERNAME_DEACTIVATED);
 		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
 
 	@When("^she clicks on the \"Forgot Password Link\"$")
-	public void clicks_forgot_password_link() throws Throwable {
+	public void clicks_forgot_password_link() {
+		sleep();
 		By selection = By.id("forgot-password");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
@@ -150,7 +138,7 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 
 	@Then("^she is redirected to the Self Service Password Reset View$")
-	public void redirect_to_sspr_view() throws Throwable {
+	public void redirect_to_sspr_view() {
 		By selection = By.className("forgotpassword-form");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
