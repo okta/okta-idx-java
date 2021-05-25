@@ -15,10 +15,11 @@
  */
 package info.seleniumcucumber.userStepDefinitions;
 
-import cucumber.api.java.en.And;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
+
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -36,8 +37,8 @@ public class Login extends BasicDefinitions {
 	@When("^she enters valid credentials$")
 	public void enter_valid_credentials() {
 		sleep();
-		driver.findElement(By.name("username")).sendKeys(USERNAME);
-		driver.findElement(By.name("password")).sendKeys(PASSWORD);
+		driver.findElement(By.name("username")).sendKeys("USERNAME");
+		driver.findElement(By.name("password")).sendKeys("PASSWORD");
 	}
 
 	@And("^she submits the Login form$")

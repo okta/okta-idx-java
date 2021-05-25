@@ -4,7 +4,7 @@ import env.CucumberRoot;
 import env.DriverUtil;
 import org.openqa.selenium.WebDriver;
 
-public class BasicDefinitions extends CucumberRoot {
+public class BasicDefinitions {
 
     protected WebDriver driver = DriverUtil.getDefaultDriver();
     protected String USERNAME = System.getenv("USERNAME");
