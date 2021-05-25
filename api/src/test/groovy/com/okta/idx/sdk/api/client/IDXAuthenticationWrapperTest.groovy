@@ -426,6 +426,182 @@ class IDXAuthenticationWrapperTest {
         )
     }
 
+    @Test(testName = "User logs in with password")
+    void testLoginWithCorrectUsernamePassword() {
+
+        def scenario = "scenario_1_1_1"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", scenario + "/identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", scenario + "/answer-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "token", scenario + "/token-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "userinfo", scenario + "/userinfo-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("mary@example.com", "superSecret"), beginResponse.proceedContext
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                is(AuthenticationStatus.SUCCESS)
+        )
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+    }
+
+    @Test(testName = "User does not know username")
+    void testLoginWithIncorrectUsername() {
+
+        def scenario = "scenario_1_1_2"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", scenario + "/identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", scenario + "/answer-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("mary@unknown.com", "superSecret"), beginResponse.proceedContext
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), hasItem("There is no account with the Username mary@unknown.com."))
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                is(AuthenticationStatus.UNKNOWN)
+        )
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+    }
+
+    @Test(testName = "User does not know the password")
+    void testLoginWithIncorrectPassword() {
+
+        def scenario = "scenario_1_1_3"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", scenario + "/identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", scenario + "/answer-response", 400, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("mary@example.com", "wrong"), beginResponse.proceedContext
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), hasItem("Password is incorrect"))
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+    }
+
+    @Test(testName = "User is not assigned to the application")
+    void testLoginWithUserUnassignedToApp() {
+
+        def scenario = "scenario_1_1_4"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", scenario + "/identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", scenario + "/answer-response", 400, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("mary@example.com", "superSecret"), beginResponse.proceedContext
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), hasItem("User is not assigned to this application"))
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+    }
+
+    @Test(testName = "User account is suspended")
+    void testLoginWithSuspendedUserAccount() {
+
+        def scenario = "scenario_1_1_5"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", scenario + "/identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", scenario + "/answer-response", 400, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("mary@example.com", "superSecret"), beginResponse.proceedContext
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), hasItem("Authentication failed"))
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+    }
+
+    @Test(testName = "User account is locked")
+    void testLoginWithLockedUserAccount() {
+
+        def scenario = "scenario_1_1_6"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", scenario + "/identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", scenario + "/answer-response", 400, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("mary@example.com", "superSecret"), beginResponse.proceedContext
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), hasItem("This factor is suspended for your account due to too many failed attempts"))
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+    }
+
+    @Test(testName = "User account is deactivated")
+    void testLoginWithDeactivatedUserAccount() {
+
+        def scenario = "scenario_1_1_7"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", scenario + "/identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", scenario + "/answer-response", 400, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("mary@example.com", "superSecret"), beginResponse.proceedContext
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), hasItem("Authentication failed"))
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+    }
+
     void setMockResponse(RequestExecutor requestExecutor, String resourceUrlEndsWith,
                          String responseName, Integer httpStatus, MediaType mediaType ) {
         when(requestExecutor.executeRequest(
