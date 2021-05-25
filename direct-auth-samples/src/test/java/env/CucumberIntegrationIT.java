@@ -23,16 +23,20 @@ import cucumber.api.junit.Cucumber;
 @RunWith(Cucumber.class)
 @CucumberOptions(
 		plugin = {
-			 "pretty", "html:target/cucumberHtmlReport",
-		     "html:target/cucumberHtmlReport",     //  for html result
-			 "pretty:target/cucumber-json-report.json"   // for json result
-		     },
-		features = "classpath:features",
-		glue = {"info.seleniumcucumber.stepdefinitions",   // predefined step definitions package
-				"info.seleniumcucumber.userStepDefinitions", // user step definitions package
+				"pretty", "html:target/cucumberHtmlReport.html",
+				"html:target/cucumberHtmlReport.html",     			//  for html result
+				"pretty:target/cucumber-json-report.json"   		// for json result
+		},
+		features = {
+				"classpath:features/login.feature",
+				"classpath:features/self_service_password_recovery.feature",
+				"classpath:features/self_service_registration.feature"
+		},
+		glue = {
+				"info.seleniumcucumber.stepdefinitions",   			// predefined step definitions package
+				"info.seleniumcucumber.userStepDefinitions", 		// user step definitions package
 				"env"
-			   }
+		}
 )
-
 public class CucumberIntegrationIT {
 }

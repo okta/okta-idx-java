@@ -102,7 +102,7 @@ public class Login extends BasicDefinitions {
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
 		String error = driver.findElement(By.className("alert-danger")).getText();
-		Assert.assertTrue("Error is not shown", !error.isEmpty());
+		Assert.assertFalse("Error is not shown", error.isEmpty());
 //		TODO: If Profile enrollment policy allows sign-up, this error in not shown. Commenting until we get clarity on this
 //		Assert.assertTrue("User not assigned error is not shown", error.contains("User is not assigned to this application"));
 	}

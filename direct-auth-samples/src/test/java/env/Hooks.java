@@ -15,9 +15,11 @@
  */
 package env;
 
+import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -29,14 +31,13 @@ public class Hooks {
 	protected WebDriver driver = DriverUtil.getDefaultDriver();
 
 	@Before
-	public void beforeScenario(){
+	public void beforeScenario(Scenario scenario) {
 		System.out.println("This will run before each Scenario");
 	}
 
 	@After
-	public void afterScenario(){
+	public void afterScenario(Scenario scenario) {
 		System.out.println("This will run after each Scenario");
-
 		if (isAlive() && existsElement("logout-btn")) {
 			driver.findElement(By.id("logout-btn")).click();
 		}
