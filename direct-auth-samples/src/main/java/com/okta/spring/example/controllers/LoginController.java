@@ -69,6 +69,7 @@ public class LoginController {
     public ModelAndView login(final @RequestParam("username") String username,
                               final @RequestParam("password") String password,
                               final HttpSession session) {
+
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         // trigger authentication
@@ -96,7 +97,9 @@ public class LoginController {
     public ModelAndView forgotPassword(final @RequestParam("username") String username,
                                        final HttpSession session) {
         logger.info(":: Forgot Password ::");
+
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.recoverPassword(username, proceedContext);
 

@@ -140,6 +140,13 @@ public class HomeController {
         }
 
         AuthenticationResponse authenticationResponse = begin(session);
+
+        if (authenticationResponse.getErrors().size() > 0) {
+            ModelAndView modelAndView = new ModelAndView("error");
+            modelAndView.addObject("errors", authenticationResponse.getErrors());
+            return modelAndView;
+        }
+
         ModelAndView modelAndView = new ModelAndView("login");
         if (!CollectionUtils.isEmpty(authenticationResponse.getIdps())) {
             modelAndView.addObject("idps", authenticationResponse.getIdps());
