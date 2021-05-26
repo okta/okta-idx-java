@@ -23,6 +23,24 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#enroll-phone-form").submit(function(event) {
+                const phone = $("#phone").val();
+                const trimmedPhone = $.trim(phone);
+                const regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
+                if (!regex.test(trimmedPhone)) {
+                    $('#phone').css('border-color', 'red');
+                    event.preventDefault();
+                }
+            });
+            $("#phone").on("input", function(){
+                $('#phone').css('border-color', '');
+            });
+        });
+    </script>
 
     <style>
         .enroll-phone-authenticator-form {
@@ -56,7 +74,7 @@
 </div>
 
 <div class="enroll-phone-authenticator-form">
-    <form th:action="@{/register-phone}" method="post">
+    <form id="enroll-phone-form" th:action="@{/register-phone}" method="post">
         <h2 class="text-center">Enroll Phone Authenticator</h2>
         <div th:if="${errors}" class="alert alert-danger">
             <span th:text="${errors}"></span>
@@ -64,7 +82,7 @@
         <p class="font-weight-light">Format: (+) {country code} {area code} {number}
             <br> For e.g. +1 555 666 7777 (US)</p>
         <div class="form-group">
-            <input type="phone" class="form-control" name="phone" placeholder="Phone number" required="required">
+            <input type="phone" id="phone" class="form-control" name="phone" placeholder="Phone number" required="required">
         </div>
         <input type="hidden" class="form-control" name="mode" th:value="${mode}" required="required">
         <div class="form-group">

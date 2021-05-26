@@ -17,9 +17,6 @@ package com.okta.spring.example.helpers;
 
 import com.okta.idx.sdk.api.client.ProceedContext;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpSession;
 
 public final class Util {
@@ -53,17 +50,5 @@ public final class Util {
      */
     public static ProceedContext getProceedContextFromSession(final HttpSession session) {
         return (ProceedContext) session.getAttribute("proceedContext");
-    }
-
-    /**
-     * Validates if the supplied phone number is a valid international number.
-     *
-     * @param phoneNumber the phone number
-     * @return true if valid; false otherwise
-     */
-    public static boolean isValidPhoneNumber(final String phoneNumber) {
-        Pattern pattern = Pattern.compile("^\\+(?:[0-9] ?){6,14}[0-9]$");
-        Matcher matcher = pattern.matcher(phoneNumber);
-        return (matcher.find() && matcher.group().equals(phoneNumber));
     }
 }
