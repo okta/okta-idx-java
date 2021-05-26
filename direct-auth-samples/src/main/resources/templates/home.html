@@ -40,7 +40,7 @@
 
     <div th:if="${tokenResponse.accessToken}">
         <p><label>Access Token: </label>
-            <span th:text="${tokenResponse.accessToken}"></span></p>
+            <span th:text="${tokenResponse.accessToken}" th:id="accessToken"></span></p>
     </div>
 
     <div th:if="${tokenResponse.expiresIn}">
@@ -50,12 +50,12 @@
 
     <div th:if="${tokenResponse.idToken}">
         <p><label>ID Token: </label>
-            <span th:text="${tokenResponse.idToken}"></span></p>
+            <span th:text="${tokenResponse.idToken}" th:id="idToken"></span></p>
     </div>
 
     <div th:if="${tokenResponse.refreshToken}">
         <p><label>Refresh Token: </label>
-            <span th:text="${tokenResponse.refreshToken}"></span></p>
+            <span th:text="${tokenResponse.refreshToken}" th:id="refreshToken"></span></p>
     </div>
 
     <div th:if="${tokenResponse.scope}">
