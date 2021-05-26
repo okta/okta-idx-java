@@ -37,19 +37,23 @@ public class UserStepDefinitions extends CucumberRoot {
 	private String USERNAME_DEACTIVATED = System.getenv("USERNAME_DEACTIVATED");
 	private String PASSWORD = System.getenv("PASSWORD");
 
-	@Given("^Mary navigates to the login page$")
-	public void navigate_to_home_page() {
+	@Given("^Mary navigates to the Basic Login View$")
+	public void navigate_to_basic_login_view() {
 		driver.manage().window().maximize();
 		driver.get("http://localhost:8080");
 		driver.findElement(By.id("login")).click();
 	}
 
-	@When("^she enters valid credentials$")
-	public void enter_valid_credentials() throws Throwable {
+	@When("^she fills in her correct username$")
+	public void enter_correct_username() throws Throwable {
 		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
 		// The below block doesn't help either. Only sleep works. (╯°□°）╯︵ ┻━┻
 		// new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.name("username"))).click();
 		driver.findElement(By.name("username")).sendKeys(USERNAME);
+	}
+
+	@And("^she fills in her correct password$")
+	public void enter_correct_password() throws Throwable {
 		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
 
@@ -57,43 +61,67 @@ public class UserStepDefinitions extends CucumberRoot {
 	public void clicks_login_button() {
 		driver.findElement(By.id("sign-in-btn")).click();
 	}
-	
-	@Then("^Mary should get logged-in$")
-	public void should_logged_in() throws Throwable {
+
+	@Then("^she is redirected to the Root View$")
+	public void redirected_to_root_view() throws Throwable {
 		By selection = By.id("profileTable");
-        (new WebDriverWait(driver, 30)).until(
-                ExpectedConditions.visibilityOfElementLocated(selection));
+		(new WebDriverWait(driver, 30)).until(
+				ExpectedConditions.visibilityOfElementLocated(selection));
 		String email = driver.findElement(By.id("email")).getText();
 		Assert.assertTrue("Can't access profile information", email.contains(USERNAME));
 	}
 
-	@When("^she fills in her incorrect username with password$")
-	public void enter_invalid_username() throws Throwable {
-		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
-		driver.findElement(By.name("username")).sendKeys("invalid@acme.com");
-		driver.findElement(By.name("password")).sendKeys(PASSWORD);
+	@And("^the access_token is stored in session$")
+	public void access_token_stored() throws Throwable {
+		By selection = By.id("accessToken");
+		(new WebDriverWait(driver, 30)).until(
+				ExpectedConditions.visibilityOfElementLocated(selection));
+		String accessToken = driver.findElement(By.id("accessToken")).getText();
+		Assert.assertTrue("Can't access access_token", !accessToken.isEmpty());
 	}
 
-	@Then("^she should see invalid user error$")
-	public void invalid_user_error() {
+	@And("^the id_token is stored in session$")
+	public void id_token_stored() throws Throwable {
+		By selection = By.id("idToken");
+		(new WebDriverWait(driver, 30)).until(
+				ExpectedConditions.visibilityOfElementLocated(selection));
+		String idToken = driver.findElement(By.id("idToken")).getText();
+		Assert.assertTrue("Can't access id_token", !idToken.isEmpty());
+	}
+
+	@And("^the refresh_token is stored in session$")
+	public void refresh_token_stored() throws Throwable {
+		By selection = By.id("refreshToken");
+		(new WebDriverWait(driver, 30)).until(
+				ExpectedConditions.visibilityOfElementLocated(selection));
+		String refreshToken = driver.findElement(By.id("refreshToken")).getText();
+		Assert.assertTrue("Can't access refresh_token", !refreshToken.isEmpty());
+	}
+
+	@When("^she fills in her incorrect username$")
+	public void enter_incorrect_username() throws Throwable {
+		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+		driver.findElement(By.name("username")).sendKeys("invalid@acme.com");
+	}
+
+	@Then("^she should see a \"There is no account with username\" message on the Login form$")
+	public void no_account_user_error() {
 		By selection = By.className("alert-danger");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
 		String error = driver.findElement(By.className("alert-danger")).getText();
 		Assert.assertTrue("Error is not shown", !error.isEmpty());
-		// TODO - In some orgs, we also see "you don't have permissions" error. Check why the difference.
-		// Assert.assertTrue("Invalid username error is not shown'", error.contains("There is no account with the Username"));
+		// If sign-up is enabled for the app, we see the account doesn't exist error
+		 Assert.assertTrue("No account with username error is not shown'", error.contains("There is no account with the Username"));
 	}
 
-	@When("^she fills in her correct username with incorrect password$")
-	public void enter_valid_username_invalid_password() throws Throwable {
-		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
-		driver.findElement(By.name("username")).sendKeys(USERNAME);
+	@When("^she fills in her incorrect password$")
+	public void enter_incorrect_password() throws Throwable {
 		driver.findElement(By.name("password")).sendKeys("invalid123");
 	}
 
-	@Then("^she should see authentication failed error$")
-	public void authentication_failed_error() throws Throwable {
+	@Then("^she should see the message \"Authentication failed\"$")
+	public void authentication_failed_message() throws Throwable {
 		By selection = By.className("alert-danger");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
@@ -120,25 +148,46 @@ public class UserStepDefinitions extends CucumberRoot {
 //		Assert.assertTrue("User not assigned error is not shown", error.contains("User is not assigned to this application"));
 	}
 
-	@When("^she enters valid credentials for suspended user$")
-	public void enter_valid_credentials_for_suspended_user() throws Throwable {
+	@Given("^Mary's account is suspended$")
+	public void suspended_user() throws Throwable {
+		// This is a suspended user
+		System.out.println(USERNAME_SUSPENDED);
+	}
+
+	@When("^she fills in her suspended username$")
+	public void enter_suspended_username() throws Throwable {
 		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+		// The below block doesn't help either. Only sleep works. (╯°□°）╯︵ ┻━┻
+		// new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.name("username"))).click();
 		driver.findElement(By.name("username")).sendKeys(USERNAME_SUSPENDED);
-		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
 
-	@When("^she enters valid credentials for locked user$")
-	public void enter_valid_credentials_for_locked_user() throws Throwable {
+	@Given("^Mary's account is locked")
+	public void locked_user() throws Throwable {
+		// This is a suspended user
+		System.out.println(USERNAME_LOCKED);
+	}
+
+	@When("^she fills in her locked username$")
+	public void enter_locked_username() throws Throwable {
 		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+		// The below block doesn't help either. Only sleep works. (╯°□°）╯︵ ┻━┻
+		// new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.name("username"))).click();
 		driver.findElement(By.name("username")).sendKeys(USERNAME_LOCKED);
-		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
 
-	@When("^she enters valid credentials for deactivated user$")
-	public void enter_valid_credentials_for_deactivated_user() throws Throwable {
+	@Given("^Mary's account is deactivated")
+	public void deactivated_user() throws Throwable {
+		// This is a suspended user
+		System.out.println(USERNAME_DEACTIVATED);
+	}
+
+	@When("^she fills in her deactivated username$")
+	public void enter_deactivated_username() throws Throwable {
 		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
+		// The below block doesn't help either. Only sleep works. (╯°□°）╯︵ ┻━┻
+		// new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.name("username"))).click();
 		driver.findElement(By.name("username")).sendKeys(USERNAME_DEACTIVATED);
-		driver.findElement(By.name("password")).sendKeys(PASSWORD);
 	}
 
 	@When("^she clicks on the \"Forgot Password Link\"$")
