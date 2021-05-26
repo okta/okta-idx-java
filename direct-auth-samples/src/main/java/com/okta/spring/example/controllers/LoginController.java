@@ -361,19 +361,9 @@ public class LoginController {
             return mav;
         }
 
-        // remove all whitespaces
-        final String trimmedPhoneNumber = phone.replaceAll("\\s+", "");
-
-        // validate phone number
-        if (!Util.isValidPhoneNumber(phone)) {
-            ModelAndView mav = new ModelAndView("register-phone");
-            mav.addObject("errors", "Invalid phone number");
-            return mav;
-        }
-
         if (!Strings.hasText(mode)) {
             ModelAndView modelAndView = new ModelAndView("select-phone-factor");
-            modelAndView.addObject("phone", trimmedPhoneNumber);
+            modelAndView.addObject("phone", phone);
             return modelAndView;
         }
 
@@ -381,7 +371,7 @@ public class LoginController {
 
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.submitPhoneAuthenticator(proceedContext,
-                        trimmedPhoneNumber, getFactorFromMethod(session, mode));
+                        phone, getFactorFromMethod(session, mode));
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("register-phone");
