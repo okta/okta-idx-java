@@ -15,17 +15,21 @@
  */
 package info.seleniumcucumber.userStepDefintions;
 
+
+import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import env.CucumberRoot;
 import env.DriverUtil;
+
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import pages.RootPage;
 
 public class UserStepDefinitions extends CucumberRoot {
 	
@@ -36,6 +40,7 @@ public class UserStepDefinitions extends CucumberRoot {
 	private String USERNAME_LOCKED = System.getenv("USERNAME_LOCKED");
 	private String USERNAME_DEACTIVATED = System.getenv("USERNAME_DEACTIVATED");
 	private String PASSWORD = System.getenv("PASSWORD");
+	private RootPage rootPage = new RootPage(driver);
 
 	private String USERNAME_FACEBOOK = System.getenv("USERNAME_FACEBOOK");
 	private String PASSWORD_FACEBOOK = System.getenv("PASSWORD_FACEBOOK");
@@ -235,5 +240,16 @@ public class UserStepDefinitions extends CucumberRoot {
 	@Then("^I close browser$")
 	public void close_browser() {
 		driver.close();
+	}
+
+	@Then("the Root Page shows links to the Entry Points")
+	public void theRootPageShowsLinksToTheEntryPoints() {
+		Assert.assertTrue(rootPage.isLoginButtonDisplayed());
+		Assert.assertTrue(rootPage.isRegistrationButtonDisplayed());
+	}
+
+	@Given("Mary navigates to root page")
+	public void maryNavigatesToRootPage() {
+		rootPage.navigateToTheRootPage();
 	}
 }
