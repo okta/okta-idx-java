@@ -4,8 +4,8 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.junit.Assert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
 
 public class PasswordRecovery extends BasicDefinitions {
 
@@ -27,7 +27,7 @@ public class PasswordRecovery extends BasicDefinitions {
     @Given("Mary navigates to the Self Service Password Reset View")
     public void maryNavigatesToTheSelfServicePasswordResetView() {
         driver.manage().window().maximize();
-        driver.get("http://localhost:8080/forgot-password");
+        driver.findElement(By.id("forgot-password")).click();
     }
 
     @When("she inputs her correct Email")
@@ -53,6 +53,7 @@ public class PasswordRecovery extends BasicDefinitions {
 
     @And("she submits the form")
     public void sheSubmitsTheForm() {
+        driver.findElement(By.id("next-btn")).click();
     }
 
     @Then("she sees a page to set her password")
@@ -81,13 +82,19 @@ public class PasswordRecovery extends BasicDefinitions {
 
     @Then("she sees the Password Recovery Page")
     public void sheSeesThePasswordRecoveryPage() {
+        Assert.assertTrue("URL should ends with \"/forgot-password\"", driver.getCurrentUrl().endsWith("/forgot-password"));
+        Assert.assertEquals("Wrong page title", "Forgot Password", driver.getTitle());
     }
 
     @When("she inputs an Email that doesn't exist")
     public void sheInputsAnEmailThatDoesnTExist() {
+        driver.findElement(By.name("username")).sendKeys("example@mail.com");
     }
 
     @Then("she sees a message \"There is no account with the Username. Sign up for an account\"")
     public void sheSeesAMessage() {
+        String error = driver.findElement(By.className("alert-danger")).getText();
+        Assert.assertFalse("Error is not shown", error.isEmpty());
+        Assert.assertTrue("Wrong error message is shown", error.contains("There is no account with the Username. Sign up for an account"));
     }
 }
