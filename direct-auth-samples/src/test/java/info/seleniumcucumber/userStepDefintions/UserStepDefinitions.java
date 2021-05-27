@@ -17,7 +17,6 @@ package info.seleniumcucumber.userStepDefintions;
 
 
 import cucumber.api.java.After;
-import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -33,7 +32,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.RootPage;
 
-public class UserStepDefinitions {
+public class UserStepDefinitions extends CucumberRoot {
 	
 	protected WebDriver driver = DriverUtil.getDefaultDriver();
 	private String USERNAME = System.getenv("USERNAME");
