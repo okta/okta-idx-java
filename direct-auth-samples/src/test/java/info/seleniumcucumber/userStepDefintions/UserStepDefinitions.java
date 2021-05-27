@@ -42,11 +42,6 @@ public class UserStepDefinitions extends CucumberRoot {
 	private String PASSWORD = System.getenv("PASSWORD");
 	private RootPage rootPage = new RootPage(driver);
 
-	@After
-	public void closeBrowser(){
-		driver.quit();
-	}
-
 	@Given("^Mary navigates to the Basic Login View$")
 	public void navigate_to_basic_login_view() {
 		driver.manage().window().maximize();
