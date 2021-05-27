@@ -27,7 +27,6 @@ import env.DriverUtil;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.RootPage;
@@ -47,6 +46,7 @@ public class UserStepDefinitions extends CucumberRoot {
 	public void closeBrowser(){
 		driver.quit();
 	}
+
 	@Given("^Mary navigates to the Basic Login View$")
 	public void navigate_to_basic_login_view() {
 		driver.manage().window().maximize();
