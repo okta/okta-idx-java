@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -76,7 +78,7 @@ public class HomeController {
      * @param session the http session
      * @return the index page view with table of contents or the home page view if we have a token.
      */
-    @GetMapping("/")
+    @RequestMapping(value = {"/", "**/callback"}, method = RequestMethod.GET)
     public ModelAndView displayIndexOrHomePage(final @RequestParam(name = "interaction_code", required = false) String interactionCode,
                                                final @RequestParam(name = "state", required = false) String state,
                                                final @RequestParam(name = "error", required = false) String error,
