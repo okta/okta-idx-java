@@ -37,6 +37,9 @@ public class UserStepDefinitions extends CucumberRoot {
 	private String USERNAME_DEACTIVATED = System.getenv("USERNAME_DEACTIVATED");
 	private String PASSWORD = System.getenv("PASSWORD");
 
+	private String USERNAME_FACEBOOK = System.getenv("USERNAME_FACEBOOK");
+	private String PASSWORD_FACEBOOK = System.getenv("PASSWORD_FACEBOOK");
+
 	@Given("^Mary navigates to the Basic Login View$")
 	public void navigate_to_basic_login_view() {
 		driver.manage().window().maximize();
@@ -68,7 +71,7 @@ public class UserStepDefinitions extends CucumberRoot {
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
 		String email = driver.findElement(By.id("email")).getText();
-		Assert.assertTrue("Can't access profile information", email.contains(USERNAME));
+		Assert.assertTrue("Can't access profile information", !email.isEmpty());
 	}
 
 	@And("^the access_token is stored in session$")
@@ -76,7 +79,7 @@ public class UserStepDefinitions extends CucumberRoot {
 		By selection = By.id("accessToken");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
-		String accessToken = driver.findElement(By.id("accessToken")).getText();
+		String accessToken = driver.findElement(selection).getText();
 		Assert.assertTrue("Can't access access_token", !accessToken.isEmpty());
 	}
 
@@ -85,7 +88,7 @@ public class UserStepDefinitions extends CucumberRoot {
 		By selection = By.id("idToken");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
-		String idToken = driver.findElement(By.id("idToken")).getText();
+		String idToken = driver.findElement(selection).getText();
 		Assert.assertTrue("Can't access id_token", !idToken.isEmpty());
 	}
 
@@ -94,7 +97,7 @@ public class UserStepDefinitions extends CucumberRoot {
 		By selection = By.id("refreshToken");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
-		String refreshToken = driver.findElement(By.id("refreshToken")).getText();
+		String refreshToken = driver.findElement(selection).getText();
 		Assert.assertTrue("Can't access refresh_token", !refreshToken.isEmpty());
 	}
 
@@ -109,7 +112,7 @@ public class UserStepDefinitions extends CucumberRoot {
 		By selection = By.className("alert-danger");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
-		String error = driver.findElement(By.className("alert-danger")).getText();
+		String error = driver.findElement(selection).getText();
 		Assert.assertTrue("Error is not shown", !error.isEmpty());
 		// If sign-up is enabled for the app, we see the account doesn't exist error
 		 Assert.assertTrue("No account with username error is not shown'", error.contains("There is no account with the Username"));
@@ -125,7 +128,7 @@ public class UserStepDefinitions extends CucumberRoot {
 		By selection = By.className("alert-danger");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
-		String error = driver.findElement(By.className("alert-danger")).getText();
+		String error = driver.findElement(selection).getText();
 		Assert.assertTrue("Error is not shown", !error.isEmpty());
 		Assert.assertTrue("Authentication failed error is not shown'", error.contains("Authentication failed"));
 	}
@@ -142,7 +145,7 @@ public class UserStepDefinitions extends CucumberRoot {
 		By selection = By.className("alert-danger");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
-		String error = driver.findElement(By.className("alert-danger")).getText();
+		String error = driver.findElement(selection).getText();
 		Assert.assertTrue("Error is not shown", !error.isEmpty());
 //		TODO: If Profile enrollment policy allows sign-up, this error in not shown. Commenting until we get clarity on this
 //		Assert.assertTrue("User not assigned error is not shown", error.contains("User is not assigned to this application"));
@@ -191,20 +194,42 @@ public class UserStepDefinitions extends CucumberRoot {
 	}
 
 	@When("^she clicks on the \"Forgot Password Link\"$")
-	public void clicks_forgot_password_link() throws Throwable {
+	public void clicks_forgot_password_link() {
 		By selection = By.id("forgot-password");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
-		driver.findElement(By.id("forgot-password")).click();
+		driver.findElement(selection).click();
 	}
 
 	@Then("^she is redirected to the Self Service Password Reset View$")
-	public void redirect_to_sspr_view() throws Throwable {
+	public void redirect_to_sspr_view() {
 		By selection = By.className("forgotpassword-form");
 		(new WebDriverWait(driver, 30)).until(
 				ExpectedConditions.visibilityOfElementLocated(selection));
 		String URL = driver.getCurrentUrl();
 		Assert.assertEquals(URL, "http://localhost:8080/forgot-password" );
+	}
+
+	@Given("^she clicks the \"Login with Facebook\" button$")
+	public void clicks_facebook_login() throws Throwable {
+		Thread.sleep(500);
+		By selection = By.id("btn-facebook");
+		(new WebDriverWait(driver, 30)).until(
+				ExpectedConditions.visibilityOfElementLocated(selection));
+		driver.findElement(selection).click();
+	}
+
+	@And("^logs in to Facebook$")
+	public void login_facebook() {
+		By facebookEmail = By.id("email");
+		(new WebDriverWait(driver, 10)).until(
+				ExpectedConditions.visibilityOfElementLocated(facebookEmail));
+		driver.findElement(facebookEmail).sendKeys(USERNAME_FACEBOOK);
+		By facebookPassword = By.id("pass");
+		driver.findElement(facebookPassword).sendKeys(PASSWORD_FACEBOOK);
+
+		By facebookSubmitButton = By.id("loginbutton");
+		driver.findElement(facebookSubmitButton).click();
 	}
 
 	@Then("^I close browser$")

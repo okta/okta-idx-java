@@ -66,6 +66,3 @@ Feature: Login
     Given Mary navigates to the Basic Login View
     When she clicks on the "Forgot Password Link"
     Then she is redirected to the Self Service Password Reset View
-
-  Scenario: Tests completed. Close browser
-    Then I close browser
