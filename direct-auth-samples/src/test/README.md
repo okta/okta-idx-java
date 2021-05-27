@@ -42,7 +42,7 @@ mvn verify
 > It'll be clear once you see what the feature file contains on what we mean by this.
 
 > To get the tests passing on local machine, you MUST include "offline_access" in the scope. See `OKTA_IDX_SCOPES` environment variable above.
-> This is because tests check if `refresh_token` is returned from the server.
+> This is needed because tests check if `refresh_token` is returned from the server.
 
 ## How to write tests
 
@@ -51,6 +51,7 @@ These feature files are written in Gherkin Syntax which is a human-readable lang
 The steps in the feature files are then automated in step definition files using selenium webdriver.
 
 Here's an example of the login feature file - [login.feature](resources/features/login.feature)
+
 Here's the corresponding implementation in a step definition file - [UserStepDefinitions.java](java/info/seleniumcucumber/userStepDefintions/UserStepDefinitions.java)
 
 You can write new feature files and add the corresponding automation in the step definition files.
