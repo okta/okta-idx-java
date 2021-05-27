@@ -28,7 +28,7 @@ For example,
 export OKTA_IDX_ISSUER=https://dev-1234.okta.com/oauth2/default
 export OKTA_IDX_CLIENTID=xxxxxx
 export OKTA_IDX_CLIENTSECRET=xxxxxx
-export OKTA_IDX_SCOPES="openid email profile"
+export OKTA_IDX_SCOPES="openid email profile offline_access"
 export OKTA_IDX_REDIRECTURI=http://localhost:8080/authorization-code/callback
 ```
 
@@ -40,6 +40,9 @@ mvn verify
 
 > NOTE: If you only want to run a specific test, comment out other scenarios in the `.feature` files. 
 > It'll be clear once you see what the feature file contains on what we mean by this.
+
+> To get the tests passing on local machine, you MUST include "offline_access" in the scope. See `OKTA_IDX_SCOPES` environment variable above.
+> This is because tests check if `refresh_token` is returned from the server.
 
 ## How to write tests
 
