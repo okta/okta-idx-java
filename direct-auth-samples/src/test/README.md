@@ -50,8 +50,7 @@ Cucumber tests contain feature files that describe a specific feature and the co
 These feature files are written in Gherkin Syntax which is a human-readable language to define Cucumber’s test cases.
 The steps in the feature files are then automated in step definition files using selenium webdriver.
 
-Here's an example of the login feature file - [login.feature](resources/features/login.feature)
-
+Here's an example of the login feature file - [login.feature](resources/features/login.feature). 
 Here's the corresponding implementation in a step definition file - [UserStepDefinitions.java](java/info/seleniumcucumber/userStepDefintions/UserStepDefinitions.java)
 
 You can write new feature files and add the corresponding automation in the step definition files.
