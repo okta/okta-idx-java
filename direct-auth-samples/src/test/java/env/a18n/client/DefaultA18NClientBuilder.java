@@ -36,8 +36,6 @@ public class DefaultA18NClientBuilder extends A18NClientBuilder {
     private static final String OKTA_YAML       = "okta.yaml";
     private static final String OKTA_PROPERTIES = "okta.properties";
 
-    private boolean allowNonHttpsForTesting = false;
-
     private final ClientConfiguration clientConfig = new ClientConfiguration();
 
     public DefaultA18NClientBuilder() {
@@ -98,10 +96,6 @@ public class DefaultA18NClientBuilder extends A18NClientBuilder {
 
         if (Strings.hasText(props.get(DEFAULT_CLIENT_REDIRECT_URI_PROPERTY_NAME))) {
             clientConfig.setRedirectUri(props.get(DEFAULT_CLIENT_REDIRECT_URI_PROPERTY_NAME));
-        }
-
-        if (Strings.hasText(props.get(DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME))) {
-            allowNonHttpsForTesting = Boolean.parseBoolean(props.get(DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME));
         }
     }
 

@@ -118,9 +118,6 @@ public class A18NEmail {
     public String fetchCode() {
         Pattern pattern = Pattern.compile("To verify manually, enter this code: (\\d{6})");
         Matcher matcher = pattern.matcher(this.content);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
+        return matcher.find() ? matcher.group(1) : null;
     }
 }

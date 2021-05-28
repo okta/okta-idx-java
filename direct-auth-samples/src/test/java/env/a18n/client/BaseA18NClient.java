@@ -26,15 +26,17 @@ import com.okta.commons.http.config.HttpClientConfiguration;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Classes;
 import com.okta.idx.sdk.api.config.ClientConfiguration;
-import com.okta.idx.sdk.api.exception.ProcessingException;
 import env.a18n.client.response.A18NEmail;
 import env.a18n.client.response.A18NProfile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class BaseA18NClient implements A18NClient {
+
+    private final Logger logger = LoggerFactory.getLogger(BaseA18NClient.class);
 
     private final ClientConfiguration clientConfiguration;
     private final ObjectMapper objectMapper;
@@ -87,7 +89,7 @@ public class BaseA18NClient implements A18NClient {
             profile = objectMapper.convertValue(responseJsonNode, A18NProfile.class);
 
         } catch (Exception e) {
-            System.out.println(e);
+            logger.debug("Fail to create A18N profile", e);
         }
 
         return profile;
@@ -111,7 +113,7 @@ public class BaseA18NClient implements A18NClient {
                 throw new Exception(response.toString());
             }
         } catch (Exception e) {
-            System.out.println(e);
+            logger.debug("Fail to delete A18N profile", e);
         }
     }
 
@@ -137,7 +139,7 @@ public class BaseA18NClient implements A18NClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
             email = objectMapper.convertValue(responseJsonNode, A18NEmail.class);
         } catch (Exception e) {
-            System.out.println(e);
+            logger.debug("Fail to get last email for "+ profile.getEmailAddress(), e);
         }
         return email;
     }
