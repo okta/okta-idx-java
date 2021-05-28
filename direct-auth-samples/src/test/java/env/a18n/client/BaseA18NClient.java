@@ -42,7 +42,6 @@ public class BaseA18NClient implements A18NClient {
     private final ObjectMapper objectMapper;
     private final RequestExecutor requestExecutor;
 
-
     public BaseA18NClient(ClientConfiguration clientConfiguration, RequestExecutor requestExecutor) {
 
         this.clientConfiguration = clientConfiguration;
