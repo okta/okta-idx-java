@@ -57,12 +57,6 @@ public class RootPage extends Page {
         driver.get("http://localhost:8080"); // TODO pass as env variable.
     }
 
-    public void waitForTable() {
-        By selection = By.id("profileTable");
-        (new WebDriverWait(driver, 30)).until(
-                ExpectedConditions.visibilityOfElementLocated(selection));
-    }
-
     public boolean isLoginButtonDisplayed() {
         return loginButton.isDisplayed();
     }
