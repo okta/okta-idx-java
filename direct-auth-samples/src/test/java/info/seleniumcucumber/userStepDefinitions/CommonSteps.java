@@ -36,7 +36,7 @@ public class CommonSteps extends CucumberRoot {
     }
 
     @Given("^Mary navigates to the Self Service Registration View$")
-    public void maryNavigatesToTheSelfServiceRegistrationView() {
+    public void mary_navigates_to_the_self_service_registration_view() {
         rootPage.navigateToTheRootPage();
         if(rootPage.isRegistrationButtonDisplayed()) {
             rootPage.registrationButton.click();

@@ -79,11 +79,10 @@ public class Login extends CucumberRoot {
 
 	@And("^the refresh_token is stored in session$")
 	public void refresh_token_stored() {
-		//TODO Review this. the webElement with id=refresh_token not presented
-		//rootPage.sleep();
-		//Assert.assertTrue(rootPage.refreshToken.isDisplayed());
-		//String refreshToken = rootPage.refreshToken.getText();
-		//Assert.assertTrue("Can't access refresh_token", !refreshToken.isEmpty());
+		rootPage.sleep();
+		Assert.assertTrue(rootPage.refreshToken.isDisplayed());
+		String refreshToken = rootPage.refreshToken.getText();
+		Assert.assertFalse("Can't access refresh_token", refreshToken.isEmpty());
 	}
 
 	@When("^she fills in her incorrect username$")

@@ -60,13 +60,13 @@ public class SocialAuth extends CucumberRoot {
     }
 
     @Then("^the Root Page shows links to the Entry Points$")
-    public void theRootPageShowsLinksToTheEntryPoints() {
+    public void the_root_page_shows_links_to_the_entrypoints() {
         Assert.assertTrue(rootPage.isLoginButtonDisplayed());
         Assert.assertTrue(rootPage.isRegistrationButtonDisplayed());
     }
 
     @Given("^Mary navigates to root page$")
-    public void maryNavigatesToRootPage() {
+    public void mary_navigates_to_root_page() {
         rootPage.navigateToTheRootPage();
     }
 }

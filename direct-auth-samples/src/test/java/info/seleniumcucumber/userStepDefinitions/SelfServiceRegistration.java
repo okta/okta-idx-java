@@ -36,14 +36,14 @@ public class SelfServiceRegistration extends CucumberRoot {
     private RegisterPage registerPage = new RegisterPage(driver);
 
     @When("^she fills out her First Name$")
-    public void sheFillsOutHerFirstName() {
+    public void she_fills_out_her_first_name() {
         registerPage.sleep();
         registerPage.firstnameInput.click();
         registerPage.firstnameInput.sendKeys("Mary");
     }
 
     @And("^she fills out her Last Name$")
-    public void sheFillsOutHerLastName() {
+    public void she_fills_out_her_last_name() {
         String profileSuffix = "self-service-registration";
         if(Page.getA18NProfile() != null && Page.getA18NProfile().getProfileId() != null) {
             profileSuffix = Page.getA18NProfile().getProfileId();
@@ -53,7 +53,7 @@ public class SelfServiceRegistration extends CucumberRoot {
     }
 
     @And("^she fills out her Email$")
-    public void sheFillsOutHerEmail() {
+    public void she_fills_out_her_email() {
         Assert.assertNotNull(Page.getA18NProfile());
         Assert.assertNotNull(Page.getA18NProfile().getEmailAddress());
         registerPage.emailInput.click();
@@ -61,38 +61,38 @@ public class SelfServiceRegistration extends CucumberRoot {
     }
 
     @And("^she fills out her Email with an invalid email format$")
-    public void sheFillsOutHerEmailWithAnInvalidEmailFormat() {
+    public void she_fills_out_her_email_with_an_invalid_email_format() {
         registerPage.emailInput.click();
         registerPage.emailInput.sendKeys("e2e-ssr@acme");
     }
 
     @And("^she submits the registration form$")
-    public void sheSubmitsTheRegistrationForm() {
+    public void she_submits_the_registration_form() {
         registerPage.sleep();
         registerPage.signInButton.click();
     }
 
     @Then("^she sees a list of required factors to setup$")
-    public void sheSeesAListOfRequiredFactorsToSetup() {
+    public void she_sees_a_list_of_required_factors_to_setup() {
         registerPage.sleep();
         //Assert.assertTrue(registerPage.codeInput.isDisplayed());
     }
 
     @When("^she selects Email$")
-    public void sheSelectsEmail() {
+    public void she_selects_email() {
         registerPage.sleep();
         registerPage.emailRadioButton.click();
         registerPage.proceedButton.click();
     }
 
     @Then("^she sees a page to input a code$")
-    public void sheSeesAPageToInputACode() {
+    public void she_sees_a_page_to_input_a_code() {
         registerPage.sleep();
         Assert.assertTrue(registerPage.codeInput.isDisplayed());
     }
 
     @When("^she inputs the correct code from her email$")
-    public void sheInputsTheCorrectCodeFromHerEmail() {
+    public void she_inputs_the_correct_code_from_her_email() {
         A18NEmail email = null;
         String code;
         int retryCount = 5; //TODO Should be in config
@@ -113,39 +113,39 @@ public class SelfServiceRegistration extends CucumberRoot {
     }
 
     @And("^she submits the verify form$")
-    public void sheSubmitsTheVerifyForm() {
+    public void she_submits_the_verify_form() {
         registerPage.verifyButton.click();
     }
 
     @When("^she selects Password$")
-    public void sheSelectsPassword() {
+    public void she_selects_password() {
         registerPage.sleep();
         registerPage.passwordRadioButton.click();
         registerPage.proceedButton.click();
     }
 
     @Then("^she sees a page to setup password$")
-    public void sheSeesAPageToSetupPassword() {
+    public void she_sees_a_page_to_setup_password() {
         registerPage.sleep();
         Assert.assertTrue(registerPage.newPasswordInput.isDisplayed());
         Assert.assertTrue(registerPage.confirmNewPasswordInput.isDisplayed());
     }
 
     @When("^she fills out her Password$")
-    public void sheFillsOutHerPassword() {
+    public void she_fills_out_her_password() {
         registerPage.sleep();
         registerPage.newPasswordInput.click();
         registerPage.newPasswordInput.sendKeys("QwErTy@123");
     }
 
     @And("^she confirms her Password$")
-    public void sheConfirmsHerPassword() {
+    public void she_confirms_her_password() {
         registerPage.confirmNewPasswordInput.click();
         registerPage.confirmNewPasswordInput.sendKeys("QwErTy@123");
     }
 
     @Then("^she sees the list of optional factors$")
-    public void sheSeesTheListOfOptionalFactorsSMS() {
+    public void she_sees_the_list_of_optional_factors_sms() {
         registerPage.sleep();
     }
 
@@ -156,12 +156,12 @@ public class SelfServiceRegistration extends CucumberRoot {
     }
 
     @And("^an application session is created$")
-    public void anApplicationSessionIsCreated() {
+    public void an_application_session_is_created() {
         Assert.assertTrue(registerPage.profileTable.isDisplayed());
     }
 
     @Then("^she sees an error message \"'Email' must be in the form of an email address, Provided value for property 'Email' does not match required pattern\"$")
-    public void sheSeesAnErrorMessageEmailInvalid() {
+    public void she_sees_an_error_message_email_invalid() {
         registerPage.sleep();
         Assert.assertTrue(registerPage.alertDanger.isDisplayed());
         String error = registerPage.alertDanger.getText();
