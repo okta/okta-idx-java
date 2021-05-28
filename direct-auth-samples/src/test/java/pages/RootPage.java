@@ -15,9 +15,12 @@
  */
 package pages;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class RootPage extends Page {
 
@@ -52,6 +55,12 @@ public class RootPage extends Page {
     public void navigateToTheRootPage() {
         driver.manage().window().maximize();
         driver.get("http://localhost:8080"); // TODO pass as env variable.
+    }
+
+    public void waitForTable() {
+        By selection = By.id("profileTable");
+        (new WebDriverWait(driver, 30)).until(
+                ExpectedConditions.visibilityOfElementLocated(selection));
     }
 
     public boolean isLoginButtonDisplayed() {

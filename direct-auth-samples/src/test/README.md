@@ -30,6 +30,7 @@ export OKTA_IDX_CLIENTID=xxxxxx
 export OKTA_IDX_CLIENTSECRET=xxxxxx
 export OKTA_IDX_SCOPES="openid email profile offline_access"
 export OKTA_IDX_REDIRECTURI=http://localhost:8080/authorization-code/callback
+export A18N_API_KEY=xxxxxx
 ```
 
 Now we're ready to run the tests
@@ -51,7 +52,7 @@ These feature files are written in Gherkin Syntax which is a human-readable lang
 The steps in the feature files are then automated in step definition files using selenium webdriver.
 
 Here's an example of the login feature file - [login.feature](resources/features/login.feature). 
-Here's the corresponding implementation in a step definition file - [UserStepDefinitions.java](java/info/seleniumcucumber/userStepDefintions/UserStepDefinitions.java)
+Here's the corresponding implementation in a step definition file - [Login.java](java/info/seleniumcucumber/userStepDefinitions/Login.java)
 
 You can write new feature files and add the corresponding automation in the step definition files.
 Happy coding!

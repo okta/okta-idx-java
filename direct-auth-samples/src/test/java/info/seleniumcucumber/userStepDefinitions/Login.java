@@ -56,6 +56,7 @@ public class Login extends CucumberRoot {
 	@Then("^she is redirected to the Root View$")
 	public void redirected_to_root_view() {
 		rootPage.sleep();
+		rootPage.waitForTable();
 		Assert.assertTrue(rootPage.email.isDisplayed());
 		String email = rootPage.email.getText();
 		Assert.assertFalse("Can't access profile information", email.isEmpty());
