@@ -15,13 +15,17 @@
  */
 package env;
 
+import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
+import env.a18n.client.A18NClient;
+import env.a18n.client.DefaultA18NClientBuilder;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import pages.Page;
 
 import java.io.IOException;
 
@@ -39,6 +43,24 @@ public class Hooks {
 
 		if (isAlive() && existsElement("logout-btn")) {
 			driver.findElement(By.id("logout-btn")).click();
+		}
+	}
+
+	@Before("@requireA18NProfile")
+	public void createA18NProfileBeforeScenario(Scenario scenario) {
+		if(Page.getA18NClient() == null) {
+			Page.setA18NClient(new DefaultA18NClientBuilder().build());
+		}
+		if(Page.getA18NProfile() == null) {
+			Page.setA18NProfile(Page.getA18NClient().createProfile());
+		}
+	}
+
+	@After("@requireA18NProfile")
+	public void removeA18NProfileAfterScenario(Scenario scenario) {
+		if(Page.getA18NProfile() != null && Page.getA18NClient() != null) {
+			Page.getA18NClient().deleteProfile(Page.getA18NProfile());
+			Page.setA18NProfile(null);
 		}
 	}
 

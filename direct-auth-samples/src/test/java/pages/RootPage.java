@@ -18,14 +18,11 @@ package pages;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 
-public class RootPage {
-    protected WebDriver driver;
+public class RootPage extends Page {
 
-    public RootPage(WebDriver driver){
-        this.driver = driver;
-        PageFactory.initElements(driver, this);
+    public RootPage(WebDriver driver) {
+        super(driver);
     }
 
     @FindBy(id = "login")
@@ -34,16 +31,34 @@ public class RootPage {
     @FindBy(id = "register")
     public WebElement registrationButton;
 
-    public void navigateToTheRootPage(){
+    @FindBy(id = "idToken")
+    public WebElement idToken;
+
+    @FindBy(id = "accessToken")
+    public WebElement accessToken;
+
+    @FindBy(id = "refreshToken")
+    public WebElement refreshToken;
+
+    @FindBy(id = "profileTable")
+    public WebElement profileTable;
+
+    @FindBy(id = "email")
+    public WebElement email;
+
+    @FindBy(className = "alert-danger")
+    public WebElement alertDanger;
+
+    public void navigateToTheRootPage() {
         driver.manage().window().maximize();
         driver.get("http://localhost:8080"); // TODO pass as env variable.
     }
 
-    public boolean isLoginButtonDisplayed(){
+    public boolean isLoginButtonDisplayed() {
         return loginButton.isDisplayed();
     }
 
-    public boolean isRegistrationButtonDisplayed(){
+    public boolean isRegistrationButtonDisplayed() {
         return registrationButton.isDisplayed();
     }
 }
