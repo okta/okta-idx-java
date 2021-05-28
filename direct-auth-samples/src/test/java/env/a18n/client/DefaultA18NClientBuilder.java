@@ -26,7 +26,6 @@ import java.io.File;
 import java.util.*;
 
 import static com.okta.idx.sdk.api.util.Constants.*;
-import static com.okta.idx.sdk.api.util.Constants.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME;
 
 public class DefaultA18NClientBuilder extends A18NClientBuilder {
 
