@@ -58,7 +58,7 @@ public class Login extends CucumberRoot {
 		rootPage.sleep();
 		Assert.assertTrue(rootPage.profileTable.isDisplayed());
 		String email = rootPage.email.getText();
-		Assert.assertTrue("Can't access profile information", !email.isEmpty());
+		Assert.assertFalse("Can't access profile information", email.isEmpty());
 	}
 
 	@And("^the access_token is stored in session$")
@@ -66,7 +66,7 @@ public class Login extends CucumberRoot {
 		rootPage.sleep();
 		Assert.assertTrue(rootPage.accessToken.isDisplayed());
 		String accessToken = rootPage.accessToken.getText();
-		Assert.assertTrue("Can't access access_token", !accessToken.isEmpty());
+		Assert.assertFalse("Can't access access_token", accessToken.isEmpty());
 	}
 
 	@And("^the id_token is stored in session$")
@@ -74,7 +74,7 @@ public class Login extends CucumberRoot {
 		rootPage.sleep();
 		Assert.assertTrue(rootPage.idToken.isDisplayed());
 		String idToken = rootPage.idToken.getText();
-		Assert.assertTrue("Can't access id_token", !idToken.isEmpty());
+		Assert.assertFalse("Can't access id_token", idToken.isEmpty());
 	}
 
 	@And("^the refresh_token is stored in session$")
@@ -98,7 +98,7 @@ public class Login extends CucumberRoot {
 		rootPage.sleep();
 		Assert.assertTrue(rootPage.alertDanger.isDisplayed());
 		String error = rootPage.alertDanger.getText();
-		Assert.assertTrue("Error is not shown", !error.isEmpty());
+		Assert.assertFalse("Error is not shown", error.isEmpty());
 		// If sign-up is enabled for the app, we see the account doesn't exist error
 		Assert.assertTrue("No account with username error is not shown'",
 				error.contains("There is no account with the Username"));
@@ -115,7 +115,7 @@ public class Login extends CucumberRoot {
 		rootPage.sleep();
 		Assert.assertTrue(rootPage.alertDanger.isDisplayed());
 		String error = rootPage.alertDanger.getText();
-		Assert.assertTrue("Error is not shown", !error.isEmpty());
+		Assert.assertFalse("Error is not shown", error.isEmpty());
 		Assert.assertTrue("Authentication failed error is not shown'",
 				error.contains("Authentication failed"));
 	}

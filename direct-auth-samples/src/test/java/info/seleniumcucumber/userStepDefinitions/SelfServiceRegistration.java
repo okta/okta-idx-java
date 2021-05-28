@@ -35,22 +35,24 @@ public class SelfServiceRegistration extends CucumberRoot {
     private RootPage rootPage = new RootPage(driver);
     private RegisterPage registerPage = new RegisterPage(driver);
 
-    @When("she fills out her First Name")
+    @When("^she fills out her First Name$")
     public void sheFillsOutHerFirstName() {
         registerPage.sleep();
         registerPage.firstnameInput.click();
         registerPage.firstnameInput.sendKeys("Mary");
     }
 
-    @And("she fills out her Last Name")
+    @And("^she fills out her Last Name$")
     public void sheFillsOutHerLastName() {
-        Assert.assertNotNull(Page.getA18NProfile());
-        Assert.assertNotNull(Page.getA18NProfile().getProfileId());
+        String profileSuffix = "self-service-registration";
+        if(Page.getA18NProfile() != null && Page.getA18NProfile().getProfileId() != null) {
+            profileSuffix = Page.getA18NProfile().getProfileId();
+        }
         registerPage.lastnameInput.click();
-        registerPage.lastnameInput.sendKeys("e2e-ssr-" + Page.getA18NProfile().getProfileId());
+        registerPage.lastnameInput.sendKeys("e2e-" + profileSuffix);
     }
 
-    @And("she fills out her Email")
+    @And("^she fills out her Email$")
     public void sheFillsOutHerEmail() {
         Assert.assertNotNull(Page.getA18NProfile());
         Assert.assertNotNull(Page.getA18NProfile().getEmailAddress());
@@ -58,32 +60,38 @@ public class SelfServiceRegistration extends CucumberRoot {
         registerPage.emailInput.sendKeys(Page.getA18NProfile().getEmailAddress());
     }
 
-    @And("she submits the registration form")
+    @And("^she fills out her Email with an invalid email format$")
+    public void sheFillsOutHerEmailWithAnInvalidEmailFormat() {
+        registerPage.emailInput.click();
+        registerPage.emailInput.sendKeys("e2e-ssr@acme");
+    }
+
+    @And("^she submits the registration form$")
     public void sheSubmitsTheRegistrationForm() {
         registerPage.sleep();
         registerPage.signInButton.click();
     }
 
-    @Then("she sees a list of required factors to setup")
+    @Then("^she sees a list of required factors to setup$")
     public void sheSeesAListOfRequiredFactorsToSetup() {
         registerPage.sleep();
         //Assert.assertTrue(registerPage.codeInput.isDisplayed());
     }
 
-    @When("she selects Email")
+    @When("^she selects Email$")
     public void sheSelectsEmail() {
         registerPage.sleep();
         registerPage.emailRadioButton.click();
         registerPage.proceedButton.click();
     }
 
-    @Then("she sees a page to input a code")
+    @Then("^she sees a page to input a code$")
     public void sheSeesAPageToInputACode() {
         registerPage.sleep();
         Assert.assertTrue(registerPage.codeInput.isDisplayed());
     }
 
-    @When("she inputs the correct code from her email")
+    @When("^she inputs the correct code from her email$")
     public void sheInputsTheCorrectCodeFromHerEmail() {
         A18NEmail email = null;
         String code;
@@ -104,52 +112,61 @@ public class SelfServiceRegistration extends CucumberRoot {
         registerPage.codeInput.sendKeys(code);
     }
 
-    @And("she submits the verify form")
+    @And("^she submits the verify form$")
     public void sheSubmitsTheVerifyForm() {
         registerPage.verifyButton.click();
     }
 
-    @When("she selects Password")
+    @When("^she selects Password$")
     public void sheSelectsPassword() {
         registerPage.sleep();
         registerPage.passwordRadioButton.click();
         registerPage.proceedButton.click();
     }
 
-    @Then("she sees a page to setup password")
+    @Then("^she sees a page to setup password$")
     public void sheSeesAPageToSetupPassword() {
         registerPage.sleep();
         Assert.assertTrue(registerPage.newPasswordInput.isDisplayed());
         Assert.assertTrue(registerPage.confirmNewPasswordInput.isDisplayed());
     }
 
-    @When("she fills out her Password")
+    @When("^she fills out her Password$")
     public void sheFillsOutHerPassword() {
         registerPage.sleep();
         registerPage.newPasswordInput.click();
         registerPage.newPasswordInput.sendKeys("QwErTy@123");
     }
 
-    @And("she confirms her Password")
+    @And("^she confirms her Password$")
     public void sheConfirmsHerPassword() {
         registerPage.confirmNewPasswordInput.click();
         registerPage.confirmNewPasswordInput.sendKeys("QwErTy@123");
     }
 
-    @Then("she sees the list of optional factors")
+    @Then("^she sees the list of optional factors$")
     public void sheSeesTheListOfOptionalFactorsSMS() {
         registerPage.sleep();
     }
 
-    @When("she selects \"Skip\" on SMS")
+    @When("^she selects \"Skip\" on SMS$")
     public void sheSelectsOnSMS() {
         registerPage.sleep();
         registerPage.skipButton.click();
     }
 
-    @And("an application session is created")
+    @And("^an application session is created$")
     public void anApplicationSessionIsCreated() {
         Assert.assertTrue(registerPage.profileTable.isDisplayed());
     }
 
+    @Then("^she sees an error message \"'Email' must be in the form of an email address, Provided value for property 'Email' does not match required pattern\"$")
+    public void sheSeesAnErrorMessageEmailInvalid() {
+        registerPage.sleep();
+        Assert.assertTrue(registerPage.alertDanger.isDisplayed());
+        String error = registerPage.alertDanger.getText();
+        Assert.assertFalse("Error is not shown", error.isEmpty());
+        Assert.assertTrue("No account with username error is not shown'",
+                error.contains("Provided value for property 'Email' does not match required pattern"));
+    }
 }

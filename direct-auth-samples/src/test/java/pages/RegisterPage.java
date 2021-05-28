@@ -63,4 +63,7 @@ public class RegisterPage extends Page {
 
     @FindBy(id = "profileTable")
     public WebElement profileTable;
+
+    @FindBy(className = "alert-danger")
+    public WebElement alertDanger;
 }

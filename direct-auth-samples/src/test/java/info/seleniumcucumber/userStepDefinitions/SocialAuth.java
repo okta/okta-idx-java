@@ -59,13 +59,13 @@ public class SocialAuth extends CucumberRoot {
         facebookLoginPage.loginButton.click();
     }
 
-    @Then("the Root Page shows links to the Entry Points")
+    @Then("^the Root Page shows links to the Entry Points$")
     public void theRootPageShowsLinksToTheEntryPoints() {
         Assert.assertTrue(rootPage.isLoginButtonDisplayed());
         Assert.assertTrue(rootPage.isRegistrationButtonDisplayed());
     }
 
-    @Given("Mary navigates to root page")
+    @Given("^Mary navigates to root page$")
     public void maryNavigatesToRootPage() {
         rootPage.navigateToTheRootPage();
     }

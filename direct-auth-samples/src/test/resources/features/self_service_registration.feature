@@ -45,15 +45,15 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
 #    And She selects "Verify"
 #    Then she is redirected to the Root View
 #    And an application session is created
-#
-#  Scenario: 4.1.3 Mary signs up with an invalid Email
-#    Given Mary navigates to the Self Service Registration View
-#    When she fills out her First Name
-#    And she fills out her Last Name
-#    And she fills out her Email with an invalid email format
-#    And she submits the registration form
-#    Then she sees an error message "'Email' must be in the form of an email address, Provided value for property 'Email' does not match required pattern"
-#
+
+  Scenario: 4.1.3 Mary signs up with an invalid Email
+    Given Mary navigates to the Self Service Registration View
+    When she fills out her First Name
+    And she fills out her Last Name
+    And she fills out her Email with an invalid email format
+    And she submits the registration form
+    Then she sees an error message "'Email' must be in the form of an email address, Provided value for property 'Email' does not match required pattern"
+
 #  Scenario: 4.1.4 Mary signs up for an account with Password, sets up required Email factor, And sets up optional SMS with an invalid phone number
 #    Given Mary navigates to the Self Service Registration View
 #    When she fills out her First Name
