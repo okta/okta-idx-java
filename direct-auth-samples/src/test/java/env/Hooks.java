@@ -18,16 +18,11 @@ package env;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
-import env.a18n.client.A18NClient;
 import env.a18n.client.DefaultA18NClientBuilder;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.Page;
-
-import java.io.IOException;
 
 public class Hooks {
 	protected WebDriver driver = DriverUtil.getDefaultDriver();
