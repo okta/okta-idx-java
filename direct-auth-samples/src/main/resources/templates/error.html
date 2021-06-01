@@ -35,6 +35,9 @@
     <div th:if="${errors}" class="alert alert-danger">
         <span th:text="${errors}"></span>
     </div>
+    <div th:if="not ${errors}" class="alert alert-danger">
+        <span th:text="'Unknown error occurred!'"></span>
+    </div>
 </div>
 
 <br>
