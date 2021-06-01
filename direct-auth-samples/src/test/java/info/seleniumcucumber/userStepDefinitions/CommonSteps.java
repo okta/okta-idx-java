@@ -52,19 +52,19 @@ public class CommonSteps extends CucumberRoot {
     }
 
     @When("Mary clicks the logout button")
-    public void maryClicksTheLogoutButton() {
+    public void mary_clicks_the_logout_button() {
         rootPage.logoutButton.click();
     }
 
     @And("Mary sees login, registration buttons")
-    public void marySeesLoginRegistrationButtons() {
+    public void mary_sees_login_registration_buttons() {
         Assert.assertTrue(rootPage.isRegistrationButtonDisplayed());
         Assert.assertTrue(rootPage.isLoginButtonDisplayed());
 
     }
 
     @And("she does not see claims from \\/userinfo")
-    public void sheDoesNotSeeClaimsFromUserinfo() {
+    public void she_does_not_see_claims_from_userinfo() {
         Assert.assertFalse(rootPage.elementIsDisplayed(rootPage.refreshToken));
         Assert.assertFalse(rootPage.elementIsDisplayed(rootPage.accessToken));
         Assert.assertFalse(rootPage.elementIsDisplayed(rootPage.email));

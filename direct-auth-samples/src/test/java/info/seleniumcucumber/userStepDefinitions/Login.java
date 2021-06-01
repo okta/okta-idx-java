@@ -134,7 +134,7 @@ public class Login extends CucumberRoot {
 	}
 
 	@Given("Mary has an authenticated session")
-	public void maryHasAnAuthenticatedSession() {
+	public void mary_has_an_authenticated_session() {
 		rootPage.navigateToTheRootPage();
 		rootPage.loginButton.click();
 		loginPage.sleep();
@@ -147,7 +147,7 @@ public class Login extends CucumberRoot {
 	}
 
 	@Then("Mary sees a table with the claims from the userinfo response")
-	public void marySeesATableWithTheClaimsFromTheUserinfoResponse() {
+	public void mary_sees_a_table_with_the_claims_from_the_userinfo_response() {
 		Assert.assertTrue(rootPage.idToken.isDisplayed());
 		Assert.assertTrue(rootPage.refreshToken.isDisplayed());
 		Assert.assertTrue(rootPage.email.isDisplayed());
@@ -155,7 +155,7 @@ public class Login extends CucumberRoot {
 	}
 
 	@And("Mary sees a logout button")
-	public void marySeesALogoutButton() {
+	public void mary_sees_a_logout_button() {
 		rootPage.waitForLoginButtonDisplayed();
 		rootPage.isLogoutButtonDisplayed();
 	}

@@ -170,7 +170,7 @@ public class SelfServiceRegistration extends CucumberRoot {
     }
 
     @Then("she is redirected back to the Root View")
-    public void sheIsRedirectedBackToTheRootView() {
+    public void she_is_redirected_back_to_the_root_view() {
         driver.getCurrentUrl().equals("http://localhost:8080");// TODO make through env var.
     }
 }
