@@ -602,6 +602,30 @@ class IDXAuthenticationWrapperTest {
         assertThat(authenticationResponse.getAuthenticators(), nullValue())
     }
 
+    @Test(testName = "User tries to reset a password with the wrong email")
+    void testResetPasswordWithWrongEmail() {
+
+        def scenario = "scenario_3_1_2"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", scenario + "/identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "recover", scenario + "/recover-response", 400, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("Mary@unknown.com", "superSecret"), beginResponse.proceedContext
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), hasItem("There is no account with the Username Mary@unknown.com."))
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+    }
+
     void setMockResponse(RequestExecutor requestExecutor, String resourceUrlEndsWith,
                          String responseName, Integer httpStatus, MediaType mediaType ) {
         when(requestExecutor.executeRequest(
