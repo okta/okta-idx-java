@@ -15,7 +15,7 @@
  */
 package pages;
 
-import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -52,6 +52,9 @@ public class RootPage extends Page {
     @FindBy(className = "alert-danger")
     public WebElement alertDanger;
 
+    @FindBy(id = "logout-btn")
+    public WebElement logoutButton;
+
     public void navigateToTheRootPage() {
         driver.manage().window().maximize();
         driver.get("http://localhost:8080"); // TODO pass as env variable.
@@ -63,5 +66,25 @@ public class RootPage extends Page {
 
     public boolean isRegistrationButtonDisplayed() {
         return registrationButton.isDisplayed();
+    }
+
+    public boolean isLogoutButtonDisplayed() {
+        return logoutButton.isDisplayed();
+    }
+
+    public void waitForLoginButtonDisplayed(){
+        new WebDriverWait(driver, 5)
+                .until(ExpectedConditions.visibilityOf(logoutButton));
+
+    }
+
+    public boolean elementIsDisplayed(WebElement element){
+        try {
+        element.isDisplayed();
+        }
+        catch (NoSuchElementException e) {
+            return false;
+        }
+        return true;
     }
 }

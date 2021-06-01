@@ -15,10 +15,9 @@
  */
 package info.seleniumcucumber.userStepDefinitions;
 
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.And;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import env.CucumberRoot;
 import env.DriverUtil;
 import env.a18n.client.response.A18NEmail;
@@ -168,5 +167,10 @@ public class SelfServiceRegistration extends CucumberRoot {
         Assert.assertFalse("Error is not shown", error.isEmpty());
         Assert.assertTrue("No account with username error is not shown'",
                 error.contains("Provided value for property 'Email' does not match required pattern"));
+    }
+
+    @Then("she is redirected back to the Root View")
+    public void sheIsRedirectedBackToTheRootView() {
+        driver.getCurrentUrl().equals("http://localhost:8080");// TODO make through env var.
     }
 }

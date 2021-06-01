@@ -15,9 +15,9 @@
  */
 package info.seleniumcucumber.userStepDefinitions;
 
-import cucumber.api.java.en.And;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.Given;
 import env.CucumberRoot;
 import env.DriverUtil;
 import org.junit.Assert;
