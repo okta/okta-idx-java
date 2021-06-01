@@ -6,8 +6,11 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.junit.Assert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 public class PasswordRecovery extends BasicDefinitions {
+
+    private static final String EXAMPLE_MAIL_COM = "example@mail.com";
 
     @Given("an org with an ORG Policy that defines Authenticators with Password and Email as required")
     public void anOrgWithAnORGPolicyThatDefinesAuthenticatorsWithPasswordAndEmailAsRequired() {
@@ -88,13 +91,15 @@ public class PasswordRecovery extends BasicDefinitions {
 
     @When("she inputs an Email that doesn't exist")
     public void sheInputsAnEmailThatDoesnTExist() {
-        driver.findElement(By.name("username")).sendKeys("example@mail.com");
+        driver.findElement(By.name("username")).sendKeys(EXAMPLE_MAIL_COM);
     }
 
-    @Then("she sees a message \"There is no account with the Username. Sign up for an account\"")
+    @Then("she sees a message \"There is no account with the Username \\{username\\}.\"")
     public void sheSeesAMessage() {
-        String error = driver.findElement(By.className("alert-danger")).getText();
-        Assert.assertFalse("Error is not shown", error.isEmpty());
-        Assert.assertTrue("Wrong error message is shown", error.contains("There is no account with the Username. Sign up for an account"));
+        WebElement alert = driver.findElement(By.className("alert-danger"));
+        Assert.assertTrue(alert.isDisplayed());
+        String errorMsg = alert.getText();
+        Assert.assertFalse("Error is not shown", errorMsg.isEmpty());
+        Assert.assertEquals("Wrong error message is shown", "[There is no account with the Username " + EXAMPLE_MAIL_COM + ".]", errorMsg);
     }
 }

@@ -24,4 +24,4 @@ Feature: Password Recovery
     Then she sees the Password Recovery Page
     When she inputs an Email that doesn't exist
     And she submits the form
-    Then she sees a message "There is no account with the Username. Sign up for an account"
+    Then she sees a message "There is no account with the Username {username}."
