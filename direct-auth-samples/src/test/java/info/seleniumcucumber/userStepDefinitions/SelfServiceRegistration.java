@@ -15,7 +15,6 @@
  */
 package info.seleniumcucumber.userStepDefinitions;
 
-import cucumber.api.java.en.Given;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -85,6 +84,29 @@ public class SelfServiceRegistration extends CucumberRoot {
         registerPage.proceedButton.click();
     }
 
+    @When("^she selects Phone from the list$")
+    public void she_selects_phone() {
+        registerPage.sleep();
+        registerPage.phoneRadioButton.click();
+        registerPage.proceedButton.click();
+    }
+
+    @And("^she inputs a valid phone number$")
+    public void she_inputs_a_valid_phone_number() {
+        Assert.assertNotNull(Page.getA18NProfile());
+        Assert.assertNotNull(Page.getA18NProfile().getPhoneNumber());
+        registerPage.phoneInput.click();
+        registerPage.phoneInput.sendKeys(Page.getA18NProfile().getPhoneNumber());
+        registerPage.submitButton.click();
+    }
+
+    @And("^she selects SMS$")
+    public void she_selects_sms() {
+        registerPage.sleep();
+        registerPage.smsRadioButton.click();
+        registerPage.submitButton.click();
+    }
+
     @Then("^she sees a page to input a code$")
     public void she_sees_a_page_to_input_a_code() {
         registerPage.sleep();
@@ -110,6 +132,24 @@ public class SelfServiceRegistration extends CucumberRoot {
         Assert.assertNotNull(code);
         registerPage.codeInput.click();
         registerPage.codeInput.sendKeys(code);
+    }
+
+    @When("^she inputs the correct code from her SMS$")
+    public void she_inputs_the_correct_code_from_her_sms() {
+/*
+        TODO fix SMS issue
+        String code = null;
+        int retryCount = 5; //TODO Should be in config
+        while (retryCount > 0 && code == null) {
+            registerPage.sleep();
+            String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
+            code = StringUtils.substringBetween(sms, "code is ", ".");
+            retryCount--;
+        }
+        Assert.assertFalse(StringUtils.isNotBlank(code));
+        registerPage.codeInput.click();
+        registerPage.codeInput.sendKeys(code);
+*/
     }
 
     @And("^she submits the verify form$")

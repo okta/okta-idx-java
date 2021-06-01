@@ -25,4 +25,6 @@ public interface A18NClient {
     void deleteProfile(A18NProfile profile);
 
     A18NEmail getLatestEmail(A18NProfile profile);
+
+    String getLatestSmsContent(A18NProfile profile);
 }

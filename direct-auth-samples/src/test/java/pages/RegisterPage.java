@@ -34,14 +34,26 @@ public class RegisterPage extends Page {
     @FindBy(name = "email")
     public WebElement emailInput;
 
+    @FindBy(name = "phone")
+    public WebElement phoneInput;
+
     @FindBy(id = "sign-in-btn")
     public WebElement signInButton;
 
     @FindBy(css = "input[name='authenticator-type'][value='Email']")
     public WebElement emailRadioButton;
 
+    @FindBy(css = "input[name='authenticator-type'][value='Phone']")
+    public WebElement phoneRadioButton;
+
     @FindBy(css = "input[name='authenticator-type'][value='Password']")
     public WebElement passwordRadioButton;
+
+    @FindBy(css = "input[name='mode'][value='sms']")
+    public WebElement smsRadioButton;
+
+    @FindBy(css = "input[name='mode'][value='voice']")
+    public WebElement voiceRadioButton;
 
     @FindBy(name = "new-password")
     public WebElement newPasswordInput;
@@ -57,6 +69,9 @@ public class RegisterPage extends Page {
 
     @FindBy(id = "verify-btn")
     public WebElement verifyButton;
+
+    @FindBy(id = "submit-btn")
+    public WebElement submitButton;
 
     @FindBy(id = "skip-btn")
     public WebElement skipButton;
