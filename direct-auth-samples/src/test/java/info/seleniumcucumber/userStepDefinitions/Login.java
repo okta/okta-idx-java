@@ -151,7 +151,6 @@ public class Login extends CucumberRoot {
 		Assert.assertTrue(rootPage.idToken.isDisplayed());
 		Assert.assertTrue(rootPage.refreshToken.isDisplayed());
 		Assert.assertTrue(rootPage.email.isDisplayed());
-		System.out.println();
 	}
 
 	@And("Mary sees a logout button")
