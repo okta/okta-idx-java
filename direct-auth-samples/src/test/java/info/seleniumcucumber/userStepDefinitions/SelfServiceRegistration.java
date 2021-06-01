@@ -26,14 +26,18 @@ import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 import pages.Page;
 import pages.RegisterPage;
-import pages.RootPage;
+import pages.RegisterPhonePage;
+import pages.SelectAuthenticatorPage;
+import pages.VerifyPage;
 
 public class SelfServiceRegistration extends CucumberRoot {
 
     protected WebDriver driver = DriverUtil.getDefaultDriver();
 
-    private RootPage rootPage = new RootPage(driver);
     private RegisterPage registerPage = new RegisterPage(driver);
+    private RegisterPhonePage registerPhonePage = new RegisterPhonePage(driver);
+    private SelectAuthenticatorPage selectAuthenticatorPage = new SelectAuthenticatorPage(driver);
+    private VerifyPage verifyPage = new VerifyPage(driver);
 
     @When("^she fills out her First Name$")
     public void she_fills_out_her_first_name() {
@@ -150,7 +154,7 @@ public class SelfServiceRegistration extends CucumberRoot {
     }
 
     @When("^she selects \"Skip\" on SMS$")
-    public void sheSelectsOnSMS() {
+    public void she_selects_skip_on_sms() {
         registerPage.sleep();
         registerPage.skipButton.click();
     }
@@ -169,4 +173,52 @@ public class SelfServiceRegistration extends CucumberRoot {
         Assert.assertTrue("No account with username error is not shown'",
                 error.contains("Provided value for property 'Email' does not match required pattern"));
     }
+
+    @Then("^she sees a list of factors to register$")
+    public void she_sees_a_list_of_factors_to_register() {
+        Assert.assertTrue(verifyPage.phoneRadioButton.isDisplayed());
+    }
+
+    @When("^she selects Phone from the list$")
+    public void she_selects_phone_from_the_list() {
+        verifyPage.phoneRadioButton.click();
+        verifyPage.proceedButton.click();
+    }
+
+    @And("^she inputs an invalid phone number$")
+    public void she_inputs_an_invalid_phone_number () {
+        Assert.assertTrue(selectAuthenticatorPage.phone.isDisplayed());
+        selectAuthenticatorPage.phone.click();
+        selectAuthenticatorPage.phone.sendKeys("+333333333333");
+    }
+
+    @And("^submits the enrollment form$")
+    public void submits_the_enrollment_form() {
+        selectAuthenticatorPage.submitButton.click();
+    }
+
+    @Then("^she sees a list of phone modes$")
+    public void she_sees_a_list_of_phone_modes() {
+        Assert.assertTrue(registerPhonePage.smsRadioButton.isDisplayed());
+    }
+
+    @When("^she selects SMS$")
+    public void she_selects_sms() {
+        registerPhonePage.smsRadioButton.click();
+    }
+
+    @And("^she submits the phone mode form$")
+    public void she_submits_the_phone_mode_form() {
+        registerPhonePage.submitButton.click();
+    }
+
+    @Then("^she should see an error message \"Unable to initiate factor enrollment: Invalid Phone Number.\"$")
+    public void she_should_see_an_error_message_invalid_phone_number() {
+        Assert.assertTrue(registerPhonePage.alertDanger.isDisplayed());
+        String error = registerPhonePage.alertDanger.getText();
+        Assert.assertFalse("Error is not shown", error.isEmpty());
+        Assert.assertTrue("Invalid phone number error is not shown'",
+                error.contains("Unable to initiate factor enrollment: Invalid Phone Number."));
+    }
+
 }
