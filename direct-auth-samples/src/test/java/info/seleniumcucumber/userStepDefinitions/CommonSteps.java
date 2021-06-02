@@ -15,10 +15,13 @@
  */
 package info.seleniumcucumber.userStepDefinitions;
 
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
+
 import env.CucumberRoot;
 import env.DriverUtil;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 import pages.RootPage;
@@ -46,5 +49,24 @@ public class CommonSteps extends CucumberRoot {
     @Then("^I close browser$")
     public void close_browser() {
         driver.close();
+    }
+
+    @When("Mary clicks the logout button")
+    public void mary_clicks_the_logout_button() {
+        rootPage.logoutButton.click();
+    }
+
+    @And("Mary sees login, registration buttons")
+    public void mary_sees_login_registration_buttons() {
+        Assert.assertTrue(rootPage.isRegistrationButtonDisplayed());
+        Assert.assertTrue(rootPage.isLoginButtonDisplayed());
+
+    }
+
+    @And("she does not see claims from \\/userinfo")
+    public void she_does_not_see_claims_from_userinfo() {
+        Assert.assertFalse(rootPage.elementIsDisplayed(rootPage.refreshToken));
+        Assert.assertFalse(rootPage.elementIsDisplayed(rootPage.accessToken));
+        Assert.assertFalse(rootPage.elementIsDisplayed(rootPage.email));
     }
 }

@@ -15,10 +15,11 @@
  */
 package env;
 
-import cucumber.api.Scenario;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
+
 import env.a18n.client.DefaultA18NClientBuilder;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -39,6 +40,7 @@ public class Hooks {
 		if (isAlive() && existsElement("logout-btn")) {
 			driver.findElement(By.id("logout-btn")).click();
 		}
+		DriverUtil.closeDriver();
 	}
 
 	@Before("@requireA18NProfile")

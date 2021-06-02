@@ -15,10 +15,10 @@
  */
 package info.seleniumcucumber.userStepDefinitions;
 
-import cucumber.api.java.en.And;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import env.CucumberRoot;
 import env.DriverUtil;
 
@@ -132,6 +132,33 @@ public class Login extends CucumberRoot {
 		Assert.assertTrue(forgotPasswordPage.forgotPasswordForm.isDisplayed());
 		Assert.assertEquals(forgotPasswordPage.getCurrentUrl(), "http://localhost:8080/forgot-password");
 	}
+
+	@Given("Mary has an authenticated session")
+	public void mary_has_an_authenticated_session() {
+		rootPage.navigateToTheRootPage();
+		rootPage.loginButton.click();
+		loginPage.sleep();
+		loginPage.usernameInput.click();
+		loginPage.usernameInput.sendKeys(USERNAME);
+
+		loginPage.passwordInput.click();
+		loginPage.passwordInput.sendKeys(PASSWORD);
+		loginPage.signInButton.click();
+	}
+
+	@Then("Mary sees a table with the claims from the userinfo response")
+	public void mary_sees_a_table_with_the_claims_from_the_userinfo_response() {
+		Assert.assertTrue(rootPage.idToken.isDisplayed());
+		Assert.assertTrue(rootPage.refreshToken.isDisplayed());
+		Assert.assertTrue(rootPage.email.isDisplayed());
+	}
+
+	@And("Mary sees a logout button")
+	public void mary_sees_a_logout_button() {
+		rootPage.waitForLoginButtonDisplayed();
+		rootPage.isLogoutButtonDisplayed();
+	}
+
 
 //	@When("^she enters valid credentials for unassigned user$")
 //	public void enter_valid_credentials_for_unassigned_user() throws Throwable {

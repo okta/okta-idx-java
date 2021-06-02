@@ -15,16 +15,16 @@
  */
 package env;
 
+import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.CucumberOptions;
 import org.junit.runner.RunWith;
 
-import cucumber.api.CucumberOptions;
-import cucumber.api.junit.Cucumber;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(
 		plugin = {
-				"pretty", "html:target/cucumberHtmlReport",
-				"html:target/cucumberHtmlReport",     		// for html result
+				"pretty", "html:target/cucumberHtmlReport.html",
+				"html:target/cucumberHtmlReport.html",     		// for html result
 				"pretty:target/cucumber-json-report.json"   // for json result
 		},
 		features = {
