@@ -80,11 +80,11 @@ public class RootPage extends Page {
 
     public boolean elementIsDisplayed(WebElement element){
         try {
-        element.isDisplayed();
+           return element.isDisplayed();
         }
         catch (NoSuchElementException e) {
             return false;
         }
-        return true;
+
     }
 }
