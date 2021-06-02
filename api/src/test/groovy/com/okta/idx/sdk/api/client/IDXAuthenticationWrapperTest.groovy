@@ -988,7 +988,7 @@ class IDXAuthenticationWrapperTest {
         ))
     }
 
-    @Test(testName = "Mary enters a wrong verification code on verify")
+    @Test(testName = "User enters a wrong verification code on verify")
     void testMFAWithInvalidCodeFromSMS() {
 
         def scenario = "scenario_6_2_4"
