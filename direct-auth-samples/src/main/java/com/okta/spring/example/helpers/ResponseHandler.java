@@ -98,6 +98,7 @@ public final class ResponseHandler {
             case PASSWORD_EXPIRED:
                 return registerPasswordForm("Password Expired");
             case AWAITING_AUTHENTICATOR_SELECTION:
+            case AWAITING_AUTHENTICATOR_VERIFICATION_DATA:
                 return selectAuthenticatorForm(response, "Select Authenticator", session);
             case AWAITING_AUTHENTICATOR_VERIFICATION:
                 return verifyForm();
