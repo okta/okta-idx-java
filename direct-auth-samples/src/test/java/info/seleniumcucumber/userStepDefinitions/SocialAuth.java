@@ -34,30 +34,30 @@ public class SocialAuth extends CucumberRoot {
     protected WebDriver driver = DriverUtil.getDefaultDriver();
     private RootPage rootPage = new RootPage(driver);
     private LoginPage loginPage = new LoginPage(driver);
-    private FacebookLoginPage facebookLoginPage = new FacebookLoginPage(driver);
+//    private FacebookLoginPage facebookLoginPage = new FacebookLoginPage(driver);
 
-    @Given("^she clicks the \"Login with Facebook\" button$")
-    public void clicks_facebook_login() {
-        loginPage.sleep();
-        Assert.assertTrue(loginPage.facebookLoginButton.isDisplayed());
-        loginPage.facebookLoginButton.click();
-    }
-
-    @And("^logs in to Facebook$")
-    public void login_facebook() {
-        facebookLoginPage.sleep();
-
-        Assert.assertTrue(facebookLoginPage.emailInput.isDisplayed());
-        facebookLoginPage.emailInput.click();
-        facebookLoginPage.emailInput.sendKeys(USERNAME_FACEBOOK);
-
-        Assert.assertTrue(facebookLoginPage.passwordInput.isDisplayed());
-        facebookLoginPage.passwordInput.click();
-        facebookLoginPage.passwordInput.sendKeys(PASSWORD_FACEBOOK);
-
-        Assert.assertTrue(facebookLoginPage.loginButton.isDisplayed());
-        facebookLoginPage.loginButton.click();
-    }
+//    @Given("^she clicks the \"Login with Facebook\" button$")
+//    public void clicks_facebook_login() {
+//        loginPage.sleep();
+//        Assert.assertTrue(loginPage.facebookLoginButton.isDisplayed());
+//        loginPage.facebookLoginButton.click();
+//    }
+//
+//    @And("^logs in to Facebook$")
+//    public void login_facebook() {
+//        facebookLoginPage.sleep();
+//
+//        Assert.assertTrue(facebookLoginPage.emailInput.isDisplayed());
+//        facebookLoginPage.emailInput.click();
+//        facebookLoginPage.emailInput.sendKeys(USERNAME_FACEBOOK);
+//
+//        Assert.assertTrue(facebookLoginPage.passwordInput.isDisplayed());
+//        facebookLoginPage.passwordInput.click();
+//        facebookLoginPage.passwordInput.sendKeys(PASSWORD_FACEBOOK);
+//
+//        Assert.assertTrue(facebookLoginPage.loginButton.isDisplayed());
+//        facebookLoginPage.loginButton.click();
+//    }
 
     @Then("^the Root Page shows links to the Entry Points$")
     public void the_root_page_shows_links_to_the_entrypoints() {
