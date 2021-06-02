@@ -627,7 +627,7 @@ class IDXAuthenticationWrapperTest {
     }
 
     @Test(testName = "User signs up for an account with Password, setups up required Email factor, then skips optional SMS")
-    void testSelfServiceRegistrationWithEmailAndOptionalSms() {
+    void testSelfServiceRegistrationWithPasswordAndEmailAndSkipOptionalSms() {
 
         def scenario = "scenario_4_1_1"
         def requestExecutor = mock(RequestExecutor)
@@ -720,6 +720,136 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "oauth2/default/v1/userinfo", scenario + "/user-info-response", 200, mediaTypeAppIonJson)
 
         authenticationResponse = idxAuthenticationWrapper.skipAuthenticatorEnrollment(authenticationResponse.getProceedContext())
+
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(), is(AuthenticationStatus.SUCCESS))
+        assertThat(authenticationResponse.getTokenResponse(), notNullValue())
+        assertThat(authenticationResponse.getTokenResponse().getScope(), is("openid profile offline_access"))
+        assertThat(authenticationResponse.getTokenResponse().getTokenType(), is("Bearer"))
+        assertThat(authenticationResponse.getTokenResponse().getExpiresIn(), is(3600))
+        assertThat(authenticationResponse.getTokenResponse().getAccessToken(), notNullValue())
+        assertThat(authenticationResponse.getTokenResponse().getRefreshToken(), notNullValue())
+        assertThat(authenticationResponse.getTokenResponse().getIdToken(), notNullValue())
+    }
+
+    @Test(testName = "User signs up for an account with Password, setups up required Email factor, AND sets up optional SMS")
+    void testSelfServiceRegistrationWithPasswordAndEmailAndSetupOptionalSms() {
+
+        def scenario = "scenario_4_1_2"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "enroll", scenario + "/enroll-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues(beginResponse.proceedContext)
+        assertThat(newUserRegistrationResponse.getErrors(), empty())
+        assertThat(newUserRegistrationResponse.getFormValues(), notNullValue())
+        assertThat(newUserRegistrationResponse.getFormValues(), hasSize(1))
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().state, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle, equalTo("029ZAB"))
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier, notNullValue())
+        assertThat(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge, notNullValue())
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+
+        IDXClientContext idxClientContext = newUserRegistrationResponse.getProceedContext().getClientContext()
+        assertThat(idxClientContext.state,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
+        assertThat(idxClientContext.interactionHandle,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle))
+        assertThat(idxClientContext.codeVerifier,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier))
+        assertThat(idxClientContext.codeChallenge,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
+
+        setMockResponse(requestExecutor, "introspect", scenario + "/enroll-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "enroll/new", scenario + "/enroll-new-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+        assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
+        assertThat(authenticationResponse.getProceedContext().getClientContext().state,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
+        assertThat(authenticationResponse.getProceedContext().getClientContext().interactionHandle,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().interactionHandle))
+        assertThat(authenticationResponse.getProceedContext().getClientContext().codeVerifier,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeVerifier))
+        assertThat(authenticationResponse.getProceedContext().getClientContext().codeChallenge,
+                equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().codeChallenge))
+
+        Authenticator passwordAuthenticator = new Authenticator(
+                authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().label,
+                authenticationResponse.authenticators.first().factors,
+                authenticationResponse.authenticators.first().hasNestedFactors())
+
+        setMockResponse(requestExecutor, "credential/enroll", scenario + "/credential-enroll-password-response", 200, mediaTypeAppIonJson)
+
+        authenticationResponse =
+                idxAuthenticationWrapper.selectAuthenticator(authenticationResponse.getProceedContext(), passwordAuthenticator)
+
+        setMockResponse(requestExecutor, "challenge/answer", scenario + "/challenge-answer-password-response", 200, mediaTypeAppIonJson)
+
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd1234")
+
+        authenticationResponse =
+                idxAuthenticationWrapper.verifyAuthenticator(authenticationResponse.getProceedContext(), verifyAuthenticatorOptions)
+
+        Authenticator emailAuthenticator = new Authenticator(
+                authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().label,
+                authenticationResponse.authenticators.first().factors,
+                authenticationResponse.authenticators.first().hasNestedFactors())
+
+        setMockResponse(requestExecutor, "credential/enroll", scenario + "/credential-enroll-email-response", 200, mediaTypeAppIonJson)
+
+        authenticationResponse =
+                idxAuthenticationWrapper.selectAuthenticator(authenticationResponse.getProceedContext(), emailAuthenticator)
+
+        verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("471537")
+
+        setMockResponse(requestExecutor, "challenge/answer", scenario + "/challenge-answer-email-response", 200, mediaTypeAppIonJson)
+
+        authenticationResponse =
+                idxAuthenticationWrapper.verifyAuthenticator(authenticationResponse.getProceedContext(), verifyAuthenticatorOptions)
+
+        Authenticator phoneAuthenticator = new Authenticator(
+                authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().label,
+                authenticationResponse.authenticators.first().factors,
+                authenticationResponse.authenticators.first().hasNestedFactors())
+
+        setMockResponse(requestExecutor, "credential/enroll", scenario + "/credential-enroll-phone-response", 200, mediaTypeAppIonJson)
+
+        Authenticator.Factor smsFactor = new Authenticator.Factor(
+                phoneAuthenticator.getId(), "sms", null, phoneAuthenticator.getLabel()
+        )
+
+        authenticationResponse = idxAuthenticationWrapper.selectFactor(authenticationResponse.getProceedContext(), smsFactor)
+
+        setMockResponse(requestExecutor, "credential/enroll", scenario + "/credential-enroll-phone-number-response", 200, mediaTypeAppIonJson)
+
+        authenticationResponse =
+                idxAuthenticationWrapper.submitPhoneAuthenticator(authenticationResponse.getProceedContext(), "14021234567", smsFactor)
+
+        setMockResponse(requestExecutor, "oauth2/v1/token", scenario + "/token-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "oauth2/default/v1/userinfo", scenario + "/user-info-response", 200, mediaTypeAppIonJson)
+
+        verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("134165")
+
+        setMockResponse(requestExecutor, "challenge/answer", scenario + "/challenge-answer-phone-response", 200, mediaTypeAppIonJson)
+
+        authenticationResponse =
+                idxAuthenticationWrapper.verifyAuthenticator(authenticationResponse.getProceedContext(), verifyAuthenticatorOptions)
 
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
