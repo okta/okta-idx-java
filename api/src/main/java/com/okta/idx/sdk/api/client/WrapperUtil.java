@@ -63,7 +63,7 @@ final class WrapperUtil {
     }
 
     static void printRemediationOptions(IDXResponse idxResponse) {
-        if (idxResponse.remediation() != null) {
+        if (idxResponse != null && idxResponse.remediation() != null) {
             RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
             logger.info("Remediation options: {}", Arrays.stream(remediationOptions)
                     .map(RemediationOption::getName)
