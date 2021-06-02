@@ -15,7 +15,6 @@
  */
 package env;
 
-import io.cucumber.java.Before;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +42,5 @@ public class CucumberRoot {
     /**
      * Need this method so the cucumber will recognize this class as glue and load spring context configuration.
      */
-    @Before
-    public void setUp() {
-        logger.info("Spring Context initialized for executing cucumber tests.");
-    }
+
 }

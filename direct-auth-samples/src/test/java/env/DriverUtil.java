@@ -375,7 +375,7 @@ public class DriverUtil {
 	public static void closeDriver() {
 		if (driver != null) {
 			try {
-				//driver.close();
+				driver.close();
 				//driver.quit(); // fails in current geckodriver! TODO: Fixme
 			} catch (NoSuchMethodError nsme) { // in case quit fails
 			} catch (NoSuchSessionException nsse) { // in case close fails
