@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
@@ -395,6 +396,8 @@ public class IDXAuthenticationWrapper {
                                                            String phone,
                                                            com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
         try {
+            Assert.notNull(proceedContext, "proceed context cannot be null");
+
             Authenticator phoneAuthenticator = new Authenticator();
             phoneAuthenticator.setId(factor.getId());
             phoneAuthenticator.setMethodType(factor.getMethod());

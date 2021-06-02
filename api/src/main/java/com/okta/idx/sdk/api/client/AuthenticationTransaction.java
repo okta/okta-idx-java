@@ -168,6 +168,10 @@ final class AuthenticationTransaction {
         fillOutIdps(authenticationResponse);
         fillOutAuthenticators(authenticationResponse);
 
+        if (idxResponse == null) {
+            return authenticationResponse;
+        }
+
         if (idxResponse.isLoginSuccessful()) {
             // login successful
             logger.info("Login Successful!");
@@ -234,7 +238,7 @@ final class AuthenticationTransaction {
     }
 
     private static void copyErrorMessages(IDXResponse idxResponse, AuthenticationResponse authenticationResponse) {
-        if (idxResponse.getMessages() == null) {
+        if (idxResponse == null || idxResponse.getMessages() == null) {
             return;
         }
         Arrays.stream(idxResponse.getMessages().getValue())
