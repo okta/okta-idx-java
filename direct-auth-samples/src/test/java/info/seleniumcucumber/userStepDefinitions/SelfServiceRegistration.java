@@ -21,6 +21,7 @@ import cucumber.api.java.en.When;
 import env.CucumberRoot;
 import env.DriverUtil;
 import env.a18n.client.response.A18NEmail;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 import pages.Page;
@@ -29,6 +30,7 @@ import pages.RootPage;
 
 public class SelfServiceRegistration extends CucumberRoot {
 
+    private static final int RETRY_COUNT = 5;   //TODO Should be in config
     protected WebDriver driver = DriverUtil.getDefaultDriver();
 
     private RootPage rootPage = new RootPage(driver);
@@ -117,7 +119,7 @@ public class SelfServiceRegistration extends CucumberRoot {
     public void she_inputs_the_correct_code_from_her_email() {
         A18NEmail email = null;
         String code;
-        int retryCount = 5; //TODO Should be in config
+        int retryCount = RETRY_COUNT;
         while(retryCount > 0) {
             registerPage.sleep();
             email = Page.getA18NClient().getLatestEmail(Page.getA18NProfile());
@@ -136,20 +138,17 @@ public class SelfServiceRegistration extends CucumberRoot {
 
     @When("^she inputs the correct code from her SMS$")
     public void she_inputs_the_correct_code_from_her_sms() {
-/*
-        TODO fix SMS issue
         String code = null;
-        int retryCount = 5; //TODO Should be in config
+        int retryCount = RETRY_COUNT;
         while (retryCount > 0 && code == null) {
             registerPage.sleep();
             String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
             code = StringUtils.substringBetween(sms, "code is ", ".");
             retryCount--;
         }
-        Assert.assertFalse(StringUtils.isNotBlank(code));
+        Assert.assertTrue(StringUtils.isNotBlank(code));
         registerPage.codeInput.click();
         registerPage.codeInput.sendKeys(code);
-*/
     }
 
     @And("^she submits the verify form$")
