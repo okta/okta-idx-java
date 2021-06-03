@@ -44,6 +44,7 @@ import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
+import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.idx.sdk.api.util.ClientUtil;
@@ -471,18 +472,18 @@ public class IDXAuthenticationWrapper {
      * of {@link IDXClientContext} which can be used to reenter/resume the flow.
      *
      * @return the idx client context
+     * @throws ProcessingException if the backend interact API call fails
      */
-    public IDXClientContext getClientContext() {
-
-        IDXClientContext idxClientContext = null;
+    public IDXClientContext getClientContext() throws ProcessingException {
 
         try {
-            idxClientContext = client.interact();
+            return client.interact();
         } catch (ProcessingException e) {
             logger.error("Error occurred:", e);
+            ErrorResponse errorResponse = e.getErrorResponse();
+            logger.error("Error details: {}, {}", errorResponse.getError(), errorResponse.getErrorDescription());
+            throw e;
         }
-
-        return idxClientContext;
     }
 
     /**
