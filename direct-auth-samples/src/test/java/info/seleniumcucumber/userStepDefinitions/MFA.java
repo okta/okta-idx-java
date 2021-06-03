@@ -18,7 +18,6 @@ package info.seleniumcucumber.userStepDefinitions;
 import env.CucumberRoot;
 import env.DriverUtil;
 import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.apache.commons.lang3.StringUtils;
@@ -55,11 +54,24 @@ public class MFA extends CucumberRoot {
         Assert.assertTrue(verifyPage.phoneRadioButton.isDisplayed());
     }
 
+    @Then("^she is presented with an option to select Email to verify$")
+    public void she_is_presented_with_an_option_to_select_email_to_verify() {
+        Assert.assertTrue(selectAuthenticatorPage.selectAuthenticatorsForm.isDisplayed());
+        Assert.assertTrue(selectAuthenticatorPage.emailRadioButton.isDisplayed());
+    }
+
     @And("^she inputs a valid phone number$")
     public void she_inputs_a_valid_phone_number() {
         Assert.assertTrue(selectAuthenticatorPage.phone.isDisplayed());
         selectAuthenticatorPage.phone.click();
         selectAuthenticatorPage.phone.sendKeys(Page.getA18NProfile().getPhoneNumber());
+    }
+
+    @And("^she inputs the incorrect code from the email$")
+    public void she_inputs_the_incorrect_code_from_the_email(){
+        selectAuthenticatorPage.codeInput.click();
+        selectAuthenticatorPage.codeInput.sendKeys("invalid_code");
+        selectAuthenticatorPage.verifyButton.click();
     }
 
     @And("^she inputs a invalid phone number$")
@@ -87,6 +99,15 @@ public class MFA extends CucumberRoot {
         Assert.assertTrue(StringUtils.isNotBlank(code));
         registerPage.codeInput.click();
         registerPage.codeInput.sendKeys(code);
+    }
+
+    @Then("^the sample shows an error message \"Invalid code. Try again.\" on the Sample App$")
+    public void the_sample_shows_an_error_message(){
+        registerPage.sleep();
+        Assert.assertTrue(registerPage.alertDanger.isDisplayed());
+        String error = registerPage.alertDanger.getText();
+        Assert.assertFalse("Error is not shown", error.isEmpty());
+        Assert.assertTrue("Invalid code error is not shown", error.contains("Invalid code. Try again."));
     }
 
     @Then("^she should see a message \"Unable to initiate factor enrollment: Invalid Phone Number\"$")
