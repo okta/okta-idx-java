@@ -28,6 +28,7 @@ import com.okta.commons.lang.Classes;
 import com.okta.idx.sdk.api.config.ClientConfiguration;
 import env.a18n.client.response.A18NEmail;
 import env.a18n.client.response.A18NProfile;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,6 +143,29 @@ public class BaseA18NClient implements A18NClient {
             logger.debug("Fail to get last email for "+ profile.getEmailAddress(), e);
         }
         return email;
+    }
+
+    @Override
+    public String getLatestSmsContent(A18NProfile profile) {
+        String sms = null;
+
+        try {
+            Request request = new DefaultRequest(
+                    HttpMethod.GET,
+                    profile.getUrl() + "/sms/latest/content",
+                    null,
+                    getHttpHeaders());
+
+            Response response = requestExecutor.executeRequest(request);
+
+            if (response.getHttpStatus() != 200) {
+                throw new Exception(response.toString());
+            }
+            sms = IOUtils.toString(response.getBody(), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            logger.debug("Fail to get last sms for " + profile.getEmailAddress(), e);
+        }
+        return sms;
     }
 
     private HttpHeaders getHttpHeaders() {
