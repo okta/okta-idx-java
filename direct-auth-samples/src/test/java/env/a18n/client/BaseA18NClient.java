@@ -86,7 +86,7 @@ public class BaseA18NClient implements A18NClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
             profile = objectMapper.convertValue(responseJsonNode, A18NProfile.class);
-
+            logger.info("A18N profile created: " + profile.getEmailAddress());
         } catch (Exception e) {
             logger.debug("Fail to create A18N profile", e);
         }
@@ -111,6 +111,7 @@ public class BaseA18NClient implements A18NClient {
             if (response.getHttpStatus() != 204) {
                 throw new Exception(response.toString());
             }
+            logger.info("A18N profile deleted: " + profile.getEmailAddress());
         } catch (Exception e) {
             logger.debug("Fail to delete A18N profile", e);
         }

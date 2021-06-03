@@ -19,21 +19,22 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
-public class SelectAuthenticatorPage extends Page {
+public class PasswordRecoveryPage extends Page {
 
-    public SelectAuthenticatorPage(WebDriver driver) {
+    public PasswordRecoveryPage(WebDriver driver) {
         super(driver);
     }
 
-    @FindBy(id = "phone")
-    public WebElement phone;
+    @FindBy(name = "username")
+    public WebElement usernameInput;
 
-    @FindBy(id = "submit-btn")
-    public WebElement submitButton;
+    @FindBy(id = "next-btn")
+    public WebElement nextButton;
 
-    @FindBy(name = "code")
-    public WebElement codeInput;
+    @FindBy(css = "input[name='authenticator-type'][value='Email']")
+    public WebElement emailRadioButton;
 
-    @FindBy(id = "verify-btn")
-    public WebElement verifyButton;
+    @FindBy(id = "proceed-btn")
+    public WebElement proceedButton;
+
 }

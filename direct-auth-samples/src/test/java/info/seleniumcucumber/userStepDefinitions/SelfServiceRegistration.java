@@ -31,6 +31,8 @@ import pages.VerifyPage;
 
 public class SelfServiceRegistration extends CucumberRoot {
 
+    private static final int RETRY_COUNT = 5; //TODO Should be in config
+
     protected WebDriver driver = DriverUtil.getDefaultDriver();
 
     private RegisterPage registerPage = new RegisterPage(driver);
@@ -98,7 +100,7 @@ public class SelfServiceRegistration extends CucumberRoot {
     public void she_inputs_the_correct_code_from_her_email() {
         A18NEmail email = null;
         String code;
-        int retryCount = 5; //TODO Should be in config
+        int retryCount = RETRY_COUNT;
         while(retryCount > 0) {
             registerPage.sleep();
             email = Page.getA18NClient().getLatestEmail(Page.getA18NProfile());
@@ -109,7 +111,7 @@ public class SelfServiceRegistration extends CucumberRoot {
             }
         }
         Assert.assertNotNull(email);
-        code = email.fetchCode();
+        code = email.fetchCodeFromRegistrationEmail();
         Assert.assertNotNull(code);
         registerPage.codeInput.click();
         registerPage.codeInput.sendKeys(code);
