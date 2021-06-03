@@ -16,17 +16,32 @@
 package env;
 
 
+import com.okta.sdk.client.Client;
+import com.okta.sdk.client.ClientBuilder;
+import com.okta.sdk.client.Clients;
+import com.okta.sdk.resource.user.User;
+import com.okta.sdk.resource.user.UserBuilder;
 import env.a18n.client.DefaultA18NClientBuilder;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
+import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pages.Page;
 
+import java.util.Optional;
+
 public class Hooks {
+
+	private final Logger logger = LoggerFactory.getLogger(Hooks.class);
+
 	protected WebDriver driver = DriverUtil.getDefaultDriver();
+	protected ClientBuilder builder = Clients.builder();
+	protected Client client = builder.build();
 
 	@Before
 	public void beforeScenario(){
@@ -58,6 +73,53 @@ public class Hooks {
 		if(Page.getA18NProfile() != null && Page.getA18NClient() != null) {
 			Page.getA18NClient().deleteProfile(Page.getA18NProfile());
 			Page.setA18NProfile(null);
+		}
+	}
+
+	@Before("@requireExistingUser")
+	public void createUserBeforeScenario() {
+
+		Assert.assertNotNull(Page.getA18NProfile());
+
+		User user = UserBuilder.instance()
+                .setEmail(Page.getA18NProfile().getEmailAddress())
+                .setFirstName("Mary E2E")
+                .setLastName(Page.getA18NProfile().getProfileId())
+                .setPassword("Abcd1234".toCharArray())
+                .setActive(true)
+                .buildAndCreate(client);
+		Assert.assertNotNull(user.getId());
+		logger.info("User created: " + user.getProfile().getEmail());
+		Page.setUser(user);
+	}
+
+	@After("@requireExistingUser")
+	public void deleteUserAfterScenario() {
+		if (Page.getUser() != null) {
+			String userEmail = Page.getUser().getProfile().getEmail();
+			Page.getUser().deactivate();
+			Page.getUser().delete();
+			Page.setUser(null);
+			logger.info("User deleted: " + userEmail);
+		} else {
+			logger.warn("No user to delete");
+		}
+	}
+
+	@After("@requireUserDeletionAfterRegistration")
+	public void deleteUserAfterRegistration() {
+		if(Page.getA18NProfile() != null) {
+			logger.info("Searching for a user to be deleted: " + Page.getA18NProfile().getEmailAddress());
+		 	Optional<User> userToDelete = client.listUsers(Page.getA18NProfile().getEmailAddress(), null, null, null, null )
+					.stream().filter(x -> x.getProfile().getEmail().equals(Page.getA18NProfile().getEmailAddress())).findFirst();
+		 	if(userToDelete.isPresent()) {
+				String userEmail = userToDelete.get().getProfile().getEmail();
+		 		userToDelete.get().deactivate();
+				userToDelete.get().delete();
+				logger.info("User deleted: " + userEmail);
+			} else {
+				logger.warn("Fail to find a user to delete: " + Page.getA18NProfile().getEmailAddress());
+			}
 		}
 	}
 

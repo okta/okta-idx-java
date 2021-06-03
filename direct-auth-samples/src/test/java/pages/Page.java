@@ -15,6 +15,7 @@
  */
 package pages;
 
+import com.okta.sdk.resource.user.User;
 import env.a18n.client.A18NClient;
 import env.a18n.client.response.A18NProfile;
 import org.openqa.selenium.WebDriver;
@@ -26,6 +27,7 @@ public class Page {
 
     private static A18NClient a18NClient;
     private static A18NProfile a18NProfile;
+    private static User user;
 
     public static A18NClient getA18NClient() {
         return a18NClient;
@@ -41,6 +43,14 @@ public class Page {
 
     public static void setA18NProfile(A18NProfile a18NProfile) {
         Page.a18NProfile = a18NProfile;
+    }
+
+    public static User getUser() {
+        return user;
+    }
+
+    public static void setUser(User user) {
+        Page.user = user;
     }
 
     public Page(WebDriver driver) {

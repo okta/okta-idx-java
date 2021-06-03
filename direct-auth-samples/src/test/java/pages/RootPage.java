@@ -60,6 +60,11 @@ public class RootPage extends Page {
         driver.get("http://localhost:8080"); // TODO pass as env variable.
     }
 
+    public void navigateToThePasswordResetPage() {
+        driver.manage().window().maximize();
+        driver.get("http://localhost:8080/forgot-password"); // TODO pass as env variable.
+    }
+
     public boolean isLoginButtonDisplayed() {
         return loginButton.isDisplayed();
     }

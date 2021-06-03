@@ -167,6 +167,24 @@
             <version>5.3.5</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.okta.sdk</groupId>
+            <artifactId>okta-sdk-api</artifactId>
+            <version>4.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.okta.sdk</groupId>
+            <artifactId>okta-sdk-impl</artifactId>
+            <version>4.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.okta.sdk</groupId>
+            <artifactId>okta-sdk-httpclient</artifactId>
+            <version>4.0.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

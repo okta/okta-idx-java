@@ -115,8 +115,14 @@ public class A18NEmail {
         this.content = content;
     }
 
-    public String fetchCode() {
+    public String fetchCodeFromRegistrationEmail() {
         Pattern pattern = Pattern.compile("To verify manually, enter this code: (\\d{6})");
+        Matcher matcher = pattern.matcher(this.content);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    public String fetchCodeFromPasswordResetEmail() {
+        Pattern pattern = Pattern.compile("Enter a code instead: (\\d{6})");
         Matcher matcher = pattern.matcher(this.content);
         return matcher.find() ? matcher.group(1) : null;
     }

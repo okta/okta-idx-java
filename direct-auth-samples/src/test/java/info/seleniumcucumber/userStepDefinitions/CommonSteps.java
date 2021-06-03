@@ -46,6 +46,11 @@ public class CommonSteps extends CucumberRoot {
         }
     }
 
+    @Given("^Mary navigates to the Self Service Password Reset View$")
+    public void mary_navigates_to_the_self_service_password_reset_view() {
+        rootPage.navigateToThePasswordResetPage();
+    }
+
     @Then("^I close browser$")
     public void close_browser() {
         driver.close();
