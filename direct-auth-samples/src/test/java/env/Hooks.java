@@ -19,6 +19,7 @@ package env;
 import com.okta.sdk.client.Client;
 import com.okta.sdk.client.ClientBuilder;
 import com.okta.sdk.client.Clients;
+import com.okta.sdk.resource.group.Group;
 import com.okta.sdk.resource.user.User;
 import com.okta.sdk.resource.user.UserBuilder;
 import env.a18n.client.DefaultA18NClientBuilder;
@@ -33,7 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pages.Page;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Hooks {
 
@@ -104,6 +107,19 @@ public class Hooks {
 		} else {
 			logger.warn("No user to delete");
 		}
+	}
+
+	@Before("@requireMFAGroupsForUser")
+	public void assignMFAGroupBeforeScenario() {
+		Assert.assertNotNull(Page.getUser());
+		List<Group> groupList = client.listGroups()
+				.stream().filter(
+						x -> x.getProfile().getName().equals("MFA Required") ||
+						x.getProfile().getName().equals("Phone Enrollment Required"))
+				.collect(Collectors.toList());
+		Assert.assertFalse(groupList.isEmpty());
+		Assert.assertEquals(2, groupList.size());
+		groupList.forEach(x -> Page.getUser().addToGroup(x.getId()));
 	}
 
 	@After("@requireUserDeletionAfterRegistration")
