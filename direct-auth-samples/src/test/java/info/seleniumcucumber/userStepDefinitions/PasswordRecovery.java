@@ -23,12 +23,15 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import pages.*;
 
 public class PasswordRecovery extends CucumberRoot {
 
 	private static final int RETRY_COUNT = 5; //TODO Should be in config
+	private static final String EXAMPLE_EMAIL = "mary@unknown.com";
 
 	protected WebDriver driver = DriverUtil.getDefaultDriver();
 	protected PasswordRecoveryPage passwordRecoveryPage = new PasswordRecoveryPage(driver);
@@ -107,5 +110,31 @@ public class PasswordRecovery extends CucumberRoot {
 	public void she_confirms_that_password() {
 		registerPage.confirmNewPasswordInput.click();
 		registerPage.confirmNewPasswordInput.sendKeys("QwErTy@123");
+	}
+
+	@When("she selects \"Forgot Password\"")
+	public void she_selects_forgot_password() {
+		driver.findElement(By.id("forgot-password")).click();
+	}
+
+	@Then("she sees the Password Recovery Page")
+	public void she_sees_the_password_recovery_page() {
+		Assert.assertTrue("URL should ends with \"/forgot-password\"", driver.getCurrentUrl().endsWith("/forgot-password"));
+		Assert.assertEquals("Wrong page title", "Forgot Password", driver.getTitle());
+		Assert.assertTrue(driver.findElement(By.className("forgotpassword-form")).isDisplayed());
+	}
+
+	@When("she inputs an Email that doesn't exist")
+	public void she_inputs_an_email_that_doesnt_exist() {
+		driver.findElement(By.name("username")).sendKeys(EXAMPLE_EMAIL);
+	}
+
+	@Then("she sees a message \"There is no account with the Username mary@unknown.com.\"")
+	public void she_sees_a_message() {
+		WebElement alert = driver.findElement(By.className("alert-danger"));
+		Assert.assertTrue(alert.isDisplayed());
+		String errorMsg = alert.getText();
+		Assert.assertFalse("Error is not shown", errorMsg.isEmpty());
+		Assert.assertEquals("Wrong error message is shown", "[There is no account with the Username " + EXAMPLE_EMAIL + ".]", errorMsg);
 	}
 }
