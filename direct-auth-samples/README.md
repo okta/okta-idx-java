@@ -17,7 +17,7 @@ These Examples are:
 4. Sign In/Sign Up with Social Identity Providers
 5. Sign In with Multifactor Authentication using Email or Phone
 
-For information and guides on how to build your app with this sample, please take a look at the [{FRAMEWORK}
+For information and guides on how to build your app with this sample, please take a look at the [Java
 guides for Embedded Authentication](link to DevDoc SBS guide)
 
 ## Prerequisites
@@ -55,7 +55,7 @@ Now navigate to http://localhost:8080 in your browser.
 
 If you see a home page that prompts you to login, then things are working!
 
-To see some examples for use cases using this sample application, please take a look at the [{FRAMEWORK} guides for Embedded Authentication](link to DevDoc SBS guide)
+To see some examples for use cases using this sample application, please take a look at the [Java guides for Embedded Authentication](link to DevDoc SBS guide)
 
 [jdk-8]: https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html
 [apache-maven]: https://maven.apache.org/download.cgi
