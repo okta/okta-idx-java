@@ -68,7 +68,8 @@ public class MFA extends CucumberRoot {
     }
 
     @And("^she inputs the incorrect code from the email$")
-    public void she_inputs_the_incorrect_code_from_the_email(){
+    @And("^she inputs the incorrect code from the phone$")
+    public void she_inputs_the_incorrect_code(){
         selectAuthenticatorPage.codeInput.click();
         selectAuthenticatorPage.codeInput.sendKeys("invalid_code");
         selectAuthenticatorPage.verifyButton.click();
@@ -118,5 +119,10 @@ public class MFA extends CucumberRoot {
         Assert.assertFalse("Error is not shown", error.isEmpty());
         Assert.assertTrue("Invalid phone number error is not shown",
                 error.contains("Unable to initiate factor enrollment: Invalid Phone Number"));
+    }
+    
+    @And("^she sees a field to re-enter another code$")
+    public void she_sees_a_field_to_reenter_another_code(){
+        Assert.assertTrue(selectAuthenticatorPage.codeInput.isDisplayed());
     }
 }
