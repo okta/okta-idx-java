@@ -14,8 +14,8 @@ before_install:
 - source ./src/ci/before_install.sh
 
 # skip the Travis-CI install phase because Maven handles that directly
-install:
-- 'true'
+#install:
+#- 'true'
 
 script:
 - "./src/ci/build.sh"
