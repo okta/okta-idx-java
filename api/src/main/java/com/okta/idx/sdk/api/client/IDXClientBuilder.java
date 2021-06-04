@@ -17,24 +17,17 @@ package com.okta.idx.sdk.api.client;
 
 import java.util.Set;
 
-public interface IDXClientBuilder {
+abstract class IDXClientBuilder {
 
-    String DEFAULT_CLIENT_ISSUER_PROPERTY_NAME = "okta.idx.issuer";
-    String DEFAULT_CLIENT_ID_PROPERTY_NAME = "okta.idx.clientId";
-    String DEFAULT_CLIENT_SECRET_PROPERTY_NAME = "okta.idx.clientSecret";
-    String DEFAULT_CLIENT_SCOPES_PROPERTY_NAME = "okta.idx.scopes";
-    String DEFAULT_CLIENT_REDIRECT_URI_PROPERTY_NAME = "okta.idx.redirectUri";
-    String DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME = "okta.testing.disableHttpsCheck";
+    protected abstract IDXClientBuilder setIssuer(String issuer);
 
-    IDXClientBuilder setIssuer(String issuer);
+    protected abstract IDXClientBuilder setClientId(String clientId);
 
-    IDXClientBuilder setClientId(String clientId);
+    protected abstract IDXClientBuilder setClientSecret(String clientSecret);
 
-    IDXClientBuilder setClientSecret(String clientSecret);
+    protected abstract IDXClientBuilder setScopes(Set<String> scopes);
 
-    IDXClientBuilder setScopes(Set<String> scopes);
+    protected abstract IDXClientBuilder setRedirectUri(String redirectUri);
 
-    IDXClientBuilder setRedirectUri(String redirectUri);
-
-    IDXClient build();
+    protected abstract IDXClient build();
 }

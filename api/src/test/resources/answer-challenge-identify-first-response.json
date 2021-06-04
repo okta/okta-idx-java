@@ -1,0 +1,181 @@
+{
+  "version": "1.0.0",
+  "stateHandle": "02_SASNV3rEhVtB1v3sW5dkSvDCproFFJLi2p6ecer",
+  "expiresAt": "2021-05-17T15:20:45.000Z",
+  "intent": "LOGIN",
+  "remediation": {
+    "type": "array",
+    "value": [
+      {
+        "rel": ["create-form"],
+        "name": "select-authenticator-enroll",
+        "href": "https://foo.oktapreview.com/idp/idx/credential/enroll",
+        "method": "POST",
+        "produces": "application/ion+json; okta-version=1.0.0",
+        "value": [
+          {
+            "name": "authenticator",
+            "type": "object",
+            "options": [
+              {
+                "label": "Phone",
+                "value": {
+                  "form": {
+                    "value": [
+                      {
+                        "name": "id",
+                        "required": true,
+                        "value": "autl0dfr8dfAY2KHl5d6",
+                        "mutable": false
+                      },
+                      {
+                        "name": "methodType",
+                        "type": "string",
+                        "required": false,
+                        "options": [
+                          { "label": "SMS", "value": "sms" },
+                          { "label": "Voice call", "value": "voice" }
+                        ]
+                      },
+                      {
+                        "name": "phoneNumber",
+                        "label": "Phone number",
+                        "required": false
+                      }
+                    ]
+                  }
+                },
+                "relatesTo": "$.authenticators.value[1]"
+              },
+              {
+                "label": "Security Key or Biometric",
+                "value": {
+                  "form": {
+                    "value": [
+                      {
+                        "name": "id",
+                        "required": true,
+                        "value": "autl0dfrbjCpnlcs55d6",
+                        "mutable": false
+                      },
+                      {
+                        "name": "methodType",
+                        "required": false,
+                        "value": "webauthn",
+                        "mutable": false
+                      }
+                    ]
+                  }
+                },
+                "relatesTo": "$.authenticators.value[2]"
+              }
+            ]
+          },
+          {
+            "name": "stateHandle",
+            "required": true,
+            "value": "02_SASNV3rEhVtB1v3sW5dkSvDCproFFJLi2p6ecer",
+            "visible": false,
+            "mutable": false
+          }
+        ],
+        "accepts": "application/json; okta-version=1.0.0"
+      },
+      {
+        "rel": ["create-form"],
+        "name": "skip",
+        "href": "https://foo.oktapreview.com/idp/idx/skip",
+        "method": "POST",
+        "produces": "application/ion+json; okta-version=1.0.0",
+        "value": [
+          {
+            "name": "stateHandle",
+            "required": true,
+            "value": "02_SASNV3rEhVtB1v3sW5dkSvDCproFFJLi2p6ecer",
+            "visible": false,
+            "mutable": false
+          }
+        ],
+        "accepts": "application/json; okta-version=1.0.0"
+      }
+    ]
+  },
+  "authenticators": {
+    "type": "array",
+    "value": [
+      {
+        "type": "app",
+        "key": "okta_verify",
+        "id": "autl0by1fSntw1UJv5d6",
+        "displayName": "Okta Verify",
+        "methods": [{ "type": "push" }, { "type": "totp" }]
+      },
+      {
+        "type": "phone",
+        "key": "phone_number",
+        "id": "autl0dfr8dfAY2KHl5d6",
+        "displayName": "Phone",
+        "methods": [{ "type": "sms" }, { "type": "voice" }]
+      },
+      {
+        "type": "security_key",
+        "key": "webauthn",
+        "id": "autl0dfrbjCpnlcs55d6",
+        "displayName": "Security Key or Biometric",
+        "methods": [{ "type": "webauthn" }]
+      },
+      {
+        "type": "security_question",
+        "key": "security_question",
+        "id": "autl0dfr92NW7T4et5d6",
+        "displayName": "Security Question",
+        "methods": [{ "type": "security_question" }]
+      }
+    ]
+  },
+  "authenticatorEnrollments": {
+    "type": "array",
+    "value": [
+      {
+        "type": "email",
+        "key": "okta_email",
+        "id": "eaerdqdxs6KlDZub45d6",
+        "displayName": "Email",
+        "methods": [{ "type": "email" }]
+      },
+      {
+        "type": "password",
+        "key": "okta_password",
+        "id": "lae1qogr7sJWxWwxM5d6",
+        "displayName": "Password",
+        "methods": [{ "type": "password" }]
+      }
+    ]
+  },
+  "user": { "type": "object", "value": { "id": "00urdpwtpZcEgrAlU5d6" } },
+  "cancel": {
+    "rel": ["create-form"],
+    "name": "cancel",
+    "href": "https://foo.oktapreview.com/idp/idx/cancel",
+    "method": "POST",
+    "produces": "application/ion+json; okta-version=1.0.0",
+    "value": [
+      {
+        "name": "stateHandle",
+        "required": true,
+        "value": "02_SASNV3rEhVtB1v3sW5dkSvDCproFFJLi2p6ecer",
+        "visible": false,
+        "mutable": false
+      }
+    ],
+    "accepts": "application/json; okta-version=1.0.0"
+  },
+  "app": {
+    "type": "object",
+    "value": {
+      "name": "oidc_client",
+      "label": "IDXWebApp",
+      "id": "0oalwhsor3W1iFrvu5d6"
+    }
+  }
+}

@@ -98,7 +98,7 @@ public class RemediationOption {
      * @return array an array of FormValue
      */
     public FormValue[] form() {
-        return Arrays.copyOf(value, value.length);
+        return value != null ? Arrays.copyOf(value, value.length) : null;
     }
 
     public String getName() {
@@ -107,6 +107,10 @@ public class RemediationOption {
 
     public String getType() {
         return type;
+    }
+
+    public String getHref() {
+        return href;
     }
 
     /**
@@ -156,7 +160,14 @@ public class RemediationOption {
                     }
                 }
                 if (key != null) {
-                    authenticatorOptionsMap.put(key, val);
+                    String[] tokenizedKey = key.split(",");
+                    if (tokenizedKey != null) {
+                        for (String tmpKey : tokenizedKey) {
+                            authenticatorOptionsMap.put(tmpKey, val);
+                        }
+                    } else {
+                        authenticatorOptionsMap.put(key, val);
+                    }
                 }
             }
         }

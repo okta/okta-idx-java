@@ -28,8 +28,7 @@
     <name>Okta IDX Java SDK :: Api</name>
     <description>
         The Okta IDX Java SDK API .jar provides a Java API that your code can use to make calls to the Okta
-        IDX API. This .jar is the only compile-time dependency within the Okta SDK project that your code should
-        depend on. Implementations of this API (implementation .jars) should be runtime dependencies only.
+        IDX API.
     </description>
     <packaging>jar</packaging>
 
@@ -56,12 +55,38 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>com.okta.commons</groupId>
+            <artifactId>okta-http-okhttp</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+
+        <!-- Test deps -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

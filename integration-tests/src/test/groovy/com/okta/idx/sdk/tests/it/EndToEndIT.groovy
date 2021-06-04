@@ -36,6 +36,7 @@ import com.okta.idx.sdk.api.request.IdentifyRequest
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder
 
 import com.okta.idx.sdk.api.response.IDXResponse
+import com.okta.idx.sdk.api.util.Constants
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
@@ -65,7 +66,7 @@ class EndToEndIT {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-        System.setProperty(IDXClientBuilder.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
+        System.setProperty(Constants.DEFAULT_CLIENT_TESTING_DISABLE_HTTPS_CHECK_PROPERTY_NAME, "true")
 
         idxClient = Clients.builder()
             .setIssuer("http://localhost:" + mockPort)
@@ -80,7 +81,7 @@ class EndToEndIT {
     void testWithPasswordAndEmailAuthenticators() {
 
         // interact
-        wireMockServer.stubFor(post(urlPathEqualTo("/v1/interact"))
+        wireMockServer.stubFor(post(urlPathEqualTo("/oauth2/v1/interact"))
             .withHeader("Content-Type", containing(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.SC_OK)
@@ -92,7 +93,7 @@ class EndToEndIT {
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
 
-        wireMockServer.verify(postRequestedFor(urlEqualTo("/v1/interact"))
+        wireMockServer.verify(postRequestedFor(urlEqualTo("/oauth2/v1/interact"))
             .withHeader("Content-Type", equalTo(MediaType.APPLICATION_FORM_URLENCODED_VALUE)))
         wireMockServer.resetAll()
 
@@ -289,7 +290,7 @@ class EndToEndIT {
     void testWithSecurityQnAndEmailAuthenticators() {
 
         // interact
-        wireMockServer.stubFor(post(urlPathEqualTo("/v1/interact"))
+        wireMockServer.stubFor(post(urlPathEqualTo("/oauth2/v1/interact"))
             .withHeader("Content-Type", containing(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.SC_OK)
@@ -301,7 +302,7 @@ class EndToEndIT {
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
 
-        wireMockServer.verify(postRequestedFor(urlEqualTo("/v1/interact"))
+        wireMockServer.verify(postRequestedFor(urlEqualTo("/oauth2/v1/interact"))
             .withHeader("Content-Type", equalTo(MediaType.APPLICATION_FORM_URLENCODED_VALUE)))
         wireMockServer.resetAll()
 
