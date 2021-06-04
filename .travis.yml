@@ -10,8 +10,8 @@ addons:
     - libxml2-utils
   chrome: stable
 
-before_install:
-- source ./src/ci/before_install.sh
+#before_install:
+#- source ./src/ci/before_install.sh
 
 # skip the Travis-CI install phase because Maven handles that directly
 #install:
@@ -19,12 +19,12 @@ before_install:
 
 install: skip
 
-script: "exit 0"
+script: exit 0
+
 #- "./src/ci/build.sh"
 
-
-after_success:
-- bash <(curl -s https://codecov.io/bash) -f coverage/target/site/jacoco-aggregate/jacoco.xml
+#after_success:
+#- bash <(curl -s https://codecov.io/bash) -f coverage/target/site/jacoco-aggregate/jacoco.xml
 
 deploy:
 - provider: pages
