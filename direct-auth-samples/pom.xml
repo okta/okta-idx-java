@@ -25,7 +25,7 @@
 
     <artifactId>okta-idx-java-direct-auth-samples</artifactId>
     <name>Okta IDX Java SDK :: Direct Auth Samples</name>
-    <version>0.1.0-beta.6</version>
+    <version>0.1.1-beta.6-SNAPSHOT</version>
     <description>Demonstrate IDX SDK Direct Auth flows</description>
 
     <properties>
@@ -33,7 +33,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <checkstyle-maven-plugin.version>3.1.2</checkstyle-maven-plugin.version>
         <java.version>1.8</java.version>
-        <okta.sdk.version>0.1.0-beta.6</okta.sdk.version>
+        <okta.sdk.version>0.1.1-beta.6-SNAPSHOT</okta.sdk.version>
         <okta.sdk.api.version>4.0.0</okta.sdk.api.version>
     </properties>
 
@@ -266,9 +266,4 @@
             </build>
         </profile>
     </profiles>
-
-
-  <scm>
-    <tag>okta-idx-java-root-0.1.0-beta.6</tag>
-  </scm>
 </project>
