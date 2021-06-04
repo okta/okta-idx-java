@@ -17,6 +17,8 @@ before_install:
 #install:
 #- 'true'
 
+install: skip
+
 script: "exit 0"
 #- "./src/ci/build.sh"
 
