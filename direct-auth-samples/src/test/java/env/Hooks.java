@@ -15,7 +15,6 @@
  */
 package env;
 
-
 import com.okta.sdk.client.Client;
 import com.okta.sdk.client.ClientBuilder;
 import com.okta.sdk.client.Clients;
@@ -34,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pages.Page;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -110,16 +110,20 @@ public class Hooks {
 	}
 
 	@Before("@requireMFAGroupsForUser")
-	public void assignMFAGroupBeforeScenario() {
+	public void assignMFAGroupBeforeScenario(Scenario scenario) {
 		Assert.assertNotNull(Page.getUser());
+		List<String> groups = new ArrayList<>();
+		groups.add("MFA Required");
+		if (scenario.getId().contains("mfa_with_password_and_sms")) {
+			groups.add("Phone Enrollment Required");
+		}
+
 		List<Group> groupList = client.listGroups()
-				.stream().filter(
-						x -> x.getProfile().getName().equals("MFA Required") ||
-						x.getProfile().getName().equals("Phone Enrollment Required"))
+				.stream()
+				.filter(group -> groups.contains(group.getProfile().getName()))
 				.collect(Collectors.toList());
 		Assert.assertFalse(groupList.isEmpty());
-		Assert.assertEquals(2, groupList.size());
-		groupList.forEach(x -> Page.getUser().addToGroup(x.getId()));
+		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
 	}
 
 	@After("@requireUserDeletionAfterRegistration")
