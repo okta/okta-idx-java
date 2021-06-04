@@ -23,7 +23,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import pages.ForgotPasswordPage;
 import pages.LoginPage;
 import pages.Page;
@@ -140,9 +139,8 @@ public class PasswordRecovery extends CucumberRoot {
 
 	@Then("she sees a message \"There is no account with the Username mary@unknown.com.\"")
 	public void she_sees_a_message() {
-		WebElement alert = forgotPasswordPage.alertDanger;
-		Assert.assertTrue(alert.isDisplayed());
-		String errorMsg = alert.getText();
+		Assert.assertTrue(forgotPasswordPage.alertDanger.isDisplayed());
+		String errorMsg = forgotPasswordPage.alertDanger.getText();
 		Assert.assertFalse("Error is not shown", errorMsg.isEmpty());
 		Assert.assertEquals("Wrong error message is shown", "[There is no account with the Username " + EXAMPLE_EMAIL + ".]", errorMsg);
 	}
