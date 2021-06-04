@@ -35,16 +35,6 @@
         </dependency>
         <dependency>
             <groupId>com.okta.idx.sdk</groupId>
-            <artifactId>okta-idx-java-impl</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.okta.idx.sdk</groupId>
-            <artifactId>okta-idx-java-examples</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.okta.idx.sdk</groupId>
             <artifactId>okta-idx-java-integration-tests</artifactId>
             <scope>test</scope>
         </dependency>
