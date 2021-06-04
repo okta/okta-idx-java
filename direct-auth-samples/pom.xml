@@ -51,12 +51,6 @@
             <version>${okta.sdk.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.okta.idx.sdk</groupId>
-            <artifactId>okta-idx-java-impl</artifactId>
-            <version>${okta.sdk.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
@@ -214,7 +208,7 @@
         <profile>
             <id>cucumber-it</id>
             <!-- runs Cucumber E2E tests;
-                 use mvn clean install -P '!cucumber-it' to disable this  -->
+                 use mvn clean install -P '!cucumber-it' to disable it  -->
             <activation>
                 <activeByDefault>false</activeByDefault> <!-- TODO: revert to true -->
             </activation>

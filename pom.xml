@@ -69,11 +69,6 @@
                 <artifactId>okta-idx-java-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.okta.idx.sdk</groupId>
-                <artifactId>okta-idx-java-impl</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <!-- Other Okta Projects -->
             <dependency>
@@ -319,3 +314,4 @@
         </profile>
     </profiles>
 </project>
+
