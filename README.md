@@ -21,7 +21,12 @@ This repository contains the Okta IDX SDK for Java. This SDK can be used in your
 
 > :warning: Beta alert! This library is in beta. See [release status](#release-status) for more information.
 
-## Release status
+This library is built for projects in Java framework to communicate with Okta as an OAuth
+2.0 + OpenID Connect provider. It works with [Okta's Identity Engine](#okta-identity-engine) to authenticate and register users.
+
+To see this library working in a sample, check out our [Java Sample Application](direct-auth-samples).
+
+## Release Status
 
 This library uses semantic versioning and follows Okta's [Library Version Policy][okta-library-versioning].
 
@@ -31,14 +36,14 @@ This library uses semantic versioning and follows Okta's [Library Version Policy
 
 The latest release can always be found on the [releases page][github-releases].
 
-## Need help?
+## Need Help?
  
 If you run into problems using the SDK, you can
  
 * Ask questions on the [Okta Developer Forums][devforum]
 * Post [issues][github-issues] here on GitHub (for code errors)
 
-## Getting started
+## Getting Started
 
 ### Prerequisites
 
@@ -76,7 +81,7 @@ You will also need:
 
 * An Okta account, called an _organization_ (sign up for a free [developer organization](https://developer.okta.com/signup) if you need one). 
 
-## Usage guide
+## Usage Guide
 
 The below code snippets will help you understand how to use this library. Alternatively, you can look at [Quickstart](examples/src/main/java/Quickstart.java) to help get started.
 
@@ -98,7 +103,7 @@ This library looks for configuration in the following sources:
  
 Higher numbers win. In other words, configuration passed via the constructor will override configuration found in environment variables, which will override configuration in `okta.yaml` (if any), and so on.
  
-### YAML configuration
+### YAML Configuration
  
 The full YAML configuration looks like:
  
@@ -127,7 +132,7 @@ okta:
     redirectUri: "https://loginredirect.com"
 ```
  
-### Environment variables
+### Environment Variables
  
 Each one of the configuration values above can be turned into an environment variable name with the `_` (underscore) character:
 
@@ -137,7 +142,7 @@ Each one of the configuration values above can be turned into an environment var
 * `OKTA_IDX_SCOPES`
 * `OKTA_IDX_REDIRECTURI`
 
-### System properties
+### System Properties
 
 Each one of the configuration values written in 'dot' notation to be used as a Java system property:
 * `okta.idx.issuer`
@@ -150,9 +155,9 @@ Each one of the configuration values written in 'dot' notation to be used as a J
 
 In most cases, you won't need to build the SDK from source. If you want to build it yourself, clone the repo and run `mvn install`.
 
-By default, the Cucumber Integration Tests are run on Maven builds (see [here](direct-auth-samples/pom.xml)). 
-If you wish to skip these Cucumber integration tests, 
-simply disable the associated maven profile using `mvn clean install -P '!cucumber-it'`
+By default, the Cucumber Integration tests are run on Maven builds (see [here](direct-auth-samples/pom.xml)). 
+If you wish to skip these Cucumber Integration tests, 
+simply disable the associated Maven profile using `mvn clean install -P '!cucumber-it'`
 
 ## Contributing
  
@@ -166,3 +171,4 @@ We are happy to accept contributions and PRs! Please see the [contribution guide
 [okta-library-versioning]: https://developer.okta.com/code/library-versions
 [jdk-8]: https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html
 [apache-maven]: https://maven.apache.org/download.cgi
+[okta-identity-engine]: https://developer.okta.com/docs/concepts/ie-intro/
