@@ -24,5 +24,5 @@ Feature: 3.1 Direct Auth Password Recovery
     When she selects "Forgot Password"
     Then she sees the Password Recovery Page
     When she inputs an Email that doesn't exist
-    And she submits the form
+    And she submits the forgot password form
     Then she sees a message "There is no account with the Username mary@unknown.com."
