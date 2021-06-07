@@ -135,4 +135,32 @@
         <cve>CVE-2021-25122</cve>
         <cve>CVE-2021-25329</cve>
     </suppress>
+
+    <suppress>
+        <notes><![CDATA[ file name: tomcat-embed-core-9.0.39.jar ]]></notes>
+        <cve>CVE-2020-17527</cve>
+        <cve>CVE-2020-9484</cve>
+        <cve>CVE-2021-24122</cve>
+        <cve>CVE-2021-25122</cve>
+        <cve>CVE-2021-25329</cve>
+    </suppress>
+
+    <!-- False positive - https://github.com/jeremylong/DependencyCheck/issues/1827 -->
+    <suppress>
+        <notes><![CDATA[ file name: spring-security-core-5.4.1.jar ]]></notes>
+        <cve>CVE-2018-1258</cve>
+        <cve>CVE-2021-22112</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[ file name: spring-security-oauth2-core-5.4.1.jar ]]></notes>
+        <cve>CVE-2018-1258</cve>
+        <cve>CVE-2021-22112</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[ file name: spring-security-oauth2-resource-server-5.4.1.jar ]]></notes>
+        <cve>CVE-2018-1258</cve>
+        <cve>CVE-2021-22112</cve>
+    </suppress>
 </suppressions>
