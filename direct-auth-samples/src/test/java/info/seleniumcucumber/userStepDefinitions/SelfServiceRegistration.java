@@ -21,6 +21,7 @@ import io.cucumber.java.en.When;
 import env.CucumberRoot;
 import env.DriverUtil;
 import env.a18n.client.response.A18NEmail;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 import pages.Page;
@@ -31,8 +32,7 @@ import pages.VerifyPage;
 
 public class SelfServiceRegistration extends CucumberRoot {
 
-    private static final int RETRY_COUNT = 5; //TODO Should be in config
-
+    private static final int RETRY_COUNT = 5;   //TODO Should be in config
     protected WebDriver driver = DriverUtil.getDefaultDriver();
 
     private RegisterPage registerPage = new RegisterPage(driver);
@@ -117,6 +117,21 @@ public class SelfServiceRegistration extends CucumberRoot {
         registerPage.codeInput.sendKeys(code);
     }
 
+    @When("^she inputs the correct code from her SMS$")
+    public void she_inputs_the_correct_code_from_her_sms() {
+        String code = null;
+        int retryCount = RETRY_COUNT;
+        while (retryCount > 0 && code == null) {
+            registerPage.sleep();
+            String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
+            code = StringUtils.substringBetween(sms, "code is ", ".");
+            retryCount--;
+        }
+        Assert.assertTrue(StringUtils.isNotBlank(code));
+        registerPage.codeInput.click();
+        registerPage.codeInput.sendKeys(code);
+    }
+
     @And("^she submits the verify form$")
     public void she_submits_the_verify_form() {
         registerPage.verifyButton.click();
@@ -190,6 +205,15 @@ public class SelfServiceRegistration extends CucumberRoot {
     public void she_selects_phone_from_the_list() {
         verifyPage.phoneRadioButton.click();
         verifyPage.proceedButton.click();
+    }
+
+    @And("^she inputs a valid phone number$")
+    public void she_inputs_a_valid_phone_number() {
+        Assert.assertNotNull(Page.getA18NProfile());
+        Assert.assertNotNull(Page.getA18NProfile().getPhoneNumber());
+        Assert.assertTrue(selectAuthenticatorPage.phone.isDisplayed());
+        selectAuthenticatorPage.phone.click();
+        selectAuthenticatorPage.phone.sendKeys(Page.getA18NProfile().getPhoneNumber());
     }
 
     @And("^she inputs an invalid phone number$")
