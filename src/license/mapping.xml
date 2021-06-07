@@ -22,4 +22,9 @@
         <artifactId>auto-service</artifactId>
         <license>Apache License, Version 2.0</license>
     </artifact>
+    <artifact>
+        <groupId>org.thymeleaf.extras</groupId>
+        <artifactId>thymeleaf-extras-springsecurity5</artifactId>
+        <license>Apache License, Version 2.0</license>
+    </artifact>
 </license-lookup>
