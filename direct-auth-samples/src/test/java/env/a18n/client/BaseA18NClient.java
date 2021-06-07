@@ -40,13 +40,10 @@ public class BaseA18NClient implements A18NClient {
 
     private final Logger logger = LoggerFactory.getLogger(BaseA18NClient.class);
 
-    private final ClientConfiguration clientConfiguration;
     private final ObjectMapper objectMapper;
     private final RequestExecutor requestExecutor;
 
     public BaseA18NClient(ClientConfiguration clientConfiguration, RequestExecutor requestExecutor) {
-
-        this.clientConfiguration = clientConfiguration;
 
         this.objectMapper = new ObjectMapper()
                 .enable(SerializationFeature.INDENT_OUTPUT)
@@ -94,7 +91,7 @@ public class BaseA18NClient implements A18NClient {
             profile = objectMapper.convertValue(responseJsonNode, A18NProfile.class);
             logger.info("A18N profile created: " + profile.getEmailAddress());
         } catch (Exception e) {
-            logger.debug("Fail to create A18N profile", e);
+            logger.error("Fail to create A18N profile", e);
         }
 
         return profile;
@@ -119,7 +116,7 @@ public class BaseA18NClient implements A18NClient {
             }
             logger.info("A18N profile deleted: " + profile.getEmailAddress());
         } catch (Exception e) {
-            logger.debug("Fail to delete A18N profile", e);
+            logger.error("Fail to delete A18N profile", e);
         }
     }
 
@@ -145,7 +142,7 @@ public class BaseA18NClient implements A18NClient {
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
             email = objectMapper.convertValue(responseJsonNode, A18NEmail.class);
         } catch (Exception e) {
-            logger.debug("Fail to get last email for "+ profile.getEmailAddress(), e);
+            logger.error("Fail to get last email for " + profile.getEmailAddress(), e);
         }
         return email;
     }
@@ -168,7 +165,7 @@ public class BaseA18NClient implements A18NClient {
             }
             sms = IOUtils.toString(response.getBody(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            logger.debug("Fail to get last sms for " + profile.getEmailAddress(), e);
+            logger.error("Fail to get last sms for " + profile.getEmailAddress(), e);
         }
         return sms;
     }
