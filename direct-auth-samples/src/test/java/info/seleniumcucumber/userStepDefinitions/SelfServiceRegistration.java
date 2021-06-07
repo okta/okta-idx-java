@@ -209,14 +209,29 @@ public class SelfServiceRegistration extends CucumberRoot {
         Assert.assertTrue(registerPhonePage.smsRadioButton.isDisplayed());
     }
 
+    @Then("^she is presented with an option to select SMS to verify$")
+    public void she_is_presented_with_an_option_to_select_sms_to_verify(){
+        Assert.assertTrue(verifyPage.phoneRadioButton.isDisplayed());
+    }
+
     @When("^she selects SMS$")
     public void she_selects_sms() {
         registerPhonePage.smsRadioButton.click();
     }
 
+    @When("^she selects SMS from the list$")
+    public void she_selects_sms_from_the_list() {
+        verifyPage.phoneRadioButton.click();
+    }
+
     @And("^she submits the phone mode form$")
     public void she_submits_the_phone_mode_form() {
         registerPhonePage.submitButton.click();
+    }
+
+    @And("^she selects Receive a Code$")
+    public void she_selects_receive_a_code() {
+        verifyPage.proceedButton.click();
     }
 
     @Then("^she should see an error message \"Unable to initiate factor enrollment: Invalid Phone Number.\"$")
