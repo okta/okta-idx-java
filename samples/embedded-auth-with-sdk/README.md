@@ -1,4 +1,4 @@
-# Okta IDX Direct Auth Example
+# Okta IDX Embedded Auth with SDK Sample
 
 ## Introduction
 
