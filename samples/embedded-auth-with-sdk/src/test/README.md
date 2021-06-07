@@ -7,8 +7,8 @@ To run the tests locally, we need to first run the following script from the roo
 cd okta-idx-java
 ./src/ci/download_chromedriver.sh
 ```
-This will download the chromedriver binary based on your chrome version and place it in the `direct-auth-samples` directory.
-Make sure the binary `chromedriver` is present in the `direct-auth-samples` after running the script
+This will download the chromedriver binary based on your chrome version and place it in the `direct-auth-with-sdk` directory.
+Make sure the binary `chromedriver` is present in `samples/direct-auth-with-sdk` after running the script
 
 Next, we need to set some environment variables to run the tests. Variable names are self-explanatory
 For example,
@@ -35,7 +35,7 @@ export A18N_API_KEY=xxxxxx
 
 Now we're ready to run the tests
 ```
-cd direct-auth-samples
+cd samples/direct-auth-with-sdk
 mvn verify
 ```
 
