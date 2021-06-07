@@ -44,7 +44,7 @@
         <module>api</module>
         <module>integration-tests</module>
         <module>coverage</module>
-        <module>direct-auth-samples</module>
+        <module>samples</module>
     </modules>
 
     <dependencyManagement>
