@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 public class BaseA18NClient implements A18NClient {
 
@@ -75,7 +76,11 @@ public class BaseA18NClient implements A18NClient {
                     "https://api.a18n.help/v1/profile",
                     null,
                     getHttpHeaders(),
-                    new ByteArrayInputStream("profile".getBytes(StandardCharsets.UTF_8)),
+                    new ByteArrayInputStream(objectMapper.writeValueAsBytes(new HashMap<String, String>() {
+                        {
+                            put("displayName", "okta-idx-java");
+                        }
+                    })),
                     -1L);
 
             Response response = requestExecutor.executeRequest(request);
