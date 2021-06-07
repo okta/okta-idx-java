@@ -1,0 +1,92 @@
+<!--
+  ~ Copyright 2021-Present Okta, Inc.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Home</title>
+
+    <div th:replace="fragments/header :: header-css"></div>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div th:if="${tokenResponse}">
+    <a href="/logout" class="btn btn-danger pull-right" id="logout-btn">Logout</a><br/>
+</div>
+
+<div class="container">
+
+    <div th:if="${tokenResponse}" class="alert alert-success">
+        <p>Welcome, <span th:text="${user}"></span>!</p>
+        <p>You have successfully logged in!</p>
+    </div>
+
+    <h2 class="text-center">Token Info</h2>
+
+    <div th:if="${tokenResponse.accessToken}">
+        <p><label>Access Token: </label>
+            <span th:text="${tokenResponse.accessToken}" th:id="accessToken"></span></p>
+    </div>
+
+    <div th:if="${tokenResponse.expiresIn}">
+        <p><label>Expires In: </label>
+            <span th:text="${tokenResponse.expiresIn} + ' ms'"></span></p>
+    </div>
+
+    <div th:if="${tokenResponse.idToken}">
+        <p><label>ID Token: </label>
+            <span th:text="${tokenResponse.idToken}" th:id="idToken"></span></p>
+    </div>
+
+    <div th:if="${tokenResponse.refreshToken}">
+        <p><label>Refresh Token: </label>
+            <span th:text="${tokenResponse.refreshToken}" th:id="refreshToken"></span></p>
+    </div>
+
+    <div th:if="${tokenResponse.scope}">
+        <p><label>Scope(s): </label>
+            <span th:text="${tokenResponse.scope}"></span></p>
+    </div>
+
+    <div th:if="${tokenResponse.tokenType}">
+        <p><label>Token Type: </label>
+            <span th:text="${tokenResponse.tokenType}"></span></p>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="text-center">User Profile</h2>
+
+    <table class="table table-striped" th:id="profileTable">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">Attribute</th>
+            <th scope="col">Value</th>
+        </tr>
+        </thead>
+        <tr th:each="claim : ${claims}">
+            <td th:text="${claim.key}"></td>
+            <td th:text="${claim.value}" th:id="${claim.key}"></td>
+        </tr>
+    </table>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

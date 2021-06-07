@@ -60,7 +60,7 @@ function downloadChromeDriver() {
   echo "${CHROMEDRIVER_DOWNLOAD_URL}"
 
   curl "${CHROMEDRIVER_DOWNLOAD_URL}" --output chromedriver.zip
-  unzip -o chromedriver.zip -d ./direct-auth-samples/
+  unzip -o chromedriver.zip -d ./samples/embedded-auth-with-sdk/
 }
 
 downloadChromeDriver

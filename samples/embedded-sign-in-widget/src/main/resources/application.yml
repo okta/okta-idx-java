@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          okta:
+            authorization-uri: http://localhost:${server.port}/custom-login
+            user-name-attribute: email
+
+okta:
+  oauth2:
+    redirect-uri: /authorization-code/callback
+    scopes:
+    - openid
+    - email
+    - profile
