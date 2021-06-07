@@ -24,7 +24,7 @@
        <version>0.1.0-beta.6-SNAPSHOT</version>
     </parent>
 
-    <artifactId>okta-idx-java-examples</artifactId>
+    <artifactId>okta-idx-java-samples</artifactId>
     <groupId>com.okta.idx.sdk</groupId>
     <name>Okta IDX Java SDK :: Samples</name>
     <packaging>pom</packaging>
