@@ -28,7 +28,7 @@ guides for Embedded Authentication](link to DevDoc SBS guide)
 ## Installation & Running The App
 
 1. Build the project from root level (see [here](https://github.com/okta/okta-idx-java/tree/direct-auth#building-the-sdk))
-2. Navigate to samples folder `direct-auth-samples` and run the below `mvn` command:
+2. Navigate to folder `samples/embedded-auth-with-sdk` and run the below `mvn` command:
 
 ```bash
 cd samples/embedded-auth-with-sdk/
