@@ -19,20 +19,27 @@ import env.CucumberRoot;
 import env.DriverUtil;
 import env.a18n.client.response.A18NEmail;
 import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
-import pages.*;
+import pages.ForgotPasswordPage;
+import pages.LoginPage;
+import pages.Page;
+import pages.PasswordRecoveryPage;
+import pages.RegisterPage;
+import pages.SelectAuthenticatorPage;
 
 public class PasswordRecovery extends CucumberRoot {
 
 	private static final int RETRY_COUNT = 5; //TODO Should be in config
+	private static final String EXAMPLE_EMAIL = "mary@unknown.com";
 
 	protected WebDriver driver = DriverUtil.getDefaultDriver();
+	protected LoginPage loginPage = new LoginPage(driver);
 	protected PasswordRecoveryPage passwordRecoveryPage = new PasswordRecoveryPage(driver);
 	protected SelectAuthenticatorPage selectAuthenticatorPage = new SelectAuthenticatorPage(driver);
+	protected ForgotPasswordPage forgotPasswordPage = new ForgotPasswordPage(driver);
 	protected RegisterPage registerPage = new RegisterPage(driver);
 
 	@When("^she inputs her correct Email$")
@@ -92,6 +99,11 @@ public class PasswordRecovery extends CucumberRoot {
 		selectAuthenticatorPage.verifyButton.click();
 	}
 
+	@And("^she submits the forgot password form$")
+	public void she_submits_the_forgot_password_form() {
+		forgotPasswordPage.nextButton.click();
+	}
+
 	@Then("^she sees a page to set her password$")
 	public void she_sees_a_page_to_set_her_password() {
 		Assert.assertTrue(registerPage.newPasswordInput.isDisplayed());
@@ -107,5 +119,29 @@ public class PasswordRecovery extends CucumberRoot {
 	public void she_confirms_that_password() {
 		registerPage.confirmNewPasswordInput.click();
 		registerPage.confirmNewPasswordInput.sendKeys("QwErTy@123");
+	}
+
+	@When("she selects \"Forgot Password\"")
+	public void she_selects_forgot_password() {
+		loginPage.forgotPasswordLink.click();
+	}
+
+	@Then("she sees the Password Recovery Page")
+	public void she_sees_the_password_recovery_page() {
+		Assert.assertTrue("URL should ends with \"/forgot-password\"", forgotPasswordPage.getCurrentUrl().endsWith("/forgot-password"));
+		Assert.assertTrue(forgotPasswordPage.forgotPasswordForm.isDisplayed());
+	}
+
+	@When("she inputs an Email that doesn't exist")
+	public void she_inputs_an_email_that_doesnt_exist() {
+		forgotPasswordPage.inputField.sendKeys(EXAMPLE_EMAIL);
+	}
+
+	@Then("she sees a message \"There is no account with the Username mary@unknown.com.\"")
+	public void she_sees_a_message() {
+		Assert.assertTrue(forgotPasswordPage.alertDanger.isDisplayed());
+		String errorMsg = forgotPasswordPage.alertDanger.getText();
+		Assert.assertFalse("Error is not shown", errorMsg.isEmpty());
+		Assert.assertEquals("Wrong error message is shown", "[There is no account with the Username " + EXAMPLE_EMAIL + ".]", errorMsg);
 	}
 }

@@ -28,11 +28,13 @@ public class A18NProfile {
             .enable(SerializationFeature.INDENT_OUTPUT)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-    private String profileId;
+    private String displayName;
+
+    private String emailAddress;
 
     private String phoneNumber;
 
-    private String emailAddress;
+    private String profileId;
 
     private String url;
 
@@ -40,16 +42,20 @@ public class A18NProfile {
         return objectMapper.writeValueAsString(this);
     }
 
-    public String getProfileId() {
-        return profileId;
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getEmailAddress() {
+        return emailAddress;
     }
 
     public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public String getEmailAddress() {
-        return emailAddress;
+    public String getProfileId() {
+        return profileId;
     }
 
     public String getUrl() {

@@ -21,6 +21,7 @@ import com.okta.sdk.client.Clients;
 import com.okta.sdk.resource.group.Group;
 import com.okta.sdk.resource.user.User;
 import com.okta.sdk.resource.user.UserBuilder;
+import com.okta.sdk.resource.user.factor.SmsUserFactor;
 import env.a18n.client.DefaultA18NClientBuilder;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -89,11 +90,22 @@ public class Hooks {
                 .setFirstName("Mary E2E")
                 .setLastName(Page.getA18NProfile().getProfileId())
                 .setPassword("Abcd1234".toCharArray())
+				.setMobilePhone(Page.getA18NProfile().getPhoneNumber())
                 .setActive(true)
                 .buildAndCreate(client);
 		Assert.assertNotNull(user.getId());
 		logger.info("User created: " + user.getProfile().getEmail());
 		Page.setUser(user);
+	}
+
+	@Before("@requireEnrolledPhone")
+	public void enrollSmsUserFactor() {
+		Assert.assertNotNull(Page.getA18NProfile());
+		Assert.assertNotNull(Page.getUser());
+
+		SmsUserFactor smsUserFactor = client.instantiate(SmsUserFactor.class);
+		smsUserFactor.getProfile().setPhoneNumber(Page.getA18NProfile().getPhoneNumber());
+		Page.getUser().enrollFactor(smsUserFactor, false, null, null, true);
 	}
 
 	@After("@requireExistingUser")

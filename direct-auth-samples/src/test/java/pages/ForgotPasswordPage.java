@@ -28,4 +28,13 @@ public class ForgotPasswordPage extends Page {
     @FindBy(className = "forgotpassword-form")
     public WebElement forgotPasswordForm;
 
+    @FindBy(css = "input[name='username'][placeholder='Email']")
+    public WebElement inputField;
+
+    @FindBy(id = "next-btn")
+    public WebElement nextButton;
+
+    @FindBy(className = "alert-danger")
+    public WebElement alertDanger;
+
 }

@@ -21,19 +21,23 @@ Feature: 6.2 Multi-Factor Authentication with Password and SMS
     Then she is redirected to the Root View
     And an application session is created
 
-#  Scenario: 6.2.2 2FA Login with SMS
-#    Given Mary navigates to the Basic Login View
-#    And she has inserted her password
-#    And her password is correct
-#    When she clicks Login
-#    Then she is presented with an option to select SMS to verify
-#    When She selects SMS from the list
-#    And She selects "Receive a Code"
-#    Then the screen changes to receive an input for a code
-#    When She inputs the correct code from the SMS
-#    And She selects "Verify"
-#    Then she is redirected to the Root View
-#    And an application session is created
+  @requireA18NProfile
+  @requireExistingUser
+  @requireEnrolledPhone
+  @requireMFAGroupsForUser
+  Scenario: 6.2.2 2FA Login with SMS
+    Given Mary navigates to the Basic Login View
+    When she fills in her correct username for mfa
+    And she fills in her correct password for mfa
+    And she submits the Login form
+    Then she is presented with an option to select SMS to verify
+    When she selects SMS from the list
+    And she selects Receive a Code
+    Then the screen changes to receive an input for a code
+    When she inputs the correct code from the SMS
+    And she submits the verify form
+    Then she is redirected to the Root View
+    And an application session is created
 
   @requireA18NProfile
   @requireExistingUser
@@ -52,15 +56,22 @@ Feature: 6.2 Multi-Factor Authentication with Password and SMS
     And she submits the phone mode form
     Then she should see a message "Unable to initiate factor enrollment: Invalid Phone Number"
 
-#  Scenario: 6.2.4 Mary enters a wrong verification code on verify
-#    Given Mary navigates to the Basic Login View
-#    And she has inserted her password
-#    And her password is correct
-#    When she clicks Login
-#    Then she is presented with an option to select SMS to verify
-#    When She selects SMS from the list
-#    And She selects "Receive a Code"
-#    Then the screen changes to receive an input for a code
-#    When She inputs the incorrect code from the email
-#    Then the sample show as error message "Invalid code. Try again." on the SMS Challenge page
-#    And she sees a field to re-enter another code
+  @requireA18NProfile
+  @requireExistingUser
+  @requireMFAGroupsForUser
+  Scenario: 6.2.4 Mary enters a wrong verification code on verify
+    Given Mary navigates to the Basic Login View
+    When she fills in her correct username for mfa
+    And she fills in her correct password for mfa
+    And she submits the Login form
+    Then she is presented with a list of factors
+    When she selects Phone from the list
+    And she inputs a valid phone number
+    And submits the enrollment form
+    Then she sees a list of phone modes
+    When she selects SMS
+    And she submits the phone mode form
+    Then the screen changes to receive an input for a code
+    When she inputs the incorrect code from the phone
+    Then the sample shows an error message "Invalid code. Try again." on the Sample App
+    And she sees a field to re-enter another code

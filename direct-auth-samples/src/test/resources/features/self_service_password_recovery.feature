@@ -19,10 +19,10 @@ Feature: 3.1 Direct Auth Password Recovery
     Then she is redirected to the Root View
     And an application session is created
 
-#  Scenario: 3.1.2 Mary tries to reset a password with the wrong email
-#    Given Mary navigates to the Self Service Password Reset View
-#    When she selects "Forgot Password"
-#    Then she sees the Password Recovery Page
-#    When she inputs an Email that doesn't exist
-#    And she submits the form
-#    Then she sees a message "There is no account with the Username {username}."
+  Scenario: 3.1.2 Mary tries to reset a password with the wrong email
+    Given Mary navigates to the Basic Login View
+    When she selects "Forgot Password"
+    Then she sees the Password Recovery Page
+    When she inputs an Email that doesn't exist
+    And she submits the forgot password form
+    Then she sees a message "There is no account with the Username mary@unknown.com."
