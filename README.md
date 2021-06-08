@@ -24,7 +24,7 @@ This repository contains the Okta IDX SDK for Java. This SDK can be used in your
 This library is built for projects in Java framework to communicate with Okta as an OAuth
 2.0 + OpenID Connect provider. It works with [Okta's Identity Engine](#okta-identity-engine) to authenticate and register users.
 
-To see this library working in a sample, check out our [Java Sample Application](direct-auth-samples).
+To see this library working in a sample, check out our [Java Samples](#java-samples).
 
 ## Release Status
 
@@ -155,7 +155,7 @@ Each one of the configuration values written in 'dot' notation to be used as a J
 
 In most cases, you won't need to build the SDK from source. If you want to build it yourself, clone the repo and run `mvn install`.
 
-By default, the Cucumber Integration tests are run on Maven builds (see [here](direct-auth-samples/pom.xml)). 
+By default, the Cucumber Integration tests are run on Maven builds (see [here](samples/embedded-auth-with-sdk/pom.xml)). 
 If you wish to skip these Cucumber Integration tests, 
 simply disable the associated Maven profile using `mvn clean install -P '!cucumber-it'`
 
@@ -171,4 +171,5 @@ We are happy to accept contributions and PRs! Please see the [contribution guide
 [okta-library-versioning]: https://developer.okta.com/code/library-versions
 [jdk-8]: https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html
 [apache-maven]: https://maven.apache.org/download.cgi
+[java-samples]: https://github.com/okta/okta-idx-java/tree/master/samples
 [okta-identity-engine]: https://developer.okta.com/docs/concepts/ie-intro/
