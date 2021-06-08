@@ -24,7 +24,7 @@ This repository contains the Okta IDX SDK for Java. This SDK can be used in your
 This library is built for projects in Java framework to communicate with Okta as an OAuth
 2.0 + OpenID Connect provider. It works with [Okta's Identity Engine](#okta-identity-engine) to authenticate and register users.
 
-To see this library working in a sample, check out our [Java Samples](java-samples).
+To see this library working in a sample, check out our [Java Samples][java-samples].
 
 ## Release Status
 
@@ -47,8 +47,8 @@ If you run into problems using the SDK, you can
 
 ### Prerequisites
 
-- [JDK 8](jdk-8) or later
-- [Apache Maven](apache-maven) 3.6.x or later
+- [JDK 8][jdk-8] or later
+- [Apache Maven][apache-maven] 3.6.x or later
 
 To use this SDK, you will need to include the following dependencies:
 
@@ -164,6 +164,6 @@ We are happy to accept contributions and PRs! Please see the [contribution guide
 [github-releases]: https://github.com/okta/okta-idx-java/releases
 [okta-library-versioning]: https://developer.okta.com/code/library-versions
 [jdk-8]: https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html
-[apache-maven]: https://maven.apache.org/download.cgi
 [java-samples]: https://github.com/okta/okta-idx-java/tree/master/samples
+[apache-maven]: https://maven.apache.org/download.cgi
 [okta-identity-engine]: https://developer.okta.com/docs/concepts/ie-intro/
