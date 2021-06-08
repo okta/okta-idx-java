@@ -37,7 +37,7 @@ public class MFA extends CucumberRoot {
 
     @When("^she fills in her correct username for mfa$")
     public void she_fills_in_her_correct_username_for_mfa() {
-        loginPage.sleep();
+        loginPage.waitForWebElementDisplayed(loginPage.usernameInput);
         Assert.assertTrue(loginPage.usernameInput.isDisplayed());
         loginPage.usernameInput.click();
         loginPage.usernameInput.sendKeys(Page.getUser().getProfile().getEmail());
@@ -70,6 +70,7 @@ public class MFA extends CucumberRoot {
 
     @And("^she inputs a invalid phone number$")
     public void she_inputs_a_invalid_phone_number() {
+        selectAuthenticatorPage.waitForWebElementDisplayed(selectAuthenticatorPage.phone);
         Assert.assertTrue(selectAuthenticatorPage.phone.isDisplayed());
         selectAuthenticatorPage.phone.click();
         selectAuthenticatorPage.phone.sendKeys(Page.getA18NProfile().getPhoneNumber());
@@ -82,14 +83,7 @@ public class MFA extends CucumberRoot {
 
     @When("^she inputs the correct code from the SMS$")
     public void she_inputs_the_correct_code_from_the_sms() {
-        String code = null;
-        int retryCount = RETRY_COUNT;
-        while (retryCount > 0 && code == null) {
-            registerPage.sleep();
-            String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
-            code = StringUtils.substringBetween(sms, "code is ", ".");
-            retryCount--;
-        }
+        String code = registerPage.fetchCodeFromSMS();
         Assert.assertTrue(StringUtils.isNotBlank(code));
         registerPage.codeInput.click();
         registerPage.codeInput.sendKeys(code);
@@ -97,7 +91,7 @@ public class MFA extends CucumberRoot {
 
     @Then("^the sample shows an error message \"Invalid code. Try again.\" on the Sample App$")
     public void the_sample_shows_an_error_message(){
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.alertDanger);
         Assert.assertTrue(registerPage.alertDanger.isDisplayed());
         String error = registerPage.alertDanger.getText();
         Assert.assertFalse("Error is not shown", error.isEmpty());
@@ -106,7 +100,7 @@ public class MFA extends CucumberRoot {
 
     @Then("^she should see a message \"Unable to initiate factor enrollment: Invalid Phone Number\"$")
     public void she_should_see_a_message_invalid_phone_number() {
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.alertDanger);
         Assert.assertTrue(registerPage.alertDanger.isDisplayed());
         String error = registerPage.alertDanger.getText();
         Assert.assertFalse("Error is not shown", error.isEmpty());

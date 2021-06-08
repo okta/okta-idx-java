@@ -65,24 +65,6 @@ public class RootPage extends Page {
         driver.get("http://localhost:8080/forgot-password"); // TODO pass as env variable.
     }
 
-    public boolean isLoginButtonDisplayed() {
-        return loginButton.isDisplayed();
-    }
-
-    public boolean isRegistrationButtonDisplayed() {
-        return registrationButton.isDisplayed();
-    }
-
-    public boolean isLogoutButtonDisplayed() {
-        return logoutButton.isDisplayed();
-    }
-
-    public void waitForLoginButtonDisplayed(){
-        new WebDriverWait(driver, 5)
-                .until(ExpectedConditions.visibilityOf(logoutButton));
-
-    }
-
     public boolean elementIsDisplayed(WebElement element){
         try {
            return element.isDisplayed();

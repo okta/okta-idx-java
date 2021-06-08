@@ -26,7 +26,6 @@ import com.okta.commons.http.config.HttpClientConfiguration;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Classes;
 import com.okta.idx.sdk.api.config.ClientConfiguration;
-import env.a18n.client.response.A18NEmail;
 import env.a18n.client.response.A18NProfile;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -121,14 +120,14 @@ public class BaseA18NClient implements A18NClient {
     }
 
     @Override
-    public A18NEmail getLatestEmail(A18NProfile profile) {
+    public String getLatestEmailContent(A18NProfile profile) {
 
-        A18NEmail email = null;
+        String email = null;
 
         try {
             Request request = new DefaultRequest(
                     HttpMethod.GET,
-                    profile.getUrl() + "/email/latest",
+                    profile.getUrl() + "/email/latest/content",
                     null,
                     getHttpHeaders(),
                     null,
@@ -139,8 +138,7 @@ public class BaseA18NClient implements A18NClient {
             if (response.getHttpStatus() != 200) {
                 throw new Exception(response.toString());
             }
-            JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
-            email = objectMapper.convertValue(responseJsonNode, A18NEmail.class);
+            email = IOUtils.toString(response.getBody(), StandardCharsets.UTF_8);
         } catch (Exception e) {
             logger.error("Fail to get last email for " + profile.getEmailAddress(), e);
         }

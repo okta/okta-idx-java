@@ -18,10 +18,19 @@ package pages;
 import com.okta.sdk.resource.user.User;
 import env.a18n.client.A18NClient;
 import env.a18n.client.response.A18NProfile;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Page {
+
+    private static final int RETRY_COUNT = 5;
 
     protected WebDriver driver;
 
@@ -62,11 +71,51 @@ public class Page {
         return driver.getCurrentUrl();
     }
 
-    public void sleep() {
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public void waitForWebElementDisplayed(WebElement webElement) {
+        new WebDriverWait(driver, 5)
+                .until(ExpectedConditions.visibilityOf(webElement));
+    }
+
+    public String fetchCodeFromSMS() {
+        String code = null;
+        int retryCount = RETRY_COUNT;
+        while (retryCount > 0 && code == null) {
+            try { Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
+            String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
+            code = StringUtils.substringBetween(sms, "code is ", ".");
+            retryCount--;
         }
+        return code;
+    }
+
+    public String fetchEmailContent() {
+        String email = null;
+        int retryCount = RETRY_COUNT;
+        while(retryCount > 0) {
+            try { Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
+            email = Page.getA18NClient().getLatestEmailContent(Page.getA18NProfile());
+            if(email != null) {
+                break;
+            } else {
+                retryCount--;
+            }
+        }
+        return email;
+    }
+
+    public String fetchCodeFromRegistrationEmail(String emailContent) {
+        Pattern pattern = Pattern.compile("To verify manually, enter this code: (\\d{6})");
+        Matcher matcher = pattern.matcher(emailContent);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    public String fetchCodeFromPasswordResetEmail(String emailContent) {
+        Pattern pattern = Pattern.compile("Enter a code instead: (\\d{6})");
+        Matcher matcher = pattern.matcher(emailContent);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    public void doNothing() {
+        try { Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
     }
 }

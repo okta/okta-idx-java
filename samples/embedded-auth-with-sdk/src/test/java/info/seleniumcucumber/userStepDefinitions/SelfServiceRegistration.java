@@ -20,7 +20,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import env.CucumberRoot;
 import env.DriverUtil;
-import env.a18n.client.response.A18NEmail;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
@@ -42,7 +41,7 @@ public class SelfServiceRegistration extends CucumberRoot {
 
     @When("^she fills out her First Name$")
     public void she_fills_out_her_first_name() {
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.firstnameInput);
         registerPage.firstnameInput.click();
         registerPage.firstnameInput.sendKeys("Mary");
     }
@@ -54,7 +53,7 @@ public class SelfServiceRegistration extends CucumberRoot {
             profileSuffix = Page.getA18NProfile().getProfileId();
         }
         registerPage.lastnameInput.click();
-        registerPage.lastnameInput.sendKeys("e2e-" + profileSuffix);
+        registerPage.lastnameInput.sendKeys("E2E-Java-" + profileSuffix);
     }
 
     @And("^she fills out her Email$")
@@ -73,45 +72,34 @@ public class SelfServiceRegistration extends CucumberRoot {
 
     @And("^she submits the registration form$")
     public void she_submits_the_registration_form() {
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.signInButton);
         registerPage.signInButton.click();
     }
 
     @Then("^she sees a list of required factors to setup$")
     public void she_sees_a_list_of_required_factors_to_setup() {
-        registerPage.sleep();
+        //registerPage.doNothing();
         //Assert.assertTrue(registerPage.codeInput.isDisplayed());
     }
 
     @When("^she selects Email$")
     public void she_selects_email() {
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.emailRadioButton);
         registerPage.emailRadioButton.click();
         registerPage.proceedButton.click();
     }
 
     @Then("^she sees a page to input a code$")
     public void she_sees_a_page_to_input_a_code() {
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.codeInput);
         Assert.assertTrue(registerPage.codeInput.isDisplayed());
     }
 
     @When("^she inputs the correct code from her email$")
     public void she_inputs_the_correct_code_from_her_email() {
-        A18NEmail email = null;
-        String code;
-        int retryCount = RETRY_COUNT;
-        while(retryCount > 0) {
-            registerPage.sleep();
-            email = Page.getA18NClient().getLatestEmail(Page.getA18NProfile());
-            if(email != null && email.getContent() != null) {
-                break;
-            } else {
-                retryCount--;
-            }
-        }
-        Assert.assertNotNull(email);
-        code = email.fetchCodeFromRegistrationEmail();
+        String emailContent = registerPage.fetchEmailContent();
+        Assert.assertNotNull(emailContent);
+        String code = registerPage.fetchCodeFromRegistrationEmail(emailContent);
         Assert.assertNotNull(code);
         registerPage.codeInput.click();
         registerPage.codeInput.sendKeys(code);
@@ -119,14 +107,7 @@ public class SelfServiceRegistration extends CucumberRoot {
 
     @When("^she inputs the correct code from her SMS$")
     public void she_inputs_the_correct_code_from_her_sms() {
-        String code = null;
-        int retryCount = RETRY_COUNT;
-        while (retryCount > 0 && code == null) {
-            registerPage.sleep();
-            String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
-            code = StringUtils.substringBetween(sms, "code is ", ".");
-            retryCount--;
-        }
+        String code = registerPage.fetchCodeFromSMS();
         Assert.assertTrue(StringUtils.isNotBlank(code));
         registerPage.codeInput.click();
         registerPage.codeInput.sendKeys(code);
@@ -139,21 +120,21 @@ public class SelfServiceRegistration extends CucumberRoot {
 
     @When("^she selects Password$")
     public void she_selects_password() {
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.passwordRadioButton);
         registerPage.passwordRadioButton.click();
         registerPage.proceedButton.click();
     }
 
     @Then("^she sees a page to setup password$")
     public void she_sees_a_page_to_setup_password() {
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.newPasswordInput);
         Assert.assertTrue(registerPage.newPasswordInput.isDisplayed());
         Assert.assertTrue(registerPage.confirmNewPasswordInput.isDisplayed());
     }
 
     @When("^she fills out her Password$")
     public void she_fills_out_her_password() {
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.newPasswordInput);
         registerPage.newPasswordInput.click();
         registerPage.newPasswordInput.sendKeys("QwErTy@123");
     }
@@ -166,12 +147,12 @@ public class SelfServiceRegistration extends CucumberRoot {
 
     @Then("^she sees the list of optional factors$")
     public void she_sees_the_list_of_optional_factors_sms() {
-        registerPage.sleep();
+        //registerPage.doNothing();
     }
 
     @When("^she selects \"Skip\" on SMS$")
     public void she_selects_skip_on_sms() {
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.skipButton);
         registerPage.skipButton.click();
     }
 
@@ -182,7 +163,7 @@ public class SelfServiceRegistration extends CucumberRoot {
 
     @Then("^she sees an error message \"'Email' must be in the form of an email address, Provided value for property 'Email' does not match required pattern\"$")
     public void she_sees_an_error_message_email_invalid() {
-        registerPage.sleep();
+        registerPage.waitForWebElementDisplayed(registerPage.alertDanger);
         Assert.assertTrue(registerPage.alertDanger.isDisplayed());
         String error = registerPage.alertDanger.getText();
         Assert.assertFalse("Error is not shown", error.isEmpty());
@@ -193,7 +174,7 @@ public class SelfServiceRegistration extends CucumberRoot {
 
     @Then("she is redirected back to the Root View")
     public void she_is_redirected_back_to_the_root_view() {
-        driver.getCurrentUrl().equals("http://localhost:8080");// TODO make through env var.
+        Assert.assertEquals("http://localhost:8080/", driver.getCurrentUrl()); // TODO make through env var.
     }
 
     @Then("^she sees a list of factors to register$")

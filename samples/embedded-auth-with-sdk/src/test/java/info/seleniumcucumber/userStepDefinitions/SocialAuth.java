@@ -33,7 +33,6 @@ public class SocialAuth extends CucumberRoot {
 
     protected WebDriver driver = DriverUtil.getDefaultDriver();
     private RootPage rootPage = new RootPage(driver);
-    private LoginPage loginPage = new LoginPage(driver);
 //    private FacebookLoginPage facebookLoginPage = new FacebookLoginPage(driver);
 
 //    @Given("^she clicks the \"Login with Facebook\" button$")
@@ -60,9 +59,9 @@ public class SocialAuth extends CucumberRoot {
 //    }
 
     @Then("^the Root Page shows links to the Entry Points$")
-    public void the_root_page_shows_links_to_the_entrypoints() {
-        Assert.assertTrue(rootPage.isLoginButtonDisplayed());
-        Assert.assertTrue(rootPage.isRegistrationButtonDisplayed());
+    public void the_root_page_shows_links_to_the_entry_points() {
+        Assert.assertTrue(rootPage.loginButton.isDisplayed());
+        Assert.assertTrue(rootPage.registrationButton.isDisplayed());
     }
 
     @Given("^Mary navigates to root page$")

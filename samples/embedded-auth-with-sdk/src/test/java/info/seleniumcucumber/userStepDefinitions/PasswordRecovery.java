@@ -17,7 +17,6 @@ package info.seleniumcucumber.userStepDefinitions;
 
 import env.CucumberRoot;
 import env.DriverUtil;
-import env.a18n.client.response.A18NEmail;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -32,7 +31,6 @@ import pages.SelectAuthenticatorPage;
 
 public class PasswordRecovery extends CucumberRoot {
 
-	private static final int RETRY_COUNT = 5; //TODO Should be in config
 	private static final String EXAMPLE_EMAIL = "mary@unknown.com";
 
 	protected WebDriver driver = DriverUtil.getDefaultDriver();
@@ -47,6 +45,7 @@ public class PasswordRecovery extends CucumberRoot {
 		Assert.assertNotNull(Page.getA18NProfile());
 		Assert.assertNotNull(Page.getA18NProfile().getEmailAddress());
 		Assert.assertNotNull(Page.getUser());
+		passwordRecoveryPage.waitForWebElementDisplayed(passwordRecoveryPage.usernameInput);
 		Assert.assertTrue(passwordRecoveryPage.usernameInput.isDisplayed());
 		passwordRecoveryPage.usernameInput.click();
 		passwordRecoveryPage.usernameInput.sendKeys(Page.getUser().getProfile().getEmail());
@@ -59,6 +58,7 @@ public class PasswordRecovery extends CucumberRoot {
 
 	@Then("^she sees the list of authenticators$")
 	public void she_sees_the_list_of_authenticators() {
+		passwordRecoveryPage.waitForWebElementDisplayed(passwordRecoveryPage.emailRadioButton);
 	 	Assert.assertTrue(passwordRecoveryPage.emailRadioButton.isDisplayed());
 	}
 
@@ -70,25 +70,15 @@ public class PasswordRecovery extends CucumberRoot {
 
 	@Then("^she sees a page to input her code$")
 	public void she_sees_a_page_to_input_her_code() {
+		selectAuthenticatorPage.waitForWebElementDisplayed(selectAuthenticatorPage.codeInput);
 		Assert.assertTrue(selectAuthenticatorPage.codeInput.isDisplayed());
 	}
 
 	@When("^she fills in the correct code$")
 	public void she_fills_in_the_correct_code() {
-		A18NEmail email = null;
-		String code;
-		int retryCount = RETRY_COUNT;
-		while(retryCount > 0) {
-			selectAuthenticatorPage.sleep();
-			email = Page.getA18NClient().getLatestEmail(Page.getA18NProfile());
-			if(email != null && email.getContent() != null) {
-				break;
-			} else {
-				retryCount--;
-			}
-		}
-		Assert.assertNotNull(email);
-		code = email.fetchCodeFromPasswordResetEmail();
+		String emailContent = selectAuthenticatorPage.fetchEmailContent();
+		Assert.assertNotNull(emailContent);
+		String code = selectAuthenticatorPage.fetchCodeFromPasswordResetEmail(emailContent);
 		Assert.assertNotNull(code);
 		selectAuthenticatorPage.codeInput.click();
 		selectAuthenticatorPage.codeInput.sendKeys(code);
@@ -121,23 +111,18 @@ public class PasswordRecovery extends CucumberRoot {
 		registerPage.confirmNewPasswordInput.sendKeys("QwErTy@123");
 	}
 
-	@When("she selects \"Forgot Password\"")
-	public void she_selects_forgot_password() {
-		loginPage.forgotPasswordLink.click();
-	}
-
-	@Then("she sees the Password Recovery Page")
+	@Then("^she sees the Password Recovery Page$")
 	public void she_sees_the_password_recovery_page() {
 		Assert.assertTrue("URL should ends with \"/forgot-password\"", forgotPasswordPage.getCurrentUrl().endsWith("/forgot-password"));
 		Assert.assertTrue(forgotPasswordPage.forgotPasswordForm.isDisplayed());
 	}
 
-	@When("she inputs an Email that doesn't exist")
+	@When("^she inputs an Email that doesn't exist$")
 	public void she_inputs_an_email_that_doesnt_exist() {
 		forgotPasswordPage.inputField.sendKeys(EXAMPLE_EMAIL);
 	}
 
-	@Then("she sees a message \"There is no account with the Username mary@unknown.com.\"")
+	@Then("^she sees a message \"There is no account with the Username mary@unknown.com.\"$")
 	public void she_sees_a_message() {
 		Assert.assertTrue(forgotPasswordPage.alertDanger.isDisplayed());
 		String errorMsg = forgotPasswordPage.alertDanger.getText();

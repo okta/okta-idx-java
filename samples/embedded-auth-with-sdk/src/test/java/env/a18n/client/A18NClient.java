@@ -15,7 +15,6 @@
  */
 package env.a18n.client;
 
-import env.a18n.client.response.A18NEmail;
 import env.a18n.client.response.A18NProfile;
 
 public interface A18NClient {
@@ -24,7 +23,7 @@ public interface A18NClient {
 
     void deleteProfile(A18NProfile profile);
 
-    A18NEmail getLatestEmail(A18NProfile profile);
+    String getLatestEmailContent(A18NProfile profile);
 
     String getLatestSmsContent(A18NProfile a18NProfile);
 }
