@@ -17,13 +17,10 @@ These Examples are:
 4. Sign In/Sign Up with Social Identity Providers
 5. Sign In with Multifactor Authentication using Email or Phone
 
-For information and guides on how to build your app with this sample, please take a look at the [Java
-guides for Embedded Authentication](link to DevDoc SBS guide)
-
 ## Prerequisites
 
-- [JDK 8](#jdk-8) or later
-- [Apache Maven](#apache-maven) 3.6.x or later
+- [JDK 8][jdk-8] or later
+- [Apache Maven][apache-maven] 3.6.x or later
 
 ## Installation & Running The App
 

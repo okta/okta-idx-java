@@ -1,6 +1,6 @@
 # Okta IDX Embedded Sign In Widget + Spring Sample
 
-This example shows you how to use the [Okta Spring Boot Library][] to login a user.  The login is achieved through the Interaction Code flow using the [Okta Sign In Widget][], which gives you more control to customize the login experience within your app.  After the user authenticates, they are redirected back to the application and a local cookie session is created.
+This example shows you how to use the [Okta Spring Boot Library][] to login a user. The login is achieved through the Interaction Code flow using the [Okta Sign In Widget][], which gives you more control to customize the login experience within your app.  After the user authenticates, they are redirected back to the application and a local cookie session is created.
 
 ## Introduction
 
@@ -22,9 +22,6 @@ These Examples are:
 4. Sign In/Sign Up with Social Identity Providers
 5. Sign In with Multifactor Authentication using Email or Phone
 6. Progressive Profiling
-
-For information and guides on how to build your app with this sample, please take a look at the [Java
-guides for Embedded Sign In Widget Authentication](link to DevDoc SBS guide)
 
 ## Prerequisites
 
