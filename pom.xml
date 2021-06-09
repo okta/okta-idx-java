@@ -178,19 +178,18 @@
     <build>
         <pluginManagement>
             <plugins>
-<!--                Due to the A18N profiles rate limit tests cannot be run in parallel-->
-<!--                <plugin>-->
-<!--                    <groupId>org.apache.maven.plugins</groupId>-->
-<!--                    <artifactId>maven-surefire-plugin</artifactId>-->
-<!--                    <configuration>-->
-<!--                        <trimStackTrace>false</trimStackTrace>-->
-<!--                        <reuseForks>true</reuseForks>-->
-<!--                        <forkCount>1</forkCount>-->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <trimStackTrace>false</trimStackTrace>
+                        <reuseForks>true</reuseForks>
+                        <forkCount>1</forkCount>
 <!--                        <parallel>classesAndMethods</parallel>-->
 <!--                        <threadCount>5</threadCount>-->
 <!--                        <skipTests>${skipImplTests}</skipTests>-->
-<!--                    </configuration>-->
-<!--                </plugin>-->
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
