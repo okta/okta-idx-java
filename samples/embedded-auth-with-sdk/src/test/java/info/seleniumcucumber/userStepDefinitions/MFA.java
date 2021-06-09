@@ -27,8 +27,6 @@ import pages.*;
 
 public class MFA extends CucumberRoot {
 
-    private static final int RETRY_COUNT = 5;
-
     protected WebDriver driver = DriverUtil.getDefaultDriver();
     private LoginPage loginPage = new LoginPage(driver);
     private VerifyPage verifyPage = new VerifyPage(driver);

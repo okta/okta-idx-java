@@ -31,7 +31,6 @@ import pages.VerifyPage;
 
 public class SelfServiceRegistration extends CucumberRoot {
 
-    private static final int RETRY_COUNT = 5;   //TODO Should be in config
     protected WebDriver driver = DriverUtil.getDefaultDriver();
 
     private RegisterPage registerPage = new RegisterPage(driver);
