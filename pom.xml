@@ -185,9 +185,9 @@
                         <trimStackTrace>false</trimStackTrace>
                         <reuseForks>true</reuseForks>
                         <forkCount>1</forkCount>
-                        <parallel>classesAndMethods</parallel>
-                        <threadCount>5</threadCount>
-                        <skipTests>${skipImplTests}</skipTests>
+<!--                        <parallel>classesAndMethods</parallel>-->
+<!--                        <threadCount>5</threadCount>-->
+<!--                        <skipTests>${skipImplTests}</skipTests>-->
                     </configuration>
                 </plugin>
                 <plugin>
@@ -196,11 +196,9 @@
                     <configuration>
                         <trimStackTrace>false</trimStackTrace>
                         <reuseForks>true</reuseForks>
-<!--
-                        <forkCount>2C</forkCount>
-                        <parallel>classes</parallel>
-                        <threadCount>5</threadCount>
--->
+<!--                        <forkCount>2C</forkCount>-->
+<!--                        <parallel>classes</parallel>-->
+<!--                        <threadCount>5</threadCount>-->
                     </configuration>
                 </plugin>
                 <plugin>
@@ -208,7 +206,9 @@
                     <artifactId>maven-pmd-plugin</artifactId>
                     <configuration>
                         <rulesets>
-                            <ruleset>${basedir}/../src/pmd/ruleset.xml</ruleset>
+                            <!-- starting from maven 3.3.1 -->
+                            <!--suppress UnresolvedMavenProperty -->
+                            <ruleset>${maven.multiModuleProjectDirectory}/src/pmd/ruleset.xml</ruleset>
                         </rulesets>
                     </configuration>
                 </plugin>

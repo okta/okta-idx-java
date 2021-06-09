@@ -34,6 +34,7 @@ public class CommonSteps extends CucumberRoot {
     @Given("^Mary navigates to the Basic Login View$")
     public void navigate_to_basic_login_view() {
         rootPage.navigateToTheRootPage();
+        rootPage.waitForWebElementDisplayed(rootPage.loginButton);
         Assert.assertTrue(rootPage.loginButton.isDisplayed());
         rootPage.loginButton.click();
     }
@@ -41,7 +42,8 @@ public class CommonSteps extends CucumberRoot {
     @Given("^Mary navigates to the Self Service Registration View$")
     public void mary_navigates_to_the_self_service_registration_view() {
         rootPage.navigateToTheRootPage();
-        if(rootPage.isRegistrationButtonDisplayed()) {
+        rootPage.waitForWebElementDisplayed(rootPage.registrationButton);
+        if(rootPage.registrationButton.isDisplayed()) {
             rootPage.registrationButton.click();
         }
     }
@@ -51,10 +53,10 @@ public class CommonSteps extends CucumberRoot {
         rootPage.navigateToThePasswordResetPage();
     }
 
-    @Then("^I close browser$")
-    public void close_browser() {
-        driver.close();
-    }
+//    @Then("^I close browser$")
+//    public void close_browser() {
+//        driver.close();
+//    }
 
     @When("Mary clicks the logout button")
     public void mary_clicks_the_logout_button() {
@@ -63,8 +65,8 @@ public class CommonSteps extends CucumberRoot {
 
     @And("Mary sees login, registration buttons")
     public void mary_sees_login_registration_buttons() {
-        Assert.assertTrue(rootPage.isRegistrationButtonDisplayed());
-        Assert.assertTrue(rootPage.isLoginButtonDisplayed());
+        Assert.assertTrue(rootPage.registrationButton.isDisplayed());
+        Assert.assertTrue(rootPage.loginButton.isDisplayed());
 
     }
 
@@ -72,6 +74,6 @@ public class CommonSteps extends CucumberRoot {
     public void she_does_not_see_claims_from_userinfo() {
         Assert.assertFalse(rootPage.elementIsDisplayed(rootPage.refreshToken));
         Assert.assertFalse(rootPage.elementIsDisplayed(rootPage.accessToken));
-        Assert.assertFalse(rootPage.elementIsDisplayed(rootPage.email));
+        Assert.assertFalse(rootPage.elementIsDisplayed(rootPage.profileTable));
     }
 }

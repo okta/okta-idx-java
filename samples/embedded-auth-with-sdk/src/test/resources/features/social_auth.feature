@@ -10,5 +10,5 @@ Feature: 5.1 Direct Auth Social Login with 1 Social IDP
 #    And the id_token is stored in session
 #    And the refresh_token is stored in session
 
-  Scenario: Tests completed. Close browser
-    Then I close browser
+#  Scenario: Tests completed. Close browser
+#    Then I close browser

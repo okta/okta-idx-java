@@ -37,7 +37,7 @@ public class Login extends CucumberRoot {
 
 	@When("^she fills in her correct username$")
 	public void enter_correct_username() {
-		loginPage.sleep();
+		loginPage.waitForWebElementDisplayed(loginPage.usernameInput);
 		loginPage.usernameInput.click();
 		loginPage.usernameInput.sendKeys(USERNAME);
 	}
@@ -55,15 +55,13 @@ public class Login extends CucumberRoot {
 
 	@Then("^she is redirected to the Root View$")
 	public void redirected_to_root_view() {
-		rootPage.sleep();
-		Assert.assertTrue(rootPage.email.isDisplayed());
-		String email = rootPage.email.getText();
-		Assert.assertFalse("Can't access profile information", email.isEmpty());
+		rootPage.waitForWebElementDisplayed(rootPage.profileTable);
+		Assert.assertTrue("Can't access profile information", rootPage.profileTable.isDisplayed());
 	}
 
 	@And("^the access_token is stored in session$")
 	public void access_token_stored() {
-		rootPage.sleep();
+		rootPage.waitForWebElementDisplayed(rootPage.accessToken);
 		Assert.assertTrue(rootPage.accessToken.isDisplayed());
 		String accessToken = rootPage.accessToken.getText();
 		Assert.assertFalse("Can't access access_token", accessToken.isEmpty());
@@ -71,7 +69,7 @@ public class Login extends CucumberRoot {
 
 	@And("^the id_token is stored in session$")
 	public void id_token_stored() {
-		rootPage.sleep();
+		rootPage.waitForWebElementDisplayed(rootPage.idToken);
 		Assert.assertTrue(rootPage.idToken.isDisplayed());
 		String idToken = rootPage.idToken.getText();
 		Assert.assertFalse("Can't access id_token", idToken.isEmpty());
@@ -79,7 +77,7 @@ public class Login extends CucumberRoot {
 
 	@And("^the refresh_token is stored in session$")
 	public void refresh_token_stored() {
-		rootPage.sleep();
+		rootPage.waitForWebElementDisplayed(rootPage.refreshToken);
 		Assert.assertTrue(rootPage.refreshToken.isDisplayed());
 		String refreshToken = rootPage.refreshToken.getText();
 		Assert.assertFalse("Can't access refresh_token", refreshToken.isEmpty());
@@ -87,14 +85,14 @@ public class Login extends CucumberRoot {
 
 	@When("^she fills in her incorrect username$")
 	public void enter_incorrect_username() {
-		loginPage.sleep();
+		loginPage.waitForWebElementDisplayed(loginPage.usernameInput);
 		loginPage.usernameInput.click();
 		loginPage.usernameInput.sendKeys("invalid@acme.com");
 	}
 
 	@Then("^she should see a \"There is no account with username\" message on the Login form$")
 	public void no_account_user_error() {
-		rootPage.sleep();
+		rootPage.waitForWebElementDisplayed(rootPage.alertDanger);
 		Assert.assertTrue(rootPage.alertDanger.isDisplayed());
 		String error = rootPage.alertDanger.getText();
 		Assert.assertFalse("Error is not shown", error.isEmpty());
@@ -111,7 +109,7 @@ public class Login extends CucumberRoot {
 
 	@Then("^she should see the message \"Authentication failed\"$")
 	public void authentication_failed_message() {
-		rootPage.sleep();
+		rootPage.waitForWebElementDisplayed(rootPage.alertDanger);
 		Assert.assertTrue(rootPage.alertDanger.isDisplayed());
 		String error = rootPage.alertDanger.getText();
 		Assert.assertFalse("Error is not shown", error.isEmpty());
@@ -120,24 +118,26 @@ public class Login extends CucumberRoot {
 	}
 
 	@When("^she clicks on the \"Forgot Password Link\"$")
+	@When("^she selects \"Forgot Password\"$")
 	public void clicks_forgot_password_link() {
-		loginPage.sleep();
+		loginPage.waitForWebElementDisplayed(loginPage.forgotPasswordLink);
 		Assert.assertTrue(loginPage.forgotPasswordLink.isDisplayed());
 		loginPage.forgotPasswordLink.click();
 	}
 
 	@Then("^she is redirected to the Self Service Password Reset View$")
 	public void redirect_to_sspr_view() {
-		forgotPasswordPage.sleep();
+		forgotPasswordPage.waitForWebElementDisplayed(forgotPasswordPage.forgotPasswordForm);
 		Assert.assertTrue(forgotPasswordPage.forgotPasswordForm.isDisplayed());
 		Assert.assertEquals(forgotPasswordPage.getCurrentUrl(), "http://localhost:8080/forgot-password");
 	}
 
-	@Given("Mary has an authenticated session")
+	@Given("^Mary has an authenticated session$")
 	public void mary_has_an_authenticated_session() {
 		rootPage.navigateToTheRootPage();
 		rootPage.loginButton.click();
-		loginPage.sleep();
+
+		loginPage.waitForWebElementDisplayed(loginPage.usernameInput);
 		loginPage.usernameInput.click();
 		loginPage.usernameInput.sendKeys(USERNAME);
 
@@ -146,17 +146,17 @@ public class Login extends CucumberRoot {
 		loginPage.signInButton.click();
 	}
 
-	@Then("Mary sees a table with the claims from the userinfo response")
+	@Then("^Mary sees a table with the claims from the userinfo response$")
 	public void mary_sees_a_table_with_the_claims_from_the_userinfo_response() {
 		Assert.assertTrue(rootPage.idToken.isDisplayed());
 		Assert.assertTrue(rootPage.refreshToken.isDisplayed());
-		Assert.assertTrue(rootPage.email.isDisplayed());
+		Assert.assertTrue(rootPage.profileTable.isDisplayed());
 	}
 
-	@And("Mary sees a logout button")
+	@And("^Mary sees a logout button$")
 	public void mary_sees_a_logout_button() {
-		rootPage.waitForLoginButtonDisplayed();
-		rootPage.isLogoutButtonDisplayed();
+		rootPage.waitForWebElementDisplayed(rootPage.logoutButton);
+		Assert.assertTrue(rootPage.logoutButton.isDisplayed());
 	}
 
 

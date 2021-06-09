@@ -39,8 +39,4 @@ public class CucumberRoot {
     protected String USERNAME_FACEBOOK = System.getenv("USERNAME_FACEBOOK");
     protected String PASSWORD_FACEBOOK = System.getenv("PASSWORD_FACEBOOK");
 
-    /**
-     * Need this method so the cucumber will recognize this class as glue and load spring context configuration.
-     */
-
 }

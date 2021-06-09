@@ -33,4 +33,56 @@
         </Class>
     </Match>
 
+    <Match>
+        <Class name="com.okta.spring.example.helpers.HomeHelper">
+            <Bug pattern="REC_CATCH_EXCEPTION" />
+        </Class>
+    </Match>
+
+    <Match>
+        <Class name="com.okta.spring.example.helpers.Util">
+            <Bug pattern="TRUST_BOUNDARY_VIOLATION" />
+        </Class>
+    </Match>
+
+    <Match>
+        <Class name="com.okta.spring.example.helpers.ResponseHandler">
+            <Bug pattern="TRUST_BOUNDARY_VIOLATION" />
+        </Class>
+    </Match>
+
+    <Match>
+        <Class name="com.okta.spring.example.controllers.UserDetailsController">
+            <Bug pattern="SPRING_ENDPOINT" />
+        </Class>
+    </Match>
+
+    <Match>
+        <Class name="com.okta.spring.example.controllers.LoginController">
+            <Bug pattern="SPRING_ENDPOINT" />
+        </Class>
+    </Match>
+
+    <Match>
+        <Class name="com.okta.spring.example.controllers.HomeController">
+            <Bug pattern="SPRING_ENDPOINT" />
+        </Class>
+    </Match>
+
+    <Match>
+        <Class name="com.okta.spring.example.controllers.LogoutController" >
+            <Bug pattern="SPRING_ENDPOINT" />
+        </Class>
+    </Match>
+
+    <Match>
+        <Class name="com.okta.spring.example.CustomAuthenticationProcessingFilter">
+            <Bug pattern="SERVLET_PARAMETER" />
+        </Class>
+    </Match>
+
+    <Match>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON" />
+    </Match>
+
 </FindBugsFilter>
