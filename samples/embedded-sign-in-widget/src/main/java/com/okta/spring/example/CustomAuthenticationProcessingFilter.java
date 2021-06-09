@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
+@SuppressWarnings("PMD")
 public class CustomAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
     private final AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository =

@@ -206,7 +206,9 @@
                     <artifactId>maven-pmd-plugin</artifactId>
                     <configuration>
                         <rulesets>
-                            <ruleset>${user.dir}/src/pmd/ruleset.xml</ruleset>
+                            <!-- starting from maven 3.3.1 -->
+                            <!--suppress UnresolvedMavenProperty -->
+                            <ruleset>${maven.multiModuleProjectDirectory}/src/pmd/ruleset.xml</ruleset>
                         </rulesets>
                     </configuration>
                 </plugin>
