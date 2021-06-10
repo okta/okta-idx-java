@@ -13,22 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.example;
+package pages;
 
-import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
-@SpringBootApplication
-public class ExampleApplication {
+public class Page {
 
-    /**
-     * Application entry point.
-     *
-     * @param args
-     */
-    public static void main(final String[] args) {
-        TomcatURLStreamHandlerFactory.disable(); //Prevent "factory already defined" error in E2E tests
-        SpringApplication.run(ExampleApplication.class, args);
+    protected WebDriver driver;
+
+    public Page(WebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
+    }
+
+    public void waitForWebElementDisplayed(WebElement webElement) {
+        new WebDriverWait(driver, 10)
+                .until(ExpectedConditions.visibilityOf(webElement));
     }
 }

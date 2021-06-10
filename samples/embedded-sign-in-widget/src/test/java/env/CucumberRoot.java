@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.example;
+package env;
 
-import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import io.cucumber.spring.CucumberContextConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@SpringBootApplication
-public class ExampleApplication {
+@CucumberContextConfiguration
+public class CucumberRoot {
 
-    /**
-     * Application entry point.
-     *
-     * @param args
-     */
-    public static void main(final String[] args) {
-        TomcatURLStreamHandlerFactory.disable(); //Prevent "factory already defined" error in E2E tests
-        SpringApplication.run(ExampleApplication.class, args);
-    }
+    private final Logger logger = LoggerFactory.getLogger(CucumberRoot.class);
+
+    protected String USERNAME = System.getenv("USERNAME");
+    protected String PASSWORD = System.getenv("PASSWORD");
 }

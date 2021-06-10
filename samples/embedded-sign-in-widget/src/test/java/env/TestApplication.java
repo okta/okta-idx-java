@@ -13,22 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.example;
+package env;
 
-import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ExampleApplication {
+public class TestApplication {
 
-    /**
-     * Application entry point.
-     *
-     * @param args
-     */
-    public static void main(final String[] args) {
-        TomcatURLStreamHandlerFactory.disable(); //Prevent "factory already defined" error in E2E tests
-        SpringApplication.run(ExampleApplication.class, args);
+    public static void main(String[] args) {
+        SpringApplication.run(TestApplication.class, args);
     }
 }

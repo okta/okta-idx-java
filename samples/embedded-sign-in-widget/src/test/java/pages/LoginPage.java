@@ -13,22 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.example;
+package pages;
 
-import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 
-@SpringBootApplication
-public class ExampleApplication {
+public class LoginPage extends Page {
 
-    /**
-     * Application entry point.
-     *
-     * @param args
-     */
-    public static void main(final String[] args) {
-        TomcatURLStreamHandlerFactory.disable(); //Prevent "factory already defined" error in E2E tests
-        SpringApplication.run(ExampleApplication.class, args);
+    public LoginPage(WebDriver driver) {
+        super(driver);
     }
+
+    @FindBy(name = "identifier")
+    public WebElement usernameInput;
+
+    @FindBy(name = "credentials.passcode")
+    public WebElement passwordInput;
+
+    @FindBy(css = "input[type=submit]")
+    public WebElement submitButton;
 }

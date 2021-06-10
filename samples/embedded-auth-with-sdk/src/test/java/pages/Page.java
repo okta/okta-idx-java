@@ -72,7 +72,7 @@ public class Page {
     }
 
     public void waitForWebElementDisplayed(WebElement webElement) {
-        new WebDriverWait(driver, 5)
+        new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.visibilityOf(webElement));
     }
 

@@ -61,6 +61,7 @@ function downloadChromeDriver() {
 
   curl "${CHROMEDRIVER_DOWNLOAD_URL}" --output chromedriver.zip
   unzip -o chromedriver.zip -d ./samples/embedded-auth-with-sdk/
+  unzip -o chromedriver.zip -d ./samples/embedded-sign-in-widget/
 }
 
 downloadChromeDriver
