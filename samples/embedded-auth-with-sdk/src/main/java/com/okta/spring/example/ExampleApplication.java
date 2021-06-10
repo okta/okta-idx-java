@@ -15,6 +15,7 @@
  */
 package com.okta.spring.example;
 
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -27,6 +28,7 @@ public class ExampleApplication {
      * @param args
      */
     public static void main(final String[] args) {
+        TomcatURLStreamHandlerFactory.disable(); //Prevent "factory already defined" error in E2E tests
         SpringApplication.run(ExampleApplication.class, args);
     }
 }

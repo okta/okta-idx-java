@@ -17,6 +17,7 @@ package com.okta.spring.example;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ public class HostedLoginCodeFlowExampleApplication {
     private final Logger logger = LoggerFactory.getLogger(HostedLoginCodeFlowExampleApplication.class);
 
     public static void main(String[] args) {
+        TomcatURLStreamHandlerFactory.disable(); //Prevent "factory already defined" error in E2E tests
         SpringApplication.run(HostedLoginCodeFlowExampleApplication.class, args);
     }
 

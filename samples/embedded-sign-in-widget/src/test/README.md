@@ -21,12 +21,10 @@ We assume all accounts use the same password.
 Apart from these, we'd of course need to set the variables needed to run the sample application itself
 For example,
 ```
-export OKTA_IDX_ISSUER=https://dev-1234.okta.com/oauth2/default
-export OKTA_IDX_CLIENTID=xxxxxx
-export OKTA_IDX_CLIENTSECRET=xxxxxx
-export OKTA_IDX_SCOPES="openid email profile offline_access"
-export OKTA_IDX_REDIRECTURI=http://localhost:8080/authorization-code/callback
-export A18N_API_KEY=xxxxxx
+export OKTA_OAUTH2_CLIENTID=xxxxxx
+export OKTA_OAUTH2_CLIENTSECRET=xxxxxx
+export OKTA_OAUTH2_ISSUER=https://dev-1234.okta.com/oauth2/default
+export OKTA_OAUTH2_REDIRECTURI=http://localhost:8080
 ```
 
 Now we're ready to run the tests
