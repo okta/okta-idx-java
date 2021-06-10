@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 				"pretty:target/cucumber-json-report.json"   // for json result
 		},
 		features = {
-				"classpath:features",
+				"classpath:features/social_auth.feature",
 		},
 		glue = {
 				"info.seleniumcucumber.stepdefinitions",   	// predefined step definitions package
