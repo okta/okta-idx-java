@@ -28,9 +28,10 @@ These Examples are:
 Before running this sample, you will need the following:
 
 * An Okta Developer Account, you can sign up for one at https://developer.okta.com/signup/.
-* An Okta Application, configured for Web mode. This is done from the Okta Developer Console and you can find instructions [here][OIDC Web Application Setup Instructions].  When following the wizard, use the default properties.  They are designed to work with our sample applications.
-* Your Okta Application entry needs a login redirect URI. Go to "Login redirect URIs" under "General Settings" for your application, click "Edit" and add http://localhost:8080/authorization-code/callback.
-* Your Okta Application entry needs the logout callback. "Logout redirect URIs" under "General" for the application should list http://localhost:8080. If it is not present, click "Edit" and add it.
+* An Okta Application, configured for Web mode. This is done from the Okta Developer Console and you can find instructions [here][OIDC Web Application Setup Instructions].  When following the wizard, use the default properties. They are designed to work with our sample applications.
+* Your Okta Application entry needs "Interaction Code" grant type. Go to "Grant Type" under "Application" for your application, check "Interaction Code".
+* Your Okta Application entry needs a Login (Sign-in) redirect URI. Go to "Sign-in redirect URIs" under "General Settings" for your application, click "Edit" and add http://localhost:8080.
+* Your Okta Application entry needs the Logout (Sign-out) redirect URI. "Sign-out redirect URIs" under "General Settings" for the application should list http://localhost:8080. If it is not present, click "Edit" and add it.
 * Ensure that your Okta Application is assigned to "Everyone" group or a custom group or a set of users that need to access the application. Navigate to "Assignments" tab for the application, and click "Assign -> Assign to People" or "Assign -> Assign to Groups" to do this.
 
 ## Installation & Running The App
@@ -51,7 +52,7 @@ mvn -Dokta.oauth2.issuer=https://{yourOktaDomain}/oauth2/default \
     -Dokta.oauth2.clientId={clientId} \
     -Dokta.oauth2.clientSecret={clientSecret} \
     -Dokta.idx.scopes={scopes} \   # e.g. "openid email profile"
-    -Dokta.oauth2.redirectUri={redirectUri} # should match with what is set in app settings
+    -Dokta.oauth2.redirectUri=http://localhost:8080
 ```
 
 > **NOTE:** Putting secrets on the command line should ONLY be done for examples, do NOT do this in production. Instead, we recommend you store them as environment variables. For example:
@@ -61,7 +62,7 @@ export OKTA_OAUTH2_ISSUER=https://{yourOktaDomain}/oauth2/default
 export OKTA_OAUTH2_CLIENT_ID={clientId}
 export OKTA_OAUTH2_CLIENT_SECRET={clientSecret}
 export OKTA_IDX_SCOPES={scopes}
-export OKTA_OAUTH2_REDIRECTURI={redirectUri}
+export OKTA_OAUTH2_REDIRECTURI=http://localhost:8080
 ```
 
 Then you can simply use `mvn` to start your app.
@@ -76,5 +77,4 @@ You can login with the same account that you created when signing up for your De
 
 [Okta Spring Boot Library]: https://github.com/okta/okta-spring-boot
 [OIDC Web Application Setup Instructions]: https://developer.okta.com/authentication-guide/implementing-authentication/auth-code#1-setting-up-your-application
-[Authorization Code Flow]: https://developer.okta.com/authentication-guide/implementing-authentication/auth-code
 [Okta Sign In Widget]: https://github.com/okta/okta-signin-widget
