@@ -31,6 +31,9 @@ cron () {
 }
 
 deploy () {
+    echo "Downloading chromedriver"
+    "${CHROMEDRIVER_DOWNLOAD_SCRIPT}"
+
     echo "Deploying SNAPSHOT build"
     ${MVN_CMD} deploy -Pci
 
