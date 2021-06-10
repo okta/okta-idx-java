@@ -163,4 +163,9 @@
         <cve>CVE-2018-1258</cve>
         <cve>CVE-2021-22112</cve>
     </suppress>
+
+    <suppress>
+        <notes><![CDATA[ file name: spring-core-5.3.1.jar ]]></notes>
+        <cve>CVE-2021-22118</cve>
+    </suppress>
 </suppressions>

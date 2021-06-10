@@ -17,6 +17,8 @@ package com.okta.idx.sdk.api.util;
 
 import com.okta.commons.lang.Assert;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +28,7 @@ import java.util.Base64;
 public class PkceUtil {
 
     public static final String CODE_CHALLENGE_METHOD = "S256";
+    private static final int URL_SAFE_FLAG = 8;
 
     /**
      * Generate Code Challenge (Base64 URL-encoded SHA-256 hash of the generated code verifier).
@@ -42,7 +45,7 @@ public class PkceUtil {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(bytes, 0, bytes.length);
         byte[] digest = messageDigest.digest();
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+        return base64Encode(digest);
     }
 
     /**
@@ -55,6 +58,20 @@ public class PkceUtil {
         SecureRandom secureRandom = new SecureRandom();
         byte[] codeVerifier = new byte[32];
         secureRandom.nextBytes(codeVerifier);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
+        return base64Encode(codeVerifier);
+    }
+
+    private static String base64Encode(byte[] source) {
+        try {
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(source);
+        } catch (NoClassDefFoundError e) {
+            try {
+                Method method = Class.forName("android.util.Base64").getMethod("encodeToString", byte[].class, int.class);
+                String encoded = (String) method.invoke(null, source, URL_SAFE_FLAG);
+                return encoded.substring(0, encoded.length() - 2); // Remove trailing "=\n".
+            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
+                throw new IllegalStateException("No Base64 Encoder found.", exception);
+            }
+        }
     }
 }

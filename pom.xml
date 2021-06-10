@@ -25,7 +25,7 @@
 
     <groupId>com.okta.idx.sdk</groupId>
     <artifactId>okta-idx-java-root</artifactId>
-    <version>0.1.0-beta.7-SNAPSHOT</version>
+    <version>0.1.0-beta.8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Okta IDX Java SDK</name>
@@ -185,6 +185,7 @@
                         <trimStackTrace>false</trimStackTrace>
                         <reuseForks>true</reuseForks>
                         <forkCount>1</forkCount>
+                        <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
 <!--                        <parallel>classesAndMethods</parallel>-->
 <!--                        <threadCount>5</threadCount>-->
 <!--                        <skipTests>${skipImplTests}</skipTests>-->

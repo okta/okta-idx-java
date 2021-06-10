@@ -38,7 +38,7 @@ public class OptionalPropertiesSource implements PropertiesSource {
     public Map<String,String> getProperties() {
         try {
             return propertiesSource.getProperties();
-        } catch (Exception e) {
+        } catch (Exception | NoClassDefFoundError e) {
             log.debug("Unable to obtain properties from optional properties source {}", propertiesSource);
         }
         return new LinkedHashMap<>();
