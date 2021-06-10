@@ -46,6 +46,8 @@ echo "PULL_REQUEST: ${PULL_REQUEST}"
 echo "BRANCH: ${BRANCH}"
 echo "IS_RELEASE: ${IS_RELEASE}"
 echo "RUN_ITS: ${RUN_ITS}"
+echo "TRAVIS_EVENT_TYPE: ${TRAVIS_EVENT_TYPE}"
+echo "DEPLOY: ${DEPLOY}"
 
 # all the prep is done, lets run the build!
 MVN_CMD="./mvnw -s src/ci/settings.xml -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -V"
