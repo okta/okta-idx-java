@@ -526,6 +526,8 @@ public class IDXAuthenticationWrapper {
         AuthenticationResponse newUserRegistrationResponse = new AuthenticationResponse();
 
         try {
+            Assert.notNull(proceedContext.getSelectProfileEnrollHref(), "Policy not configured.");
+
             // enroll new user
             AuthenticationTransaction enrollTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
