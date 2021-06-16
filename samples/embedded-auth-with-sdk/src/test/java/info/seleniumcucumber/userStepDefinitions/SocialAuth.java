@@ -15,17 +15,15 @@
  */
 package info.seleniumcucumber.userStepDefinitions;
 
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.Given;
 import env.CucumberRoot;
 import env.DriverUtil;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import org.junit.Assert;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.FacebookLoginPage;
+import pages.GoogleLoginPage;
 import pages.LoginPage;
 import pages.RootPage;
 
@@ -33,30 +31,51 @@ public class SocialAuth extends CucumberRoot {
 
     protected WebDriver driver = DriverUtil.getDefaultDriver();
     private RootPage rootPage = new RootPage(driver);
-//    private FacebookLoginPage facebookLoginPage = new FacebookLoginPage(driver);
+    private LoginPage loginPage = new LoginPage(driver);
+    private FacebookLoginPage facebookLoginPage = new FacebookLoginPage(driver);
+    private GoogleLoginPage googleLoginPage = new GoogleLoginPage(driver);
 
-//    @Given("^she clicks the \"Login with Facebook\" button$")
-//    public void clicks_facebook_login() {
-//        loginPage.sleep();
-//        Assert.assertTrue(loginPage.facebookLoginButton.isDisplayed());
-//        loginPage.facebookLoginButton.click();
-//    }
-//
-//    @And("^logs in to Facebook$")
-//    public void login_facebook() {
-//        facebookLoginPage.sleep();
-//
-//        Assert.assertTrue(facebookLoginPage.emailInput.isDisplayed());
-//        facebookLoginPage.emailInput.click();
-//        facebookLoginPage.emailInput.sendKeys(USERNAME_FACEBOOK);
-//
-//        Assert.assertTrue(facebookLoginPage.passwordInput.isDisplayed());
-//        facebookLoginPage.passwordInput.click();
-//        facebookLoginPage.passwordInput.sendKeys(PASSWORD_FACEBOOK);
-//
-//        Assert.assertTrue(facebookLoginPage.loginButton.isDisplayed());
-//        facebookLoginPage.loginButton.click();
-//    }
+    @Given("^she clicks the \"Login with Facebook\" button$")
+    public void clicks_facebook_login() {
+        Assert.assertTrue(loginPage.facebookLoginButton.isDisplayed());
+        loginPage.facebookLoginButton.click();
+    }
+
+    @And("^logs in to Facebook$")
+    public void logs_in_to_facebook() {
+        Assert.assertTrue(facebookLoginPage.emailInput.isDisplayed());
+        facebookLoginPage.emailInput.click();
+        facebookLoginPage.emailInput.sendKeys(USERNAME_FACEBOOK);
+
+//        loginPage.waitForWebElementDisplayed(facebookLoginPage.passwordInput);
+        Assert.assertTrue(facebookLoginPage.passwordInput.isDisplayed());
+        facebookLoginPage.passwordInput.click();
+        facebookLoginPage.passwordInput.sendKeys(PASSWORD_FACEBOOK);
+
+        Assert.assertTrue(facebookLoginPage.loginButton.isDisplayed());
+        facebookLoginPage.loginButton.click();
+    }
+
+    @Given("^she clicks the \"Login with Google\" button in the embedded Sign In Widget$")
+    public void clicks_google_login() {
+        Assert.assertTrue(loginPage.googleLoginButton.isDisplayed());
+        loginPage.googleLoginButton.click();
+    }
+
+    @And("^logs in to Google$")
+    public void logs_in_to_google() {
+        Assert.assertTrue(googleLoginPage.emailInput.isDisplayed());
+        googleLoginPage.emailInput.click();
+        googleLoginPage.emailInput.sendKeys(USERNAME_GOOGLE);
+
+        googleLoginPage.submit(googleLoginPage.emailInput);
+
+        Assert.assertTrue(googleLoginPage.passwordInput.isDisplayed());
+        googleLoginPage.passwordInput.click();
+        googleLoginPage.passwordInput.sendKeys(PASSWORD_GOOGLE);
+
+        googleLoginPage.submit(googleLoginPage.passwordInput);
+    }
 
     @Then("^the Root Page shows links to the Entry Points$")
     public void the_root_page_shows_links_to_the_entry_points() {
@@ -67,5 +86,16 @@ public class SocialAuth extends CucumberRoot {
     @Given("^Mary navigates to root page$")
     public void mary_navigates_to_root_page() {
         rootPage.navigateToTheRootPage();
+    }
+
+    @And("^the remediation returns \"MFA_REQUIRED\"$")
+    public void the_remediation_returns_mfa_required(){
+        Assert.assertTrue(rootPage.getCurrentUrl().contains("error=interaction_required"));
+    }
+
+    @Then("^Mary should see an interaction_required error message$")
+    public void mary_should_see_an_error_message(){
+        Assert.assertTrue(rootPage.alertDanger.isDisplayed());
+        Assert.assertEquals("Your client is configured to use the interaction code flow and user interaction is required to complete the request.", rootPage.alertDanger.getText());
     }
 }

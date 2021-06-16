@@ -19,8 +19,6 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class RootPage extends Page {
 
@@ -48,6 +46,9 @@ public class RootPage extends Page {
 
     @FindBy(id = "email")
     public WebElement email;
+
+    @FindBy(id = "name")
+    public WebElement name;
 
     @FindBy(className = "alert-danger")
     public WebElement alertDanger;
