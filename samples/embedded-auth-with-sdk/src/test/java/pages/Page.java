@@ -30,7 +30,8 @@ import java.util.regex.Pattern;
 
 public class Page {
 
-    private static final int RETRY_COUNT = 30;
+    private static final int RETRY_COUNT = 40;
+    private static final int TIME_OUT_IN_SECONDS = 20;
 
     protected WebDriver driver;
 
@@ -72,7 +73,7 @@ public class Page {
     }
 
     public void waitForWebElementDisplayed(WebElement webElement) {
-        new WebDriverWait(driver, 10)
+        new WebDriverWait(driver, TIME_OUT_IN_SECONDS)
                 .until(ExpectedConditions.visibilityOf(webElement));
     }
 
