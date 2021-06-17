@@ -98,14 +98,6 @@ public class Hooks {
 		Page.setUser(user);
 	}
 
-	@Before("@requireFacebookUser")
-	public void setFacebookUser() {
-		client.listUsers().stream()
-				.filter(user1 -> System.getenv("USERNAME_FACEBOOK").equals(user1.getProfile().getEmail()))
-				.findAny()
-				.ifPresent(Page::setUser);
-	}
-
 	@Before("@requireEnrolledPhone")
 	public void enrollSmsUserFactor() {
 		Assert.assertNotNull(Page.getA18NProfile());
@@ -144,14 +136,6 @@ public class Hooks {
 				.collect(Collectors.toList());
 		Assert.assertFalse(groupList.isEmpty());
 		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
-	}
-
-	@After("@requireMFAGroupsForUser")
-	public void removeUserFromGroups(Scenario scenario) {
-		User user = Page.getUser();
-		user.listGroups().stream()
-				.filter(group -> !"Everyone".equals(group.getProfile().getName()))
-				.forEach(group -> group.removeUser(user.getId()));
 	}
 
 	@After("@requireUserDeletionAfterRegistration")

@@ -36,9 +36,4 @@ public class CucumberRoot {
     protected String USERNAME_DEACTIVATED = System.getenv("USERNAME_DEACTIVATED");
     protected String PASSWORD = System.getenv("PASSWORD");
 
-    protected String USERNAME_FACEBOOK = System.getenv("USERNAME_FACEBOOK");
-    protected String PASSWORD_FACEBOOK = System.getenv("PASSWORD_FACEBOOK");
-    protected String USERNAME_GOOGLE = System.getenv("USERNAME_GOOGLE");
-    protected String PASSWORD_GOOGLE = System.getenv("PASSWORD_GOOGLE");
-
 }

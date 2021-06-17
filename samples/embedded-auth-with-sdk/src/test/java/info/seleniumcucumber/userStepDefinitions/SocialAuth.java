@@ -41,16 +41,15 @@ public class SocialAuth extends CucumberRoot {
         loginPage.facebookLoginButton.click();
     }
 
-    @And("^logs in to Facebook$")
-    public void logs_in_to_facebook() {
+    @And("logs in to Facebook with {word} and {word}")
+    public void logs_in_to_facebook(String email, String password) {
         Assert.assertTrue(facebookLoginPage.emailInput.isDisplayed());
         facebookLoginPage.emailInput.click();
-        facebookLoginPage.emailInput.sendKeys(USERNAME_FACEBOOK);
+        facebookLoginPage.emailInput.sendKeys(System.getenv(email));
 
-//        loginPage.waitForWebElementDisplayed(facebookLoginPage.passwordInput);
         Assert.assertTrue(facebookLoginPage.passwordInput.isDisplayed());
         facebookLoginPage.passwordInput.click();
-        facebookLoginPage.passwordInput.sendKeys(PASSWORD_FACEBOOK);
+        facebookLoginPage.passwordInput.sendKeys(System.getenv(password));
 
         Assert.assertTrue(facebookLoginPage.loginButton.isDisplayed());
         facebookLoginPage.loginButton.click();
@@ -62,18 +61,17 @@ public class SocialAuth extends CucumberRoot {
         loginPage.googleLoginButton.click();
     }
 
-    @And("^logs in to Google$")
-    public void logs_in_to_google() {
+    @And("logs in to Google with {word} and {word}")
+    public void logs_in_to_google(String email, String password) {
         Assert.assertTrue(googleLoginPage.emailInput.isDisplayed());
         googleLoginPage.emailInput.click();
-        googleLoginPage.emailInput.sendKeys(USERNAME_GOOGLE);
-
+        googleLoginPage.emailInput.sendKeys(System.getenv(email));
         googleLoginPage.submit(googleLoginPage.emailInput);
 
+        googleLoginPage.waitForWebElementDisplayed(googleLoginPage.passwordInput);
         Assert.assertTrue(googleLoginPage.passwordInput.isDisplayed());
         googleLoginPage.passwordInput.click();
-        googleLoginPage.passwordInput.sendKeys(PASSWORD_GOOGLE);
-
+        googleLoginPage.passwordInput.sendKeys(System.getenv(password));
         googleLoginPage.submit(googleLoginPage.passwordInput);
     }
 

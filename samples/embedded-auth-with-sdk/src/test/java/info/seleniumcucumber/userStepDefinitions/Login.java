@@ -83,9 +83,10 @@ public class Login extends CucumberRoot {
 		Assert.assertFalse("Can't access refresh_token", refreshToken.isEmpty());
 	}
 
-	@And("^the cell for the value of \"email\" is shown and contains her email$")
-	public void the_cell_for_email_is_shown_and_contains_her_email() {
+	@And("the cell for the value of \"email\" is shown and contains her {word}")
+	public void the_cell_for_email_is_shown_and_contains_her_email(String email) {
 		Assert.assertTrue(rootPage.email.isDisplayed());
+		Assert.assertEquals(System.getenv(email), rootPage.email.getText());
 	}
 
 	@And("^the cell for the value of \"name\" is shown and contains her first name and last name$")
