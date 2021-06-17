@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class Page {
 
-    private static final int RETRY_COUNT = 10;
+    private static final int RETRY_COUNT = 15;
 
     protected WebDriver driver;
 
