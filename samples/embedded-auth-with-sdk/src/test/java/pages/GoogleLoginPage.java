@@ -15,32 +15,24 @@
  */
 package pages;
 
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
-public class LoginPage extends Page {
+public class GoogleLoginPage extends Page {
 
-    public LoginPage(WebDriver driver) {
+    public GoogleLoginPage(WebDriver driver) {
         super(driver);
     }
 
-    @FindBy(id = "btn-facebook")
-    public WebElement facebookLoginButton;
+    @FindBy(css = "input[type='email']")
+    public WebElement emailInput;
 
-    @FindBy(className = "btn-google")
-    public WebElement googleLoginButton;
-
-    @FindBy(name = "username")
-    public WebElement usernameInput;
-
-    @FindBy(name = "password")
+    @FindBy(css = "input[type='password']")
     public WebElement passwordInput;
 
-    @FindBy(id = "sign-in-btn")
-    public WebElement signInButton;
-
-    @FindBy(id = "forgot-password")
-    public WebElement forgotPasswordLink;
-
+    public void submit(WebElement webElement) {
+        webElement.sendKeys(Keys.ENTER);
+    }
 }

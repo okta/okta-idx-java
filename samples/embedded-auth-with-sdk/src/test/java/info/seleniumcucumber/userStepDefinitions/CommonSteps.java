@@ -15,12 +15,10 @@
  */
 package info.seleniumcucumber.userStepDefinitions;
 
-
 import env.CucumberRoot;
 import env.DriverUtil;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
@@ -52,11 +50,6 @@ public class CommonSteps extends CucumberRoot {
     public void mary_navigates_to_the_self_service_password_reset_view() {
         rootPage.navigateToThePasswordResetPage();
     }
-
-//    @Then("^I close browser$")
-//    public void close_browser() {
-//        driver.close();
-//    }
 
     @When("Mary clicks the logout button")
     public void mary_clicks_the_logout_button() {

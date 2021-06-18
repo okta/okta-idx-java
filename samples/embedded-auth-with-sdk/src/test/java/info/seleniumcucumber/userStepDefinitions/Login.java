@@ -15,6 +15,8 @@
  */
 package info.seleniumcucumber.userStepDefinitions;
 
+import com.okta.sdk.client.Clients;
+import com.okta.sdk.resource.user.User;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -34,6 +36,7 @@ public class Login extends CucumberRoot {
 	private RootPage rootPage = new RootPage(driver);
 	private LoginPage loginPage = new LoginPage(driver);
 	private ForgotPasswordPage forgotPasswordPage = new ForgotPasswordPage(driver);
+	private User user;
 
 	@When("^she fills in her correct username$")
 	public void enter_correct_username() {
@@ -81,6 +84,19 @@ public class Login extends CucumberRoot {
 		Assert.assertTrue(rootPage.refreshToken.isDisplayed());
 		String refreshToken = rootPage.refreshToken.getText();
 		Assert.assertFalse("Can't access refresh_token", refreshToken.isEmpty());
+	}
+
+	@And("the cell for the value of \"email\" is shown and contains her {word}")
+	public void the_cell_for_email_is_shown_and_contains_her_email(String email) {
+		Assert.assertTrue(rootPage.email.isDisplayed());
+		Assert.assertEquals(System.getenv(email), rootPage.email.getText());
+		user = getUser(System.getenv(email));
+	}
+
+	@And("^the cell for the value of \"name\" is shown and contains her first name and last name$")
+	public void the_cell_for_name_is_shown_and_contains_her_name() {
+		Assert.assertTrue(rootPage.name.isDisplayed());
+		Assert.assertEquals(user.getProfile().getDisplayName(), rootPage.name.getText());
 	}
 
 	@When("^she fills in her incorrect username$")
@@ -159,63 +175,14 @@ public class Login extends CucumberRoot {
 		Assert.assertTrue(rootPage.logoutButton.isDisplayed());
 	}
 
-
-//	@When("^she enters valid credentials for unassigned user$")
-//	public void enter_valid_credentials_for_unassigned_user() throws Throwable {
-//		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
-//		driver.findElement(By.name("username")).sendKeys(USERNAME_WITH_APP_UNASSIGNED);
-//		driver.findElement(By.name("password")).sendKeys(PASSWORD);
-//	}
-
-//	@Then("^she should see user not assigned to app error$")
-//	public void user_not_assigned_app_error() throws Throwable {
-//		By selection = By.className("alert-danger");
-//		(new WebDriverWait(driver, 30)).until(
-//				ExpectedConditions.visibilityOfElementLocated(selection));
-//		String error = driver.findElement(selection).getText();
-//		Assert.assertTrue("Error is not shown", !error.isEmpty());
-////		TODO: If Profile enrollment policy allows sign-up, this error in not shown. Commenting until we get clarity on this
-////		Assert.assertTrue("User not assigned error is not shown", error.contains("User is not assigned to this application"));
-//	}
-
-//	@Given("^Mary's account is suspended$")
-//	public void suspended_user() throws Throwable {
-//		// This is a suspended user
-//		System.out.println(USERNAME_SUSPENDED);
-//	}
-
-//	@When("^she fills in her suspended username$")
-//	public void enter_suspended_username() throws Throwable {
-//		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
-//		// The below block doesn't help either. Only sleep works. (╯°□°）╯︵ ┻━┻
-//		// new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.name("username"))).click();
-//		driver.findElement(By.name("username")).sendKeys(USERNAME_SUSPENDED);
-//	}
-
-//	@Given("^Mary's account is locked")
-//	public void locked_user() throws Throwable {
-//		// This is a suspended user
-//		System.out.println(USERNAME_LOCKED);
-//	}
-
-//	@When("^she fills in her locked username$")
-//	public void enter_locked_username() throws Throwable {
-//		Thread.sleep(500); // Removing this fails the test. ¯\_(ツ)_/¯
-//		// The below block doesn't help either. Only sleep works. (╯°□°）╯︵ ┻━┻
-//		// new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.name("username"))).click();
-//		driver.findElement(By.name("username")).sendKeys(USERNAME_LOCKED);
-//	}
-
-//	@Given("^Mary's account is deactivated")
-//	public void deactivated_user() throws Throwable {
-//		// This is a suspended user
-//		System.out.println(USERNAME_DEACTIVATED);
-//	}
-
-//	@When("^she fills in her deactivated username$")
-//	public void enter_deactivated_username() {
-//		rootPage.sleep();
-//		driver.findElement(By.name("username")).sendKeys(USERNAME_DEACTIVATED);
-//	}
+    private User getUser(String email) {
+	    Assert.assertNotNull(email);
+        return Clients.builder().build()
+                .listUsers()
+                .stream()
+                .filter(user -> email.equals(user.getProfile().getEmail()))
+                .findFirst()
+                .orElse(null);
+    }
 
 }
