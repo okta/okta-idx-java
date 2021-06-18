@@ -88,6 +88,7 @@ public class SocialAuth extends CucumberRoot {
 
     @And("^the remediation returns \"MFA_REQUIRED\"$")
     public void the_remediation_returns_mfa_required(){
+        rootPage.waitForWebElementDisplayed(rootPage.alertDanger);
         Assert.assertTrue(rootPage.getCurrentUrl().contains("error=interaction_required"));
     }
 
