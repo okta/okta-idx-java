@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class Page {
 
-    private static final int RETRY_COUNT = 40;
+    private static final int RETRY_COUNT = 90;
     private static final int TIME_OUT_IN_SECONDS = 20;
 
     protected WebDriver driver;
