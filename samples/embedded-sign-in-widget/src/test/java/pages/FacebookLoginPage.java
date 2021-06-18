@@ -19,21 +19,19 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
-public class LoginPage extends Page {
+public class FacebookLoginPage extends Page {
 
-    public LoginPage(WebDriver driver) {
+    public FacebookLoginPage(WebDriver driver) {
         super(driver);
     }
 
-    @FindBy(name = "identifier")
-    public WebElement usernameInput;
+    @FindBy(id = "email")
+    public WebElement emailInput;
 
-    @FindBy(name = "credentials.passcode")
+    @FindBy(id = "pass")
     public WebElement passwordInput;
 
-    @FindBy(css = "input[type=submit]")
-    public WebElement submitButton;
+    @FindBy(id = "loginbutton")
+    public WebElement loginButton;
 
-    @FindBy(className = "social-auth-facebook-button")
-    public WebElement facebookLoginButton;
 }

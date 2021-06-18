@@ -78,10 +78,15 @@ public class Login extends CucumberRoot {
         Assert.assertTrue(profilePage.claimSubData.isDisplayed());
     }
 
-    @And("the cell for the value of \"email\" is shown and contains her email")
-    public void theCellForTheValueOfIsShownAndContainsHerEmail() {
+    @And("the cell for the value of \"email\" is shown and contains her {word}")
+    public void theCellForTheValueOfIsShownAndContainsHerEmail(String email) {
         profilePage.waitForWebElementDisplayed(profilePage.claimEmailData);
         Assert.assertTrue(profilePage.claimEmailData.isDisplayed());
-        Assert.assertEquals(profilePage.claimEmailData.getText(), USERNAME);
+        Assert.assertEquals(profilePage.claimEmailData.getText(), System.getenv(email));
+    }
+
+    @And("^the cell for the value of \"name\" is shown and contains her first name and last name$")
+    public void the_cell_for_name_is_shown_and_contains_her_name() {
+        Assert.assertTrue(profilePage.claimEmailData.isDisplayed());
     }
 }

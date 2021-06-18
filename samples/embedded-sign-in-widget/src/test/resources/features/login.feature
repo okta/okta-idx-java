@@ -7,4 +7,4 @@ Feature: 8.1: Basic Login with Embedded Sign In Widget
     And she submits the Login form
     Then she is redirected to the Root View
     And she sees a table with her profile info
-    And the cell for the value of "email" is shown and contains her email
+    And the cell for the value of "email" is shown and contains her USERNAME
