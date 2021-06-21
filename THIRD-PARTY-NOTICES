@@ -16,11 +16,11 @@ This project includes:
   Apache Log4j API under Apache License, Version 2.0
   Apache Log4j to SLF4J Adapter under Apache License, Version 2.0
   ASM based accessors helper used by json-smart under The Apache Software License, Version 2.0
-  ASM Core under BSD
   attoparser under The Apache Software License, Version 2.0
   Cucumber-HTML under MIT License
   Cucumber-JVM Repackaged Dependencies under BSD License or The Apache Software License, Version 2.0
   Gherkin under MIT License
+  IntelliJ IDEA Annotations under The Apache Software License, Version 2.0
   Jackson datatype: jdk8 under The Apache Software License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
@@ -28,11 +28,14 @@ This project includes:
   jackson-databind under The Apache Software License, Version 2.0
   Jackson-module-parameter-names under The Apache Software License, Version 2.0
   Jakarta Annotations API under EPL 2.0 or GPL2 w/ CPE
-  Jakarta Expression Language 3.0 under EPL 2.0 or GPL2 w/ CPE
   javax.annotation API under CDDL + GPLv2 with classpath exception
   JCIP Annotations under Apache License under Apache License, Version 2.0
   JSON Small and Fast Parser under The Apache Software License, Version 2.0
   JUL to SLF4J bridge under MIT License
+  Kotlin Stdlib under The Apache License, Version 2.0
+  Kotlin Stdlib Common under The Apache License, Version 2.0
+  Kotlin Stdlib Jdk7 under The Apache License, Version 2.0
+  Kotlin Stdlib Jdk8 under The Apache License, Version 2.0
   Nimbus Content Type under The Apache Software License, Version 2.0
   Nimbus JOSE+JWT under The Apache Software License, Version 2.0
   Nimbus LangTag under The Apache Software License, Version 2.0
@@ -62,18 +65,20 @@ This project includes:
   spring-boot-starter-thymeleaf under Apache License, Version 2.0
   spring-boot-starter-tomcat under Apache License, Version 2.0
   spring-boot-starter-web under Apache License, Version 2.0
-  spring-security-config under The Apache Software License, Version 2.0
-  spring-security-core under The Apache Software License, Version 2.0
-  spring-security-oauth2-client under The Apache Software License, Version 2.0
-  spring-security-oauth2-core under The Apache Software License, Version 2.0
-  spring-security-oauth2-jose under The Apache Software License, Version 2.0
-  spring-security-oauth2-resource-server under The Apache Software License, Version 2.0
-  spring-security-web under The Apache Software License, Version 2.0
+  spring-security-config under Apache License, Version 2.0
+  spring-security-core under Apache License, Version 2.0
+  spring-security-crypto under Apache License, Version 2.0
+  spring-security-oauth2-client under Apache License, Version 2.0
+  spring-security-oauth2-core under Apache License, Version 2.0
+  spring-security-oauth2-jose under Apache License, Version 2.0
+  spring-security-oauth2-resource-server under Apache License, Version 2.0
+  spring-security-web under Apache License, Version 2.0
   thymeleaf under The Apache Software License, Version 2.0
   thymeleaf-extras-java8time under The Apache Software License, Version 2.0
   thymeleaf-extras-springsecurity5 under The Apache Software License, Version 2.0
   thymeleaf-spring5 under The Apache Software License, Version 2.0
   tomcat-embed-core under Apache License, Version 2.0
+  tomcat-embed-el under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0
   unbescape under The Apache Software License, Version 2.0
 
