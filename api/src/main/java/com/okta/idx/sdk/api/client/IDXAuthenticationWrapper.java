@@ -138,27 +138,29 @@ public class IDXAuthenticationWrapper {
                 return client.identify(identifyRequest, proceedContext.getHref());
             });
 
-            if (isIdentifyInOneStep) {
-                return identifyTransaction.asAuthenticationResponse();
-            } else {
-                AuthenticationTransaction passwordTransaction = selectPasswordAuthenticatorIfNeeded(identifyTransaction);
-                AuthenticationTransaction answerTransaction = passwordTransaction.proceed(() -> {
-                    // answer password authenticator challenge
-                    Credentials credentials = new Credentials();
-                    credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
-
-                    // build answer password authenticator challenge request
-                    AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest =
-                            AnswerChallengeRequestBuilder.builder()
-                                    .withStateHandle(passwordTransaction.getStateHandle())
-                                    .withCredentials(credentials)
-                                    .build();
-
-                    return passwordTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR)
-                            .proceed(client, passwordAuthenticatorAnswerChallengeRequest);
-                });
-                return answerTransaction.asAuthenticationResponse();
+            AuthenticationResponse identifyResponse = identifyTransaction.asAuthenticationResponse();
+            if (isIdentifyInOneStep ||
+                    identifyResponse.getErrors() != null && !identifyResponse.getErrors().isEmpty()) {
+                return identifyResponse;
             }
+
+            AuthenticationTransaction passwordTransaction = selectPasswordAuthenticatorIfNeeded(identifyTransaction);
+            AuthenticationTransaction answerTransaction = passwordTransaction.proceed(() -> {
+                // answer password authenticator challenge
+                Credentials credentials = new Credentials();
+                credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
+
+                // build answer password authenticator challenge request
+                AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest =
+                        AnswerChallengeRequestBuilder.builder()
+                                .withStateHandle(passwordTransaction.getStateHandle())
+                                .withCredentials(credentials)
+                                .build();
+
+                return passwordTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR)
+                        .proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+            });
+            return answerTransaction.asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
