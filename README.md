@@ -85,12 +85,6 @@ You will also need:
 
 These examples will help you understand how to use this library.
 
-### Get Proceed Context
-
-```java
-ProceedContext proceedContext = Util.getProceedContextFromSession(session);
-```
-
 `IDXAuthenticationWrapper` object needs to be instantiated to be able to invoke all the backend Okta APIs.
 
 ### Authenticate users
