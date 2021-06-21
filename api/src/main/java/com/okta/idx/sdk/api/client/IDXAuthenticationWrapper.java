@@ -139,7 +139,8 @@ public class IDXAuthenticationWrapper {
             });
 
             AuthenticationResponse identifyResponse = identifyTransaction.asAuthenticationResponse();
-            if (isIdentifyInOneStep || (identifyResponse.getErrors() != null && !identifyResponse.getErrors().isEmpty())) {
+            if (isIdentifyInOneStep ||
+                    (identifyResponse.getErrors() != null && !identifyResponse.getErrors().isEmpty())) {
                 return identifyResponse;
             }
 
