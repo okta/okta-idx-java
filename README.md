@@ -81,6 +81,88 @@ You will also need:
 
 * An Okta account, called an _organization_ (sign up for a free [developer organization](https://developer.okta.com/signup) if you need one). 
 
+## Usage guide
+
+These examples will help you understand how to use this library.
+
+`IDXAuthenticationWrapper` object needs to be instantiated to be able to invoke all the backend Okta APIs.
+
+
+### Authenticate users
+
+Begin Transaction:
+
+```java
+AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+```
+
+Authenticate User:
+
+```java
+ AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password), beginResponse.getProceedContext());
+```
+
+### Authentication Status
+
+The `AuthenticationStatus` in `AuthenticationResponse` you get will indicate how to proceed to continue with the authentication flow.
+
+#### Success
+
+Type: `AuthenticationStatus.Success`
+
+The user was successfully authenticated and you can retrieve the tokens from the response by calling `getTokenResponse()` on `AuthenticationResponse` object.
+
+#### Password Expired
+
+Type: `AuthenticationStatus.PasswordExpired`
+
+The user needs to change their password to continue with the authentication flow and retrieve tokens.
+
+#### Awaiting authenticator enrollment
+
+Type: `AuthenticationStatus.AwaitingAuthenticatorEnrollment`
+
+The user needs to enroll an authenticator to continue with the authentication flow and retrieve tokens. You can retrieve the authenticators information by calling `authnResponse.Authenticators`.
+
+#### Awaiting challenge authenticator selection
+
+Type: `AwaitingChallengeAuthenticatorSelection`
+
+The user needs to select and challenge an additional authenticator to continue with the authentication flow and retrieve tokens.
+
+There are other statuses that you can get in `AuthenticationStatus`:
+
+#### Awaiting Authenticator Verification
+
+Type: `AwaitingAuthenticatorVerification`
+
+The user has successfully selected an authenticator to challenge so they now need to verify the selected authenticator. For example, if the user selected phone, this status indicates that they have to provide they code they received to verify the authenticator.
+
+#### Awaiting Authenticator Enrollment Data
+
+Type: `AwaitingAuthenticatorEnrollmentData`
+
+The user needs to provide additional authenticator information. For example, when a user selects to enroll phone they will have to provide their phone number to complete the enrollment process.
+
+#### Awaiting Challenge Authenticator Data
+
+Type: `AwaitingChallengeAuthenticatorData`
+
+The user needs to provide additional authenticator information. For example, when a user selects to challenge phone they will have to choose if they want to receive the code via voice or SMS.
+
+#### Awaiting Password Reset
+
+Type: `AwaitingPasswordReset`
+
+The user needs to reset their password to continue with the authentication flow and retrieve tokens.
+
+### Revoke Tokens
+
+```java
+idxAuthenticationWrapper.revokeToken(TokenType.ACCESS_TOKEN, accessToken);
+```
+
 ### Thread Safety
 
 Every instance of the SDK `Client` is thread-safe. You **should** use the same instance throughout the entire lifecycle of your application. Each instance has its own Connection pool and Caching resources that are automatically released when the instance is garbage collected.
