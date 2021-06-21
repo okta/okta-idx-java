@@ -16,7 +16,6 @@ This project includes:
   Apache Log4j API under Apache License, Version 2.0
   Apache Log4j to SLF4J Adapter under Apache License, Version 2.0
   ASM based accessors helper used by json-smart under The Apache Software License, Version 2.0
-  ASM Core under BSD
   attoparser under The Apache Software License, Version 2.0
   Cucumber-HTML under MIT License
   Cucumber-JVM Repackaged Dependencies under BSD License or The Apache Software License, Version 2.0
