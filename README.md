@@ -87,16 +87,25 @@ These examples will help you understand how to use this library.
 
 `IDXAuthenticationWrapper` object needs to be instantiated to be able to invoke all the backend Okta APIs.
 
+
 ### Authenticate users
+
+Begin Transaction:
+
+```java
+AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+```
+
+Authenticate User:
 
 ```java
  AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password), proceedContext);
+                idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password), beginResponse.getProceedContext());
 ```
 
 ### Authentication Status
 
-The `AuthenticationResponse` you get will indicate how to proceed to continue with the authentication flow. `AuthenticationStatus` in `AuthenticationResponse` can contain the following statuses:
+The `AuthenticationStatus` in `AuthenticationResponse` you get will indicate how to proceed to continue with the authentication flow.
 
 #### Success
 
