@@ -87,7 +87,6 @@ These examples will help you understand how to use this library.
 
 `IDXAuthenticationWrapper` object needs to be instantiated to be able to invoke all the backend Okta APIs.
 
-
 ### Authenticate users
 
 Begin Transaction:
@@ -163,6 +162,50 @@ The user needs to reset their password to continue with the authentication flow 
 idxAuthenticationWrapper.revokeToken(TokenType.ACCESS_TOKEN, accessToken);
 ```
 
+### Register a User
+
+```java
+// begin transaction
+AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin();
+
+// get proceed context
+ProceedContext beginProceedContext = beginResponse.getProceedContext();
+
+// enroll user
+AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues(beginProceedContext);
+
+// set user profile
+UserProfile userProfile = new UserProfile();
+userProfile.addAttribute("lastName", lastname);
+userProfile.addAttribute("firstName", firstname);
+userProfile.addAttribute("email", email);
+
+ProceedContext proceedContext = newUserRegistrationResponse.getProceedContext();
+
+# register user with proceed context context
+AuthenticationResponse authenticationResponse =
+        idxAuthenticationWrapper.register(proceedContext, userProfile);
+```
+
+> Note: Check the response's `AuthenticationStatus` to determine what the next step is.
+
+### Recover Password
+
+```java
+// recover password
+ AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.recoverPassword(username, proceedContext);
+```
+
+> Note: Check the response's `AuthenticationStatus` to determine what the next step is.
+
+### Error Handling
+
+`AuthenticationResponse` contains the list of SDK errors as strings. 
+
+```java
+List<String> errors = authenticationResponse.getErrors();
+```
 ### Thread Safety
 
 Every instance of the SDK `Client` is thread-safe. You **should** use the same instance throughout the entire lifecycle of your application. Each instance has its own Connection pool and Caching resources that are automatically released when the instance is garbage collected.
