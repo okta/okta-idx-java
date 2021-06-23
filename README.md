@@ -171,11 +171,16 @@ AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin();
 // get proceed context
 ProceedContext beginProceedContext = beginResponse.getProceedContext();
 
+// enroll user
+AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues(beginProceedContext);
+
 // set user profile
 UserProfile userProfile = new UserProfile();
 userProfile.addAttribute("lastName", lastname);
 userProfile.addAttribute("firstName", firstname);
 userProfile.addAttribute("email", email);
+
+ProceedContext proceedContext = newUserRegistrationResponse.getProceedContext();
 
 # register user with proceed context context
 AuthenticationResponse authenticationResponse =
