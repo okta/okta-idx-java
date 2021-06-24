@@ -70,8 +70,6 @@ public class LoginController {
                               final @RequestParam("password") String password,
                               final HttpSession session) {
 
-        //ProceedContext proceedContext = Util.getProceedContextFromSession(session);
-
         // begin transaction
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin();
 
