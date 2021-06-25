@@ -560,6 +560,15 @@ public class IDXAuthenticationWrapper {
     // Check if that's the case, and proceed to select password authenticator
     private AuthenticationTransaction selectPasswordAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction)
             throws ProcessingException {
+        // If remediation contains challenge-authenticator for passcode, we don't need to check SELECT_AUTHENTICATOR_AUTHENTICATE
+        Optional<RemediationOption> challengeRemediationOptionOptional =
+                authenticationTransaction.getOptionalRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR);
+
+        if (challengeRemediationOptionOptional.isPresent()) {
+            // proceed with password challenge
+            return authenticationTransaction;
+        }
+
         Optional<RemediationOption> remediationOptionOptional =
                 authenticationTransaction.getOptionalRemediationOption(RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE);
         if (!remediationOptionOptional.isPresent()) {
