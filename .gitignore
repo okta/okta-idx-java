@@ -50,3 +50,4 @@ travis_phantomjs
 
 chromedriver.zip
 direct-auth-samples/chromedriver
+samples/embedded-sign-in-widget/chromedriver

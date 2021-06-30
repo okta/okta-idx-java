@@ -54,7 +54,7 @@ Feature: 6.2 Multi-Factor Authentication with Password and SMS
     Then she sees a list of phone modes
     When she selects SMS
     And she submits the phone mode form
-    Then she should see a message "Unable to initiate factor enrollment: Invalid Phone Number"
+    Then she should see a message "Invalid Phone Number"
 
   @requireA18NProfile
   @requireExistingUser
