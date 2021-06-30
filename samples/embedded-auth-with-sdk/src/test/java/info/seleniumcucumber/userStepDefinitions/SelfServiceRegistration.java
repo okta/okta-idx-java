@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-Present Okta, Inc.
+ * Copyright (c) 2021-Present, Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,13 +238,13 @@ public class SelfServiceRegistration extends CucumberRoot {
         verifyPage.proceedButton.click();
     }
 
-    @Then("^she should see an error message \"Unable to initiate factor enrollment: Invalid Phone Number.\"$")
+    @Then("^she should see an error message \"Invalid Phone Number.\"$")
     public void she_should_see_an_error_message_invalid_phone_number() {
         Assert.assertTrue(registerPhonePage.alertDanger.isDisplayed());
         String error = registerPhonePage.alertDanger.getText();
         Assert.assertFalse("Error is not shown", error.isEmpty());
         Assert.assertTrue("Invalid phone number error is not shown'",
-                error.contains("Unable to initiate factor enrollment: Invalid Phone Number."));
+                error.contains("Invalid Phone Number."));
     }
 
 

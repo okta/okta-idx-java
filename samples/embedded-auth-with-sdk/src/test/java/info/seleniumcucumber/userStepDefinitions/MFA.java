@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-Present Okta, Inc.
+ * Copyright (c) 2021-Present, Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,14 +96,14 @@ public class MFA extends CucumberRoot {
         Assert.assertTrue("Invalid code error is not shown", error.contains("Invalid code. Try again."));
     }
 
-    @Then("^she should see a message \"Unable to initiate factor enrollment: Invalid Phone Number\"$")
+    @Then("^she should see a message \"Invalid Phone Number\"$")
     public void she_should_see_a_message_invalid_phone_number() {
         registerPage.waitForWebElementDisplayed(registerPage.alertDanger);
         Assert.assertTrue(registerPage.alertDanger.isDisplayed());
         String error = registerPage.alertDanger.getText();
         Assert.assertFalse("Error is not shown", error.isEmpty());
         Assert.assertTrue("Invalid phone number error is not shown",
-                error.contains("Unable to initiate factor enrollment: Invalid Phone Number"));
+                error.contains("Invalid Phone Number"));
     }
 
     @And("^she sees a field to re-enter another code$")

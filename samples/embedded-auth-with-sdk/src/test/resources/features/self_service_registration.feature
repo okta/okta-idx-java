@@ -89,4 +89,4 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
     Then she sees a list of phone modes
     When she selects SMS
     And she submits the phone mode form
-    Then she should see an error message "Unable to initiate factor enrollment: Invalid Phone Number."
+    Then she should see an error message "Invalid Phone Number."
