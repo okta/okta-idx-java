@@ -59,8 +59,8 @@ mvn -Dokta.oauth2.issuer=https://{yourOktaDomain}/oauth2/default \
 
 ```bash
 export OKTA_OAUTH2_ISSUER=https://{yourOktaDomain}/oauth2/default
-export OKTA_OAUTH2_CLIENT_ID={clientId}
-export OKTA_OAUTH2_CLIENT_SECRET={clientSecret}
+export OKTA_OAUTH2_CLIENTID={clientId}
+export OKTA_OAUTH2_CLIENTSECRET={clientSecret}
 export OKTA_IDX_SCOPES={scopes}
 export OKTA_OAUTH2_REDIRECTURI=http://localhost:8080
 ```
