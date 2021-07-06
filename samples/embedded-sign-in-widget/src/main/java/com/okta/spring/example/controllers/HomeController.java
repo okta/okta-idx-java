@@ -17,12 +17,29 @@ package com.okta.spring.example.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class HomeController {
 
     @GetMapping("/")
-    public String home() {
+    public String home(
+            @RequestParam(name = "error", required = false) String error,
+            @RequestParam(name = "interaction_code", required = false) String interactionCode,
+            @RequestParam(name = "state", required = false) String state) {
+
+        //MFA disabled
+        if (interactionCode != null && state != null) {
+            String oauthAuthUri =
+                    String.format("/oauth2/authorization/okta?interaction_code=%s&state=%s", interactionCode, state);
+            return "redirect:" + oauthAuthUri;
+        }
+        //MFA enabled
+        if (state != null && error != null && error.equals("interaction_required")) {
+            String oauthAuthUri =
+                    String.format("/oauth2/authorization/okta?error=%s&state=%s", error, state);
+            return "redirect:" + oauthAuthUri;
+        }
         return "home";
     }
 }
