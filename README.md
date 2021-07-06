@@ -62,6 +62,8 @@ For Apache Maven:
 </dependency>
 ```
 
+where `{okta.sdk.version}` is the Java IDX SDK version. 
+
 For Gradle:
 
 ```groovy
