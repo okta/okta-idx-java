@@ -81,7 +81,7 @@ public class LoginController {
                 idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password), proceedContext);
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
-            ModelAndView modelAndView = new ModelAndView("login");
+            ModelAndView modelAndView = new ModelAndView("redirect:/login");
             modelAndView.addObject("errors", authenticationResponse.getErrors());
             return modelAndView;
         }
