@@ -15,9 +15,12 @@
  */
 package com.okta.spring.example.controllers;
 
+import com.okta.commons.lang.Strings;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpSession;
 
 @Controller
 public class HomeController {
@@ -26,7 +29,8 @@ public class HomeController {
     public String home(
             @RequestParam(name = "error", required = false) String error,
             @RequestParam(name = "interaction_code", required = false) String interactionCode,
-            @RequestParam(name = "state", required = false) String state) {
+            @RequestParam(name = "state", required = false) String state,
+            HttpSession session) {
 
         //MFA disabled
         if (interactionCode != null && state != null) {
@@ -39,6 +43,10 @@ public class HomeController {
             String oauthAuthUri =
                     String.format("/oauth2/authorization/okta?error=%s&state=%s", error, state);
             return "redirect:" + oauthAuthUri;
+        }
+        //cleanup the context in case of unsuccessful login
+        if (Strings.hasText(error)) {
+            session.setAttribute("idxClientContext", null);
         }
         return "home";
     }
