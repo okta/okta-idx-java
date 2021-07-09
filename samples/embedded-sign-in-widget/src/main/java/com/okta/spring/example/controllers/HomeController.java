@@ -15,6 +15,7 @@
  */
 package com.okta.spring.example.controllers;
 
+import com.okta.commons.lang.Strings;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,7 +45,7 @@ public class HomeController {
             return "redirect:" + oauthAuthUri;
         }
         //cleanup the context in case of unsuccessful login
-        if(error != null && error.equals("access_denied")) {
+        if (Strings.hasText(error)) {
             session.setAttribute("idxClientContext", null);
         }
         return "home";
