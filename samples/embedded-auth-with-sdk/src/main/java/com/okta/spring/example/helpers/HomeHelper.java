@@ -73,6 +73,7 @@ public class HomeHelper {
         String user = null;
 
         try {
+            // get user claim info from /v1/userinfo endpoint
             String userInfoUrl = getNormalizedUri(issuer, "/v1/userinfo");
 
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -83,7 +84,7 @@ public class HomeHelper {
             ParameterizedTypeReference<Map<String, String>> responseType =
                     new ParameterizedTypeReference<Map<String, String>>() { };
             ResponseEntity<Map<String, String>> responseEntity =
-                    restTemplate.exchange(userInfoUrl, HttpMethod.POST, requestEntity, responseType);
+                    restTemplate.exchange(userInfoUrl, HttpMethod.GET, requestEntity, responseType);
 
             claims = responseEntity.getBody();
             Assert.notNull(claims, "claims cannot be null");
