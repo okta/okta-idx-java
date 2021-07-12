@@ -120,7 +120,7 @@ public class IDXAuthenticationWrapper {
 
                 if (isIdentifyInOneStep) {
                     Credentials credentials = new Credentials();
-                    credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
+                    credentials.setPasscode(authenticationOptions.getPassword());
 
                     identifyRequest = IdentifyRequestBuilder.builder()
                             .withIdentifier(authenticationOptions.getUsername())
@@ -148,7 +148,7 @@ public class IDXAuthenticationWrapper {
             AuthenticationTransaction answerTransaction = passwordTransaction.proceed(() -> {
                 // answer password authenticator challenge
                 Credentials credentials = new Credentials();
-                credentials.setPasscode(authenticationOptions.getPassword().toCharArray());
+                credentials.setPasscode(authenticationOptions.getPassword());
 
                 // build answer password authenticator challenge request
                 AnswerChallengeRequest passwordAuthenticatorAnswerChallengeRequest =
