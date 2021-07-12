@@ -174,7 +174,7 @@ final class AuthenticationTransaction {
 
         if (idxResponse.isLoginSuccessful()) {
             // login successful
-            logger.info("Login Successful!");
+            logger.debug("Login Successful!");
             TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, clientContext);
             authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
             authenticationResponse.setTokenResponse(tokenResponse);
