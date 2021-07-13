@@ -15,6 +15,8 @@
  */
 package com.okta.idx.sdk.api.model;
 
+import java.util.Arrays;
+
 public class AuthenticationOptions {
 
     private String username;
@@ -35,7 +37,7 @@ public class AuthenticationOptions {
     }
 
     public char[] getPassword() {
-        return password;
+        return Arrays.copyOf(password, password.length);
     }
 
     public void setPassword(char[] password) {
