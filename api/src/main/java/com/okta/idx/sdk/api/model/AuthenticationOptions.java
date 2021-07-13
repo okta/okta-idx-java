@@ -15,13 +15,15 @@
  */
 package com.okta.idx.sdk.api.model;
 
+import java.util.Arrays;
+
 public class AuthenticationOptions {
 
     private String username;
 
-    private String password;
+    private char[] password;
 
-    public AuthenticationOptions(String username, String password) {
+    public AuthenticationOptions(String username, char[] password) {
         this.username = username;
         this.password = password;
     }
@@ -34,11 +36,11 @@ public class AuthenticationOptions {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public char[] getPassword() {
+        return Arrays.copyOf(password, password.length);
     }
 
-    public void setPassword(String password) {
+    public void setPassword(char[] password) {
         this.password = password;
     }
 }

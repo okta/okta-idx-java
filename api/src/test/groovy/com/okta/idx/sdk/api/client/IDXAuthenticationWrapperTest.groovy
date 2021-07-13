@@ -281,7 +281,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -310,7 +310,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("Authentication failed"))
@@ -333,7 +333,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -362,7 +362,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("Password is incorrect"))
@@ -384,7 +384,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -414,7 +414,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -446,7 +446,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("mary@example.com", "superSecret"), beginResponse.proceedContext
+                new AuthenticationOptions("mary@example.com", "superSecret".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -473,7 +473,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("mary@unknown.com", "superSecret"), beginResponse.proceedContext
+                new AuthenticationOptions("mary@unknown.com", "superSecret".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("There is no account with the Username mary@unknown.com."))
@@ -500,7 +500,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("mary@example.com", "wrong"), beginResponse.proceedContext
+                new AuthenticationOptions("mary@example.com", "wrong".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("Password is incorrect"))
@@ -524,7 +524,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("mary@example.com", "superSecret"), beginResponse.proceedContext
+                new AuthenticationOptions("mary@example.com", "superSecret".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("User is not assigned to this application"))
@@ -548,7 +548,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("mary@example.com", "superSecret"), beginResponse.proceedContext
+                new AuthenticationOptions("mary@example.com", "superSecret".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("Authentication failed"))
@@ -572,7 +572,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("mary@example.com", "superSecret"), beginResponse.proceedContext
+                new AuthenticationOptions("mary@example.com", "superSecret".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("This factor is suspended for your account due to too many failed attempts"))
@@ -596,7 +596,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("mary@example.com", "superSecret"), beginResponse.proceedContext
+                new AuthenticationOptions("mary@example.com", "superSecret".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("Authentication failed"))
@@ -620,7 +620,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("Mary@unknown.com", "superSecret"), beginResponse.proceedContext
+                new AuthenticationOptions("Mary@unknown.com", "superSecret".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("There is no account with the Username Mary@unknown.com."))
@@ -1018,7 +1018,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -1090,7 +1090,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -1151,7 +1151,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -1222,7 +1222,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -1281,7 +1281,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
@@ -1335,7 +1335,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
-                new AuthenticationOptions("username", "password"), beginResponse.proceedContext
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())

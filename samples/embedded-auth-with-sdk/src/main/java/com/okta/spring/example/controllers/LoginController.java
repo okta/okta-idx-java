@@ -78,7 +78,7 @@ public class LoginController {
 
         // trigger authentication
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password), proceedContext);
+                idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password.toCharArray()), proceedContext);
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("redirect:/login");
