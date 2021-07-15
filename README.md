@@ -15,7 +15,7 @@
 * [Building the SDK](#building-the-sdk)
 * [Contributing](#contributing)
 
-This repository contains the Okta IDX SDK for Java. This SDK can be used in your server-side code to assist in authenticating users against the Okta Identity Engine.
+This repository contains the Okta IDX SDK for Java. This SDK can be used in your server-side code to assist in authenticating users against the Okta Identity Engine using the [Interaction Code][interaction-code-intro] flow.
 
 > :grey_exclamation: The use of this SDK requires usage of the Okta Identity Engine. This functionality is in general availability but is being gradually rolled out to customers. If you want to request to gain access to the Okta Identity Engine, please reach out to your account manager. If you do not have an account manager, please reach out to oie@okta.com for more information.
 
@@ -294,3 +294,4 @@ We are happy to accept contributions and PRs! Please see the [contribution guide
 [java-samples]: https://github.com/okta/okta-idx-java/tree/master/samples
 [apache-maven]: https://maven.apache.org/download.cgi
 [okta-identity-engine]: https://developer.okta.com/docs/concepts/ie-intro/
+[interaction-code-intro]: https://developer.okta.com/docs/guides/sign-into-web-app-remediation/java/before-you-begin/
