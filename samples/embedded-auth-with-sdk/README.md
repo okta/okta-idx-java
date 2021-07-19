@@ -17,6 +17,9 @@ These Examples are:
 4. Sign In/Sign Up with Social Identity Providers
 5. Sign In with Multifactor Authentication using Email or Phone
 
+For information and guides on how to build your app with this sample, please take a look at the [Java
+guides for Embedded Authentication](https://developer.okta.com/docs/guides/oie-embedded-sdk-use-cases/java/oie-embedded-sdk-use-case-overview/#start-with-a-use-case)
+
 ## Prerequisites
 
 - [JDK 8][jdk-8] or later

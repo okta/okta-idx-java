@@ -23,6 +23,9 @@ These Examples are:
 5. Sign In with Multifactor Authentication using Email or Phone
 6. Progressive Profiling
 
+For information and guides on how to build your app with this sample, please take a look at the [Java
+guides for Embedded Widget](https://developer.okta.com/docs/guides/oie-embedded-widget-use-cases/java/oie-embedded-widget-use-case-overview/)
+
 ## Prerequisites
 
 Before running this sample, you will need the following:
