@@ -294,4 +294,4 @@ We are happy to accept contributions and PRs! Please see the [contribution guide
 [java-samples]: https://github.com/okta/okta-idx-java/tree/master/samples
 [apache-maven]: https://maven.apache.org/download.cgi
 [okta-identity-engine]: https://developer.okta.com/docs/concepts/ie-intro/
-[interaction-code-intro]: https://developer.okta.com/docs/guides/sign-into-web-app-remediation/java/before-you-begin/
+[interaction-code-intro]: https://developer.okta.com/docs/guides/oie-embedded-sdk-overview/main/
