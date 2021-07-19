@@ -58,4 +58,14 @@
         <cve>CVE-2021-22112</cve>
     </suppress>
 
+    <suppress>
+        <notes><![CDATA[ file name: nimbus-jose-jwt-9.1.2.jar ]]></notes>
+        <cve>CVE-2021-27568</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[ file name: tomcat-embed-core-9.0.46.jar ]]></notes>
+        <cve>CVE-2021-33037</cve>
+    </suppress>
+
 </suppressions>
