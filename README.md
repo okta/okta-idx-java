@@ -112,25 +112,25 @@ The `AuthenticationStatus` in `AuthenticationResponse` you get will indicate how
 
 #### Success
 
-Type: `AuthenticationStatus.Success`
+Type: `AuthenticationStatus.SUCCESS`
 
 The user was successfully authenticated and you can retrieve the tokens from the response by calling `getTokenResponse()` on `AuthenticationResponse` object.
 
 #### Password Expired
 
-Type: `AuthenticationStatus.PasswordExpired`
+Type: `AuthenticationStatus.PASSWORD_EXPIRED`
 
 The user needs to change their password to continue with the authentication flow and retrieve tokens.
 
 #### Awaiting authenticator enrollment
 
-Type: `AuthenticationStatus.AwaitingAuthenticatorEnrollment`
+Type: `AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION`
 
 The user needs to enroll an authenticator to continue with the authentication flow and retrieve tokens. You can retrieve the authenticators information by calling `authnResponse.Authenticators`.
 
 #### Awaiting challenge authenticator selection
 
-Type: `AwaitingChallengeAuthenticatorSelection`
+Type: `AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION`
 
 The user needs to select and challenge an additional authenticator to continue with the authentication flow and retrieve tokens.
 
@@ -138,25 +138,25 @@ There are other statuses that you can get in `AuthenticationStatus`:
 
 #### Awaiting Authenticator Verification
 
-Type: `AwaitingAuthenticatorVerification`
+Type: `AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION`
 
 The user has successfully selected an authenticator to challenge so they now need to verify the selected authenticator. For example, if the user selected phone, this status indicates that they have to provide they code they received to verify the authenticator.
 
 #### Awaiting Authenticator Enrollment Data
 
-Type: `AwaitingAuthenticatorEnrollmentData`
+Type: `AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_DATA`
 
 The user needs to provide additional authenticator information. For example, when a user selects to enroll phone they will have to provide their phone number to complete the enrollment process.
 
 #### Awaiting Challenge Authenticator Data
 
-Type: `AwaitingChallengeAuthenticatorData`
+Type: `AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION_DATA`
 
 The user needs to provide additional authenticator information. For example, when a user selects to challenge phone they will have to choose if they want to receive the code via voice or SMS.
 
 #### Awaiting Password Reset
 
-Type: `AwaitingPasswordReset`
+Type: `AuthenticationStatus.AWAITING_PASSWORD_RESET`
 
 The user needs to reset their password to continue with the authentication flow and retrieve tokens.
 
