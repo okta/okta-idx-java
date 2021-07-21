@@ -49,7 +49,7 @@ If you run into problems using the SDK, you can
 
 ### Prerequisites
 
-- [JDK 8][jdk-8] or later
+- [JDK 8][jdk-8]
 - [Apache Maven][apache-maven] 3.6.x or later
 
 To use this SDK, you will need to include the following dependencies:
