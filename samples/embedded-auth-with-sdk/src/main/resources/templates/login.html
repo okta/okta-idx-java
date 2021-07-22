@@ -64,6 +64,12 @@
             border-color: rgba(0,0,0,0.2);
             width: 250px;
         }
+        .btn-generic {
+            color: #fff;
+            background-color: #717572;
+            border-color: rgba(0,0,0,0.2);
+            width: 250px;
+        }
         .btn-social {
             position: relative;
             padding-left: 44px;
@@ -149,8 +155,10 @@
                         <i class="fa fa-linkedin fa-fw"></i> Login with LinkedIn
                     </a>
                 </div>
-                <div th:case="'*'">
-                    <br><a th:href="@{${idp.href}}" class="btn btn-primary">Login with [[${idp.type}]]</a><br>
+                <div th:case="*">
+                    <a th:href="@{${idp.href}}" class="btn btn-lg btn-social btn-generic">
+                        <i class="fa fa-arrow-right fa-fw"></i> Login with [[${idp.type}]]
+                    </a>
                 </div>
             </div>
             <p/>
