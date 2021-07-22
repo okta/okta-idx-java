@@ -34,7 +34,8 @@ import org.junit.runner.RunWith;
 				"info.seleniumcucumber.stepdefinitions",   	// predefined step definitions package
 				"info.seleniumcucumber.userStepDefinitions", // user step definitions package
 				"env"
-		}
+		},
+		tags = "not @ignore"
 )
 public class CucumberIntegrationIT {
 }

@@ -19,31 +19,19 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
-public class LoginPage extends Page {
+public class OktaLoginPage extends Page {
 
-    public LoginPage(WebDriver driver) {
+    public OktaLoginPage(WebDriver driver) {
         super(driver);
     }
 
-    @FindBy(id = "btn-facebook")
-    public WebElement facebookLoginButton;
-
-    @FindBy(className = "btn-google")
-    public WebElement googleLoginButton;
-
-    @FindBy(id = "btn-generic")
-    public WebElement oidcLoginButton;
-
-    @FindBy(name = "username")
+    @FindBy(name = "identifier")
     public WebElement usernameInput;
 
-    @FindBy(name = "password")
+    @FindBy(name = "credentials.passcode")
     public WebElement passwordInput;
 
-    @FindBy(id = "sign-in-btn")
-    public WebElement signInButton;
-
-    @FindBy(id = "forgot-password")
-    public WebElement forgotPasswordLink;
+    @FindBy(className = "button")
+    public WebElement loginButton;
 
 }

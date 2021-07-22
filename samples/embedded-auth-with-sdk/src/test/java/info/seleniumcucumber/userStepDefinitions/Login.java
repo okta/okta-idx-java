@@ -96,7 +96,8 @@ public class Login extends CucumberRoot {
 	@And("^the cell for the value of \"name\" is shown and contains her first name and last name$")
 	public void the_cell_for_name_is_shown_and_contains_her_name() {
 		Assert.assertTrue(rootPage.name.isDisplayed());
-		Assert.assertEquals(user.getProfile().getDisplayName(), rootPage.name.getText());
+		Assert.assertTrue(rootPage.name.getText().contains(user.getProfile().getFirstName()));
+		Assert.assertTrue(rootPage.name.getText().contains(user.getProfile().getLastName()));
 	}
 
 	@When("^she fills in her incorrect username$")
