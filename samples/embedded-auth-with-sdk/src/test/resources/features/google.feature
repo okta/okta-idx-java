@@ -1,3 +1,5 @@
+# Test disabled since Okta OIDC IdP login test covers this feature
+@ignore
 Feature: 7.1 Direct Auth with Self Hosted Sign In Widget Social Login with 1 Social IDP
 
   Scenario: 7.1.1 Mary Logs in with Social IDP

@@ -64,6 +64,12 @@
             border-color: rgba(0,0,0,0.2);
             width: 250px;
         }
+        .btn-generic {
+            color: #fff;
+            background-color: #717572;
+            border-color: rgba(0,0,0,0.2);
+            width: 250px;
+        }
         .btn-social {
             position: relative;
             padding-left: 44px;
@@ -135,7 +141,7 @@
         <th:block th:each="idp: ${idps}">
             <div th:switch="${idp.type}">
                 <div th:case="'GOOGLE'">
-                    <a th:href="@{${idp.href}}" class="btn btn-lg btn-social btn-google">
+                    <a th:href="@{${idp.href}}" class="btn btn-lg btn-social btn-google" id="btn-google">
                         <i class="fa fa-google fa-fw"></i> Login with Google
                     </a>
                 </div>
@@ -145,12 +151,14 @@
                     </a>
                 </div>
                 <div th:case="'LINKEDIN'">
-                    <a th:href="@{${idp.href}}" class="btn btn-lg btn-social btn-linkedin">
+                    <a th:href="@{${idp.href}}" class="btn btn-lg btn-social btn-linkedin" id="btn-linkedin">
                         <i class="fa fa-linkedin fa-fw"></i> Login with LinkedIn
                     </a>
                 </div>
-                <div th:case="'*'">
-                    <br><a th:href="@{${idp.href}}" class="btn btn-primary">Login with [[${idp.type}]]</a><br>
+                <div th:case="*">
+                    <a th:href="@{${idp.href}}" class="btn btn-lg btn-social btn-generic" id="btn-generic">
+                        <i class="fa fa-arrow-right fa-fw"></i> Login with [[${idp.type}]]
+                    </a>
                 </div>
             </div>
             <p/>

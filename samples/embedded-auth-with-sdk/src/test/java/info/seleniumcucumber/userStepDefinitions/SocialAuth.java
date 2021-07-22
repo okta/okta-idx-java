@@ -25,6 +25,7 @@ import org.openqa.selenium.WebDriver;
 import pages.FacebookLoginPage;
 import pages.GoogleLoginPage;
 import pages.LoginPage;
+import pages.OktaLoginPage;
 import pages.RootPage;
 
 public class SocialAuth extends CucumberRoot {
@@ -34,6 +35,7 @@ public class SocialAuth extends CucumberRoot {
     private LoginPage loginPage = new LoginPage(driver);
     private FacebookLoginPage facebookLoginPage = new FacebookLoginPage(driver);
     private GoogleLoginPage googleLoginPage = new GoogleLoginPage(driver);
+    private OktaLoginPage oktaLoginPage = new OktaLoginPage(driver);
 
     @Given("^she clicks the \"Login with Facebook\" button$")
     public void clicks_facebook_login() {
@@ -53,6 +55,27 @@ public class SocialAuth extends CucumberRoot {
 
         Assert.assertTrue(facebookLoginPage.loginButton.isDisplayed());
         facebookLoginPage.loginButton.click();
+    }
+
+    @Given("^she clicks the \"Login with OIDC\" button$")
+    public void clicks_oidc_login() {
+        Assert.assertTrue(loginPage.oidcLoginButton.isDisplayed());
+        loginPage.oidcLoginButton.click();
+    }
+
+    @And("logs in to OIDC IdP with {word} and {word}")
+    public void logs_in_to_oidc_idp(String email, String password) {
+        oktaLoginPage.waitForWebElementDisplayed(oktaLoginPage.usernameInput);
+        Assert.assertTrue(oktaLoginPage.usernameInput.isDisplayed());
+        oktaLoginPage.usernameInput.click();
+        oktaLoginPage.usernameInput.sendKeys(System.getenv(email));
+
+        Assert.assertTrue(oktaLoginPage.passwordInput.isDisplayed());
+        oktaLoginPage.passwordInput.click();
+        oktaLoginPage.passwordInput.sendKeys(System.getenv(password));
+
+        Assert.assertTrue(oktaLoginPage.loginButton.isDisplayed());
+        oktaLoginPage.loginButton.click();
     }
 
     @Given("^she clicks the \"Login with Google\" button in the embedded Sign In Widget$")
