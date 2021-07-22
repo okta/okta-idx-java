@@ -39,7 +39,11 @@ public class OptionalPropertiesSource implements PropertiesSource {
         try {
             return propertiesSource.getProperties();
         } catch (Exception | NoClassDefFoundError e) {
-            log.debug("Unable to obtain properties from optional properties source {}", propertiesSource);
+            if (log.isTraceEnabled()) {
+                log.trace("Unable to obtain properties from optional properties source {}", propertiesSource, e);
+            } else {
+                log.debug("Unable to obtain properties from optional properties source {}: {}", propertiesSource, e.getMessage());
+            }
         }
         return new LinkedHashMap<>();
     }
