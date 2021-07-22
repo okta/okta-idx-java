@@ -1,0 +1,14 @@
+com.okta.idx.sdk.api.client
+com.okta.idx.sdk.api.config
+com.okta.idx.sdk.api.deserializers
+com.okta.idx.sdk.api.exception
+com.okta.idx.sdk.api.io
+com.okta.idx.sdk.api.model
+com.okta.idx.sdk.api.request
+com.okta.idx.sdk.api.response
+com.okta.idx.sdk.api.serializers
+com.okta.idx.sdk.api.util
+com.okta.spring.example
+com.okta.spring.example.config
+com.okta.spring.example.controllers
+com.okta.spring.example.helpers
