@@ -113,9 +113,16 @@ public class CustomAuthenticationProcessingFilter extends AbstractAuthentication
         final OAuth2AuthorizationExchange oAuth2AuthorizationExchange =
                 new OAuth2AuthorizationExchange(authorizationRequest, authorizationResponse);
 
+        String userInfoUri = clientRegistration.getProviderDetails().getUserInfoEndpoint().getUri();
+
+        // This is true in case of issuer set to org authorization server (ISSUER=https://org.okta.com)
+        if (!userInfoUri.contains("oauth2")) {
+            // Ideally we should get this uri from the well-known endpoint https://org.okta.com/.well-known/openid-configuration
+            userInfoUri = clientRegistration.getProviderDetails().getIssuerUri() + "/oauth2/v1/userinfo";
+        }
+
         final Map<String, Object> userAttributes =
-                helperUtil.getUserAttributes(clientRegistration.getProviderDetails().getUserInfoEndpoint().getUri(),
-                        oAuth2AccessToken);
+                helperUtil.getUserAttributes(userInfoUri,oAuth2AccessToken);
 
         final Collection<? extends GrantedAuthority> authorities =
                 helperUtil.tokenScopesToAuthorities(oAuth2AccessToken);
