@@ -37,6 +37,7 @@
         <jackson.version>2.11.3</jackson.version>
         <snakeyaml.version>1.27</snakeyaml.version>
         <okta.commons.version>1.2.6</okta.commons.version>
+        <okta.sdk.previousVersion>0.1.0-beta.8</okta.sdk.previousVersion>
         <github.slug>okta/okta-idx-java</github.slug>
     </properties>
 
@@ -273,6 +274,26 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.siom79.japicmp</groupId>
+                <artifactId>japicmp-maven-plugin</artifactId>
+                <version>0.15.3</version>
+                <configuration>
+                    <oldVersion>
+                        <dependency>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${okta.sdk.previousVersion}</version>
+                            <type>jar</type>
+                        </dependency>
+                    </oldVersion>
+                    <parameter>
+                        <onlyModified>true</onlyModified>
+                        <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
+                        <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>
+                    </parameter>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
