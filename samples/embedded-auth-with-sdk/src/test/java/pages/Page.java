@@ -149,7 +149,7 @@ public class Page {
     }
 
     int getSleepDurationDuringVerificationCodeFetching() {
-        int value = 100;
+        int value = 2000;
         try {
             value = Integer.parseInt(
                     System.getenv().getOrDefault("OKTA_E2E_VERIFICATION_CODE_SLEEP_DURATION", value + "")
