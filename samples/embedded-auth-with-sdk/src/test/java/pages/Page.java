@@ -89,7 +89,7 @@ public class Page {
             String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
             code = StringUtils.substringBetween(sms, "code is ", ".");
             if(code == null) {
-                logger.info("Attempt {} of {} SMS fetching failed.", tryCounter, totalRetryCount);
+                logger.warn("Attempt {} of {} SMS fetching failed.", tryCounter, totalRetryCount);
             } else {
                 logger.info("Verification SMS successfully received.");
             }
@@ -106,7 +106,7 @@ public class Page {
             waitForNextTry();
             email = Page.getA18NClient().getLatestEmailContent(Page.getA18NProfile());
             if(email == null) {
-                logger.info("Attempt {} of {} email fetching failed.", tryCounter, totalRetryCount);
+                logger.warn("Attempt {} of {} email fetching failed.", tryCounter, totalRetryCount);
             } else {
                 logger.info("Verification email successfully received.");
             }
@@ -125,7 +125,7 @@ public class Page {
         try {
             Thread.sleep(getSleepDurationDuringVerificationCodeFetching());
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("Exception occurred", e);
         }
     }
 
@@ -142,7 +142,7 @@ public class Page {
                     System.getenv().getOrDefault("OKTA_E2E_VERIFICATION_CODE_RETRY_COUNT", retry + "")
             );
         } catch (NumberFormatException e) {
-            logger.debug("Fail to parse OKTA_E2E_VERIFICATION_CODE_RETRY_COUNT. Defaulting to {}.", retry, e);
+            logger.warn("Fail to parse OKTA_E2E_VERIFICATION_CODE_RETRY_COUNT. Defaulting to {}.", retry, e);
         }
 
         return retry;
@@ -155,7 +155,7 @@ public class Page {
                     System.getenv().getOrDefault("OKTA_E2E_VERIFICATION_CODE_SLEEP_DURATION", value + "")
             );
         } catch (NumberFormatException e) {
-            logger.debug("Fail to parse OKTA_E2E_VERIFICATION_CODE_SLEEP_DURATION. Defaulting to {}.", value, e);
+            logger.warn("Fail to parse OKTA_E2E_VERIFICATION_CODE_SLEEP_DURATION. Defaulting to {}.", value, e);
         }
 
         return value;
