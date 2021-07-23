@@ -140,7 +140,7 @@ public class BaseA18NClient implements A18NClient {
             }
             email = IOUtils.toString(response.getBody(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            logger.error("Fail to get last email for " + profile.getEmailAddress(), e);
+            logger.debug("Fail to get last email for " + profile.getEmailAddress(), e);
         }
         return email;
     }
@@ -163,7 +163,7 @@ public class BaseA18NClient implements A18NClient {
             }
             sms = IOUtils.toString(response.getBody(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            logger.error("Fail to get last sms for " + profile.getEmailAddress(), e);
+            logger.debug("Fail to get last sms for " + profile.getEmailAddress(), e);
         }
         return sms;
     }
