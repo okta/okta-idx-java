@@ -72,4 +72,11 @@ final class WrapperUtil {
             logger.debug("Remediation options unavailable");
         }
     }
+
+    static void printMessage(IDXResponse idxResponse) {
+        if(idxResponse != null && idxResponse.getMessages() != null && idxResponse.getMessages().hasErrorValue()) {
+            Arrays.stream(idxResponse.getMessages().getValue())
+                    .forEach(messageValue -> logger.error(messageValue.getMessage()));
+        }
+    }
 }
