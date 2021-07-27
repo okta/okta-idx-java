@@ -40,9 +40,9 @@ public class SelfServiceRegistration extends CucumberRoot {
 
     @When("^she fills out her First Name$")
     public void she_fills_out_her_first_name() {
-        registerPage.waitForWebElementDisplayed(registerPage.firstnameInput);
-        registerPage.firstnameInput.click();
-        registerPage.firstnameInput.sendKeys("Mary");
+        registerPage.waitForWebElementDisplayed(registerPage.firstNameInput);
+        registerPage.firstNameInput.click();
+        registerPage.firstNameInput.sendKeys("Mary");
     }
 
     @And("^she fills out her Last Name$")
@@ -51,8 +51,8 @@ public class SelfServiceRegistration extends CucumberRoot {
         if(Page.getA18NProfile() != null && Page.getA18NProfile().getProfileId() != null) {
             profileSuffix = Page.getA18NProfile().getProfileId();
         }
-        registerPage.lastnameInput.click();
-        registerPage.lastnameInput.sendKeys("E2E-Java-" + profileSuffix);
+        registerPage.lastNameInput.click();
+        registerPage.lastNameInput.sendKeys("E2E-Java-" + profileSuffix);
     }
 
     @And("^she fills out her Email$")

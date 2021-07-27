@@ -25,13 +25,13 @@ public class RegisterPage extends Page {
         super(driver);
     }
 
-    @FindBy(name = "firstname")
-    public WebElement firstnameInput;
+    @FindBy(id = "firstName")
+    public WebElement firstNameInput;
 
-    @FindBy(name = "lastname")
-    public WebElement lastnameInput;
+    @FindBy(id = "lastName")
+    public WebElement lastNameInput;
 
-    @FindBy(name = "email")
+    @FindBy(id = "email")
     public WebElement emailInput;
 
     @FindBy(id = "sign-in-btn")
