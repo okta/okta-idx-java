@@ -18,6 +18,7 @@ package com.okta.spring.example.controllers;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
+import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.spring.example.helpers.HomeHelper;
@@ -34,6 +35,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class HomeController {
@@ -176,8 +181,32 @@ public class HomeController {
      */
     @GetMapping("/register")
     public ModelAndView displayRegisterPage(final HttpSession session) {
-        begin(session);
-        return new ModelAndView("register");
+        AuthenticationResponse authenticationResponse = begin(session);
+
+        authenticationResponse =
+                authenticationWrapper.fetchSignUpFormValues(authenticationResponse.getProceedContext());
+
+        ModelAndView modelAndView = new ModelAndView("register");
+
+        Optional<FormValue> userProfileFormValue = authenticationResponse.getFormValues()
+                    .stream()
+                    .filter(x -> x.getName().equals("userProfile"))
+                    .findFirst();
+
+
+        if (!userProfileFormValue.isPresent()) {
+            return displayErrorPage();
+        }
+
+        List<FormValue> userProfileAttributes =
+                new LinkedList<>(Arrays.asList(userProfileFormValue.get().form().getValue()));
+
+
+        if (!CollectionUtils.isEmpty(userProfileAttributes)) {
+            modelAndView.addObject("userProfileAttributes", userProfileAttributes);
+        }
+
+        return modelAndView;
     }
 
     /**

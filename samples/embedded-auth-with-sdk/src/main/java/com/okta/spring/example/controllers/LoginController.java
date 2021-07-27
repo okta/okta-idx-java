@@ -21,6 +21,7 @@ import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
+import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -36,6 +37,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class LoginController {
@@ -304,16 +306,12 @@ public class LoginController {
     /**
      * Handle new user registration functionality.
      *
-     * @param lastname the lastname
-     * @param firstname the firstname
-     * @param email the email
+     * @param userProfileAttributes string array for user profile attributes from register form
      * @param session the session
      * @return the enroll authenticators view.
      */
     @PostMapping("/register")
-    public ModelAndView register(final @RequestParam("lastname") String lastname,
-                                 final @RequestParam("firstname") String firstname,
-                                 final @RequestParam("email") String email,
+    public ModelAndView register(final @RequestParam(value = "userProfileAttribute[]") String[] userProfileAttributes,
                                  final HttpSession session) {
         logger.info(":: Register ::");
 
@@ -339,9 +337,31 @@ public class LoginController {
         }
 
         UserProfile userProfile = new UserProfile();
-        userProfile.addAttribute("lastName", lastname);
-        userProfile.addAttribute("firstName", firstname);
-        userProfile.addAttribute("email", email);
+//        FormValue userProfileFormValue = null;
+
+//        for (FormValue formValue: newUserRegistrationResponse.getFormValues()) {
+//            if (formValue.getName().contentEquals("userProfile")) {
+//                userProfileFormValue = formValue;
+//            }
+//        }
+
+        Optional<FormValue> userProfileFormValue = newUserRegistrationResponse.getFormValues()
+                    .stream()
+                    .filter(x -> x.getName().equals("userProfile"))
+                    .findFirst();
+
+        if (!userProfileFormValue.isPresent()) {
+            ModelAndView modelAndView = new ModelAndView("register");
+            modelAndView.addObject("errors", "Unknown error occurred!");
+            return modelAndView;
+        }
+
+        int i = 0;
+        for (FormValue value: userProfileFormValue.get().form().getValue()) {
+            //Build the user profile
+            userProfile.addAttribute(value.getName(), userProfileAttributes[i]);
+            i++;
+        }
 
         ProceedContext proceedContext = newUserRegistrationResponse.getProceedContext();
 
