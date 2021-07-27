@@ -19,7 +19,6 @@ import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.FormValue;
-import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.spring.example.helpers.HomeHelper;
@@ -36,8 +35,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class HomeController {
@@ -187,23 +188,19 @@ public class HomeController {
 
         ModelAndView modelAndView = new ModelAndView("register");
 
-        List<FormValue> userProfileAttributes = new LinkedList<>();
-        FormValue userProfileFormValue = null;
+        Optional<FormValue> userProfileFormValue = authenticationResponse.getFormValues()
+                    .stream()
+                    .filter(x -> x.getName().equals("userProfile"))
+                    .findFirst();
 
-        for (FormValue formValue: authenticationResponse.getFormValues()) {
-            if (formValue.getName().contentEquals("userProfile")) {
-                userProfileFormValue = formValue;
-            }
+
+        if (!userProfileFormValue.isPresent()) {
+            return displayErrorPage();
         }
 
-        if (userProfileFormValue == null) {
-            displayErrorPage();
-        }
+        List<FormValue> userProfileAttributes =
+                new LinkedList<>(Arrays.asList(userProfileFormValue.get().form().getValue()));
 
-        for (FormValue value: userProfileFormValue.form().getValue()) {
-            //Build the user profile
-            userProfileAttributes.add(value);
-        }
 
         if (!CollectionUtils.isEmpty(userProfileAttributes)) {
             modelAndView.addObject("userProfileAttributes", userProfileAttributes);

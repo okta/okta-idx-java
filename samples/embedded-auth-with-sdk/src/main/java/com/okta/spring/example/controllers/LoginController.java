@@ -31,13 +31,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class LoginController {
@@ -311,7 +311,7 @@ public class LoginController {
      * @return the enroll authenticators view.
      */
     @PostMapping("/register")
-    public ModelAndView register(final @RequestParam(value="userProfileAttribute[]") String[] userProfileAttributes,
+    public ModelAndView register(final @RequestParam(value = "userProfileAttribute[]") String[] userProfileAttributes,
                                  final HttpSession session) {
         logger.info(":: Register ::");
 
@@ -337,22 +337,27 @@ public class LoginController {
         }
 
         UserProfile userProfile = new UserProfile();
-        FormValue userProfileFormValue = null;
+//        FormValue userProfileFormValue = null;
 
-        for (FormValue formValue: newUserRegistrationResponse.getFormValues()) {
-            if (formValue.getName().contentEquals("userProfile")) {
-                userProfileFormValue = formValue;
-            }
-        }
+//        for (FormValue formValue: newUserRegistrationResponse.getFormValues()) {
+//            if (formValue.getName().contentEquals("userProfile")) {
+//                userProfileFormValue = formValue;
+//            }
+//        }
 
-        if (userProfileFormValue == null) {
+        Optional<FormValue> userProfileFormValue = newUserRegistrationResponse.getFormValues()
+                    .stream()
+                    .filter(x -> x.getName().equals("userProfile"))
+                    .findFirst();
+
+        if (!userProfileFormValue.isPresent()) {
             ModelAndView modelAndView = new ModelAndView("register");
             modelAndView.addObject("errors", "Unknown error occurred!");
             return modelAndView;
         }
 
         int i = 0;
-        for (FormValue value: userProfileFormValue.form().getValue()) {
+        for (FormValue value: userProfileFormValue.get().form().getValue()) {
             //Build the user profile
             userProfile.addAttribute(value.getName(), userProfileAttributes[i]);
             i++;
