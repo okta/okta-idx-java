@@ -24,13 +24,16 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Page {
 
-    private static final int RETRY_COUNT = 90;
+    private final Logger logger = LoggerFactory.getLogger(Page.class);
+
     private static final int TIME_OUT_IN_SECONDS = 20;
 
     protected WebDriver driver;
@@ -79,27 +82,35 @@ public class Page {
 
     public String fetchCodeFromSMS() {
         String code = null;
-        int retryCount = RETRY_COUNT;
-        while (retryCount > 0 && code == null) {
-            try { Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
+        int totalRetryCount = getRetryCountDuringVerificationCodeFetching();
+        int tryCounter = 0;
+        while (tryCounter < totalRetryCount && code == null) {
+            waitForNextTry();
             String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
             code = StringUtils.substringBetween(sms, "code is ", ".");
-            retryCount--;
+            if(code == null) {
+                logger.warn("Attempt {} of {} SMS fetching failed.", tryCounter, totalRetryCount);
+            } else {
+                logger.info("Verification SMS successfully received.");
+            }
+            tryCounter++;
         }
         return code;
     }
 
     public String fetchEmailContent() {
         String email = null;
-        int retryCount = RETRY_COUNT;
-        while(retryCount > 0) {
-            try { Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
+        int totalRetryCount = getRetryCountDuringVerificationCodeFetching();
+        int tryCounter = 0;
+        while(tryCounter < totalRetryCount && email == null) {
+            waitForNextTry();
             email = Page.getA18NClient().getLatestEmailContent(Page.getA18NProfile());
-            if(email != null) {
-                break;
+            if(email == null) {
+                logger.warn("Attempt {} of {} email fetching failed.", tryCounter, totalRetryCount);
             } else {
-                retryCount--;
+                logger.info("Verification email successfully received.");
             }
+            tryCounter++;
         }
         return email;
     }
@@ -110,13 +121,43 @@ public class Page {
         return matcher.find() ? matcher.group(1) : null;
     }
 
+    private void waitForNextTry() {
+        try {
+            Thread.sleep(getSleepDurationDuringVerificationCodeFetching());
+        } catch (InterruptedException e) {
+            logger.error("Exception occurred", e);
+        }
+    }
+
     public String fetchCodeFromPasswordResetEmail(String emailContent) {
         Pattern pattern = Pattern.compile("Enter a code instead: (\\d{6})");
         Matcher matcher = pattern.matcher(emailContent);
         return matcher.find() ? matcher.group(1) : null;
     }
 
-    public void doNothing() {
-        try { Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
+    int getRetryCountDuringVerificationCodeFetching() {
+        int retry = 5;
+        try {
+            retry = Integer.parseInt(
+                    System.getenv().getOrDefault("OKTA_E2E_VERIFICATION_CODE_RETRY_COUNT", retry + "")
+            );
+        } catch (NumberFormatException e) {
+            logger.warn("Fail to parse OKTA_E2E_VERIFICATION_CODE_RETRY_COUNT. Defaulting to {}.", retry, e);
+        }
+
+        return retry;
+    }
+
+    int getSleepDurationDuringVerificationCodeFetching() {
+        int value = 4000;
+        try {
+            value = Integer.parseInt(
+                    System.getenv().getOrDefault("OKTA_E2E_VERIFICATION_CODE_SLEEP_DURATION", value + "")
+            );
+        } catch (NumberFormatException e) {
+            logger.warn("Fail to parse OKTA_E2E_VERIFICATION_CODE_SLEEP_DURATION. Defaulting to {}.", value, e);
+        }
+
+        return value;
     }
 }
