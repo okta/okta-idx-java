@@ -136,7 +136,7 @@ public class Page {
     }
 
     int getRetryCountDuringVerificationCodeFetching() {
-        int retry = 10;
+        int retry = 5;
         try {
             retry = Integer.parseInt(
                     System.getenv().getOrDefault("OKTA_E2E_VERIFICATION_CODE_RETRY_COUNT", retry + "")
@@ -149,7 +149,7 @@ public class Page {
     }
 
     int getSleepDurationDuringVerificationCodeFetching() {
-        int value = 2000;
+        int value = 4000;
         try {
             value = Integer.parseInt(
                     System.getenv().getOrDefault("OKTA_E2E_VERIFICATION_CODE_SLEEP_DURATION", value + "")
