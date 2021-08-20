@@ -44,11 +44,10 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
     And she submits the verify form
     Then she sees a list of factors to register
     When she selects Phone from the list
-    And she inputs a valid phone number
-    And submits the enrollment form
-    Then she sees a list of phone modes
     When she selects SMS
     And she submits the phone mode form
+    And she inputs a valid phone number
+    And submits the enrollment form
     Then the screen changes to receive an input for a code
     When she inputs the correct code from her SMS
     And she submits the verify form
@@ -84,9 +83,8 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
     And she submits the verify form
     Then she sees a list of factors to register
     When she selects Phone from the list
-    And she inputs an invalid phone number
-    And submits the enrollment form
-    Then she sees a list of phone modes
     When she selects SMS
     And she submits the phone mode form
+    And she inputs an invalid phone number
+    And submits the enrollment form
     Then she should see an error message "Invalid Phone Number."
