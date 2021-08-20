@@ -68,6 +68,11 @@ public class RemediationOption {
     private String accepts;
 
     /**
+     * Refresh value for this remediation option.
+     */
+    private String refresh;
+
+    /**
      * Allow you to continue the remediation with this option.
      *
      * @param client the {@link IDXClient} instance
@@ -111,6 +116,10 @@ public class RemediationOption {
 
     public String getHref() {
         return href;
+    }
+
+    public String getRefresh() {
+        return refresh;
     }
 
     /**

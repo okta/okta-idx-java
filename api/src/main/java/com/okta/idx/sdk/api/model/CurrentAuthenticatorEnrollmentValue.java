@@ -32,6 +32,8 @@ public class CurrentAuthenticatorEnrollmentValue {
 
     private RemediationOption resend;
 
+    private RemediationOption poll;
+
     public Recover getRecover() {
         return recover;
     }
@@ -50,5 +52,9 @@ public class CurrentAuthenticatorEnrollmentValue {
 
     public RemediationOption getResend() {
         return resend;
+    }
+
+    public RemediationOption getPoll() {
+        return poll;
     }
 }
