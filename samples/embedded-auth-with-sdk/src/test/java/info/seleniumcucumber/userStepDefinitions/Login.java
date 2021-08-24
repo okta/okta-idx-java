@@ -113,9 +113,15 @@ public class Login extends CucumberRoot {
 		Assert.assertTrue(rootPage.alertDanger.isDisplayed());
 		String error = rootPage.alertDanger.getText();
 		Assert.assertFalse("Error is not shown", error.isEmpty());
-		// If sign-up is enabled for the app, we see the account doesn't exist error
-		Assert.assertTrue("No account with username error is not shown'",
-				error.contains("There is no account with the Username"));
+		if (System.getenv("USER_ENUMERATION_PREVENTION_ENABLED") != null) {
+			// If user enumeration prevention is enabled, authentication failed error is seen
+			Assert.assertTrue("Authentication failed error is not shown'",
+					error.contains("Authentication failed"));
+		} else {
+			// If user enumeration prevention is disabled, we see the account doesn't exist error
+			Assert.assertTrue("No account with username error is not shown'",
+					error.contains("There is no account with the Username"));
+		}
 	}
 
 	@When("^she fills in her incorrect password$")

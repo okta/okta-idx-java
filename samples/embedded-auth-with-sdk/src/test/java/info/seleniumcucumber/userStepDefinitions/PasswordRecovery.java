@@ -124,6 +124,11 @@ public class PasswordRecovery extends CucumberRoot {
 
 	@Then("^she sees a message \"There is no account with the Username mary@unknown.com.\"$")
 	public void she_sees_a_message() {
+		// This error is shown only if user enumeration prevention feature is disabled
+		if (System.getenv("USER_ENUMERATION_PREVENTION_ENABLED") != null) {
+			return;
+		}
+
 		Assert.assertTrue(forgotPasswordPage.alertDanger.isDisplayed());
 		String errorMsg = forgotPasswordPage.alertDanger.getText();
 		Assert.assertFalse("Error is not shown", errorMsg.isEmpty());
