@@ -24,10 +24,20 @@ source "${COMMON_SCRIPT}"
 
 cron () {
     echo "Running TRAVIS CRON task"
-    ${MVN_CMD} dependency-check:aggregate -Powasp
+    echo "Downloading chromedriver"
+    "${CHROMEDRIVER_DOWNLOAD_SCRIPT}"
 
     echo "Running Integration Tests against Trex Org"
-    OKTA_CLIENT_ORGURL="${TREX_CLIENT_ORGURL}" OKTA_CLIENT_TOKEN="${TREX_CLIENT_TOKEN}" ${MVN_CMD} install
+    export OKTA_IDX_ISSUER=${TREX_OKTA_IDX_ISSUER}
+    export OKTA_OAUTH2_ISSUER=${TREX_OKTA_IDX_ISSUER}
+    export OKTA_CLIENT_TOKEN=${TREX_OKTA_CLIENT_TOKEN}
+    export OKTA_CLIENT_ORGURL=${TREX_OKTA_CLIENT_ORGURL}
+    export OKTA_IDX_CLIENTID=${TREX_OKTA_IDX_CLIENTID}
+    export OKTA_IDX_CLIENTSECRET=${TREX_OKTA_IDX_CLIENTSECRET}
+    export OKTA_OAUTH2_CLIENTID=${TREX_OKTA_IDX_CLIENTID}
+    export OKTA_OAUTH2_CLIENTSECRET=${TREX_OKTA_IDX_CLIENTSECRET}
+
+    ${MVN_CMD} clean verify
 }
 
 deploy () {
