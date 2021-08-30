@@ -25,58 +25,82 @@ public class TokenResponse {
      * The Access Token JWT
      */
     @JsonAlias("access_token")
-    public String accessToken;
+    private String accessToken;
 
     /**
      * Seconds the token is valid for
      */
     @JsonAlias("expires_in")
-    public Integer expiresIn;
+    private Integer expiresIn;
 
     /**
      * The ID Token JWT
      */
     @JsonAlias("id_token")
-    public String idToken;
+    private String idToken;
 
     /**
      * The Refresh Token JWT
      */
     @JsonAlias("refresh_token")
-    public String refreshToken;
+    private String refreshToken;
 
     /**
      * The scope of the JWT
      */
-    public String scope;
+    private String scope;
 
     /**
      * The type of Token the JWT is
      */
     @JsonAlias("token_type")
-    public String tokenType;
+    private String tokenType;
 
     public String getAccessToken() {
         return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     public Integer getExpiresIn() {
         return expiresIn;
     }
 
+    public void setExpiresIn(Integer expiresIn) {
+        this.expiresIn = expiresIn;
+    }
+
     public String getIdToken() {
         return idToken;
+    }
+
+    public void setIdToken(String idToken) {
+        this.idToken = idToken;
     }
 
     public String getRefreshToken() {
         return refreshToken;
     }
 
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
     public String getScope() {
         return scope;
     }
 
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
     public String getTokenType() {
         return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 }
