@@ -1,0 +1,11 @@
+com.okta.idx.sdk.api.client
+com.okta.idx.sdk.api.deserializers
+com.okta.idx.sdk.api.exception
+com.okta.idx.sdk.api.model
+com.okta.idx.sdk.api.request
+com.okta.idx.sdk.api.response
+com.okta.idx.sdk.api.serializers
+com.okta.idx.sdk.impl.client
+com.okta.idx.sdk.impl.config
+com.okta.idx.sdk.impl.io
+com.okta.idx.sdk.impl.util
