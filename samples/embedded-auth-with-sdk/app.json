@@ -1,6 +1,5 @@
 {
   "name": "Start on Heroku: Java",
   "description": "A barebones Java app, which can easily be deployed to Heroku.",
-  "repository": "https://github.com/okta/okta-idx-java/tree/deploy_to_heroku/samples/embedded-auth-with-sdk",
   "addons": [ "heroku-postgresql" ]
 }
