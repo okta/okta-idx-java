@@ -31,7 +31,7 @@
 
     <modules>
         <module>embedded-auth-with-sdk</module>
-        <module>embedded-sign-in-widget</module>
+<!--        <module>embedded-sign-in-widget</module>-->
     </modules>
 </project>
 
