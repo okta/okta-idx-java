@@ -27,6 +27,8 @@ guides for Embedded Authentication](https://developer.okta.com/docs/guides/oie-e
 
 ## Installation & Running The App
 
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
 1. Build the project from root level (see [here](https://github.com/okta/okta-idx-java/tree/direct-auth#building-the-sdk))
 2. Navigate to folder `samples/embedded-auth-with-sdk` and run the below `mvn` command:
 
