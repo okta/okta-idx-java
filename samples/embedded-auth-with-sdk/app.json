@@ -1,7 +1,5 @@
 {
-  "name": "Java IDX Sample",
-  "description": "Java IDX Samples",
-  "repository": "https://github.com/okta/okta-idx-java/samples/embedded-auth-with-sdk",
-  "logo": "https://node-js-sample.herokuapp.com/node.svg",
-  "keywords": ["Java", "IDX"]
+  "name": "Start on Heroku: Java",
+  "description": "A barebones Java app, which can easily be deployed to Heroku.",
+  "addons": [ "heroku-postgresql" ]
 }
