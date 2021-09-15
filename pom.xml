@@ -180,6 +180,17 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>com.heroku.sdk</groupId>
+                    <artifactId>heroku-maven-plugin</artifactId>
+                    <version>3.0.3</version>
+                    <configuration>
+                        <appName>hidden-basin-99472</appName>
+                        <processTypes>
+                            <web>java $JAVA_OPTS -Dserver.port=$PORT -cp target/classes:target/dependency/* com.okta.spring.example.ExampleApplication</web>
+                        </processTypes>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
