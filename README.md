@@ -47,6 +47,8 @@ If you run into problems using the SDK, you can
 
 ## Getting Started
 
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
 ### Prerequisites
 
 - [JDK 8][jdk-8] or [JDK-11][jdk-11]
