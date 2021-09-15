@@ -1,7 +1,7 @@
 {
   "name": "Java IDX Sample",
   "description": "Java IDX Samples",
-  "repository": "https://github.com/okta/okta-idx-java",
+  "repository": "https://github.com/okta/okta-idx-java/samples/embedded-auth-with-sdk",
   "logo": "https://node-js-sample.herokuapp.com/node.svg",
   "keywords": ["Java", "IDX"]
 }
