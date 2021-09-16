@@ -184,7 +184,15 @@
                     <artifactId>heroku-maven-plugin</artifactId>
                     <version>3.0.3</version>
                     <configuration>
-                        <appName>hidden-basin-99472</appName>
+                        <configVars>
+                            <OKTA_IDX_ISSUER>${env.OKTA_IDX_ISSUER}</OKTA_IDX_ISSUER>
+                            <OKTA_IDX_CLIENTID>${env.OKTA_IDX_CLIENTID}</OKTA_IDX_CLIENTID>
+                            <OKTA_IDX_CLIENTSECRET>${env.OKTA_IDX_CLIENTSECRET}</OKTA_IDX_CLIENTSECRET>
+                            <OKTA_IDX_SCOPES>${env.OKTA_IDX_SCOPES}</OKTA_IDX_SCOPES>
+                            <OKTA_IDX_REDIRECTURI>${env.OKTA_IDX_REDIRECTURI}</OKTA_IDX_REDIRECTURI>
+                            <PORT>8901</PORT>
+                        </configVars>
+                        <appName>${heroku.appName}</appName>
                         <processTypes>
                             <web>java $JAVA_OPTS -Dserver.port=$PORT -cp target/classes:target/dependency/* com.okta.spring.example.ExampleApplication</web>
                         </processTypes>
