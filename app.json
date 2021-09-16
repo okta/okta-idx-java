@@ -1,5 +1,19 @@
 {
   "name": "Start on Heroku: Java",
   "description": "A barebones Java app, which can easily be deployed to Heroku.",
-  "repository": "https://github.com/okta/okta-idx-java"
+  "repository": "https://github.com/okta/okta-idx-java",
+  "env": {
+    "OKTA_IDX_ISSUER": {
+      "description": "Issuer URL for your org",
+      "value": "https://java-idx-sdk.okta.com/oauth2/default"
+    },
+    "OKTA_IDX_CLIENTID": {
+      "description": "Client ID for your application",
+      "value": "test123"
+    },
+    "OKTA_IDX_CLIENTSECRET": {
+      "description": "Client Secret for your application",
+      "value": ""
+    }
+  }
 }
