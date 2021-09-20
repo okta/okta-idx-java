@@ -247,6 +247,11 @@ public class LoginController {
         }
     }
 
+    /**
+     * Show authenticator verification form
+     *
+     * @return verify.html
+     */
     @GetMapping("/verify")
     public ModelAndView verify() {
         logger.info(":: Show Verify form ::");
