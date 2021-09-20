@@ -23,6 +23,7 @@ import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import de.taimos.totp.TOTP;
 import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -34,8 +35,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 public class QrCodePage extends Page {
 
@@ -52,7 +51,7 @@ public class QrCodePage extends Page {
     public WebElement nextButton;
 
     public static String obtainSecret(String base64Image) throws IOException, NotFoundException {
-        String qrCode = decodeQRCode(parseBase64Binary(base64Image.split(",")[1]));
+        String qrCode = decodeQRCode(Base64.decodeBase64(base64Image.split(",")[1]));
         Matcher matcher = SECRET_PATTERN.matcher(qrCode);
         if (matcher.find()) {
             return matcher.group("key");
