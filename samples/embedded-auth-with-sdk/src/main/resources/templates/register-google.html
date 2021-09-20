@@ -1,0 +1,88 @@
+<!--
+  ~ Copyright (c) 2021-Present, Okta, Inc.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Enroll Google Authenticator</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        .enroll-google-authenticator-form {
+            width: 440px;
+            margin: 50px auto;
+        }
+
+        .enroll-google-authenticator-form form {
+            margin-bottom: 15px;
+            background: #f7f7f7;
+            box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+
+        .enroll-google-authenticator-form h2 {
+            margin: 0 0 15px;
+        }
+
+        .enroll-google-authenticator-form .qrcode {
+            width: 200px;
+            margin: auto;
+        }
+
+        .form-control, .btn {
+            min-height: 38px;
+            border-radius: 2px;
+        }
+
+        .btn {
+            font-size: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="padding:1em">
+        <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
+    </div>
+
+    <div class="enroll-google-authenticator-form">
+        <form id="enroll-google-form" th:action="@{verify}">
+            <div>
+                <h2 class="text-center">Scan QR code</h2>
+                <div>
+                    <p class="font-weight-light">Launch Google Authenticator, tap the "+" icon, then select "Scan
+                        a QR code".</p>
+                    <div class="qrcode">
+                        <img id="qr-code" th:src="@{${session.qrCode}}" alt="qr code">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <button id="next-btn" type="submit" class="btn btn-primary btn-block">Next</button>
+            </div>
+        </form>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

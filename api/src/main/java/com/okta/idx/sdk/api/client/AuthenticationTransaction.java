@@ -18,6 +18,8 @@ package com.okta.idx.sdk.api.client;
 import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
+import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
+import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollmentValue;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.Idp;
@@ -218,6 +220,10 @@ final class AuthenticationTransaction {
                 break;
         }
 
+        Optional.ofNullable(idxResponse.getCurrentAuthenticator())
+                .map(CurrentAuthenticatorEnrollment::getValue)
+                .map(CurrentAuthenticatorEnrollmentValue::getContextualData)
+                .ifPresent(authenticationResponse::setContextualData);
         return authenticationResponse;
     }
 

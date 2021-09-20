@@ -13,27 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package pages;
+package com.okta.idx.sdk.api.model;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-public class VerifyPage extends Page {
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class ContextualData {
 
-    public VerifyPage(WebDriver driver) {
-        super(driver);
+    private Qrcode qrcode;
+    private String sharedSecret;
+
+    public Qrcode getQrcode() {
+        return qrcode;
     }
 
-    @FindBy(name = "code")
-    public WebElement codeInput;
-
-    @FindBy(id = "verify-btn")
-    public WebElement verifyButton;
-
-    @FindBy(css = "input[name='authenticator-type'][value='Phone']")
-    public WebElement phoneRadioButton;
-
-    @FindBy(id = "proceed-btn")
-    public WebElement proceedButton;
+    public String getSharedSecret() {
+        return sharedSecret;
+    }
 }

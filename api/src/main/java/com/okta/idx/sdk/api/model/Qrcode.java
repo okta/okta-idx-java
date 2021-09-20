@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-Present, Okta, Inc.
+ * Copyright (c) 2021-Present, Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,49 +18,20 @@ package com.okta.idx.sdk.api.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class CurrentAuthenticatorEnrollmentValue {
-
-    private Recover recover;
-
+public class Qrcode {
+    private String method;
+    private String href;
     private String type;
 
-    private String id;
+    public String getMethod() {
+        return method;
+    }
 
-    private String key;
-
-    private String displayName;
-
-    private RemediationOption resend;
-
-    private RemediationOption poll;
-
-    private ContextualData contextualData;
-
-    public Recover getRecover() {
-        return recover;
+    public String getHref() {
+        return href;
     }
 
     public String getType() {
         return type;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public RemediationOption getResend() {
-        return resend;
-    }
-
-    public RemediationOption getPoll() {
-        return poll;
-    }
-
-    public ContextualData getContextualData() {
-        return contextualData;
     }
 }

@@ -37,9 +37,15 @@ public class SelectAuthenticatorPage extends Page {
     @FindBy(css = "input[type='radio'][name='authenticator-type'][value='Email']")
     public WebElement emailRadioButton;
 
+    @FindBy(css = "input[type='radio'][name='authenticator-type'][value='Google Authenticator']")
+    public WebElement googleAuthenticatorButton;
+
     @FindBy(name = "code")
     public WebElement codeInput;
 
     @FindBy(id = "verify-btn")
     public WebElement verifyButton;
+
+    @FindBy(id = "proceed-btn")
+    public WebElement proceedButton;
 }
