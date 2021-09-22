@@ -167,6 +167,8 @@ public final class ResponseHandler {
                 return registerPasswordForm("Setup Password");
             case "Phone":
                 return new ModelAndView("register-phone");
+            case "Google Authenticator":
+                return new ModelAndView("register-google");
             default:
                 return unsupportedPolicy();
         }

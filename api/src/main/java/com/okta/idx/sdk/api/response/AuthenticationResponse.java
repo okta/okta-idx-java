@@ -18,6 +18,7 @@ package com.okta.idx.sdk.api.response;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
+import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Idp;
 
@@ -39,6 +40,8 @@ public class AuthenticationResponse {
     private List<Authenticator> authenticators;
 
     private List<Idp> idps = new LinkedList<>();
+
+    private ContextualData contextualData;
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
@@ -94,5 +97,13 @@ public class AuthenticationResponse {
 
     public void setIdps(List<Idp> idps) {
         this.idps = idps;
+    }
+
+    public ContextualData getContextualData() {
+        return contextualData;
+    }
+
+    public void setContextualData(ContextualData contextualData) {
+        this.contextualData = contextualData;
     }
 }

@@ -21,7 +21,9 @@ import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
+import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.FormValue;
+import com.okta.idx.sdk.api.model.Qrcode;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -31,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -151,6 +154,10 @@ public class LoginController {
 
                 if (foundAuthenticator.getFactors().size() == 1) {
                     authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
+                    Optional.ofNullable(authenticationResponse.getContextualData())
+                            .map(ContextualData::getQrcode)
+                            .map(Qrcode::getHref)
+                            .ifPresent(qrCode -> session.setAttribute("qrCode", qrCode));
                 } else {
                     // user should select the factor in a separate view
                     ModelAndView modelAndView = new ModelAndView("select-factor");
@@ -238,6 +245,17 @@ public class LoginController {
             default:
                 return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
+    }
+
+    /**
+     * Show authenticator verification form.
+     *
+     * @return verify.html.
+     */
+    @GetMapping("/verify")
+    public ModelAndView verify() {
+        logger.info(":: Show Verify form ::");
+        return new ModelAndView("verify");
     }
 
     /**
