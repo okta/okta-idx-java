@@ -20,6 +20,8 @@ These Examples are:
 For information and guides on how to build your app with this sample, please take a look at the [Java
 guides for Embedded Authentication](https://developer.okta.com/docs/guides/oie-embedded-sdk-use-cases/java/oie-embedded-sdk-use-case-overview/#start-with-a-use-case)
 
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
 ## Prerequisites
 
 - [JDK 8][jdk-8] or later
@@ -47,6 +49,13 @@ export OKTA_IDX_CLIENTID={clientId}
 export OKTA_IDX_CLIENTSECRET={clientSecret}
 export OKTA_IDX_SCOPES="space separated scopes" # e.g. openid email profile
 export OKTA_IDX_REDIRECTURI={redirectUri}
+```
+
+### Deploying to Heroku
+
+```bash
+cd samples/embedded-auth-with-sdk/
+mvn heroku:deploy -Dheroku.appName={yourAppName}
 ```
 
 > :information_source: For root Org AS case, set issuer url to https://{yourOktaDomain}

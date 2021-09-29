@@ -26,6 +26,8 @@ This library is built for projects in Java framework to communicate with Okta as
 
 To see this library working in a sample, check out our [Java Samples][java-samples].
 
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
 ## Release Status
 
 ✔️ The current stable major version series is: 1.x

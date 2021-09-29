@@ -1,0 +1,31 @@
+{
+  "name": "Java Direct Auth Sample",
+  "description": "Sample Java application that demonstrates various Okta IDX use cases.",
+  "repository": "https://github.com/okta/okta-idx-java",
+  "env": {
+    "OKTA_IDX_ISSUER": {
+      "description": "Issuer URL for your org",
+      "value": ""
+    },
+    "OKTA_IDX_CLIENTID": {
+      "description": "Client ID for your application",
+      "value": ""
+    },
+    "OKTA_IDX_CLIENTSECRET": {
+      "description": "Client Secret for your application",
+      "value": ""
+    },
+    "OKTA_IDX_REDIRECTURI": {
+      "description": "Redirect URI for your application",
+      "value": "http://localhost:8080"
+    },
+    "OKTA_IDX_SCOPES": {
+      "description": "Scopes for your application",
+      "value": "openid email profile"
+    },
+    "PORT": {
+      "description": "Port for your application",
+      "value": ""
+    }
+  }
+}
