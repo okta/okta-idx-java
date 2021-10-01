@@ -15,11 +15,13 @@
  */
 package com.okta.spring.example.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
+import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.FormValue;
@@ -27,6 +29,7 @@ import com.okta.idx.sdk.api.model.Qrcode;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
+import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.spring.example.helpers.ResponseHandler;
 import com.okta.spring.example.helpers.Util;
 import org.slf4j.Logger;
@@ -135,6 +138,30 @@ public class LoginController {
                                             final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        if (authenticatorType != null && authenticatorType.equals("Security Key or Biometric")) {
+            IDXResponse idxResponse = null;
+            try {
+                List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
+
+                String authId = null;
+                for (Authenticator authenticator : authenticators) {
+                    if (authenticator.getLabel().equals("Security Key or Biometric")) {
+                        authId = authenticator.getId();
+                    }
+                }
+
+                idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authId);
+                idxResponse = idxAuthenticationWrapper.getClient().introspect(proceedContext.getClientContext());
+                logger.info("IDX Response {}", idxResponse.raw());
+            } catch (ProcessingException | JsonProcessingException e) {
+                logger.error("Error occurred", e);
+            }
+            ModelAndView modelAndView = new ModelAndView("enroll-webauthn-authenticator");
+            modelAndView.addObject("title", "Enroll Webauthn Authenticator");
+            modelAndView.addObject("currentAuthenticator", idxResponse.getCurrentAuthenticator());
+            return modelAndView;
+        }
 
         AuthenticationResponse authenticationResponse = null;
 

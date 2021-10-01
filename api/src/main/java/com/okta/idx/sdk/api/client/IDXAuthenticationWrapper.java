@@ -69,7 +69,11 @@ public class IDXAuthenticationWrapper {
 
     private static final Logger logger = LoggerFactory.getLogger(IDXAuthenticationWrapper.class);
 
-    private final IDXClient client;
+    public IDXClient getClient() {
+        return client;
+    }
+
+    IDXClient client;
 
     /**
      * Creates {@link IDXAuthenticationWrapper} instance.
@@ -320,6 +324,26 @@ public class IDXAuthenticationWrapper {
                         .withAuthenticator(authenticator)
                         .build();
                 return client.challenge(request, proceedContext.getHref());
+            }).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    public AuthenticationResponse enrollAuthenticator(ProceedContext proceedContext, String authenticatorId) {
+        try {
+            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                Authenticator authenticator = new Authenticator();
+                authenticator.setId(authenticatorId);
+
+                EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                        .withAuthenticator(authenticator)
+                        .withStateHandle(proceedContext.getStateHandle())
+                        .build();
+
+                return client.enroll(enrollRequest, proceedContext.getHref());
             }).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);

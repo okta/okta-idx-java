@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-Present, Okta, Inc.
+ * Copyright (c) 2020-Present, Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.idx.sdk.api.model;
+package com.okta.idx.sdk.webauthn;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.okta.idx.sdk.api.model.UserValue;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ContextualData {
+public class User {
 
-    private Qrcode qrcode;
-    private String sharedSecret;
-    private ActivationData activationData;
+    private String id;
 
-    public Qrcode getQrcode() {
-        return qrcode;
+    private String name;
+
+    private String displayName;
+
+    public String getId() {
+        return id;
     }
 
-    public String getSharedSecret() {
-        return sharedSecret;
+    public String getName() {
+        return name;
     }
 
-    public ActivationData getActivationData() { return activationData; }
+    public String getDisplayName() {
+        return displayName;
+    }
 }
