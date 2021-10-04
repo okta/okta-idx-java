@@ -16,6 +16,7 @@
 package com.okta.spring.example.controllers;
 
 import com.okta.commons.lang.Strings;
+import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.FormValue;
@@ -158,6 +159,29 @@ public class HomeController {
         if (!CollectionUtils.isEmpty(authenticationResponse.getIdps())) {
             modelAndView.addObject("idps", authenticationResponse.getIdps());
         }
+        return modelAndView;
+    }
+
+    /**
+     * Display the select authenticator page.
+     *
+     * @param session the http session
+     * @param completedAuthenticatorType the last enrolled/verified authenticator type
+     * @return the select authenticators view.
+     */
+    @GetMapping("/select-authenticator")
+    public ModelAndView displaySelectAuthenticatorPage(final HttpSession session,
+            @RequestParam(value = "completed", required = false) String completedAuthenticatorType) {
+
+        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
+
+        if (completedAuthenticatorType != null) {
+            authenticators.removeIf(authenticator -> authenticator.getLabel().equals(completedAuthenticatorType));
+        }
+
+        ModelAndView modelAndView = new ModelAndView("select-authenticator");
+        modelAndView.addObject("title", "Select Authenticator");
+        modelAndView.addObject("authenticators", authenticators);
         return modelAndView;
     }
 

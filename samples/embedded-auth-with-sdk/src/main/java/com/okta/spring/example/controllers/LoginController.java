@@ -16,6 +16,8 @@
 package com.okta.spring.example.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.Authenticator;
@@ -23,9 +25,13 @@ import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
+import com.okta.idx.sdk.api.model.ChallengeData;
 import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Qrcode;
+import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -38,10 +44,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -137,10 +145,12 @@ public class LoginController {
                                             final @RequestParam(value = "action") String action,
                                             final HttpSession session) {
 
+        logger.info("Auth Type: {}, Action: {}", authenticatorType, action);
+
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         if (authenticatorType != null && authenticatorType.equals("Security Key or Biometric")) {
-            IDXResponse idxResponse = null;
+            IDXResponse idxResponse;
             try {
                 List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
 
@@ -153,14 +163,44 @@ public class LoginController {
 
                 idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authId);
                 idxResponse = idxAuthenticationWrapper.getClient().introspect(proceedContext.getClientContext());
-                logger.info("IDX Response {}", idxResponse.raw());
-            } catch (ProcessingException | JsonProcessingException e) {
+                //logger.info("IDX Response {}", idxResponse.raw());
+
+                RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
+                Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                        .filter(x -> "select-authenticator-authenticate".equals(x.getName()))
+                        .findAny();
+
+                if (remediationOptionsOptional.isPresent()) {
+                    ModelAndView modelAndView = new ModelAndView("select-webauthn-authenticator");
+                    modelAndView.addObject("title", "Select Webauthn Authenticator");
+
+                    AuthenticatorEnrollments authenticatorEnrollments = idxResponse.getAuthenticatorEnrollments();
+                    Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
+                            .filter(x -> "security_key".equals(x.getType()))
+                            .findAny();
+
+                    String webauthnCredentialId = authenticatorEnrollmentOptional.get().getCredentialId();
+                    ChallengeData challengeData = idxResponse.getCurrentAuthenticator().getValue().getContextualData().getChallengeData();
+                    modelAndView.addObject("webauthnCredentialId", webauthnCredentialId);
+                    modelAndView.addObject("challengeData", challengeData);
+                    return modelAndView;
+                }
+
+                remediationOptionsOptional = Arrays.stream(remediationOptions)
+                        .filter(x -> "select-authenticator-enroll".equals(x.getName()))
+                        .findAny();
+
+                if (remediationOptionsOptional.isPresent()) {
+                    ModelAndView modelAndView = new ModelAndView("enroll-webauthn-authenticator");
+                    modelAndView.addObject("title", "Enroll Webauthn Authenticator");
+                    modelAndView.addObject("currentAuthenticator", idxResponse.getCurrentAuthenticator());
+                    modelAndView.addObject("stateHandle", idxResponse.getStateHandle());
+                    modelAndView.addObject("href", idxResponse.remediation().getValue()[0].getHref());
+                    return modelAndView;
+                }
+            } catch (ProcessingException e) {
                 logger.error("Error occurred", e);
             }
-            ModelAndView modelAndView = new ModelAndView("enroll-webauthn-authenticator");
-            modelAndView.addObject("title", "Enroll Webauthn Authenticator");
-            modelAndView.addObject("currentAuthenticator", idxResponse.getCurrentAuthenticator());
-            return modelAndView;
         }
 
         AuthenticationResponse authenticationResponse = null;
@@ -306,6 +346,44 @@ public class LoginController {
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("verify");
+            modelAndView.addObject("errors", authenticationResponse.getErrors());
+            return modelAndView;
+        }
+
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
+    }
+
+    /**
+     * Handle webauthn authenticator verification functionality.
+     *
+     * @param requestBodyJson
+     * @param session the session
+     * @return the view associated with authentication response.
+     */
+    @PostMapping("/verify-webauthn")
+    public ModelAndView verifyWebAuthn(final @RequestBody String requestBodyJson,
+                                       final HttpSession session) {
+        logger.info(":: Verify Webauthn ::");
+
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = null;
+        try {
+            jsonNode = objectMapper.readTree(requestBodyJson);
+        } catch (JsonProcessingException e) {
+            logger.error("Error occurred:", e);
+        }
+
+        String clientData = jsonNode.get("clientData").asText();
+        String authenticatorData = jsonNode.get("authenticatorData").asText();
+        String signatureData = jsonNode.get("signatureData").asText();
+
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.verifyWebAuthn(proceedContext, clientData, null, authenticatorData, signatureData);
+
+        if (responseHandler.needsToShowErrors(authenticationResponse)) {
+            ModelAndView modelAndView = new ModelAndView("verify-webauthn");
             modelAndView.addObject("errors", authenticationResponse.getErrors());
             return modelAndView;
         }
@@ -467,6 +545,36 @@ public class LoginController {
         }
 
         return responseHandler.verifyForm();
+    }
+
+    /**
+     * Handle webauthn authenticator enrollment functionality.
+     *
+     * @param req body
+     * @param session the session
+     * @return the view associated with authentication response.
+     */
+    @PostMapping(value = "/enroll-webauthn")
+    public ModelAndView enrollWebauthn(final @RequestBody String req,
+                                       final HttpSession session) {
+        logger.info(":: Enroll Webauthn Authenticator ::");
+
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = null;
+        try {
+            jsonNode = objectMapper.readTree(req);
+        } catch (JsonProcessingException e) {
+            logger.error("Error occurred:", e);
+        }
+
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.verifyWebAuthn(proceedContext,
+                        jsonNode.get("clientData").textValue(), jsonNode.get("attestation").textValue(), null, null);
+
+        logger.info("Auth Status: {}", authenticationResponse.getAuthenticationStatus().toString());
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
 
     /**

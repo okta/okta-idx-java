@@ -117,6 +117,7 @@ public final class ResponseHandler {
      * @return the view associated with the response authentication status.
      */
     public ModelAndView selectAuthenticatorForm(AuthenticationResponse response, String title, HttpSession session) {
+
         boolean canSkip = authenticationWrapper.isSkipAuthenticatorPresent(response.getProceedContext());
         ModelAndView modelAndView = new ModelAndView("select-authenticator");
         modelAndView.addObject("canSkip", canSkip);

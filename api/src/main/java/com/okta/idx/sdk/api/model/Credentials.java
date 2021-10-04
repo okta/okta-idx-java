@@ -32,6 +32,8 @@ public class Credentials {
 
     public String clientData;
 
+    public String attestation;
+
     public String signatureData;
 
     public void setPasscode(char[] passcode) {
@@ -56,6 +58,10 @@ public class Credentials {
 
     public void setClientData(String clientData) {
         this.clientData = clientData;
+    }
+
+    public void setAttestation(String attestation) {
+        this.attestation = attestation;
     }
 
     public void setSignatureData(String signatureData) {

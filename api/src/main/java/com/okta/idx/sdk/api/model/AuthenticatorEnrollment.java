@@ -30,6 +30,8 @@ public class AuthenticatorEnrollment {
 
     private String displayName;
 
+    private String credentialId;
+
     private MethodType[] methods;
 
     public Profile getProfile() {
@@ -46,6 +48,10 @@ public class AuthenticatorEnrollment {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getCredentialId() {
+        return credentialId;
     }
 
     public MethodType[] getMethods() {

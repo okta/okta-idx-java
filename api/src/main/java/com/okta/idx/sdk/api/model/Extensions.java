@@ -16,25 +16,14 @@
 package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.okta.idx.sdk.webauthn.User;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ContextualData {
+public class Extensions {
 
-    private Qrcode qrcode;
-    private String sharedSecret;
-    private ActivationData activationData;
-    private ChallengeData challengeData;
+    private String appid;
 
-    public Qrcode getQrcode() {
-        return qrcode;
+    public String getAppid() {
+        return appid;
     }
-
-    public String getSharedSecret() {
-        return sharedSecret;
-    }
-
-    public ActivationData getActivationData() { return activationData; }
-
-    public ChallengeData getChallengeData() { return challengeData; }
-
 }

@@ -412,6 +412,43 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
+     * Verify Webauthn Authenticator.
+     *
+     * @param proceedContext the ProceedContext
+     * @param clientData
+     * @param attestation
+     * @return the Authentication response
+     */
+    public AuthenticationResponse verifyWebAuthn(ProceedContext proceedContext,
+                                                 String clientData,
+                                                 String attestation,
+                                                 String authenticatorData,
+                                                 String signatureData) {
+
+        try {
+            Credentials credentials = new Credentials();
+            credentials.setClientData(clientData);
+            if (attestation != null)
+               credentials.setAttestation(attestation);
+            credentials.setAuthenticatorData(authenticatorData);
+            credentials.setSignatureData(signatureData);
+
+            AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(proceedContext.getStateHandle())
+                    .withCredentials(credentials)
+                    .build();
+
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.answerChallenge(challengeAuthenticatorRequest, "https://java-sdk.oktapreview.com/idp/idx/challenge/answer")
+            ).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /**
      * Submit phone authenticator enrollment with the provided phone number.
      *
      * @param proceedContext the ProceedContext

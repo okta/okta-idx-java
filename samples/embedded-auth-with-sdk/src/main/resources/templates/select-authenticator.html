@@ -62,7 +62,6 @@
             th:if="${authenticator} != 'security_question'"> <!-- not supported by app at this point -->
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="authenticator-type" th:value="${authenticator.label}" checked="true">
-                Test
                 <label class="form-check-label" th:text="${authenticator.label}"></label>
             </div>
         </tr>
@@ -77,45 +76,6 @@
     </form>
 
 </div>
-
-<script>
-    function test() {
-        navigator.credentials
-            .create({
-                publicKey: {
-                    // random, cryptographically secure, at least 16 bytes
-                    challenge: base64url.decode("<%= challenge %>"),
-                    // relying party
-                    rp: {
-                        name: "Awesome Corp", // sample relying party
-                    },
-                    user: {
-                        id: base64url.decode("<%= id %>"),
-                        name: "<%= name %>",
-                        displayName: "<%= displayName %>",
-                    },
-                    authenticatorSelection: { userVerification: "preferred" },
-                    attestation: "direct",
-                    pubKeyCredParams: [
-                        {
-                            type: "public-key",
-                            alg: -7, // "ES256" IANA COSE Algorithms registry
-                        },
-                    ],
-                },
-            })
-            .then((res) => {
-                var json = publicKeyCredentialToJSON(res);
-                // Send data to relying party's servers
-                post("/webauthn/register", {
-                    state: "<%= state %>",
-                    provider: "<%= provider %>",
-                    res: JSON.stringify(json),
-                });
-            })
-            .catch(console.error);
-    }
-</script>
 
 <div th:replace="fragments/footer :: footer"></div>
 
