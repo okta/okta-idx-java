@@ -179,6 +179,11 @@ public class HomeController {
             authenticators.removeIf(authenticator -> authenticator.getLabel().equals(completedAuthenticatorType));
         }
 
+        TokenResponse tokenResponse = (TokenResponse) session.getAttribute("tokenResponse");
+        if (tokenResponse != null) {
+            return homeHelper.proceedToHome(tokenResponse, session);
+        }
+
         ModelAndView modelAndView = new ModelAndView("select-authenticator");
         modelAndView.addObject("title", "Select Authenticator");
         modelAndView.addObject("authenticators", authenticators);

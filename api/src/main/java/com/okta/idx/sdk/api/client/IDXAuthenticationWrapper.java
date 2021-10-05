@@ -416,7 +416,9 @@ public class IDXAuthenticationWrapper {
      *
      * @param proceedContext the ProceedContext
      * @param clientData
-     * @param attestation
+     * @param attestation (optional)
+     * @param authenticatorData
+     * @param signatureData
      * @return the Authentication response
      */
     public AuthenticationResponse verifyWebAuthn(ProceedContext proceedContext,
@@ -439,7 +441,7 @@ public class IDXAuthenticationWrapper {
                     .build();
 
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
-                    client.answerChallenge(challengeAuthenticatorRequest, "https://java-sdk.oktapreview.com/idp/idx/challenge/answer")
+                    client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
             ).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
