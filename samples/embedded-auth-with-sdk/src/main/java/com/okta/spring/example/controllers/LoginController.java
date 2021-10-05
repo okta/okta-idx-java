@@ -553,7 +553,6 @@ public class LoginController {
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyWebAuthn(
                 proceedContext, webauthnRequest);
 
-        logger.info("Auth Status: {}", authenticationResponse.getAuthenticationStatus().toString());
         return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
 
