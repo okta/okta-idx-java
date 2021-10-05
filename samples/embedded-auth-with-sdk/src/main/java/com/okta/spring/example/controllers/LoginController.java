@@ -15,9 +15,6 @@
  */
 package com.okta.spring.example.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.Authenticator;
@@ -34,6 +31,7 @@ import com.okta.idx.sdk.api.model.Qrcode;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
+import com.okta.idx.sdk.api.request.WebauthnRequest;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.spring.example.helpers.ResponseHandler;
@@ -359,31 +357,19 @@ public class LoginController {
     /**
      * Handle webauthn authenticator verification functionality.
      *
-     * @param requestBodyJson
+     * @param webauthnRequest
      * @param session the session
      * @return the view associated with authentication response.
      */
     @PostMapping("/verify-webauthn")
-    public ModelAndView verifyWebAuthn(final @RequestBody String requestBodyJson,
+    public ModelAndView verifyWebAuthn(final @RequestBody WebauthnRequest webauthnRequest,
                                        final HttpSession session) {
         logger.info(":: Verify Webauthn ::");
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = null;
-        try {
-            jsonNode = objectMapper.readTree(requestBodyJson);
-        } catch (JsonProcessingException e) {
-            logger.error("Error occurred:", e);
-        }
-
-        String clientData = jsonNode.get("clientData").asText();
-        String authenticatorData = jsonNode.get("authenticatorData").asText();
-        String signatureData = jsonNode.get("signatureData").asText();
-
-        AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.verifyWebAuthn(proceedContext, clientData, null, authenticatorData, signatureData);
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyWebAuthn(
+                        proceedContext, webauthnRequest);
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("verify-webauthn");
@@ -553,28 +539,19 @@ public class LoginController {
     /**
      * Handle webauthn authenticator enrollment functionality.
      *
-     * @param req body
+     * @param webauthnRequest body
      * @param session the session
      * @return the view associated with authentication response.
      */
     @PostMapping(value = "/enroll-webauthn")
-    public ModelAndView enrollWebauthn(final @RequestBody String req,
+    public ModelAndView enrollWebauthn(final @RequestBody WebauthnRequest webauthnRequest,
                                        final HttpSession session) {
         logger.info(":: Enroll Webauthn Authenticator ::");
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = null;
-        try {
-            jsonNode = objectMapper.readTree(req);
-        } catch (JsonProcessingException e) {
-            logger.error("Error occurred:", e);
-        }
-
-        AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.verifyWebAuthn(proceedContext,
-                        jsonNode.get("clientData").textValue(), jsonNode.get("attestation").textValue(), null, null);
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyWebAuthn(
+                proceedContext, webauthnRequest);
 
         logger.info("Auth Status: {}", authenticationResponse.getAuthenticationStatus().toString());
         return responseHandler.handleKnownTransitions(authenticationResponse, session);

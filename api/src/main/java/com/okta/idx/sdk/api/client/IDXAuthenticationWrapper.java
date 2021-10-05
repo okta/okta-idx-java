@@ -43,6 +43,7 @@ import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
+import com.okta.idx.sdk.api.request.WebauthnRequest;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
@@ -415,25 +416,21 @@ public class IDXAuthenticationWrapper {
      * Verify Webauthn Authenticator.
      *
      * @param proceedContext the ProceedContext
-     * @param clientData
-     * @param attestation (optional)
-     * @param authenticatorData
-     * @param signatureData
+     * @param webauthnRequest object
      * @return the Authentication response
      */
     public AuthenticationResponse verifyWebAuthn(ProceedContext proceedContext,
-                                                 String clientData,
-                                                 String attestation,
-                                                 String authenticatorData,
-                                                 String signatureData) {
+                                                 WebauthnRequest webauthnRequest) {
 
         try {
             Credentials credentials = new Credentials();
-            credentials.setClientData(clientData);
-            if (attestation != null)
-               credentials.setAttestation(attestation);
-            credentials.setAuthenticatorData(authenticatorData);
-            credentials.setSignatureData(signatureData);
+            credentials.setClientData(webauthnRequest.getClientData());
+            if (webauthnRequest.getAttestation() != null)
+               credentials.setAttestation(webauthnRequest.getAttestation());
+            if (webauthnRequest.getAuthenticatorData() != null)
+            credentials.setAuthenticatorData(webauthnRequest.getAuthenticatorData());
+            if (webauthnRequest.getSignatureData() != null)
+            credentials.setSignatureData(webauthnRequest.getSignatureData());
 
             AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
                     .withStateHandle(proceedContext.getStateHandle())

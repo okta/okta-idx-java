@@ -170,8 +170,9 @@ public class HomeController {
      * @return the select authenticators view.
      */
     @GetMapping("/select-authenticator")
-    public ModelAndView displaySelectAuthenticatorPage(final HttpSession session,
-            @RequestParam(value = "completed", required = false) String completedAuthenticatorType) {
+    public ModelAndView displaySelectAuthenticatorPage(
+            final HttpSession session,
+            final @RequestParam(value = "completed", required = false) String completedAuthenticatorType) {
 
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
 
@@ -229,7 +230,6 @@ public class HomeController {
 
         List<FormValue> userProfileAttributes =
                 new LinkedList<>(Arrays.asList(userProfileFormValue.get().form().getValue()));
-
 
         if (!CollectionUtils.isEmpty(userProfileAttributes)) {
             modelAndView.addObject("userProfileAttributes", userProfileAttributes);
