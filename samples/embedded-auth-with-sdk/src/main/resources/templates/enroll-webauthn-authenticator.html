@@ -43,10 +43,10 @@
     <script th:inline="javascript">
         /*<![CDATA[*/
 
-        const challenge = /*[[${currentAuthenticator.value.contextualData.activationData.challenge}]]*/ 'default';
-        const userId = /*[[${currentAuthenticator.value.contextualData.activationData.user.id}]]*/ 'default';
-        const username = /*[[${currentAuthenticator.value.contextualData.activationData.user.name}]]*/ 'default';
-        const displayName = /*[[${currentAuthenticator.value.contextualData.activationData.user.displayName}]]*/ 'default';
+        const challenge = /*[[${currentAuthenticator.value.contextualData.activationData.challenge}]]*/ '';
+        const userId = /*[[${currentAuthenticator.value.contextualData.activationData.user.id}]]*/ '';
+        const username = /*[[${currentAuthenticator.value.contextualData.activationData.user.name}]]*/ '';
+        const displayName = /*[[${currentAuthenticator.value.contextualData.activationData.user.displayName}]]*/ '';
 
         const publicKeyCredentialCreationOptions = {
             rp: {
@@ -110,21 +110,6 @@
 
 <div style="padding:1em">
     <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
-</div>
-
-<div class="enroll-webauthn-authenticator-form">
-
-    <form th:action="@{/enroll-webauthn-authenticator}" method="post">
-        <h2 class="text-center"><span th:text="${title}"></span></h2>
-        <div th:if="${errors}" class="alert alert-danger">
-            <span th:text="${errors}"></span>
-        </div>
-
-<!--        <div class="form-group">-->
-<!--            <button id="proceed-btn" name="action" value="proceed" type="submit" class="btn btn-primary btn-block">Proceed</button>-->
-<!--        </div>-->
-    </form>
-
 </div>
 
 <div th:replace="fragments/footer :: footer"></div>

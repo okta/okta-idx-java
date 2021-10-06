@@ -109,21 +109,6 @@
     <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
 </div>
 
-<div class="select-webauthn-authenticator-form">
-
-    <form th:action="@{/select-webauthn-authenticator}" method="post">
-        <h2 class="text-center"><span th:text="${title}"></span></h2>
-        <div th:if="${errors}" class="alert alert-danger">
-            <span th:text="${errors}"></span>
-        </div>
-
-<!--        <div class="form-group">-->
-<!--            <button id="proceed-btn" name="action" value="proceed" type="submit" class="btn btn-primary btn-block">Proceed</button>-->
-<!--        </div>-->
-    </form>
-
-</div>
-
 <div th:replace="fragments/footer :: footer"></div>
 
 </body>
