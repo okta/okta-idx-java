@@ -162,8 +162,6 @@ public class LoginController {
                 AuthenticationResponse enrollResponse = idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authId);
                 idxResponse = idxAuthenticationWrapper.getClient().
                         introspect(enrollResponse.getProceedContext().getClientContext());
-                //logger.info("IDX Response {}", idxResponse.raw());
-                authenticators = enrollResponse.getAuthenticators();
                 Util.updateSession(session, enrollResponse.getProceedContext());
 
                 RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
