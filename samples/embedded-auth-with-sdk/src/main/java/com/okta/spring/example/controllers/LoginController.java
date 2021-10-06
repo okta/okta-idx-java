@@ -143,8 +143,6 @@ public class LoginController {
                                             final @RequestParam(value = "action") String action,
                                             final HttpSession session) {
 
-        logger.info("Auth Type: {}, Action: {}", authenticatorType, action);
-
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         if (authenticatorType != null && authenticatorType.equals("Security Key or Biometric")) {
