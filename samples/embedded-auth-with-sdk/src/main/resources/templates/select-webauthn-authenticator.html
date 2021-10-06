@@ -85,6 +85,7 @@
         });
         /*]]>*/
 
+        // original source: https://github.com/okta/okta-signin-widget/blob/master/src/util/CryptoUtil.js
         function binToStr(bin) {
             return btoa(new Uint8Array(bin).reduce((s, byte) => s + String.fromCharCode(byte), ''));
         }
