@@ -195,8 +195,6 @@ public class LoginController {
                     ModelAndView modelAndView = new ModelAndView("enroll-webauthn-authenticator");
                     modelAndView.addObject("title", "Enroll Webauthn Authenticator");
                     modelAndView.addObject("currentAuthenticator", idxResponse.getCurrentAuthenticator());
-                    modelAndView.addObject("stateHandle", idxResponse.getStateHandle());
-                    modelAndView.addObject("href", idxResponse.remediation().getValue()[0].getHref());
                     return modelAndView;
                 }
             } catch (ProcessingException e) {
