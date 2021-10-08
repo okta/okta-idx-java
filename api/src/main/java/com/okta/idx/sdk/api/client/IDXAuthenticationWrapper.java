@@ -20,6 +20,8 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.Authenticator;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -683,5 +685,21 @@ public class IDXAuthenticationWrapper {
         }
 
         return authenticationResponse;
+    }
+
+    /**
+     * Fetch webauthn credential id if webauthn is already enrolled (null otherwise).
+     *
+     * @param authenticationResponse the ProceedContext
+     * @return webauthn credential id, if webauthn is present.
+     */
+    public String fetchWebauthnCredentialId(AuthenticationResponse authenticationResponse) {
+        AuthenticatorEnrollments authenticatorEnrollments = authenticationResponse.getAuthenticatorEnrollments();
+
+        Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
+                .filter(x -> "security_key".equals(x.getType()))
+                .findAny();
+
+        return authenticatorEnrollmentOptional.map(AuthenticatorEnrollment::getCredentialId).orElse(null);
     }
 }

@@ -24,6 +24,7 @@ import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Idp;
 import com.okta.idx.sdk.api.model.RemediationOption;
+import com.okta.idx.sdk.api.request.WebauthnRequest;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -49,8 +50,6 @@ public class AuthenticationResponse {
     public CurrentAuthenticatorEnrollment currentAuthenticator;
 
     public AuthenticatorEnrollments authenticatorEnrollments;
-
-    public RemediationOption[] remediationOptions;
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
@@ -130,13 +129,5 @@ public class AuthenticationResponse {
 
     public void setAuthenticatorEnrollments(AuthenticatorEnrollments authenticatorEnrollments) {
         this.authenticatorEnrollments = authenticatorEnrollments;
-    }
-
-    public RemediationOption[] getRemediationOptions() {
-        return remediationOptions;
-    }
-
-    public void setRemediationOptions(RemediationOption[] remediationOptions) {
-        this.remediationOptions = remediationOptions;
     }
 }

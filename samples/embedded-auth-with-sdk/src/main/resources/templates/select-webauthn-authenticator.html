@@ -39,8 +39,8 @@
     <script th:inline="javascript">
         /*<![CDATA[*/
 
-        const challengeData = /*[[${challengeData}]]*/ 'default';
-        const webauthnCredentialId = /*[[${webauthnCredentialId}]]*/ 'default';
+        const challengeData = /*[[${challengeData}]]*/ '';
+        const webauthnCredentialId = /*[[${webauthnCredentialId}]]*/ '';
 
         const publicKeyCredentialRequestOptions = {
             challenge: strToBin(challengeData.challenge),

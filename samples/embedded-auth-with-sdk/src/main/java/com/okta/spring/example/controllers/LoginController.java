@@ -21,14 +21,9 @@ import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
-import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
-import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
-import com.okta.idx.sdk.api.model.ChallengeData;
 import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Qrcode;
-import com.okta.idx.sdk.api.model.RemediationOption;
-import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.request.WebauthnRequest;
@@ -46,7 +41,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -143,50 +137,33 @@ public class LoginController {
                                             final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
 
         if (authenticatorType != null && authenticatorType.equals("Security Key or Biometric")) {
-            ModelAndView enrollModelAndView = new ModelAndView("enroll-webauthn-authenticator");
-
-            List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
+            ModelAndView modelAndView;
 
             Optional<Authenticator> authenticatorOptional =
-                    authenticators.stream().filter(auth -> auth.getLabel().equals("Security Key or Biometric")).findFirst();
+                    authenticators.stream().filter(auth -> auth.getLabel().equals(authenticatorType)).findFirst();
             String authId = authenticatorOptional.get().getId();
 
             AuthenticationResponse enrollResponse = idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authId);
 
             Util.updateSession(session, enrollResponse.getProceedContext());
 
-            RemediationOption[] remediationOptions = enrollResponse.getRemediationOptions();
-            Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
-                    .filter(x -> RemediationType.SELECT_AUTHENTICATOR_AUTHENTICATE.equals(x.getName()))
-                    .findAny();
+            String webauthnCredentialId = idxAuthenticationWrapper.fetchWebauthnCredentialId(enrollResponse);
 
-            if (remediationOptionsOptional.isPresent()) {
-                ModelAndView selectModelAndView = new ModelAndView("select-webauthn-authenticator");
-                selectModelAndView.addObject("title", "Select Webauthn Authenticator");
-
-                AuthenticatorEnrollments authenticatorEnrollments = enrollResponse.getAuthenticatorEnrollments();
-                Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
-                        .filter(x -> "security_key".equals(x.getType()))
-                        .findAny();
-
-                String webauthnCredentialId = authenticatorEnrollmentOptional.get().getCredentialId();
-                ChallengeData challengeData = enrollResponse.getCurrentAuthenticator().getValue().getContextualData().getChallengeData();
-                selectModelAndView.addObject("webauthnCredentialId", webauthnCredentialId);
-                selectModelAndView.addObject("challengeData", challengeData);
-                return selectModelAndView;
+            if (webauthnCredentialId != null) {
+                modelAndView = new ModelAndView("select-webauthn-authenticator");
+                modelAndView.addObject("title", "select-webauthn-authenticator");
+                modelAndView.addObject("webauthnCredentialId", webauthnCredentialId);
+                modelAndView.addObject("challengeData",
+                        enrollResponse.getCurrentAuthenticator().getValue().getContextualData().getChallengeData());
+            } else {
+                modelAndView = new ModelAndView("enroll-webauthn-authenticator");
+                modelAndView.addObject("title", "enroll-webauthn-authenticator");
+                modelAndView.addObject("currentAuthenticator", enrollResponse.getCurrentAuthenticator());
             }
-
-            remediationOptionsOptional = Arrays.stream(remediationOptions)
-                    .filter(x -> "select-authenticator-enroll".equals(x.getName()))
-                    .findAny();
-
-            if (remediationOptionsOptional.isPresent()) {
-                enrollModelAndView.addObject("title", "Enroll Webauthn Authenticator");
-                enrollModelAndView.addObject("currentAuthenticator", enrollResponse.getCurrentAuthenticator());
-                return enrollModelAndView;
-            }
+            return modelAndView;
         }
 
         AuthenticationResponse authenticationResponse = null;
@@ -198,8 +175,6 @@ public class LoginController {
         }
 
         Authenticator foundAuthenticator = null;
-
-        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
 
         for (Authenticator authenticator : authenticators) {
             if (authenticatorType.equals(authenticator.getLabel())) {
