@@ -18,9 +18,12 @@ package com.okta.idx.sdk.api.response;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.ContextualData;
+import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Idp;
+import com.okta.idx.sdk.api.model.RemediationOption;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +45,12 @@ public class AuthenticationResponse {
     private List<Idp> idps = new LinkedList<>();
 
     private ContextualData contextualData;
+
+    public CurrentAuthenticatorEnrollment currentAuthenticator;
+
+    public AuthenticatorEnrollments authenticatorEnrollments;
+
+    public RemediationOption[] remediationOptions;
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
@@ -105,5 +114,29 @@ public class AuthenticationResponse {
 
     public void setContextualData(ContextualData contextualData) {
         this.contextualData = contextualData;
+    }
+
+    public CurrentAuthenticatorEnrollment getCurrentAuthenticator() {
+        return currentAuthenticator;
+    }
+
+    public void setCurrentAuthenticator(CurrentAuthenticatorEnrollment currentAuthenticator) {
+        this.currentAuthenticator = currentAuthenticator;
+    }
+
+    public AuthenticatorEnrollments getAuthenticatorEnrollments() {
+        return authenticatorEnrollments;
+    }
+
+    public void setAuthenticatorEnrollments(AuthenticatorEnrollments authenticatorEnrollments) {
+        this.authenticatorEnrollments = authenticatorEnrollments;
+    }
+
+    public RemediationOption[] getRemediationOptions() {
+        return remediationOptions;
+    }
+
+    public void setRemediationOptions(RemediationOption[] remediationOptions) {
+        this.remediationOptions = remediationOptions;
     }
 }

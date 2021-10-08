@@ -684,15 +684,4 @@ public class IDXAuthenticationWrapper {
 
         return authenticationResponse;
     }
-
-    /**
-     * Introspect to get the current state of the authentication and return the raw IDXResponse object.
-     *
-     * @param clientContext the client context
-     * @return a {@link IDXResponse} object
-     * @throws ProcessingException
-     */
-    public IDXResponse introspectAndGetRawIdxResponse(IDXClientContext clientContext) throws ProcessingException {
-         return client.introspect(clientContext);
-    }
 }

@@ -185,9 +185,18 @@ final class AuthenticationTransaction {
             return authenticationResponse;
         }
 
+        if (idxResponse.getCurrentAuthenticator() != null) {
+            authenticationResponse.setCurrentAuthenticator(idxResponse.getCurrentAuthenticator());
+        }
+
+        if (idxResponse.getAuthenticatorEnrollments() != null) {
+            authenticationResponse.setAuthenticatorEnrollments(idxResponse.getAuthenticatorEnrollments());
+        }
+
         String firstRemediation = "";
         if (idxResponse.remediation() != null && idxResponse.remediation().remediationOptions().length > 0) {
             firstRemediation = idxResponse.remediation().remediationOptions()[0].getName();
+            authenticationResponse.setRemediationOptions(idxResponse.remediation().remediationOptions());
         }
 
         switch (firstRemediation) {
