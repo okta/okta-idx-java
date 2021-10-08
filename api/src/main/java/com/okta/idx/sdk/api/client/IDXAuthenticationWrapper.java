@@ -70,11 +70,7 @@ public class IDXAuthenticationWrapper {
 
     private static final Logger logger = LoggerFactory.getLogger(IDXAuthenticationWrapper.class);
 
-    public IDXClient getClient() {
-        return client;
-    }
-
-    IDXClient client;
+    private final IDXClient client;
 
     /**
      * Creates {@link IDXAuthenticationWrapper} instance.
@@ -568,7 +564,7 @@ public class IDXAuthenticationWrapper {
      * This is useful when doing social auth, and not getting back an interaction_code.
      *
      * @param clientContext the client context
-     * @return a AuthenticationResponse with a status representing the current location in the authentnication flow.
+     * @return a AuthenticationResponse with a status representing the current location in the authentication flow.
      */
     public AuthenticationResponse introspect(IDXClientContext clientContext) {
         try {
@@ -687,5 +683,16 @@ public class IDXAuthenticationWrapper {
         }
 
         return authenticationResponse;
+    }
+
+    /**
+     * Introspect to get the current state of the authentication and return the raw IDXResponse object.
+     *
+     * @param clientContext the client context
+     * @return a {@link IDXResponse} object
+     * @throws ProcessingException
+     */
+    public IDXResponse introspectAndGetRawIdxResponse(IDXClientContext clientContext) throws ProcessingException {
+         return client.introspect(clientContext);
     }
 }

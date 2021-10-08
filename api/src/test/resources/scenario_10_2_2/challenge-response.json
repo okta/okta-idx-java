@@ -1,0 +1,294 @@
+{
+  "version": "1.0.0",
+  "stateHandle": "02ALKbMm95yboUzC9k2NyF8125VLvGWNsSiMbiF7V5",
+  "expiresAt": "2021-10-08T03:58:46.000Z",
+  "intent": "LOGIN",
+  "remediation": {
+    "type": "array",
+    "value": [
+      {
+        "rel": [
+          "create-form"
+        ],
+        "name": "challenge-authenticator",
+        "relatesTo": [
+          "$.currentAuthenticator"
+        ],
+        "href": "https://foo.oktapreview.com/idp/idx/challenge/answer",
+        "method": "POST",
+        "produces": "application/ion+json; okta-version=1.0.0",
+        "value": [
+          {
+            "name": "credentials",
+            "type": "object",
+            "form": {
+              "value": [
+                {
+                  "name": "authenticatorData",
+                  "label": "Authenticator Data",
+                  "required": true,
+                  "visible": false
+                },
+                {
+                  "name": "clientData",
+                  "label": "Client Data",
+                  "required": true,
+                  "visible": false
+                },
+                {
+                  "name": "signatureData",
+                  "label": "Signature Data",
+                  "required": true,
+                  "visible": false
+                }
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "stateHandle",
+            "required": true,
+            "value": "02ALKbMm95yboUzC9k2NyF8125VLvGWNsSiMbiF7V5",
+            "visible": false,
+            "mutable": false
+          }
+        ],
+        "accepts": "application/json; okta-version=1.0.0"
+      },
+      {
+        "rel": [
+          "create-form"
+        ],
+        "name": "select-authenticator-authenticate",
+        "href": "https://foo.oktapreview.com/idp/idx/challenge",
+        "method": "POST",
+        "produces": "application/ion+json; okta-version=1.0.0",
+        "value": [
+          {
+            "name": "authenticator",
+            "type": "object",
+            "options": [
+              {
+                "label": "Email",
+                "value": {
+                  "form": {
+                    "value": [
+                      {
+                        "name": "id",
+                        "required": true,
+                        "value": "aut10rayui3mVphc80h8",
+                        "mutable": false
+                      },
+                      {
+                        "name": "methodType",
+                        "required": false,
+                        "value": "email",
+                        "mutable": false
+                      }
+                    ]
+                  }
+                },
+                "relatesTo": "$.authenticatorEnrollments.value[0]"
+              },
+              {
+                "label": "Security Key or Biometric",
+                "value": {
+                  "form": {
+                    "value": [
+                      {
+                        "name": "id",
+                        "required": true,
+                        "value": "aut10rayui6tnp9sl0h8",
+                        "mutable": false
+                      },
+                      {
+                        "name": "methodType",
+                        "required": false,
+                        "value": "webauthn",
+                        "mutable": false
+                      }
+                    ]
+                  }
+                },
+                "relatesTo": "$.authenticators.value[1]"
+              },
+              {
+                "label": "Password",
+                "value": {
+                  "form": {
+                    "value": [
+                      {
+                        "name": "id",
+                        "required": true,
+                        "value": "aut10rayui2iHA7Fv0h8",
+                        "mutable": false
+                      },
+                      {
+                        "name": "methodType",
+                        "required": false,
+                        "value": "password",
+                        "mutable": false
+                      }
+                    ]
+                  }
+                },
+                "relatesTo": "$.authenticatorEnrollments.value[2]"
+              }
+            ]
+          },
+          {
+            "name": "stateHandle",
+            "required": true,
+            "value": "02ALKbMm95yboUzC9k2NyF8125VLvGWNsSiMbiF7V5",
+            "visible": false,
+            "mutable": false
+          }
+        ],
+        "accepts": "application/json; okta-version=1.0.0"
+      }
+    ]
+  },
+  "currentAuthenticator": {
+    "type": "object",
+    "value": {
+      "contextualData": {
+        "challengeData": {
+          "challenge": "zuzEPJk5hr_g1ZwDwKZBxI2_zjE",
+          "userVerification": "preferred",
+          "extensions": {
+            "appid": "https://foo.oktapreview.com"
+          }
+        }
+      },
+      "type": "security_key",
+      "key": "webauthn",
+      "id": "aut10rayui6tnp9sl0h8",
+      "displayName": "Security Key or Biometric",
+      "methods": [
+        {
+          "type": "webauthn"
+        }
+      ]
+    }
+  },
+  "authenticators": {
+    "type": "array",
+    "value": [
+      {
+        "type": "email",
+        "key": "okta_email",
+        "id": "aut10rayui3mVphc80h8",
+        "displayName": "Email",
+        "methods": [
+          {
+            "type": "email"
+          }
+        ]
+      },
+      {
+        "type": "security_key",
+        "key": "webauthn",
+        "id": "aut10rayui6tnp9sl0h8",
+        "displayName": "Security Key or Biometric",
+        "methods": [
+          {
+            "type": "webauthn"
+          }
+        ]
+      },
+      {
+        "type": "password",
+        "key": "okta_password",
+        "id": "aut10rayui2iHA7Fv0h8",
+        "displayName": "Password",
+        "methods": [
+          {
+            "type": "password"
+          }
+        ]
+      }
+    ]
+  },
+  "authenticatorEnrollments": {
+    "type": "array",
+    "value": [
+      {
+        "profile": {
+          "email": "n***t@mailpoof.com"
+        },
+        "type": "email",
+        "key": "okta_email",
+        "id": "eae11t30k38wVS0Sc0h8",
+        "displayName": "Email",
+        "methods": [
+          {
+            "type": "email"
+          }
+        ]
+      },
+      {
+        "type": "security_key",
+        "key": "webauthn",
+        "id": "fwf11t30nq0eTjWtM0h8",
+        "displayName": "MacBook Touch ID",
+        "credentialId": "AXFqM7oocpFkG3gEO7VCzpLcIuyZVtPMLwsxdWj4XcCzmMi98NguG10vMCbo3zOH3DTrKnQCHDGw3TzGOzoe6rMGCJErJo5iIA",
+        "methods": [
+          {
+            "type": "webauthn"
+          }
+        ]
+      },
+      {
+        "type": "password",
+        "key": "okta_password",
+        "id": "lae1a6any6Kl3gnGa0h7",
+        "displayName": "Password",
+        "methods": [
+          {
+            "type": "password"
+          }
+        ]
+      }
+    ]
+  },
+  "user": {
+    "type": "object",
+    "value": {
+      "id": "00u11t2zdiinH4T7j0h8",
+      "identifier": "nisvut@mailpoof.com",
+      "profile": {
+        "firstName": "KK",
+        "lastName": "KK",
+        "timeZone": "America/Los_Angeles",
+        "locale": "en_US"
+      }
+    }
+  },
+  "cancel": {
+    "rel": [
+      "create-form"
+    ],
+    "name": "cancel",
+    "href": "https://foo.oktapreview.com/idp/idx/cancel",
+    "method": "POST",
+    "produces": "application/ion+json; okta-version=1.0.0",
+    "value": [
+      {
+        "name": "stateHandle",
+        "required": true,
+        "value": "02ALKbMm95yboUzC9k2NyF8125VLvGWNsSiMbiF7V5",
+        "visible": false,
+        "mutable": false
+      }
+    ],
+    "accepts": "application/json; okta-version=1.0.0"
+  },
+  "app": {
+    "type": "object",
+    "value": {
+      "name": "okta_enduser",
+      "label": "Okta Dashboard",
+      "id": "DEFAULT_APP"
+    }
+  }
+}

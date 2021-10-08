@@ -109,6 +109,10 @@
     <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
 </div>
 
+<div th:if="${errors}" class="alert alert-danger">
+    <span th:text="${errors}"></span>
+</div>
+
 <div th:replace="fragments/footer :: footer"></div>
 
 </body>
