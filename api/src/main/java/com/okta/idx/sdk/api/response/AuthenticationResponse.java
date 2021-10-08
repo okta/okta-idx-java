@@ -47,11 +47,11 @@ public class AuthenticationResponse {
 
     private ContextualData contextualData;
 
-    public CurrentAuthenticatorEnrollment currentAuthenticator;
+    private CurrentAuthenticatorEnrollment currentAuthenticator;
 
-    public AuthenticatorEnrollments authenticatorEnrollments;
+    private AuthenticatorEnrollments authenticatorEnrollments;
 
-    public String webauthnCredentialId;
+    private String webauthnCredentialId;
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
