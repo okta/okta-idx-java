@@ -16,7 +16,6 @@
 package com.okta.idx.sdk.api.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.okta.idx.sdk.api.model.Credentials;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class WebauthnRequest {

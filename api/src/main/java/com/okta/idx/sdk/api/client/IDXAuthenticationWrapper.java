@@ -422,11 +422,11 @@ public class IDXAuthenticationWrapper {
             Credentials credentials = new Credentials();
             credentials.setClientData(webauthnRequest.getClientData());
             if (webauthnRequest.getAttestation() != null)
-               credentials.setAttestation(webauthnRequest.getAttestation());
+                credentials.setAttestation(webauthnRequest.getAttestation());
             if (webauthnRequest.getAuthenticatorData() != null)
-            credentials.setAuthenticatorData(webauthnRequest.getAuthenticatorData());
+                credentials.setAuthenticatorData(webauthnRequest.getAuthenticatorData());
             if (webauthnRequest.getSignatureData() != null)
-            credentials.setSignatureData(webauthnRequest.getSignatureData());
+                credentials.setSignatureData(webauthnRequest.getSignatureData());
 
             AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
                     .withStateHandle(proceedContext.getStateHandle())

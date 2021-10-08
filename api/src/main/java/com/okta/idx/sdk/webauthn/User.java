@@ -16,7 +16,6 @@
 package com.okta.idx.sdk.webauthn;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.okta.idx.sdk.api.model.UserValue;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class User {
