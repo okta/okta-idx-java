@@ -150,7 +150,7 @@ public class LoginController {
 
             Util.updateSession(session, enrollResponse.getProceedContext());
 
-            String webauthnCredentialId = idxAuthenticationWrapper.fetchWebauthnCredentialId(enrollResponse);
+            String webauthnCredentialId = enrollResponse.getWebauthnCredentialId();
 
             if (webauthnCredentialId != null) {
                 modelAndView = new ModelAndView("select-webauthn-authenticator");

@@ -51,6 +51,8 @@ public class AuthenticationResponse {
 
     public AuthenticatorEnrollments authenticatorEnrollments;
 
+    public String webauthnCredentialId;
+
     public TokenResponse getTokenResponse() {
         return tokenResponse;
     }
@@ -113,6 +115,14 @@ public class AuthenticationResponse {
 
     public void setContextualData(ContextualData contextualData) {
         this.contextualData = contextualData;
+    }
+
+    public String getWebauthnCredentialId() {
+        return webauthnCredentialId;
+    }
+
+    public void setWebauthnCredentialId(String webauthnCredentialId) {
+        this.webauthnCredentialId = webauthnCredentialId;
     }
 
     public CurrentAuthenticatorEnrollment getCurrentAuthenticator() {

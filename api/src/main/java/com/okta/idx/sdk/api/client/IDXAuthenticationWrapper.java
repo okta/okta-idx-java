@@ -333,17 +333,29 @@ public class IDXAuthenticationWrapper {
 
     public AuthenticationResponse enrollAuthenticator(ProceedContext proceedContext, String authenticatorId) {
         try {
-            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
-                Authenticator authenticator = new Authenticator();
-                authenticator.setId(authenticatorId);
+            AuthenticationResponse authenticationResponse =
+                    AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                        Authenticator authenticator = new Authenticator();
+                        authenticator.setId(authenticatorId);
 
-                EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
-                        .withAuthenticator(authenticator)
-                        .withStateHandle(proceedContext.getStateHandle())
-                        .build();
+                        EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                                .withAuthenticator(authenticator)
+                                .withStateHandle(proceedContext.getStateHandle())
+                                .build();
 
-                return client.enroll(enrollRequest, proceedContext.getHref());
-            }).asAuthenticationResponse();
+                        return client.enroll(enrollRequest, proceedContext.getHref());
+                    }).asAuthenticationResponse();
+
+            AuthenticatorEnrollments authenticatorEnrollments = authenticationResponse.getAuthenticatorEnrollments();
+
+            Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
+                    .filter(x -> "security_key".equals(x.getType()))
+                    .findAny();
+
+            authenticatorEnrollmentOptional.ifPresent(authenticatorEnrollment ->
+                    authenticationResponse.setWebauthnCredentialId(authenticatorEnrollment.getCredentialId()));
+
+            return authenticationResponse;
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
