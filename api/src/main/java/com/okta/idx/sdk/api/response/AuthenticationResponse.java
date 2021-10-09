@@ -18,13 +18,10 @@ package com.okta.idx.sdk.api.response;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
-import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.ContextualData;
-import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Idp;
-import com.okta.idx.sdk.api.model.RemediationOption;
-import com.okta.idx.sdk.api.request.WebauthnRequest;
+import com.okta.idx.sdk.webauthn.WebauthnParams;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -47,11 +44,7 @@ public class AuthenticationResponse {
 
     private ContextualData contextualData;
 
-    private CurrentAuthenticatorEnrollment currentAuthenticator;
-
-    private AuthenticatorEnrollments authenticatorEnrollments;
-
-    private String webauthnCredentialId;
+    private WebauthnParams webauthnParams = new WebauthnParams();
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
@@ -117,27 +110,7 @@ public class AuthenticationResponse {
         this.contextualData = contextualData;
     }
 
-    public String getWebauthnCredentialId() {
-        return webauthnCredentialId;
-    }
-
-    public void setWebauthnCredentialId(String webauthnCredentialId) {
-        this.webauthnCredentialId = webauthnCredentialId;
-    }
-
-    public CurrentAuthenticatorEnrollment getCurrentAuthenticator() {
-        return currentAuthenticator;
-    }
-
-    public void setCurrentAuthenticator(CurrentAuthenticatorEnrollment currentAuthenticator) {
-        this.currentAuthenticator = currentAuthenticator;
-    }
-
-    public AuthenticatorEnrollments getAuthenticatorEnrollments() {
-        return authenticatorEnrollments;
-    }
-
-    public void setAuthenticatorEnrollments(AuthenticatorEnrollments authenticatorEnrollments) {
-        this.authenticatorEnrollments = authenticatorEnrollments;
+    public WebauthnParams getWebauthnParams() {
+        return webauthnParams;
     }
 }

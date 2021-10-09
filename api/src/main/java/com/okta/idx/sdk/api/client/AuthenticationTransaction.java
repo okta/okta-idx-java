@@ -186,11 +186,11 @@ final class AuthenticationTransaction {
         }
 
         if (idxResponse.getCurrentAuthenticator() != null) {
-            authenticationResponse.setCurrentAuthenticator(idxResponse.getCurrentAuthenticator());
+            authenticationResponse.getWebauthnParams().setCurrentAuthenticator(idxResponse.getCurrentAuthenticator());
         }
 
         if (idxResponse.getAuthenticatorEnrollments() != null) {
-            authenticationResponse.setAuthenticatorEnrollments(idxResponse.getAuthenticatorEnrollments());
+            authenticationResponse.getWebauthnParams().setAuthenticatorEnrollments(idxResponse.getAuthenticatorEnrollments());
         }
 
         String firstRemediation = "";

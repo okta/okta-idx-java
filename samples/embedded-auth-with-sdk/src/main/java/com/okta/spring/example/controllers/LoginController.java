@@ -150,18 +150,19 @@ public class LoginController {
 
             Util.updateSession(session, enrollResponse.getProceedContext());
 
-            String webauthnCredentialId = enrollResponse.getWebauthnCredentialId();
+            String webauthnCredentialId = enrollResponse.getWebauthnParams().getWebauthnCredentialId();
 
             if (webauthnCredentialId != null) {
                 modelAndView = new ModelAndView("select-webauthn-authenticator");
                 modelAndView.addObject("title", "select-webauthn-authenticator");
                 modelAndView.addObject("webauthnCredentialId", webauthnCredentialId);
-                modelAndView.addObject("challengeData",
-                        enrollResponse.getCurrentAuthenticator().getValue().getContextualData().getChallengeData());
+                modelAndView.addObject("challengeData", enrollResponse.getWebauthnParams()
+                        .getCurrentAuthenticator().getValue().getContextualData().getChallengeData());
             } else {
                 modelAndView = new ModelAndView("enroll-webauthn-authenticator");
                 modelAndView.addObject("title", "enroll-webauthn-authenticator");
-                modelAndView.addObject("currentAuthenticator", enrollResponse.getCurrentAuthenticator());
+                modelAndView.addObject("currentAuthenticator",
+                        enrollResponse.getWebauthnParams().getCurrentAuthenticator());
             }
             return modelAndView;
         }

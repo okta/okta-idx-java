@@ -346,14 +346,16 @@ public class IDXAuthenticationWrapper {
                         return client.enroll(enrollRequest, proceedContext.getHref());
                     }).asAuthenticationResponse();
 
-            AuthenticatorEnrollments authenticatorEnrollments = authenticationResponse.getAuthenticatorEnrollments();
+            if (authenticationResponse.getWebauthnParams() != null) {
+                AuthenticatorEnrollments authenticatorEnrollments = authenticationResponse.getWebauthnParams().getAuthenticatorEnrollments();
 
-            Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
-                    .filter(x -> "security_key".equals(x.getType()))
-                    .findAny();
+                Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
+                        .filter(x -> "security_key".equals(x.getType()))
+                        .findAny();
 
-            authenticatorEnrollmentOptional.ifPresent(authenticatorEnrollment ->
-                    authenticationResponse.setWebauthnCredentialId(authenticatorEnrollment.getCredentialId()));
+                authenticatorEnrollmentOptional.ifPresent(authenticatorEnrollment ->
+                        authenticationResponse.getWebauthnParams().setWebauthnCredentialId(authenticatorEnrollment.getCredentialId()));
+            }
 
             return authenticationResponse;
         } catch (ProcessingException e) {
@@ -697,21 +699,5 @@ public class IDXAuthenticationWrapper {
         }
 
         return authenticationResponse;
-    }
-
-    /**
-     * Fetch webauthn credential id if webauthn is already enrolled (null otherwise).
-     *
-     * @param authenticationResponse the ProceedContext
-     * @return webauthn credential id, if webauthn is present.
-     */
-    public String fetchWebauthnCredentialId(AuthenticationResponse authenticationResponse) {
-        AuthenticatorEnrollments authenticatorEnrollments = authenticationResponse.getAuthenticatorEnrollments();
-
-        Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
-                .filter(x -> "security_key".equals(x.getType()))
-                .findAny();
-
-        return authenticatorEnrollmentOptional.map(AuthenticatorEnrollment::getCredentialId).orElse(null);
     }
 }
