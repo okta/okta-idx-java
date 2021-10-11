@@ -138,12 +138,11 @@ public class LoginController {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
-
-        if (authenticatorType != null && authenticatorType.equals("Security Key or Biometric")) {
+        if (authenticatorType != null && authenticatorType.equals("webauthn")) {
             ModelAndView modelAndView;
 
             Optional<Authenticator> authenticatorOptional =
-                    authenticators.stream().filter(auth -> auth.getLabel().equals(authenticatorType)).findFirst();
+                    authenticators.stream().filter(auth -> auth.getType().equals(authenticatorType)).findFirst();
             String authId = authenticatorOptional.get().getId();
 
             AuthenticationResponse enrollResponse = idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authId);
@@ -154,13 +153,13 @@ public class LoginController {
 
             if (webauthnCredentialId != null) {
                 modelAndView = new ModelAndView("select-webauthn-authenticator");
-                modelAndView.addObject("title", "select-webauthn-authenticator");
+                modelAndView.addObject("title", "Select Webauthn Authenticator");
                 modelAndView.addObject("webauthnCredentialId", webauthnCredentialId);
                 modelAndView.addObject("challengeData", enrollResponse.getWebauthnParams()
                         .getCurrentAuthenticator().getValue().getContextualData().getChallengeData());
             } else {
                 modelAndView = new ModelAndView("enroll-webauthn-authenticator");
-                modelAndView.addObject("title", "enroll-webauthn-authenticator");
+                modelAndView.addObject("title", "Enroll Webauthn Authenticator");
                 modelAndView.addObject("currentAuthenticator",
                         enrollResponse.getWebauthnParams().getCurrentAuthenticator());
             }
@@ -178,7 +177,7 @@ public class LoginController {
         Authenticator foundAuthenticator = null;
 
         for (Authenticator authenticator : authenticators) {
-            if (authenticatorType.equals(authenticator.getLabel())) {
+            if (authenticatorType.equals(authenticator.getType())) {
                 foundAuthenticator = authenticator;
 
                 if (foundAuthenticator.getFactors().size() == 1) {

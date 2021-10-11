@@ -49,12 +49,14 @@ public final class Authenticator {
     }
 
     private final String id;
+    private final String type;
     private final String label;
     private final List<Factor> factors;
     private final boolean hasNestedFactors;
 
-    Authenticator(String id, String label, List<Factor> factors, boolean hasNestedFactors) {
+    Authenticator(String id, String type, String label, List<Factor> factors, boolean hasNestedFactors) {
         this.id = id;
+        this.type = type;
         this.label = label;
         this.factors = factors;
         this.hasNestedFactors = hasNestedFactors;
@@ -62,6 +64,10 @@ public final class Authenticator {
 
     public String getId() {
         return id;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public String getLabel() {

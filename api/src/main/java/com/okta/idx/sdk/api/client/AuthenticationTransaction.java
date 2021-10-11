@@ -325,12 +325,14 @@ final class AuthenticationTransaction {
             String id = null;
             String label = option.getLabel();
             String enrollmentId = null;
+            String authenticatorType = null;
             boolean hasNestedFactors = false;
             Map<String, String> nestedMethods = new LinkedHashMap<>();
 
             FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
             for (FormValue formValue : optionFormValues) {
                 if (formValue.getName().equals("methodType")) {
+                    authenticatorType = String.valueOf(formValue.getValue());
                     // parse value from children
                     Options[] nestedOptions = formValue.options();
                     if (nestedOptions.length > 0) {
@@ -354,7 +356,7 @@ final class AuthenticationTransaction {
             for (Map.Entry<String, String> entry : nestedMethods.entrySet()) {
                 factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue()));
             }
-            authenticators.add(new Authenticator(id, label, factors, hasNestedFactors));
+            authenticators.add(new Authenticator(id, authenticatorType, label, factors, hasNestedFactors));
         }
         return authenticators;
     }
@@ -368,11 +370,13 @@ final class AuthenticationTransaction {
         String id = null;
         String label = parent.getLabel();
         String enrollmentId = null;
+        String authenticatorType = null;
         Map<String, String> nestedMethods = new LinkedHashMap<>();
         boolean hasNestedFactors = false;
 
         for (FormValue formValue : parent.form().getValue()) {
             if (formValue.getName().equals("methodType")) {
+                authenticatorType = String.valueOf(formValue.getValue());
                 // parse value from children
                 Options[] nestedOptions = formValue.options();
                 if (nestedOptions.length > 0) {
@@ -396,7 +400,7 @@ final class AuthenticationTransaction {
         for (Map.Entry<String, String> entry : nestedMethods.entrySet()) {
             factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue()));
         }
-        authenticators.add(new Authenticator(id, label, factors, hasNestedFactors));
+        authenticators.add(new Authenticator(id, authenticatorType, label, factors, hasNestedFactors));
 
         return authenticators;
     }
