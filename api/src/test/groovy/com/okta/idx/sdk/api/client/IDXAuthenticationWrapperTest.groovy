@@ -683,6 +683,7 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator passwordAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
@@ -701,6 +702,7 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator emailAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
@@ -790,6 +792,7 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator passwordAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
@@ -808,6 +811,7 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator emailAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
@@ -826,6 +830,7 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator phoneAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
@@ -920,6 +925,7 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator passwordAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
@@ -938,6 +944,7 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator emailAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
@@ -958,6 +965,7 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator phoneAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
@@ -1036,13 +1044,12 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator emailAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
 
         setMockResponse(requestExecutor, "challenge", scenario + "/challenge-response", 200, mediaTypeAppIonJson)
-
-        ProceedContext proceedContext = authenticationResponse.getProceedContext()
 
         authenticationResponse =
                 idxAuthenticationWrapper.selectAuthenticator(authenticationResponse.getProceedContext(), emailAuthenticator)
@@ -1108,13 +1115,12 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator emailAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
 
         setMockResponse(requestExecutor, "challenge", scenario + "/challenge-response", 200, mediaTypeAppIonJson)
-
-        ProceedContext proceedContext = authenticationResponse.getProceedContext()
 
         authenticationResponse =
                 idxAuthenticationWrapper.selectAuthenticator(authenticationResponse.getProceedContext(), emailAuthenticator)
@@ -1165,7 +1171,7 @@ class IDXAuthenticationWrapperTest {
         )
 
         Optional<Authenticator> authenticator = authenticationResponse.getAuthenticators()
-                .stream().filter({ auth -> auth.label.equals("Phone") }).findFirst()
+                .stream().filter({ auth -> (auth.label == "Phone") }).findFirst()
         assertThat("No Phone authenticator found", authenticator.isPresent())
         setMockResponse(requestExecutor, "credential/enroll", scenario + "/challenge-response", 200, mediaTypeAppIonJson)
         authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(
@@ -1440,6 +1446,7 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator passwordAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
@@ -1460,6 +1467,7 @@ class IDXAuthenticationWrapperTest {
 
         Authenticator webauthnAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
                 authenticationResponse.authenticators.first().label,
                 authenticationResponse.authenticators.first().factors,
                 authenticationResponse.authenticators.first().hasNestedFactors())
