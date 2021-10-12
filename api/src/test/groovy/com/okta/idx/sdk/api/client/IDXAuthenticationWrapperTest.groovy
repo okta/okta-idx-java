@@ -24,7 +24,7 @@ import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Idp
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
-import com.okta.idx.sdk.api.request.WebauthnRequest
+import com.okta.idx.sdk.api.request.WebAuthnRequest
 import com.okta.idx.sdk.api.response.AuthenticationResponse
 import org.testng.annotations.Test
 
@@ -1480,11 +1480,11 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "challenge/answer", scenario + "/challenge-answer-webauthn-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "token", scenario + "/token-response", 200, mediaTypeAppIonJson)
 
-        WebauthnRequest webauthnRequest = new WebauthnRequest()
-        webauthnRequest.attestation = "o2NmbXRmcGFja2VkZ2F0dFN0bXSiY2FsZyZjc2lnWEgwRgIhAPxn7aZG1m65SYOBt+bXDByFnunKks6pH1EzOdf3kF+bAiEA7fs/XAbUlzoYTWC2OagodVzCwGTSuzKDgHsw5eYPBKpoYXV0aERhdGFY0fSEN0f/X2IQM9Djsj4XeIrbzuOswjVu3W9DCDmxtPhwRWFf0CetzgACNbzGCmSLCyXx8FUDAE0BLQFPAUOb0JLoWAzzK7Mos3dOH+sYh5lWS7MSC7E3fc5AIQVLZsfULs4O4idie31KC9QehVIXcygvOcsdenOlGPAEuktKd++T6Zp+Z6UBAgMmIAEhWCCVSkj7Fkim/hXWVqnLP/oAo4m/+bXfEyfoK+S2fUoQBSJYINfXOAFm0sUWemdeTMaMuQnSDTfz6spbn6sXxtXGtJoL"
-        webauthnRequest.clientData = "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiWjV5MlNEbVYwejZNUmtvZEIzN3FqMmlZZUhrIiwib3JpZ2luIjoiaHR0cHM6Ly9qYXZhLXNkay5va3RhcHJldmlldy5jb20iLCJjcm9zc09yaWdpbiI6ZmFsc2V9"
+        WebAuthnRequest webAuthnRequest = new WebAuthnRequest()
+        webAuthnRequest.attestation = "o2NmbXRmcGFja2VkZ2F0dFN0bXSiY2FsZyZjc2lnWEgwRgIhAPxn7aZG1m65SYOBt+bXDByFnunKks6pH1EzOdf3kF+bAiEA7fs/XAbUlzoYTWC2OagodVzCwGTSuzKDgHsw5eYPBKpoYXV0aERhdGFY0fSEN0f/X2IQM9Djsj4XeIrbzuOswjVu3W9DCDmxtPhwRWFf0CetzgACNbzGCmSLCyXx8FUDAE0BLQFPAUOb0JLoWAzzK7Mos3dOH+sYh5lWS7MSC7E3fc5AIQVLZsfULs4O4idie31KC9QehVIXcygvOcsdenOlGPAEuktKd++T6Zp+Z6UBAgMmIAEhWCCVSkj7Fkim/hXWVqnLP/oAo4m/+bXfEyfoK+S2fUoQBSJYINfXOAFm0sUWemdeTMaMuQnSDTfz6spbn6sXxtXGtJoL"
+        webAuthnRequest.clientData = "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiWjV5MlNEbVYwejZNUmtvZEIzN3FqMmlZZUhrIiwib3JpZ2luIjoiaHR0cHM6Ly9qYXZhLXNkay5va3RhcHJldmlldy5jb20iLCJjcm9zc09yaWdpbiI6ZmFsc2V9"
         authenticationResponse = idxAuthenticationWrapper.verifyWebAuthn(
-                authenticationResponse.proceedContext, webauthnRequest
+                authenticationResponse.proceedContext, webAuthnRequest
         )
 
         assertThat(authenticationResponse, notNullValue())
@@ -1542,7 +1542,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "challenge/answer", scenario + "/webauthn-answer-challenge-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "token", scenario + "/token-response", 200, mediaTypeAppIonJson)
 
-        WebauthnRequest webauthnRequest = new WebauthnRequest()
+        WebAuthnRequest webauthnRequest = new WebAuthnRequest()
         webauthnRequest.authenticatorData = "9IQ3R/9fYhAz0OOyPhd4itvO46zCNW7db0MIObG0+HAFYV/DeQ=="
         webauthnRequest.clientData = "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiZEZMcjVJRXBlTjVyaTNvLWpITnYtRjduYVRjIiwib3JpZ2luIjoiaHR0cHM6Ly9qYXZhLXNkay5va3RhcHJldmlldy5jb20iLCJjcm9zc09yaWdpbiI6ZmFsc2V9"
         webauthnRequest.signatureData = "MEYCIQCYxvAygX/ItkItMpR43mvtLC4juL7X5DO20+p/oEePfwIhAJjT5pq0fkq50o+AGL3uLftPjiBDo95gxsG3qoinwucu"

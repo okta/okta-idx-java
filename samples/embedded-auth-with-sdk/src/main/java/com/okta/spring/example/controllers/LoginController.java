@@ -26,7 +26,7 @@ import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Qrcode;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
-import com.okta.idx.sdk.api.request.WebauthnRequest;
+import com.okta.idx.sdk.api.request.WebAuthnRequest;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.spring.example.helpers.ResponseHandler;
 import com.okta.spring.example.helpers.Util;
@@ -149,19 +149,19 @@ public class LoginController {
 
             Util.updateSession(session, enrollResponse.getProceedContext());
 
-            String webauthnCredentialId = enrollResponse.getWebauthnParams().getWebauthnCredentialId();
+            String webauthnCredentialId = enrollResponse.getWebAuthnParams().getWebauthnCredentialId();
 
             if (webauthnCredentialId != null) {
                 modelAndView = new ModelAndView("select-webauthn-authenticator");
                 modelAndView.addObject("title", "Select Webauthn Authenticator");
                 modelAndView.addObject("webauthnCredentialId", webauthnCredentialId);
-                modelAndView.addObject("challengeData", enrollResponse.getWebauthnParams()
+                modelAndView.addObject("challengeData", enrollResponse.getWebAuthnParams()
                         .getCurrentAuthenticator().getValue().getContextualData().getChallengeData());
             } else {
                 modelAndView = new ModelAndView("enroll-webauthn-authenticator");
                 modelAndView.addObject("title", "Enroll Webauthn Authenticator");
                 modelAndView.addObject("currentAuthenticator",
-                        enrollResponse.getWebauthnParams().getCurrentAuthenticator());
+                        enrollResponse.getWebAuthnParams().getCurrentAuthenticator());
             }
             return modelAndView;
         }
@@ -322,7 +322,7 @@ public class LoginController {
      * @return the view associated with authentication response.
      */
     @PostMapping("/verify-webauthn")
-    public ModelAndView verifyWebAuthn(final @RequestBody WebauthnRequest webauthnRequest,
+    public ModelAndView verifyWebAuthn(final @RequestBody WebAuthnRequest webauthnRequest,
                                        final HttpSession session) {
         logger.info(":: Verify Webauthn ::");
 
@@ -504,7 +504,7 @@ public class LoginController {
      * @return the view associated with authentication response.
      */
     @PostMapping(value = "/enroll-webauthn")
-    public ModelAndView enrollWebauthn(final @RequestBody WebauthnRequest webauthnRequest,
+    public ModelAndView enrollWebauthn(final @RequestBody WebAuthnRequest webauthnRequest,
                                        final HttpSession session) {
         logger.info(":: Enroll Webauthn Authenticator ::");
 

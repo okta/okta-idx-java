@@ -45,7 +45,7 @@ import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
-import com.okta.idx.sdk.api.request.WebauthnRequest;
+import com.okta.idx.sdk.api.request.WebAuthnRequest;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
@@ -346,15 +346,15 @@ public class IDXAuthenticationWrapper {
                         return client.enroll(enrollRequest, proceedContext.getHref());
                     }).asAuthenticationResponse();
 
-            if (authenticationResponse.getWebauthnParams() != null) {
-                AuthenticatorEnrollments authenticatorEnrollments = authenticationResponse.getWebauthnParams().getAuthenticatorEnrollments();
+            if (authenticationResponse.getWebAuthnParams() != null) {
+                AuthenticatorEnrollments authenticatorEnrollments = authenticationResponse.getAuthenticatorEnrollments();
 
                 Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
                         .filter(x -> "security_key".equals(x.getType()))
                         .findAny();
 
                 authenticatorEnrollmentOptional.ifPresent(authenticatorEnrollment ->
-                        authenticationResponse.getWebauthnParams().setWebauthnCredentialId(authenticatorEnrollment.getCredentialId()));
+                        authenticationResponse.getWebAuthnParams().setWebauthnCredentialId(authenticatorEnrollment.getCredentialId()));
             }
 
             return authenticationResponse;
@@ -432,7 +432,7 @@ public class IDXAuthenticationWrapper {
      * @return the Authentication response
      */
     public AuthenticationResponse verifyWebAuthn(ProceedContext proceedContext,
-                                                 WebauthnRequest webauthnRequest) {
+                                                 WebAuthnRequest webauthnRequest) {
 
         try {
             Credentials credentials = new Credentials();

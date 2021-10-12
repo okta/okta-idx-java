@@ -16,15 +16,12 @@
 package com.okta.idx.sdk.webauthn;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class WebauthnParams {
+public class WebAuthnParams {
 
     private CurrentAuthenticatorEnrollment currentAuthenticator;
-
-    private AuthenticatorEnrollments authenticatorEnrollments;
 
     private String webauthnCredentialId;
 
@@ -34,14 +31,6 @@ public class WebauthnParams {
 
     public void setCurrentAuthenticator(CurrentAuthenticatorEnrollment currentAuthenticator) {
         this.currentAuthenticator = currentAuthenticator;
-    }
-
-    public AuthenticatorEnrollments getAuthenticatorEnrollments() {
-        return authenticatorEnrollments;
-    }
-
-    public void setAuthenticatorEnrollments(AuthenticatorEnrollments authenticatorEnrollments) {
-        this.authenticatorEnrollments = authenticatorEnrollments;
     }
 
     public String getWebauthnCredentialId() {
