@@ -16,6 +16,7 @@
 package com.okta.spring.example.controllers;
 
 import com.okta.commons.lang.Strings;
+import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.FormValue;
@@ -162,6 +163,35 @@ public class HomeController {
     }
 
     /**
+     * Display the select authenticator page.
+     *
+     * @param session the http session
+     * @param completedAuthenticatorType the last enrolled/verified authenticator type
+     * @return the select authenticators view.
+     */
+    @GetMapping("/select-authenticator")
+    public ModelAndView displaySelectAuthenticatorPage(
+            final HttpSession session,
+            final @RequestParam(value = "completed", required = false) String completedAuthenticatorType) {
+
+        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
+
+        if (completedAuthenticatorType != null) {
+            authenticators.removeIf(authenticator -> authenticator.getLabel().equals(completedAuthenticatorType));
+        }
+
+        TokenResponse tokenResponse = (TokenResponse) session.getAttribute("tokenResponse");
+        if (tokenResponse != null) {
+            return homeHelper.proceedToHome(tokenResponse, session);
+        }
+
+        ModelAndView modelAndView = new ModelAndView("select-authenticator");
+        modelAndView.addObject("title", "Select Authenticator");
+        modelAndView.addObject("authenticators", authenticators);
+        return modelAndView;
+    }
+
+    /**
      * Display the forgot password page.
      *
      * @param session the http session
@@ -200,7 +230,6 @@ public class HomeController {
 
         List<FormValue> userProfileAttributes =
                 new LinkedList<>(Arrays.asList(userProfileFormValue.get().form().getValue()));
-
 
         if (!CollectionUtils.isEmpty(userProfileAttributes)) {
             modelAndView.addObject("userProfileAttributes", userProfileAttributes);

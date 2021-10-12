@@ -13,28 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.idx.sdk.api.model;
+package com.okta.idx.sdk.webauthn;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ContextualData {
+public class WebAuthnParams {
 
-    private Qrcode qrcode;
-    private String sharedSecret;
-    private ActivationData activationData;
-    private ChallengeData challengeData;
+    private CurrentAuthenticatorEnrollment currentAuthenticator;
 
-    public Qrcode getQrcode() {
-        return qrcode;
+    private String webauthnCredentialId;
+
+    public CurrentAuthenticatorEnrollment getCurrentAuthenticator() {
+        return currentAuthenticator;
     }
 
-    public String getSharedSecret() {
-        return sharedSecret;
+    public void setCurrentAuthenticator(CurrentAuthenticatorEnrollment currentAuthenticator) {
+        this.currentAuthenticator = currentAuthenticator;
     }
 
-    public ActivationData getActivationData() { return activationData; }
+    public String getWebauthnCredentialId() {
+        return webauthnCredentialId;
+    }
 
-    public ChallengeData getChallengeData() { return challengeData; }
-
+    public void setWebauthnCredentialId(String webauthnCredentialId) {
+        this.webauthnCredentialId = webauthnCredentialId;
+    }
 }

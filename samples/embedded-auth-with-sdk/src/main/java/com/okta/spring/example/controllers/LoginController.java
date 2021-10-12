@@ -26,6 +26,7 @@ import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Qrcode;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
+import com.okta.idx.sdk.api.request.WebAuthnRequest;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.spring.example.helpers.ResponseHandler;
 import com.okta.spring.example.helpers.Util;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -135,6 +137,34 @@ public class LoginController {
                                             final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
+        if (authenticatorType != null && authenticatorType.equals("webauthn")) {
+            ModelAndView modelAndView;
+
+            Optional<Authenticator> authenticatorOptional =
+                    authenticators.stream().filter(auth -> auth.getType().equals(authenticatorType)).findFirst();
+            String authId = authenticatorOptional.get().getId();
+
+            AuthenticationResponse enrollResponse = idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authId);
+
+            Util.updateSession(session, enrollResponse.getProceedContext());
+
+            String webauthnCredentialId = enrollResponse.getWebAuthnParams().getWebauthnCredentialId();
+
+            if (webauthnCredentialId != null) {
+                modelAndView = new ModelAndView("select-webauthn-authenticator");
+                modelAndView.addObject("title", "Select Webauthn Authenticator");
+                modelAndView.addObject("webauthnCredentialId", webauthnCredentialId);
+                modelAndView.addObject("challengeData", enrollResponse.getWebAuthnParams()
+                        .getCurrentAuthenticator().getValue().getContextualData().getChallengeData());
+            } else {
+                modelAndView = new ModelAndView("enroll-webauthn-authenticator");
+                modelAndView.addObject("title", "Enroll Webauthn Authenticator");
+                modelAndView.addObject("currentAuthenticator",
+                        enrollResponse.getWebAuthnParams().getCurrentAuthenticator());
+            }
+            return modelAndView;
+        }
 
         AuthenticationResponse authenticationResponse = null;
 
@@ -146,10 +176,8 @@ public class LoginController {
 
         Authenticator foundAuthenticator = null;
 
-        List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
-
         for (Authenticator authenticator : authenticators) {
-            if (authenticatorType.equals(authenticator.getLabel())) {
+            if (authenticatorType.equals(authenticator.getType())) {
                 foundAuthenticator = authenticator;
 
                 if (foundAuthenticator.getFactors().size() == 1) {
@@ -279,6 +307,32 @@ public class LoginController {
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("verify");
+            modelAndView.addObject("errors", authenticationResponse.getErrors());
+            return modelAndView;
+        }
+
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
+    }
+
+    /**
+     * Handle webauthn authenticator verification functionality.
+     *
+     * @param webauthnRequest
+     * @param session the session
+     * @return the view associated with authentication response.
+     */
+    @PostMapping("/verify-webauthn")
+    public ModelAndView verifyWebAuthn(final @RequestBody WebAuthnRequest webauthnRequest,
+                                       final HttpSession session) {
+        logger.info(":: Verify Webauthn ::");
+
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyWebAuthn(
+                        proceedContext, webauthnRequest);
+
+        if (responseHandler.needsToShowErrors(authenticationResponse)) {
+            ModelAndView modelAndView = new ModelAndView("verify-webauthn");
             modelAndView.addObject("errors", authenticationResponse.getErrors());
             return modelAndView;
         }
@@ -440,6 +494,26 @@ public class LoginController {
         }
 
         return responseHandler.verifyForm();
+    }
+
+    /**
+     * Handle webauthn authenticator enrollment functionality.
+     *
+     * @param webauthnRequest body
+     * @param session the session
+     * @return the view associated with authentication response.
+     */
+    @PostMapping(value = "/enroll-webauthn")
+    public ModelAndView enrollWebauthn(final @RequestBody WebAuthnRequest webauthnRequest,
+                                       final HttpSession session) {
+        logger.info(":: Enroll Webauthn Authenticator ::");
+
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyWebAuthn(
+                proceedContext, webauthnRequest);
+
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
 
     /**

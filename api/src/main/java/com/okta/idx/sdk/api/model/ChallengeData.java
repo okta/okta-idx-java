@@ -18,23 +18,19 @@ package com.okta.idx.sdk.api.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ContextualData {
+public class ChallengeData {
 
-    private Qrcode qrcode;
-    private String sharedSecret;
-    private ActivationData activationData;
-    private ChallengeData challengeData;
+    private String userVerification;
+    private String challenge;
+    private Extensions extensions;
 
-    public Qrcode getQrcode() {
-        return qrcode;
+    public String getUserVerification() {
+        return userVerification;
     }
 
-    public String getSharedSecret() {
-        return sharedSecret;
+    public String getChallenge() {
+        return challenge;
     }
 
-    public ActivationData getActivationData() { return activationData; }
-
-    public ChallengeData getChallengeData() { return challengeData; }
-
+    public Extensions getExtensions() { return extensions; }
 }

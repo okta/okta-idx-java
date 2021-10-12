@@ -20,6 +20,8 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.Authenticator;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -43,6 +45,7 @@ import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder;
+import com.okta.idx.sdk.api.request.WebAuthnRequest;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
@@ -328,6 +331,40 @@ public class IDXAuthenticationWrapper {
         }
     }
 
+    public AuthenticationResponse enrollAuthenticator(ProceedContext proceedContext, String authenticatorId) {
+        try {
+            AuthenticationResponse authenticationResponse =
+                    AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                        Authenticator authenticator = new Authenticator();
+                        authenticator.setId(authenticatorId);
+
+                        EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
+                                .withAuthenticator(authenticator)
+                                .withStateHandle(proceedContext.getStateHandle())
+                                .build();
+
+                        return client.enroll(enrollRequest, proceedContext.getHref());
+                    }).asAuthenticationResponse();
+
+            if (authenticationResponse.getWebAuthnParams() != null) {
+                AuthenticatorEnrollments authenticatorEnrollments = authenticationResponse.getAuthenticatorEnrollments();
+
+                Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
+                        .filter(x -> "security_key".equals(x.getType()))
+                        .findAny();
+
+                authenticatorEnrollmentOptional.ifPresent(authenticatorEnrollment ->
+                        authenticationResponse.getWebAuthnParams().setWebauthnCredentialId(authenticatorEnrollment.getCredentialId()));
+            }
+
+            return authenticationResponse;
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
     /**
      * Enroll authenticator of the supplied type.
      *
@@ -380,6 +417,41 @@ public class IDXAuthenticationWrapper {
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
                     client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
             ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Verify Webauthn Authenticator.
+     *
+     * @param proceedContext the ProceedContext
+     * @param webauthnRequest object
+     * @return the Authentication response
+     */
+    public AuthenticationResponse verifyWebAuthn(ProceedContext proceedContext,
+                                                 WebAuthnRequest webauthnRequest) {
+
+        try {
+            Credentials credentials = new Credentials();
+            credentials.setClientData(webauthnRequest.getClientData());
+            if (webauthnRequest.getAttestation() != null)
+                credentials.setAttestation(webauthnRequest.getAttestation());
+            if (webauthnRequest.getAuthenticatorData() != null)
+                credentials.setAuthenticatorData(webauthnRequest.getAuthenticatorData());
+            if (webauthnRequest.getSignatureData() != null)
+                credentials.setSignatureData(webauthnRequest.getSignatureData());
+
+            AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(proceedContext.getStateHandle())
+                    .withCredentials(credentials)
+                    .build();
+
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
+            ).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -508,7 +580,7 @@ public class IDXAuthenticationWrapper {
      * This is useful when doing social auth, and not getting back an interaction_code.
      *
      * @param clientContext the client context
-     * @return a AuthenticationResponse with a status representing the current location in the authentnication flow.
+     * @return a AuthenticationResponse with a status representing the current location in the authentication flow.
      */
     public AuthenticationResponse introspect(IDXClientContext clientContext) {
         try {
