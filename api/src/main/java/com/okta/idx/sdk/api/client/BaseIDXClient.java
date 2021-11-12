@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -95,7 +96,7 @@ final class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXClientContext interact() throws ProcessingException {
+    public IDXClientContext interact(final Optional<String> activationToken) throws ProcessingException {
 
         InteractResponse interactResponse;
         String codeVerifier, codeChallenge, state;
@@ -112,6 +113,7 @@ final class BaseIDXClient implements IDXClient {
             urlParameters.append("&code_challenge=").append(codeChallenge);
             urlParameters.append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD);
             urlParameters.append("&redirect_uri=").append(clientConfiguration.getRedirectUri());
+            activationToken.ifPresent(s -> urlParameters.append("&activation_token=").append(s));
             urlParameters.append("&state=").append(state);
 
             Request request = new DefaultRequest(

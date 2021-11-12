@@ -88,7 +88,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("interact-response.json")))
 
-        IDXClientContext idxClientContext = idxClient.interact()
+        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
 
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
@@ -297,7 +297,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("interact-response.json")))
 
-        IDXClientContext idxClientContext = idxClient.interact()
+        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
 
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))

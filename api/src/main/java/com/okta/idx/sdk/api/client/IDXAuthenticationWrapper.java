@@ -551,7 +551,7 @@ public class IDXAuthenticationWrapper {
     public IDXClientContext getClientContext() throws ProcessingException {
 
         try {
-            return client.interact();
+            return client.interact(Optional.empty());
         } catch (ProcessingException e) {
             logger.error("Error occurred:", e);
             ErrorResponse errorResponse = e.getErrorResponse();
@@ -672,9 +672,10 @@ public class IDXAuthenticationWrapper {
         return proceedContext.getSkipHref() != null;
     }
 
+    /** Begin transaction **/
     public AuthenticationResponse begin() {
         try {
-            return AuthenticationTransaction.create(client).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, Optional.empty()).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -682,6 +683,21 @@ public class IDXAuthenticationWrapper {
         }
     }
 
+    /** Begin transaction with activation token **/
+    public AuthenticationResponse begin(String activationToken) {
+        try {
+            AuthenticationTransaction authenticationTransaction =
+                    AuthenticationTransaction.create(client, Optional.of(activationToken));
+            authenticationTransaction.getRemediationOption(RemediationType.SELECT_AUTHENTICATOR_ENROLL);
+            return authenticationTransaction.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /** Exchange interaction code for token **/
     public AuthenticationResponse fetchTokenWithInteractionCode(String issuer,
                                                                 ProceedContext proceedContext,
                                                                 String interactionCode) {

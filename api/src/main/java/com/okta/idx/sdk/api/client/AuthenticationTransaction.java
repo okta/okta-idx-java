@@ -45,8 +45,8 @@ import java.util.stream.Collectors;
 
 final class AuthenticationTransaction {
 
-    static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
-        IDXClientContext idxClientContext = client.interact();
+    static AuthenticationTransaction create(IDXClient client, Optional<String> activationToken) throws ProcessingException {
+        IDXClientContext idxClientContext = client.interact(activationToken);
         Assert.notNull(idxClientContext, "IDX client context may not be null");
 
         IDXResponse introspectResponse = client.introspect(idxClientContext);

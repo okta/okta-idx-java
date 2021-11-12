@@ -27,12 +27,14 @@ import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 
+import java.util.Optional;
+
 /**
  * Client to interact with the IDX backend APIs.
  */
 public interface IDXClient {
 
-    IDXClientContext interact() throws ProcessingException;
+    IDXClientContext interact(Optional<String> activationToken) throws ProcessingException;
 
     IDXResponse introspect(IDXClientContext idxClientContext) throws ProcessingException;
 
