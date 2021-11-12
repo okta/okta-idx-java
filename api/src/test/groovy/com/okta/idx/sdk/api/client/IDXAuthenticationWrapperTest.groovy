@@ -349,7 +349,7 @@ class IDXAuthenticationWrapperTest {
     }
 
     @Test
-    void beginTransactionWithActivationTokenTest() {
+    void beginTransactionWithAndWithoutActivationTokenTest() {
 
         def requestExecutor = mock(RequestExecutor)
         def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
@@ -357,7 +357,9 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setMockResponseWithBodyParamMatcher(requestExecutor, "interact", "activation_token", "interact-response", 200, MediaType.APPLICATION_JSON)
+        // test with activation token
+
+        setMockResponseOnlyIfBodyParamMatches(requestExecutor, "interact", "activation_token", "interact-response", 200, MediaType.APPLICATION_JSON)
         setMockResponse(requestExecutor, "introspect", "introspect-with-activation-token-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin("activation-token")
@@ -365,6 +367,17 @@ class IDXAuthenticationWrapperTest {
         assertThat(beginResponse, notNullValue())
         assertThat(beginResponse.getErrors(), empty())
         assertThat(beginResponse.getAuthenticationStatus(), is(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION))
+
+        // test without activation token
+
+        setMockResponseOnlyIfBodyParamWontMatch(requestExecutor, "interact", "activation_token", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
+
+        beginResponse = idxAuthenticationWrapper.begin()
+
+        assertThat(beginResponse, notNullValue())
+        assertThat(beginResponse.getErrors(), empty())
+        assertThat(beginResponse.getAuthenticationStatus(), is(AuthenticationStatus.UNKNOWN))
     }
 
     @Test
@@ -1591,12 +1604,22 @@ class IDXAuthenticationWrapperTest {
         ).thenReturn(getResponseByResourceFileName(responseName, httpStatus, mediaType))
     }
 
-    void setMockResponseWithBodyParamMatcher(RequestExecutor requestExecutor, String resourceUrlEndsWith, String bodyParamName,
-                                             String responseName, Integer httpStatus, MediaType mediaType) {
+    void setMockResponseOnlyIfBodyParamMatches(RequestExecutor requestExecutor, String resourceUrlEndsWith, String bodyParamName,
+                                               String responseName, Integer httpStatus, MediaType mediaType) {
         when(requestExecutor.executeRequest(
                 argThat({
                     request -> request != null &&
                             (request as Request).getResourceUrl().getPath().endsWith(resourceUrlEndsWith) && request.body.getText().contains(bodyParamName)
+                }) as Request)
+        ).thenReturn(getResponseByResourceFileName(responseName, httpStatus, mediaType))
+    }
+
+    void setMockResponseOnlyIfBodyParamWontMatch(RequestExecutor requestExecutor, String resourceUrlEndsWith, String bodyParamName,
+                                                 String responseName, Integer httpStatus, MediaType mediaType) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null &&
+                            (request as Request).getResourceUrl().getPath().endsWith(resourceUrlEndsWith) && !request.body.getText().contains(bodyParamName)
                 }) as Request)
         ).thenReturn(getResponseByResourceFileName(responseName, httpStatus, mediaType))
     }
