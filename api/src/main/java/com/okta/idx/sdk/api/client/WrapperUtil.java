@@ -33,7 +33,6 @@ final class WrapperUtil {
     static AuthenticationResponse handleIllegalArgumentException(IllegalArgumentException e) {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
         logger.error("Exception occurred", e);
-        authenticationResponse.addError(e.getMessage());
         authenticationResponse.addError("The current flow is not supported. Please check your policy configuration.");
         return authenticationResponse;
     }
