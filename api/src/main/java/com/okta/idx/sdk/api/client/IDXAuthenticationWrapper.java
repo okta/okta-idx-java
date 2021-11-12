@@ -16,7 +16,6 @@
 package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.lang.Assert;
-import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
