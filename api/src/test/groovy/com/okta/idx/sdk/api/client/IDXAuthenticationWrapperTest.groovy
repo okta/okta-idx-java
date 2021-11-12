@@ -160,7 +160,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
         setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
 
-        AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient)
+        AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient, Optional.empty())
         VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("correct_code")
 
         setMockResponse(requestExecutor, "introspect", "challenge-response", 200, mediaTypeAppIonJson)
@@ -190,7 +190,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
         setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
 
-        AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient)
+        AuthenticationTransaction introspectTransaction = AuthenticationTransaction.create(idxClient, Optional.empty())
         VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("wrong_code")
 
         setMockResponse(requestExecutor, "introspect", "challenge-response", 200, mediaTypeAppIonJson)
@@ -346,6 +346,25 @@ class IDXAuthenticationWrapperTest {
         assertThat(authenticationResponse.getTokenResponse().getAccessToken(), notNullValue())
         assertThat(authenticationResponse.getTokenResponse().getRefreshToken(), notNullValue())
         assertThat(authenticationResponse.getTokenResponse().getIdToken(), notNullValue())
+    }
+
+    @Test
+    void beginTransactionWithActivationTokenTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-with-activation-token-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin("activation-token")
+
+        assertThat(beginResponse, notNullValue())
+        assertThat(beginResponse.getErrors(), empty())
+        assertThat(beginResponse.getAuthenticationStatus(), is(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION))
     }
 
     @Test

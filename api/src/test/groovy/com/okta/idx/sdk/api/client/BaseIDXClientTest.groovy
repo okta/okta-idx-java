@@ -83,7 +83,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
 
-        IDXClientContext idxClientContext = idxClient.interact()
+        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
 
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getCodeVerifier(), notNullValue())
@@ -107,7 +107,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
 
-        IDXClientContext idxClientContext = idxClient.interact()
+        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 200,
@@ -185,7 +185,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
 
-        IDXClientContext idxClientContext = idxClient.interact()
+        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 200,
@@ -344,7 +344,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
 
-        IDXClientContext idxClientContext = idxClient.interact()
+        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 200,
@@ -1023,7 +1023,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
 
-        IDXClientContext idxClientContext = idxClient.interact()
+        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 200,
@@ -1152,7 +1152,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
 
         try {
-            idxClient.interact()
+            idxClient.interact(Optional.empty())
         } catch (ProcessingException e) {
             String interactUrl = getNormalizedUri(clientConfiguration.getIssuer(),"/v1/interact")
             assertThat(e.getHttpStatus(), is(400))
@@ -1240,7 +1240,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedTokenResponse)
 
         try {
-            idxClient.interact()
+            idxClient.interact(Optional.empty())
         } catch (ProcessingException e) {
             String interactUrl = getNormalizedUri(clientConfiguration.getIssuer(),"/v1/interact")
             assertThat(e.getHttpStatus(), is(500))
@@ -1259,7 +1259,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenThrow(new HttpException("Connection failed!"))
 
         try {
-            idxClient.interact()
+            idxClient.interact(Optional.empty())
         } catch (ProcessingException e) {
             assertThat(e.getMessage(), is("com.okta.commons.http.HttpException: Connection failed!"))
         }
