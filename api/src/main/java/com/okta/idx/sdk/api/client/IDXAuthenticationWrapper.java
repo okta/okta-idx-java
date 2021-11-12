@@ -560,16 +560,6 @@ public class IDXAuthenticationWrapper {
         }
     }
 
-    /** Cancel the transaction with supplied state handle **/
-    public void cancel(String stateHandle) {
-
-        try {
-            client.cancel(stateHandle);
-        } catch (ProcessingException e) {
-            logger.error("Exception occurred", e);
-        }
-    }
-
     /**
      * Revoke the oauth2 token.
      *

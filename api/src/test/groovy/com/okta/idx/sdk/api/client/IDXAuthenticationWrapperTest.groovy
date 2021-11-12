@@ -357,7 +357,7 @@ class IDXAuthenticationWrapperTest {
         //replace idxClient with mock idxClient
         setInternalState(idxAuthenticationWrapper, "client", idxClient)
 
-        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponseWithBodyParamMatcher(requestExecutor, "interact", "activation_token", "interact-response", 200, MediaType.APPLICATION_JSON)
         setMockResponse(requestExecutor, "introspect", "introspect-with-activation-token-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin("activation-token")
@@ -1587,6 +1587,16 @@ class IDXAuthenticationWrapperTest {
                 argThat({
                     request -> request != null &&
                             (request as Request).getResourceUrl().getPath().endsWith(resourceUrlEndsWith)
+                }) as Request)
+        ).thenReturn(getResponseByResourceFileName(responseName, httpStatus, mediaType))
+    }
+
+    void setMockResponseWithBodyParamMatcher(RequestExecutor requestExecutor, String resourceUrlEndsWith, String bodyParamName,
+                                             String responseName, Integer httpStatus, MediaType mediaType) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null &&
+                            (request as Request).getResourceUrl().getPath().endsWith(resourceUrlEndsWith) && request.body.getText().contains(bodyParamName)
                 }) as Request)
         ).thenReturn(getResponseByResourceFileName(responseName, httpStatus, mediaType))
     }
