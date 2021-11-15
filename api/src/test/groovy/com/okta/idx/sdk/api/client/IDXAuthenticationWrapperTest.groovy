@@ -446,7 +446,8 @@ class IDXAuthenticationWrapperTest {
 
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
-        assertThat(authenticationResponse.getAuthenticators(), empty())
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments(), nullValue())
         assertThat(authenticationResponse.getAuthenticationStatus(),
                 is(AuthenticationStatus.UNKNOWN)
         )
