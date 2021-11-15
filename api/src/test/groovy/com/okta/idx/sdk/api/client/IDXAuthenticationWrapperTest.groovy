@@ -428,6 +428,30 @@ class IDXAuthenticationWrapperTest {
         )
     }
 
+    @Test
+    void cancelTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "cancel", "cancel-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.cancel(beginResponse.proceedContext)
+
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticators(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                is(AuthenticationStatus.UNKNOWN)
+        )
+    }
+
     @Test(testName = "User logs in with password")
     void testLoginWithCorrectUsernamePassword() {
 

@@ -539,6 +539,23 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
+     * Cancel transaction.
+     *
+     * @param proceedContext the ProceedContext
+     * @return the Authentication response
+     */
+    public AuthenticationResponse cancel(ProceedContext proceedContext) {
+        try {
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.cancel(proceedContext.getStateHandle())).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /**
      * Get IDX client context by calling the interact endpoint.
      * ClientContext reference contains the interaction handle and PKCE params.
      * <p>
