@@ -20,11 +20,6 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
 
     <suppress>
-        <notes><![CDATA[ file name: lang-tag-1.5.jar ]]></notes>
-        <cve>CVE-2020-23171</cve>
-    </suppress>
-
-    <suppress>
         <notes><![CDATA[ file name: nimbus-jose-jwt-9.1.2.jar ]]></notes>
         <cve>CVE-2021-27568</cve>
     </suppress>
