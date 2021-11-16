@@ -327,7 +327,7 @@
             <!-- runs Cucumber E2E tests;
                  use mvn clean install -P '!cucumber-it' to disable it  -->
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <build>
                 <plugins>
