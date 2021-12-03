@@ -34,10 +34,10 @@
     <inceptionYear>2020</inceptionYear>
 
     <properties>
-        <jackson.version>2.11.3</jackson.version>
+        <jackson.version>2.13.0</jackson.version>
         <snakeyaml.version>1.27</snakeyaml.version>
-        <okta.commons.version>1.2.6</okta.commons.version>
-        <okta.sdk.previousVersion>0.1.0-beta.8</okta.sdk.previousVersion>
+        <okta.commons.version>1.2.9</okta.commons.version>
+        <okta.sdk.previousVersion>1.0.0</okta.sdk.previousVersion>
         <github.slug>okta/okta-idx-java</github.slug>
     </properties>
 
@@ -293,19 +293,6 @@
                         <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
                         <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>
                     </parameter>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>sonatype-nexus-staging</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose> <!-- TODO change to true after first release -->
-                    <keepStagingRepositoryOnFailure>true</keepStagingRepositoryOnFailure>
-                    <keepStagingRepositoryOnCloseRuleFailure>true</keepStagingRepositoryOnCloseRuleFailure>
                 </configuration>
             </plugin>
         </plugins>
