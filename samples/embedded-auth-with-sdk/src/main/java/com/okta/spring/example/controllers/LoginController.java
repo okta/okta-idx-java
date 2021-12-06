@@ -228,14 +228,12 @@ public class LoginController {
      * @return select authenticator view or select factor view or null
      */
     @GetMapping("/poll")
-    private ModelAndView getModelAndView(HttpSession session) {
+    private ModelAndView sendPollRequest(HttpSession session) {
         ProceedContext proceedContextFromSession = Util.getProceedContextFromSession(session);
-        if (proceedContextFromSession.getPollHref() != null) {
-            AuthenticationResponse response = idxAuthenticationWrapper.verifyAuthenticator(proceedContextFromSession);
-            AuthenticatorEnrollment[] enrollments = response.getAuthenticatorEnrollments().getValue();
-            if (enrollments.length > 1 && Arrays.stream(enrollments).map(AuthenticatorEnrollment::getType).anyMatch("email"::equals)) {
-                return responseHandler.handleKnownTransitions(response, session);
-            }
+        AuthenticationResponse response = idxAuthenticationWrapper.verifyAuthenticator(proceedContextFromSession);
+        AuthenticatorEnrollment[] enrollments = response.getAuthenticatorEnrollments().getValue();
+        if (enrollments.length > 1 && Arrays.stream(enrollments).map(AuthenticatorEnrollment::getType).anyMatch("email"::equals)) {
+            return responseHandler.handleKnownTransitions(response, session);
         }
         return null;
     }

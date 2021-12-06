@@ -55,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -407,14 +408,18 @@ public class IDXAuthenticationWrapper {
             AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
                     .withStateHandle(proceedContext.getStateHandle())
                     .build();
-
+            String pollHref = proceedContext.getPollHref() != null
+                    ? proceedContext.getPollHref()
+                    : new URL(new URL(proceedContext.getHref()), "/").toString() + "idp/idx/challenge/poll";
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
-                    client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getPollHref())
+                    client.answerChallenge(challengeAuthenticatorRequest, pollHref)
             ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
             return handleIllegalArgumentException(e);
+        } catch (MalformedURLException e) {
+            return handleProcessingException(new ProcessingException(e));
         }
     }
 
