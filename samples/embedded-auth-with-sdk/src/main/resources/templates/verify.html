@@ -69,9 +69,44 @@
             <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
         </div>
     </form>
+
+    <form name="pollRedirectForm" th:action="@{/poll}" method="get" hidden>
+        <noscript>
+            <input type="submit"/>
+        </noscript>
+    </form>
 </div>
 
 <div th:replace="fragments/footer :: footer"></div>
 
+<script th:inline="javascript">
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function poll() {
+        fetch("/poll", {method: 'GET'})
+            .then(response => {
+                response.body.getReader().read()
+                    .then((body) => {
+                        if (body.value !== undefined) {
+                            document.pollRedirectForm.submit()
+                        }
+                    })
+            }).catch(function (err) {
+                console.error(err);
+            }
+        );
+    }
+
+    async function sendPollRequest() {
+        do {
+            poll();
+            await sleep(1000);
+        } while (true);
+    }
+
+    sendPollRequest();
+</script>
 </body>
 </html>

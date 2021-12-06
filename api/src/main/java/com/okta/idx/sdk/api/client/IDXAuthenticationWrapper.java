@@ -399,6 +399,29 @@ public class IDXAuthenticationWrapper {
      * Verify Authenticator with the supplied authenticator options.
      *
      * @param proceedContext the ProceedContext
+     * @return the Authentication response
+     */
+    public AuthenticationResponse verifyAuthenticator(ProceedContext proceedContext) {
+        try {
+            // build answer password authenticator challenge request
+            AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(proceedContext.getStateHandle())
+                    .build();
+
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getPollHref())
+            ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Verify Authenticator with the supplied authenticator options.
+     *
+     * @param proceedContext the ProceedContext
      * @param verifyAuthenticatorOptions the verify Authenticator options
      * @return the Authentication response
      */

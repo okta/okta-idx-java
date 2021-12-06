@@ -21,6 +21,7 @@ import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Qrcode;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -217,6 +219,25 @@ public class LoginController {
             default:
                 return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
+    }
+
+    /**
+     * Send poll request for enrollment authenticators and check if email was enrolled by clicking the magic link.
+     *
+     * @param session the session
+     * @return select authenticator view or select factor view or null
+     */
+    @GetMapping("/poll")
+    private ModelAndView getModelAndView(HttpSession session) {
+        ProceedContext proceedContextFromSession = Util.getProceedContextFromSession(session);
+        if (proceedContextFromSession.getPollHref() != null) {
+            AuthenticationResponse response = idxAuthenticationWrapper.verifyAuthenticator(proceedContextFromSession);
+            AuthenticatorEnrollment[] enrollments = response.getAuthenticatorEnrollments().getValue();
+            if (enrollments.length > 1 && Arrays.stream(enrollments).map(AuthenticatorEnrollment::getType).anyMatch("email"::equals)) {
+                return responseHandler.handleKnownTransitions(response, session);
+            }
+        }
+        return null;
     }
 
     /**

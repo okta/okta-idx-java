@@ -133,8 +133,19 @@ final class AuthenticationTransaction {
             resendHref = idxResponse.getCurrentAuthenticator().getValue().getResend().getHref();
         }
 
+        String pollHref = null;
+        if (idxResponse.getCurrentAuthenticatorEnrollment() != null &&
+                idxResponse.getCurrentAuthenticatorEnrollment().getValue() != null &&
+                idxResponse.getCurrentAuthenticatorEnrollment().getValue().getPoll() != null) {
+            pollHref = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getPoll().getHref();
+        } else if (idxResponse.getCurrentAuthenticator() != null &&
+                idxResponse.getCurrentAuthenticator().getValue() != null &&
+                idxResponse.getCurrentAuthenticator().getValue().getPoll() != null) {
+            pollHref = idxResponse.getCurrentAuthenticator().getValue().getPoll().getHref();
+        }
+
         return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep, selectProfileEnrollHref,
-                resendHref);
+                resendHref, pollHref);
     }
 
     RemediationOption getRemediationOption(String name) {
