@@ -70,7 +70,7 @@
         </div>
     </form>
 
-    <form name="pollRedirectForm" th:action="@{/poll}" method="get" hidden>
+    <form name="pollRedirectForm" th:action="@{/poll}" method="post" hidden>
         <noscript>
             <input type="submit"/>
         </noscript>
@@ -87,26 +87,17 @@
     function poll() {
         fetch("/poll", {method: 'GET'})
             .then(response => {
-                response.body.getReader().read()
-                    .then((body) => {
-                        if (body.value !== undefined) {
-                            document.pollRedirectForm.submit()
+                response.json()
+                    .then(async function (body) {
+                        if (body.refresh !== undefined) {
+                            await sleep(body.refresh);
+                            poll();
                         }
-                    })
-            }).catch(function (err) {
-                console.error(err);
-            }
-        );
+                    }).catch(() => document.pollRedirectForm.submit())
+            }).catch((err) => console.error(err));
     }
 
-    async function sendPollRequest() {
-        do {
-            poll();
-            await sleep(1000);
-        } while (true);
-    }
-
-    sendPollRequest();
+    poll();
 </script>
 </body>
 </html>

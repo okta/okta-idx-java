@@ -23,8 +23,10 @@ import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.ContextualData;
+import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Qrcode;
+import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.request.WebAuthnRequest;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
@@ -222,13 +225,28 @@ public class LoginController {
     }
 
     /**
-     * Send poll request for enrollment authenticators and check if email was enrolled by clicking the magic link.
+     * Send poll request for enrollment authenticators.
      *
      * @param session the session
      * @return select authenticator view or select factor view or null
      */
     @GetMapping("/poll")
-    private ModelAndView sendPollRequest(HttpSession session) {
+    @ResponseBody
+    private RemediationOption sendPollRequest(HttpSession session) {
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+        CurrentAuthenticatorEnrollment currentAuthenticator = idxAuthenticationWrapper.verifyAuthenticator(proceedContext)
+                .getWebAuthnParams().getCurrentAuthenticator();
+        return currentAuthenticator != null ? currentAuthenticator.getValue().getPoll() : null;
+    }
+
+    /**
+     * Send poll request for enrollment authenticators and check if email was enrolled by clicking the magic link.
+     *
+     * @param session the session
+     * @return select authenticator view or select factor view or null
+     */
+    @PostMapping("/poll")
+    private ModelAndView sendPostPollRequest(HttpSession session) {
         ProceedContext proceedContextFromSession = Util.getProceedContextFromSession(session);
         AuthenticationResponse response = idxAuthenticationWrapper.verifyAuthenticator(proceedContextFromSession);
         AuthenticatorEnrollment[] enrollments = response.getAuthenticatorEnrollments().getValue();
