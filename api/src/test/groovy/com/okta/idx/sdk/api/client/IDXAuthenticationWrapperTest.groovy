@@ -22,6 +22,7 @@ import com.okta.idx.sdk.api.model.AuthenticationOptions
 import com.okta.idx.sdk.api.model.AuthenticationStatus
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Idp
+import com.okta.idx.sdk.api.model.PollInfo
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
 import com.okta.idx.sdk.api.request.WebAuthnRequest
@@ -34,11 +35,13 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 import static org.mockito.ArgumentMatchers.argThat
 import static org.mockito.Mockito.mock
+import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
 
 class IDXAuthenticationWrapperTest {
 
     final MediaType mediaTypeAppIonJson = MediaType.valueOf("application/ion+json; okta-version=1.0.0")
+    final MediaType mediaTypeTextHtml = MediaType.valueOf("text/html;charset=utf-8")
 
     @Test
     void basicIDXAuthenticationWrapperTest() {
@@ -168,7 +171,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
                 new ProceedContext(introspectTransaction.clientContext,
-                        introspectTransaction.getStateHandle(), "/challenge/answer", null, false, null, null),
+                        introspectTransaction.getStateHandle(), "/challenge/answer", null, false, null, null, null),
                 verifyAuthenticatorOptions
         )
 
@@ -198,7 +201,7 @@ class IDXAuthenticationWrapperTest {
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
                 new ProceedContext(introspectTransaction.clientContext,
-                        introspectTransaction.getStateHandle(), "/challenge/answer", null, false, null, null),
+                        introspectTransaction.getStateHandle(), "/challenge/answer", null, false, null, null, null),
                 verifyAuthenticatorOptions
         )
 
@@ -426,6 +429,70 @@ class IDXAuthenticationWrapperTest {
         assertThat(authenticationResponse.getAuthenticators(),
                 hasItem(hasProperty("label", is("Email")))
         )
+    }
+
+    @Test
+    void testVerifyEmailToken() {
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "verify", "verify-email-token-response", 200, mediaTypeTextHtml)
+        Response response = idxAuthenticationWrapper.verifyEmailToken("some-token")
+
+        assertThat(response, notNullValue())
+        assertThat(response.getHttpStatus(), equalTo(200))
+        assertThat(response.getHeaders().getContentType(), equalTo(mediaTypeTextHtml))
+    }
+
+    @Test
+    void testGetPollInfo() {
+        def scenario = "scenario_6_1_2"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", scenario + "/identify-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                is(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION)
+        )
+        assertThat(authenticationResponse.getAuthenticators(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticators(),
+                hasItem(hasProperty("label", is("Email")))
+        )
+
+        Authenticator emailAuthenticator = new Authenticator(
+                authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
+                authenticationResponse.authenticators.first().label,
+                authenticationResponse.authenticators.first().factors,
+                authenticationResponse.authenticators.first().hasNestedFactors())
+
+        setMockResponse(requestExecutor, "challenge", scenario + "/challenge-response", 200, mediaTypeAppIonJson)
+
+        authenticationResponse =
+                idxAuthenticationWrapper.selectAuthenticator(authenticationResponse.getProceedContext(), emailAuthenticator)
+
+        assertThat(authenticationResponse, notNullValue())
+
+        PollInfo pollInfo = idxAuthenticationWrapper.getPollInfo(authenticationResponse)
+
+        assertThat(pollInfo, notNullValue())
+        assertThat(pollInfo.getHref(), equalTo("https://foo.oktapreview.com/idp/idx/challenge/poll"))
+        assertThat(pollInfo.getRefresh(), equalTo("4000"))
     }
 
     @Test
@@ -1208,7 +1275,7 @@ class IDXAuthenticationWrapperTest {
         )
 
         Optional<Authenticator.Factor> factor = authenticator.get().getFactors()
-                .stream().filter({ factor -> factor.label.equals("SMS") }).findFirst()
+                .stream().filter({ factor -> (factor.label == "SMS") }).findFirst()
         assertThat("No SMS factor found", factor.isPresent())
         setMockResponse(requestExecutor, "credential/enroll", scenario + "/enroll-response", 200, mediaTypeAppIonJson)
         authenticationResponse = idxAuthenticationWrapper.submitPhoneAuthenticator(
@@ -1267,7 +1334,7 @@ class IDXAuthenticationWrapperTest {
         )
 
         Optional<Authenticator> authenticator = authenticationResponse.getAuthenticators()
-                .stream().filter({ auth -> auth.label.equals("Phone") }).findFirst()
+                .stream().filter({ auth -> (auth.label == "Phone") }).findFirst()
         assertThat("No Phone authenticator found", authenticator.isPresent())
         setMockResponse(requestExecutor, "challenge", scenario + "/challenge-response", 200, mediaTypeAppIonJson)
         authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(
@@ -1326,7 +1393,7 @@ class IDXAuthenticationWrapperTest {
         )
 
         Optional<Authenticator> authenticator = authenticationResponse.getAuthenticators()
-                .stream().filter({ auth -> auth.label.equals("Phone") }).findFirst()
+                .stream().filter({ auth -> (auth.label == "Phone") }).findFirst()
         assertThat("No Phone authenticator found", authenticator.isPresent())
         setMockResponse(requestExecutor, "credential/enroll", scenario + "/challenge-response", 200, mediaTypeAppIonJson)
         authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(
@@ -1338,7 +1405,7 @@ class IDXAuthenticationWrapperTest {
         )
 
         Optional<Authenticator.Factor> factor = authenticator.get().getFactors()
-                .stream().filter({ factor -> factor.label.equals("SMS") }).findFirst()
+                .stream().filter({ factor -> (factor.label == "SMS") }).findFirst()
         assertThat("No SMS factor found", factor.isPresent())
         setMockResponse(requestExecutor, "credential/enroll", scenario + "/enroll-invalid-response", 400, mediaTypeAppIonJson)
         authenticationResponse = idxAuthenticationWrapper.submitPhoneAuthenticator(
@@ -1380,7 +1447,7 @@ class IDXAuthenticationWrapperTest {
         )
 
         Optional<Authenticator> authenticator = authenticationResponse.getAuthenticators()
-                .stream().filter({ auth -> auth.label.equals("Phone") }).findFirst()
+                .stream().filter({ auth -> (auth.label == "Phone") }).findFirst()
         assertThat("No Phone authenticator found", authenticator.isPresent())
         setMockResponse(requestExecutor, "credential/enroll", scenario + "/challenge-response", 200, mediaTypeAppIonJson)
         authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(
@@ -1392,7 +1459,7 @@ class IDXAuthenticationWrapperTest {
         )
 
         Optional<Authenticator.Factor> factor = authenticator.get().getFactors()
-                .stream().filter({ factor -> factor.label.equals("SMS") }).findFirst()
+                .stream().filter({ factor -> (factor.label == "SMS") }).findFirst()
         assertThat("No SMS factor found", factor.isPresent())
         setMockResponse(requestExecutor, "credential/enroll", scenario + "/enroll-response", 200, mediaTypeAppIonJson)
         authenticationResponse = idxAuthenticationWrapper.submitPhoneAuthenticator(
@@ -1598,6 +1665,14 @@ class IDXAuthenticationWrapperTest {
     }
 
     Response getResponseByResourceFileName(String responseName, Integer httpStatus, MediaType mediaType) {
+        if (mediaType == mediaTypeTextHtml) {
+            return new DefaultResponse(
+                    httpStatus,
+                    mediaType,
+                    new FileInputStream(getClass().getClassLoader().getResource(responseName + ".html").getFile()),
+                    -1)
+        }
+        // default
         return new DefaultResponse(
                 httpStatus,
                 mediaType,

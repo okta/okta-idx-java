@@ -66,7 +66,7 @@ import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri;
 
 final class BaseIDXClient implements IDXClient {
 
-    private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/1.0.0";
+    private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/2.0.0";
 
     private final ClientConfiguration clientConfiguration;
 
@@ -488,6 +488,27 @@ final class BaseIDXClient implements IDXClient {
 
             requestExecutor.executeRequest(request);
         } catch (HttpException | MalformedURLException e) {
+            throw new ProcessingException(e);
+        }
+    }
+
+    @Override
+    public Response verifyEmailToken(String token) throws ProcessingException {
+
+        StringBuilder urlParameter = new StringBuilder();
+        urlParameter.append("token=").append(token);
+
+        try {
+            Request request = new DefaultRequest(
+                    HttpMethod.GET,
+                    clientConfiguration.getBaseUrl() + "/email/verify",
+                    null,
+                    getHttpHeaders(false),
+                    new ByteArrayInputStream(urlParameter.toString().getBytes(StandardCharsets.UTF_8)),
+                    -1L);
+
+            return requestExecutor.executeRequest(request);
+        } catch (HttpException e) {
             throw new ProcessingException(e);
         }
     }

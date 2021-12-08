@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
@@ -25,6 +26,7 @@ import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
+import com.okta.idx.sdk.api.model.PollInfo;
 import com.okta.idx.sdk.api.model.Recover;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
@@ -677,6 +679,26 @@ public class IDXAuthenticationWrapper {
         return authenticationTransaction.proceed(() ->
                 remediationOptionOptional.get().proceed(client, selectAuthenticatorRequest)
         );
+    }
+
+    /**
+     * Helper to verify the token query parameter contained in the link of user verification email.
+     *
+     * @param token the token string.
+     * @return response object.
+     */
+    public Response verifyEmailToken(String token) throws ProcessingException {
+        return AuthenticationTransaction.verifyEmailToken(client, token);
+    }
+
+    /**
+     * Helper to get polling information from authentication response.
+     *
+     * @param authenticationResponse the authentication response
+     * @return polling info wrapper object.
+     */
+    public PollInfo getPollInfo(AuthenticationResponse authenticationResponse) {
+        return authenticationResponse.getProceedContext().getPollInfo();
     }
 
     /**

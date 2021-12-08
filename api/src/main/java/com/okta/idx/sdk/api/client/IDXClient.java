@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.okta.commons.http.Response;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
@@ -55,4 +56,6 @@ public interface IDXClient {
     TokenResponse token(String url, String grantType, String interactionCode, IDXClientContext idxClientContext) throws ProcessingException;
 
     void revokeToken(String tokenType, String token) throws ProcessingException;
+
+    Response verifyEmailToken(String token) throws ProcessingException;
 }
