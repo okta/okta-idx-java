@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
@@ -25,6 +26,7 @@ import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.Idp;
 import com.okta.idx.sdk.api.model.Options;
 import com.okta.idx.sdk.api.model.OptionsForm;
+import com.okta.idx.sdk.api.model.PollInfo;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -73,6 +75,10 @@ final class AuthenticationTransaction {
         return new AuthenticationTransaction(client, proceedContext.getClientContext(), idxResponse);
     }
 
+    static Response verifyEmailToken(IDXClient client, String token) throws ProcessingException {
+        return client.verifyEmailToken(token);
+    }
+
     interface Factory {
         IDXResponse create() throws ProcessingException;
     }
@@ -98,14 +104,13 @@ final class AuthenticationTransaction {
     }
 
     ProceedContext createProceedContext() {
-        if (idxResponse == null || idxResponse.remediation() == null || idxResponse.remediation().remediationOptions().length == 0) {
-            logger.debug("ProceedContext is null");
+        if (idxResponse == null || idxResponse.remediation() == null || idxResponse.remediation().remediationOptions() == null) {
+            logger.error("ProceedContext is null");
             return null;
         }
 
         RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
         String href = remediationOptions[0].getHref();
-        logger.debug("ProceedContext href: {}", href);
 
         String skipHref = null;
         Optional<RemediationOption> skipOptional = getOptionalRemediationOption(RemediationType.SKIP);
@@ -123,18 +128,30 @@ final class AuthenticationTransaction {
         }
 
         String resendHref = null;
+        PollInfo pollInfo = null;
+
         if (idxResponse.getCurrentAuthenticatorEnrollment() != null &&
-                idxResponse.getCurrentAuthenticatorEnrollment().getValue() != null &&
-                idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend() != null) {
-            resendHref = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend().getHref();
+                idxResponse.getCurrentAuthenticatorEnrollment().getValue() != null) {
+            if (idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend() != null) {
+                resendHref = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend().getHref();
+            }
+            if (idxResponse.getCurrentAuthenticatorEnrollment().getValue().getPoll() != null) {
+                RemediationOption pollRemediationOption = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getPoll();
+                pollInfo = new PollInfo(pollRemediationOption.getHref(), pollRemediationOption.getRefresh());
+            }
         } else if (idxResponse.getCurrentAuthenticator() != null &&
-                idxResponse.getCurrentAuthenticator().getValue() != null &&
-                idxResponse.getCurrentAuthenticator().getValue().getResend() != null) {
-            resendHref = idxResponse.getCurrentAuthenticator().getValue().getResend().getHref();
+                idxResponse.getCurrentAuthenticator().getValue() != null) {
+            if (idxResponse.getCurrentAuthenticator().getValue().getResend() != null) {
+                resendHref = idxResponse.getCurrentAuthenticator().getValue().getResend().getHref();
+            }
+            if (idxResponse.getCurrentAuthenticator().getValue().getPoll() != null) {
+                RemediationOption pollRemediationOption = idxResponse.getCurrentAuthenticator().getValue().getPoll();
+                pollInfo = new PollInfo(pollRemediationOption.getHref(), pollRemediationOption.getRefresh());
+            }
         }
 
-        return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep, selectProfileEnrollHref,
-                resendHref);
+        return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep,
+                selectProfileEnrollHref, resendHref, pollInfo);
     }
 
     RemediationOption getRemediationOption(String name) {
@@ -178,7 +195,7 @@ final class AuthenticationTransaction {
 
         if (idxResponse.isLoginSuccessful()) {
             // login successful
-            logger.debug("Login Successful!");
+            logger.info("Login Successful!");
             TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, clientContext);
             authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
             authenticationResponse.setTokenResponse(tokenResponse);

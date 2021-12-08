@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<!--[if IE 7]><html lang="en" class="lt-ie10 lt-ie9 lt-ie8"><![endif]-->
+<!--[if IE 8]><html lang="en" class="lt-ie10 lt-ie9"> <![endif]-->
+<!--[if IE 9]><html lang="en" class="lt-ie10"><![endif]-->
+<!--[if gt IE 9]><html lang="en"><![endif]-->
+<!--[if !IE]><!--><html lang="en"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <title>Sample - Sign In</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <script src="https://example.com/assets/js/sdk/sample-signin-widget/5.14.0/js/sign-in.min.js" type="text/javascript"></script>
+    <link href="https://example.com/assets/js/sdk/sample-signin-widget/5.14.0/css/sign-in.min.css" type="text/css" rel="stylesheet"/>
+    <link href="https://example.com/assets/loginpage/css/loginpage-theme.fe35d60e3e7ac95814eda9241d23b189.css" type="text/css" rel="stylesheet"/><script>
+    var okta = {
+        locale: 'en',
+        deployEnv: 'DEV'
+    };
+</script>
+    <script>window.okta || (window.okta = {}); okta.cdnUrlHostname = ""; okta.cdnPerformCheck = false;</script><script>if (window.module) module = window.module;</script>
+
+</head>
+<body class="auth okta-container">
+
+<!--[if gte IE 8]>
+<![if lte IE 10]>
+
+    <style>
+    .unsupported-browser-banner-wrap {
+      padding: 20px;
+      border: 1px solid #ddd;
+      background-color: #f3fbff;
+    }
+    .unsupported-browser-banner-inner {
+      position: relative;
+      width: 735px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .unsupported-browser-banner-inner .icon {
+      vertical-align: top;
+      margin-right: 20px;
+      display: inline-block;
+      position: static !important;
+    }
+    .unsupported-browser-banner-inner a {
+      text-decoration: underline;
+    }
+    </style>
+
+    <div class="unsupported-browser-banner-wrap">
+      <div class="unsupported-browser-banner-inner">
+        <span class="icon icon-16 icon-only warning-16-yellow"></span>You are using an unsupported browser. For the best experience, update to <a href="https://support.sample.com/help/s/article/Okta-Browser-and-OS-Support-Policy">a supported browser</a>.</div>
+    </div>
+
+  <![endif]>
+<![endif]-->
+<!--[if IE 8]> <div id="login-bg-image-ie8" class="login-bg-image" style="background-image: none" data-se="login-bg-image"></div> <![endif]-->
+<!--[if (gt IE 8)|!(IE)]><!--> <div id="login-bg-image" class="login-bg-image" style="background-image: none" data-se="login-bg-image"></div> <!--<![endif]-->
+
+<!-- hidden form for reposting fromURI for X509 auth -->
+<form action="/login/cert" method="post" id="x509_login" name="x509_login" style="display:none;">
+    <input type="hidden" class="hide" name="_xsrfToken" value="null"/><input type="hidden" id="fromURI" name="fromURI" class="hidden" value="&#x2f;user&#x2f;notifications"/>
+</form>
+
+<div class="content">
+    <div class="applogin-banner">
+        <div class="applogin-background"></div>
+        <div class="applogin-container">
+            <h1>
+                Connecting to<div class="applogin-app-logo">
+                <img src="https://example.com/assets/img/logos/logo-end-user-dashboard.fc6d8fdbcb8cb4c933d009e71456cec6.svg" alt="Okta&#x20;Dashboard" class="logo enduser"/></div>
+            </h1>
+            <p>Sign-in with your Arvind Devex account to access Okta Dashboard</p>
+        </div>
+    </div>
+    <style type="text/css">
+        .noscript-msg {
+            background-color: #fff;
+            border-color: #ddd #ddd #d8d8d8;
+            box-shadow:0 2px 0 rgba(175, 175, 175, 0.12);
+            text-align: center;
+            width: 398px;
+            min-width: 300px;
+            margin: 200px auto;
+            border-radius: 3px;
+            border-width: 1px;
+            border-style: solid;
+        }
+
+        .noscript-content {
+            padding: 42px;
+        }
+
+        .noscript-content h2 {
+            padding-bottom: 20px;
+        }
+
+        .noscript-content h1 {
+            padding-bottom: 25px;
+        }
+
+        .noscript-content a {
+            background: transparent;
+            box-shadow: none;
+            display: table-cell;
+            vertical-align: middle;
+            width: 314px;
+            height: 50px;
+            line-height: 36px;
+            color: #fff;
+            background: linear-gradient(#007dc1, #0073b2), #007dc1;
+            border: 1px solid;
+            border-color: #004b75;
+            border-bottom-color: #00456a;
+            box-shadow: rgba(0, 0, 0, 0.15) 0 1px 0, rgba(255, 255, 255, 0.1) 0 1px 0 0 inset;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+        }
+
+        .noscript-content a:hover {
+            background: #007dc1;
+            cursor: hand;
+            text-decoration: none;
+        }
+    </style>
+    <noscript>
+        <div id="noscript-msg" class="noscript-msg">
+            <div class="noscript-content">
+                <h2>Javascript is required</h2>
+                <h1>Javascript is disabled on your browser.&nbspPlease enable Javascript and refresh this page.</h1>
+                <a href="." class="">Refresh</a>
+            </div>
+        </div>
+    </noscript>
+    <div id="signin-container"></div>
+    <div id="okta-sign-in" class="auth-container main-container" style="display:none">
+        <div id="unsupported-onedrive" class="unsupported-message" style="display:none">
+            <a class="button button-primary" target="_blank" href="https://sample.com">
+                Learn how to upgrade</a>
+        </div>
+        <div id="unsupported-cookie" class="unsupported-message" style="display:none">
+            <h2 class="o-form-head">Cookies are required</h2>
+            <p>Cookies are disabled on your browser. Please enable Cookies and refresh this page.</p>
+            <a class="button button-primary" target="_blank" href=".">
+                Refresh</a>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="footer-container clearfix">
+        <p class="copyright">Powered by <a href="http://www.sample.com/" class="inline-block notranslate">Okta</a></p>
+        <p class="privacy-policy"><a href="/privacy" target="_blank" class="inline-block margin-l-10">Privacy Policy</a></p>
+    </div>
+</div>
+
+<script type="text/javascript">function runLoginPage (fn) {var mainScript = document.createElement('script');mainScript.src = 'https://example.com/assets/js/mvc/loginpage/initLoginPage.pack.792170c4df160f5f1c59ee23a984e82f.js';mainScript.crossOrigin = 'anonymous';mainScript.integrity = 'sha384-OXDLd7S+DWi9oBVH9Rby8g8Z+UragjiWf7w2VQPQvJQRXziyttjpJ+0Vf7K6+JyF';document.getElementsByTagName('head')[0].appendChild(mainScript);fn && mainScript.addEventListener('load', function () { setTimeout(fn, 1) });}</script><script type="text/javascript">
+    (function(){
+        var baseUrl = 'https\x3A\x2F\x2Fexample.com';
+        var suppliedRedirectUri = '';
+        var repost = false;
+        var stateToken = '02jaXZ\x2DtdwYVq5kSRvdu_czekns6ogSnuItUxlqVMX';
+        var fromUri = '\x2Fuser\x2Fnotifications';
+        var username = '';
+        var rememberMe = true;
+        var smsRecovery = false;
+        var callRecovery = false;
+        var emailRecovery = true;
+        var usernameLabel = 'Username';
+        var usernameInlineLabel = '';
+        var passwordLabel = 'Password';
+        var passwordInlineLabel = '';
+        var signinLabel = 'Sign\x20In';
+        var forgotpasswordLabel = 'Forgot\x20password\x3F';
+        var unlockaccountLabel = 'Unlock\x20account\x3F';
+        var helpLabel = 'Help';
+        var orgSupportPhoneNumber = '';
+        var hideSignOutForMFA = false;
+        var hideBackToSignInForReset = false;
+        var footerHelpTitle = 'Need\x20help\x20signing\x20in\x3F';
+        var recoveryFlowPlaceholder = 'Email\x20or\x20Username';
+        var signOutUrl = '';
+        var authScheme = 'OAUTH2';
+        var hasPasswordlessPolicy = 'true';
+        var INVALID_TOKEN_ERROR_CODE = 'errors.E0000011';
+
+        var securityImage = true;
+
+        securityImage = false;
+
+        securityImage = false;
+
+
+
+        var selfServiceUnlock = false;
+
+
+        var redirectByFormSubmit = false;
+
+
+        var showPasswordRequirementsAsHtmlList = false;
+
+        showPasswordRequirementsAsHtmlList = true;
+
+
+        var autoPush = false;
+
+
+        var accountChooserDiscoveryUrl = 'https://login.sample.com/discovery/iframe.html';
+
+        // In case of custom app login, the uri is already absolute, so we must not attach baseUrl
+        var redirectUri;
+        if (isAbsoluteUri(fromUri)) {
+            redirectUri = fromUri;
+        } else {
+            redirectUri = baseUrl + fromUri;
+        }
+
+
+        var customButtons;
+        var pivProperties = {};
+
+
+
+        var customLinks = [];
+
+        var factorPageCustomLink = {};
+
+
+        var linkParams;
+
+
+        var proxyIdxResponse;
+
+
+        var stateTokenAllFlows;
+
+
+        var idpDiscovery;
+        var idpDiscoveryRequestContext;
+
+
+        var showPasswordToggleOnSignInPage = false;
+
+        showPasswordToggleOnSignInPage = true;
+
+
+        var hasSkipIdpFactorVerificationButton = false;
+
+
+        var hasOAuth2ConsentFeature = false;
+        var consentFunc;
+
+        hasOAuth2ConsentFeature = true;
+
+        consentFunc = {
+            cancel: function() {
+                window.location.href='https://example.com/login/step-up/redirect?stateToken=02jaXZ-tdwYVq5kSRvdu_czekns6ogSnuItUxlqVMX'
+            }
+        };
+
+
+        var hasMfaAttestationFeature = false;
+
+        hasMfaAttestationFeature = true;
+
+
+        var rememberMyUsernameOnOIE = false;
+
+
+        var engFastpassMultipleAccounts = false;
+
+
+        var registration = false;
+
+
+        var webauthn = true;
+
+
+        var overrideExistingStateToken = false;
+
+        overrideExistingStateToken = true;
+
+
+        var loginPageConfig = {
+            fromUri: fromUri,
+            repost: repost,
+            redirectUri: redirectUri,
+            isMobileClientLogin: false,
+            isMobileSSO: false,
+            disableiPadCheck: false,
+            enableiPadLoginReload: false,
+            linkParams: linkParams,
+            hasChromeOSFeature: false,
+            showLinkToAppStore: false,
+            accountChooserDiscoveryUrl: accountChooserDiscoveryUrl,
+            mfaAttestation: hasMfaAttestationFeature,
+            enrollingFactor: '',
+            stateTokenExpiresAt: '',
+            stateTokenRefreshWindowMs: '',
+            signIn: {
+                el: '#signin-container',
+                baseUrl: baseUrl,
+                brandName: 'Okta',
+                logo: 'https://example.com/assets/img/logos/logo.png',
+                logoText: 'Arvind\x20Devex logo',
+                helpSupportNumber: orgSupportPhoneNumber,
+                stateToken: stateToken,
+                username: username,
+                signOutLink: signOutUrl,
+                consent: consentFunc,
+                authScheme: authScheme,
+                relayState: fromUri,
+                proxyIdxResponse: proxyIdxResponse,
+                overrideExistingStateToken: overrideExistingStateToken,
+                interstitialBeforeLoginRedirect: 'DEFAULT',
+                idpDiscovery: {
+                    requestContext: idpDiscoveryRequestContext
+                },
+                features: {
+                    router: true,
+                    securityImage: securityImage,
+                    rememberMe: rememberMe,
+                    autoPush: autoPush,
+                    webauthn: webauthn,
+                    smsRecovery: smsRecovery,
+                    callRecovery: callRecovery,
+                    emailRecovery: emailRecovery,
+                    selfServiceUnlock: selfServiceUnlock,
+                    multiOptionalFactorEnroll: true,
+                    deviceFingerprinting: true,
+                    useDeviceFingerprintForSecurityImage: true,
+                    trackTypingPattern: false,
+                    hideSignOutLinkInMFA: hideSignOutForMFA,
+                    hideBackToSignInForReset: hideBackToSignInForReset,
+                    rememberMyUsernameOnOIE: rememberMyUsernameOnOIE,
+                    engFastpassMultipleAccounts: engFastpassMultipleAccounts,
+                    customExpiredPassword: true,
+                    idpDiscovery: idpDiscovery,
+                    passwordlessAuth: hasPasswordlessPolicy,
+                    consent: hasOAuth2ConsentFeature,
+                    skipIdpFactorVerificationBtn: hasSkipIdpFactorVerificationButton,
+                    showPasswordToggleOnSignInPage: showPasswordToggleOnSignInPage,
+                    registration: registration,
+                    redirectByFormSubmit: redirectByFormSubmit,
+                    restrictRedirectToForeground: true,
+                    showPasswordRequirementsAsHtmlList: showPasswordRequirementsAsHtmlList
+                },
+
+                assets: {
+                    baseUrl: "https\x3A\x2F\x2Fexample.com\x2Fassets\x2Fjs\x2Fsdk\x2Fsignin\x2Dwidget\x2F5.14.0"
+                },
+
+                language: en.locale,
+                i18n: {},
+
+                customButtons: customButtons,
+
+                piv: pivProperties,
+
+                helpLinks: {
+                    help: '',
+                    forgotPassword: '',
+                    unlock: '',
+                    custom: customLinks,
+                    factorPage: factorPageCustomLink
+                }
+            }
+        };
+
+        loginPageConfig.signIn.i18n[sample.locale] = {
+
+            'primaryauth.username.placeholder': usernameLabel,
+            'primaryauth.username.tooltip': usernameInlineLabel,
+            'primaryauth.password.placeholder': passwordLabel,
+            'primaryauth.password.tooltip': passwordInlineLabel,
+            'mfa.challenge.password.placeholder': passwordLabel,
+            'primaryauth.title': signinLabel,
+            'forgotpassword': forgotpasswordLabel,
+            'unlockaccount': unlockaccountLabel,
+            'help': helpLabel,
+            'needhelp': footerHelpTitle,
+            'password.forgot.email.or.username.placeholder': recoveryFlowPlaceholder,
+            'password.forgot.email.or.username.tooltip': recoveryFlowPlaceholder,
+            'account.unlock.email.or.username.placeholder': recoveryFlowPlaceholder,
+            'account.unlock.email.or.username.tooltip': recoveryFlowPlaceholder
+        };
+
+        // When STAF is enabled and the token is not valid, the Widget must be reloaded to obtain a new stateToken. We're updating
+        // the error message here as it isn't applicable for non-STAF orgs. The override is behind a new eng flag
+        // See : OKTA-376620, Feature flag : ENG_CHANGE_INVALID_TOKEN_MESSAGE
+
+
+        function isOldWebBrowserControl() {
+            // We no longer support IE7. If we see the MSIE 7.0 browser mode, it's a good signal
+            // that we're in a windows embedded browser.
+            if (navigator.userAgent.indexOf('MSIE 7.0') === -1) {
+                return false;
+            }
+
+            // Because the userAgent is the same across embedded browsers, we use feature
+            // detection to see if we're running on older versions that do not support updating
+            // the documentMode via x-ua-compatible.
+            return document.all && !window.atob;
+        }
+
+        function isAbsoluteUri(uri) {
+            var pat = /^https?:\/\//i;
+            return pat.test(uri);
+        }
+
+        var unsupportedContainer = document.getElementById('okta-sign-in');
+
+        var failIfCookiesDisabled = true;
+
+
+        // Old versions of WebBrowser Controls (specifically, OneDrive) render in IE7 browser
+        // mode, with no way to override the documentMode. In this case, inform the user they need
+        // to upgrade.
+        if (isOldWebBrowserControl()) {
+            document.getElementById('unsupported-onedrive').removeAttribute('style');
+            unsupportedContainer.removeAttribute('style');
+        }
+        else if (failIfCookiesDisabled && !navigator.cookieEnabled) {
+            document.getElementById('unsupported-cookie').removeAttribute('style');
+            unsupportedContainer.removeAttribute('style');
+        }
+        else {
+            unsupportedContainer.parentNode.removeChild(unsupportedContainer);
+            runLoginPage(function () {
+                OktaLogin.initLoginPage(loginPageConfig);
+            });
+        }
+
+
+    }());
+</script>
+
+<script>
+    window.addEventListener('load', function(event) {
+        function applyStyle(id, style) {
+            if (style) {
+                var el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('style', style);
+                }
+            }
+        }
+        applyStyle('login-bg-image', "background-image: none");
+        applyStyle('login-bg-image-ie8', "");
+    });
+</script>
+
+</body>
+</html>

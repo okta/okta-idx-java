@@ -492,6 +492,27 @@ final class BaseIDXClient implements IDXClient {
         }
     }
 
+    @Override
+    public Response verifyEmailToken(String token) throws ProcessingException {
+
+        StringBuilder urlParameter = new StringBuilder();
+        urlParameter.append("token=").append(token);
+
+        try {
+            Request request = new DefaultRequest(
+                    HttpMethod.GET,
+                    clientConfiguration.getBaseUrl() + "/email/verify",
+                    null,
+                    getHttpHeaders(false),
+                    new ByteArrayInputStream(urlParameter.toString().getBytes(StandardCharsets.UTF_8)),
+                    -1L);
+
+            return requestExecutor.executeRequest(request);
+        } catch (HttpException e) {
+            throw new ProcessingException(e);
+        }
+    }
+
     private void handleErrorResponse(Request request, Response response) throws IOException, ProcessingException {
 
         int httpStatus = response.getHttpStatus();
