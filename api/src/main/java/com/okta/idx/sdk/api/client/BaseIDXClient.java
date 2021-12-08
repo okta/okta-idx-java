@@ -46,6 +46,7 @@ import com.okta.idx.sdk.api.request.EnrollRequest;
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IntrospectRequest;
+import com.okta.idx.sdk.api.request.PollRequest;
 import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.response.ErrorResponse;
@@ -407,6 +408,37 @@ final class BaseIDXClient implements IDXClient {
                     null,
                     getHttpHeaders(false),
                     new ByteArrayInputStream(objectMapper.writeValueAsBytes(recoverRequest)),
+                    -1L);
+
+            Response response = requestExecutor.executeRequest(request);
+
+            if (response.getHttpStatus() != 200) {
+                handleErrorResponse(request, response);
+            }
+
+            JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
+
+        } catch (IOException | HttpException e) {
+            throw new ProcessingException(e);
+        }
+
+        return idxResponse;
+    }
+
+    @Override
+    public IDXResponse poll(PollRequest pollRequest, String href) throws ProcessingException {
+
+        IDXResponse idxResponse;
+
+        try {
+            Request request = new DefaultRequest(
+                    HttpMethod.POST,
+                    Strings.hasText(href) ? href : clientConfiguration.getBaseUrl() + "/idp/idx/challenge/poll",
+                    null,
+                    getHttpHeaders(false),
+                    new ByteArrayInputStream(objectMapper.writeValueAsBytes(pollRequest)),
                     -1L);
 
             Response response = requestExecutor.executeRequest(request);
