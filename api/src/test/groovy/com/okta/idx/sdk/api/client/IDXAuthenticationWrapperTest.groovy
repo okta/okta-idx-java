@@ -466,9 +466,7 @@ class IDXAuthenticationWrapperTest {
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
-        assertThat(authenticationResponse.getAuthenticationStatus(),
-                is(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION)
-        )
+        assertThat(authenticationResponse.getAuthenticationStatus(), is(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION))
         assertThat(authenticationResponse.getAuthenticators(), notNullValue())
         assertThat(authenticationResponse.getAuthenticators(),
                 hasItem(hasProperty("label", is("Email")))
@@ -493,6 +491,61 @@ class IDXAuthenticationWrapperTest {
         assertThat(pollInfo, notNullValue())
         assertThat(pollInfo.getHref(), equalTo("https://foo.oktapreview.com/idp/idx/challenge/poll"))
         assertThat(pollInfo.getRefresh(), equalTo("4000"))
+    }
+
+    @Test
+    void pollTest() {
+        def scenario = "scenario_6_1_2"
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", scenario + "/interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", scenario + "/introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", scenario + "/identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "poll", "poll-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
+        )
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(), is(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION))
+        assertThat(authenticationResponse.getAuthenticators(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticators(),
+                hasItem(hasProperty("label", is("Email")))
+        )
+
+        Authenticator emailAuthenticator = new Authenticator(
+                authenticationResponse.authenticators.first().id,
+                authenticationResponse.authenticators.first().type,
+                authenticationResponse.authenticators.first().label,
+                authenticationResponse.authenticators.first().factors,
+                authenticationResponse.authenticators.first().hasNestedFactors())
+
+        setMockResponse(requestExecutor, "challenge", scenario + "/challenge-response", 200, mediaTypeAppIonJson)
+
+        authenticationResponse =
+                idxAuthenticationWrapper.selectAuthenticator(authenticationResponse.getProceedContext(), emailAuthenticator)
+
+        assertThat(authenticationResponse, notNullValue())
+
+        PollInfo pollInfo = idxAuthenticationWrapper.getPollInfo(authenticationResponse)
+
+        assertThat(pollInfo, notNullValue())
+        assertThat(pollInfo.getHref(), equalTo("https://foo.oktapreview.com/idp/idx/challenge/poll"))
+        assertThat(pollInfo.getRefresh(), equalTo("4000"))
+
+        AuthenticationResponse pollResponse = idxAuthenticationWrapper.poll(authenticationResponse.getProceedContext())
+
+        assertThat(pollResponse, notNullValue())
+        assertThat(pollResponse.getErrors(), empty())
+        assertThat(pollResponse.getProceedContext(), notNullValue())
+        assertThat(pollResponse.getProceedContext().getHref(), equalTo("https://foo.oktapreview.com/idp/idx/challenge/answer"))
+        assertThat(authenticationResponse.getAuthenticationStatus(), is(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION))
     }
 
     @Test

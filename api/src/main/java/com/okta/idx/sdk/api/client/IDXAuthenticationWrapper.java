@@ -43,6 +43,8 @@ import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequestBuilder;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
+import com.okta.idx.sdk.api.request.PollRequest;
+import com.okta.idx.sdk.api.request.PollRequestBuilder;
 import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
@@ -550,6 +552,27 @@ public class IDXAuthenticationWrapper {
         try {
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
                     client.cancel(proceedContext.getStateHandle())).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Handle Polling.
+     *
+     * @param proceedContext the ProceedContext
+     * @return the Authentication response
+     */
+    public AuthenticationResponse poll(ProceedContext proceedContext) {
+        try {
+            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                PollRequest pollRequest = PollRequestBuilder.builder()
+                        .withStateHandle(proceedContext.getStateHandle())
+                        .build();
+                return client.poll(pollRequest, proceedContext.getPollInfo().getHref());
+            }).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
