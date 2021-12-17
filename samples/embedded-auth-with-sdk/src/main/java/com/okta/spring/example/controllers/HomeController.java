@@ -145,7 +145,7 @@ public class HomeController {
 
         if (proceedContext == null) {
             ModelAndView mav = new ModelAndView("info");
-            mav.addObject("info", "Please enter OTP " + otp + " in original browser tab to finish the flow.");
+            mav.addObject("info", "Please enter OTP " + otp + " in the original browser tab to finish the flow.");
             return mav;
         }
 
