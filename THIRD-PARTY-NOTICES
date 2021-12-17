@@ -18,6 +18,7 @@ This project includes:
   ASM based accessors helper used by json-smart under The Apache Software License, Version 2.0
   attoparser under The Apache Software License, Version 2.0
   Bean Validation API under Apache License 2.0
+  IntelliJ IDEA Annotations under The Apache Software License, Version 2.0
   Jackson datatype: jdk8 under The Apache Software License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
@@ -29,15 +30,20 @@ This project includes:
   JCIP Annotations under Apache License under Apache License, Version 2.0
   JSON Small and Fast Parser under The Apache Software License, Version 2.0
   JUL to SLF4J bridge under MIT License
+  Kotlin Stdlib under The Apache License, Version 2.0
+  Kotlin Stdlib Common under The Apache License, Version 2.0
   Nimbus Content Type under The Apache Software License, Version 2.0
   Nimbus JOSE+JWT under The Apache Software License, Version 2.0
   OAuth 2.0 SDK with OpenID Connect extensions under Apache License, version 2.0
+  Okio under The Apache Software License, Version 2.0
   Okta Commons :: Config Check under The Apache License, Version 2.0
   Okta Commons :: HTTP :: API under The Apache License, Version 2.0
   Okta Commons :: Lang under The Apache License, Version 2.0
   Okta Spring Boot :: OAuth2 under The Apache License, Version 2.0
   Okta Spring Boot :: SDK under The Apache License, Version 2.0
   Okta Spring Boot :: Starter under The Apache License, Version 2.0
+  org.jetbrains.kotlin:kotlin-stdlib under The Apache License, Version 2.0
+  org.jetbrains.kotlin:kotlin-stdlib-common under The Apache License, Version 2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
   Spring AOP under Apache License, Version 2.0

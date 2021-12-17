@@ -25,6 +25,8 @@ import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.spring.example.helpers.HomeHelper;
 import com.okta.spring.example.helpers.ResponseHandler;
 import com.okta.spring.example.helpers.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -43,6 +45,8 @@ import java.util.Optional;
 
 @Controller
 public class HomeController {
+
+    private final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     /**
      * The issuer url.
@@ -129,6 +133,25 @@ public class HomeController {
 
         // return the root view
         return new ModelAndView("index");
+    }
+
+    @RequestMapping(value = {"/magiclink-callback"}, method = RequestMethod.GET)
+    public ModelAndView handleMagicLinkCallback(final @RequestParam(name = "state") String state,
+                                                final @RequestParam(name = "otp") String otp,
+                                                final HttpSession session) {
+        logger.info("Received Magic Link callback with state {}, otp {}", state, otp);
+
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        if (proceedContext == null) {
+            ModelAndView mav = new ModelAndView("info");
+            mav.addObject("info", "Please enter OTP " + otp + " in original browser tab to finish the flow.");
+            return mav;
+        }
+
+        AuthenticationResponse authenticationResponse =
+                authenticationWrapper.introspect(proceedContext.getClientContext());
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
 
     /**
