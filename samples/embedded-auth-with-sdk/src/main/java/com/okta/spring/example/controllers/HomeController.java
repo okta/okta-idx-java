@@ -25,8 +25,6 @@ import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.spring.example.helpers.HomeHelper;
 import com.okta.spring.example.helpers.ResponseHandler;
 import com.okta.spring.example.helpers.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -45,8 +43,6 @@ import java.util.Optional;
 
 @Controller
 public class HomeController {
-
-    private final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     /**
      * The issuer url.
@@ -76,23 +72,29 @@ public class HomeController {
      * Display one of:
      * <p>
      * a) index page - if the user is not authenticated yet (does not have token response in session).
-     * b) home page - if the user is authenticated (or) we have obtained a token for the user from the interaction code in callback.
+     * b) home page - if the user is authenticated (or) we have obtained a token for the user from the interaction code or otp in callback.
+     * c) info page - if the user is unauthenticated yet and has received an otp in callback. the info page will ask the user to input
+     *                otp in the original browser to continue with the flow.
+     * d) error page - if the received state does not correlate with the state in client context or if the callback
+     *                 contains error parameters.
      * <p>
      * where index page refers to the root view with table of contents,
      * and home page refers to the view that shows the user profile information along with token information.
      *
      * @param interactionCode the interaction code from callback (optional)
      * @param state the state value from callback (optional)
+     * @param otp the one time password or verification code (optional)
      * @param error the error from callback when interaction_code could not be sent (optional)
-     * @param errorDescription the error_description from callback (optional)
+     * @param errDesc the error_description from callback (optional)
      * @param session the http session
-     * @return the index page view with table of contents or the home page view if we have a token.
+     * @return the index page view with table of contents or the home page view if we have a token or the info page.
      */
     @RequestMapping(value = {"/", "**/callback"}, method = RequestMethod.GET)
     public ModelAndView displayIndexOrHomePage(final @RequestParam(name = "interaction_code", required = false) String interactionCode,
                                                final @RequestParam(name = "state", required = false) String state,
+                                               final @RequestParam(name = "otp", required = false) String otp,
                                                final @RequestParam(name = "error", required = false) String error,
-                                               final @RequestParam(name = "error_description", required = false) String errorDescription,
+                                               final @RequestParam(name = "error_description", required = false) String errDesc,
                                                final HttpSession session) {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
@@ -103,63 +105,47 @@ public class HomeController {
             return homeHelper.proceedToHome(tokenResponse, session);
         }
 
-//        if (Strings.hasText(error) && error.equals("interaction_required")) {
-//            AuthenticationResponse authenticationResponse =
-//                    authenticationWrapper.introspect(proceedContext.getClientContext());
-//            return responseHandler.handleKnownTransitions(authenticationResponse, session);
-//        }
+        // correlate received state with the client context
+        if ((Strings.hasText(interactionCode) || Strings.hasText(otp))
+                && proceedContext != null
+                && (Strings.isEmpty(state) || !state.equals(proceedContext.getClientContext().getState()))) {
+            ModelAndView mav = new ModelAndView("error");
+            mav.addObject("errors",
+                    "Could not correlate client context with the received state value " + state + " in callback");
+            return mav;
+        }
 
-        // if interaction code is received in callback, exchange it for a token
+        AuthenticationResponse authenticationResponse;
+
+        // if interaction code is present, exchange it for a token
         if (Strings.hasText(interactionCode)) {
-            // validate state param
-            if (Strings.isEmpty(state) || !state.equals(proceedContext.getClientContext().getState())) {
-                ModelAndView mav = new ModelAndView("error");
-                mav.addObject("errors", "Could not correlate received 'state' value in callback");
-                return mav;
-            }
-
-            AuthenticationResponse authenticationResponse =
-                    authenticationWrapper.fetchTokenWithInteractionCode(issuer, proceedContext, interactionCode);
-
+            authenticationResponse = authenticationWrapper.fetchTokenWithInteractionCode(issuer, proceedContext, interactionCode);
             return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
 
-        // if error is received in callback, show error page
-        if (Strings.hasText(error)) {
+        // if otp is present, proceed with introspect to finish the flow
+        if (Strings.hasText(otp)) {
+            if (proceedContext == null) {
+                // different browser case
+                ModelAndView mav = new ModelAndView("info");
+                mav.addObject("message",
+                        "Please enter OTP " + otp + " in the original browser tab to finish the flow.");
+                return mav;
+            }
+
+            authenticationResponse = authenticationWrapper.introspect(proceedContext.getClientContext());
+            return responseHandler.handleKnownTransitions(authenticationResponse, session);
+        }
+
+        // if error params are present, show error page
+        if (Strings.hasText(error) || Strings.hasText(errDesc)) {
             ModelAndView mav = new ModelAndView("error");
-            mav.addObject("errors", errorDescription);
+            mav.addObject("errors", error + ":" + errDesc);
             return mav;
         }
 
         // return the root view
         return new ModelAndView("index");
-    }
-
-    @RequestMapping(value = {"/magiclink-callback"}, method = RequestMethod.GET)
-    public ModelAndView handleMagicLinkCallback(final @RequestParam(name = "state") String state,
-                                                final @RequestParam(name = "otp") String otp,
-                                                final @RequestParam(name = "error", required = false) String error,
-                                                final @RequestParam(name = "error_description", required = false) String errorDesc,
-                                                final HttpSession session) {
-        logger.info("Received Magic Link callback with state {}, otp {}, error {}, error desc {}", state, otp, error, errorDesc);
-
-        if (Strings.hasText(error) || Strings.hasText(errorDesc)) {
-            ModelAndView mav = new ModelAndView("info");
-            mav.addObject("error", error + ":" + errorDesc);
-            return mav;
-        }
-
-        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
-
-        if (proceedContext == null) {
-            ModelAndView mav = new ModelAndView("info");
-            mav.addObject("message", "Please enter OTP " + otp + " in the original browser tab to finish the flow.");
-            return mav;
-        }
-
-        AuthenticationResponse authenticationResponse =
-                authenticationWrapper.introspect(proceedContext.getClientContext());
-        return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
 
     /**
