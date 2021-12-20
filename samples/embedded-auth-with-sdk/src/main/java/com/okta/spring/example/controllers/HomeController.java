@@ -138,14 +138,22 @@ public class HomeController {
     @RequestMapping(value = {"/magiclink-callback"}, method = RequestMethod.GET)
     public ModelAndView handleMagicLinkCallback(final @RequestParam(name = "state") String state,
                                                 final @RequestParam(name = "otp") String otp,
+                                                final @RequestParam(name = "error", required = false) String error,
+                                                final @RequestParam(name = "error_description", required = false) String errorDesc,
                                                 final HttpSession session) {
-        logger.info("Received Magic Link callback with state {}, otp {}", state, otp);
+        logger.info("Received Magic Link callback with state {}, otp {}, error {}, error desc {}", state, otp, error, errorDesc);
+
+        if (Strings.hasText(error) || Strings.hasText(errorDesc)) {
+            ModelAndView mav = new ModelAndView("info");
+            mav.addObject("error", error + ":" + errorDesc);
+            return mav;
+        }
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         if (proceedContext == null) {
             ModelAndView mav = new ModelAndView("info");
-            mav.addObject("info", "Please enter OTP " + otp + " in the original browser tab to finish the flow.");
+            mav.addObject("message", "Please enter OTP " + otp + " in the original browser tab to finish the flow.");
             return mav;
         }
 

@@ -32,8 +32,11 @@
 </div>
 
 <div class="container">
-    <div th:if="${info}" class="alert alert-primary">
-        <span th:text="${info}"></span>
+    <div th:if="${message}" class="alert alert-primary">
+        <span th:text="${message}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-danger">
+        <span th:text="${error}"></span>
     </div>
 </div>
 
