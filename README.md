@@ -50,7 +50,7 @@ If you run into problems using the SDK, you can
 
 ### Prerequisites
 
-- [JDK 8][jdk-8] or [JDK-11][jdk-11]
+- [JDK 8][jdk-8] or [JDK 11][jdk-11]
 - [Apache Maven][apache-maven] 3.6.x or later
 
 To use this SDK, you will need to include the following dependencies:
@@ -65,15 +65,14 @@ For Apache Maven:
 </dependency>
 ```
 
-where `{okta.sdk.version}` is the Java IDX SDK version. 
-
 For Gradle:
 
 ```groovy
 compile "com.okta.idx.sdk:okta-idx-java-api:${okta.sdk.version}"
 ```
 
-where `okta.sdk.version` is the latest stable release version listed [here](#release-status).
+where ${okta.sdk.version} is the latest published version in [Maven Central](https://search.maven.org/search?q=g:com.okta.idx.sdk%20AND%20a:okta-idx-java-api).
+
 ### SNAPSHOT Dependencies
 
 Snapshots are deployed off of the 'master' branch to [OSSRH](https://oss.sonatype.org/) and can be consumed using the following repository configured for Apache Maven or Gradle:
