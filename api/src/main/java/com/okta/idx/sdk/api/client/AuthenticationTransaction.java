@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -240,6 +241,9 @@ final class AuthenticationTransaction {
             case RemediationType.ENROLL_AUTHENTICATOR:
                 authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT);
                 break;
+            case RemediationType.ENROLL_POLL:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_POLL_ENROLLMENT);
+                break;
             default:
                 authenticationResponse.setAuthenticationStatus(defaultStatus);
                 break;
@@ -360,6 +364,10 @@ final class AuthenticationTransaction {
                     } else {
                         nestedMethods.put(String.valueOf(formValue.getValue()), label);
                     }
+                } else if("channel".equals(formValue.getName())) {
+                    authenticatorType = String.valueOf(option.getLabel())
+                            .toLowerCase(Locale.ROOT).replaceAll(" ", "_");
+                    nestedMethods.put(authenticatorType, label);
                 }
                 if (formValue.getName().equals("id")) {
                     id = String.valueOf(formValue.getValue());

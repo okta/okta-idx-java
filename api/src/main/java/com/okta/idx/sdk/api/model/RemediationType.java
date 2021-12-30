@@ -36,6 +36,8 @@ public class RemediationType {
 
     public static final String ENROLL_PROFILE = "enroll-profile";
 
+    public static final String ENROLL_POLL = "enroll-poll";
+
     public static final String SELECT_ENROLL_PROFILE = "select-enroll-profile";
 
     public static final String SELECT_AUTHENTICATOR_ENROLL = "select-authenticator-enroll";

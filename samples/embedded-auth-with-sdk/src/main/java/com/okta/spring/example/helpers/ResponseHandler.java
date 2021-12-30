@@ -183,6 +183,10 @@ public final class ResponseHandler {
         return new ModelAndView("verify");
     }
 
+    public ModelAndView setupOktaVerifyForm() {
+        return new ModelAndView("setup-okta-verify");
+    }
+
     /**
      * Return the view for register password form.
      * @param title the title of form

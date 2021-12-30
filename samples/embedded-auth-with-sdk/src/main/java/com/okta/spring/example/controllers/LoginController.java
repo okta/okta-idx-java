@@ -214,6 +214,8 @@ public class LoginController {
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
                 return responseHandler.registerVerifyForm(foundAuthenticator);
+            case AWAITING_POLL_ENROLLMENT:
+                return responseHandler.setupOktaVerifyForm();
             default:
                 return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
