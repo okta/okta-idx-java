@@ -317,6 +317,26 @@ public class LoginController {
     }
 
     /**
+     * Handle Okta verify functionality.
+     *
+     * @param session the session
+     * @return the view associated with authentication response.
+     */
+    @GetMapping("/poll")
+    public ModelAndView poll(final HttpSession session) {
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.poll(Util.getProceedContextFromSession(session));
+
+        if (responseHandler.needsToShowErrors(authenticationResponse)) {
+            ModelAndView modelAndView = new ModelAndView("error");
+            modelAndView.addObject("errors", authenticationResponse.getErrors());
+            return modelAndView;
+        }
+
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
+    }
+
+    /**
      * Handle webauthn authenticator verification functionality.
      *
      * @param webauthnRequest

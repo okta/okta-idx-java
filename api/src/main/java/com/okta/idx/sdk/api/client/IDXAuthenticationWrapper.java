@@ -571,7 +571,10 @@ public class IDXAuthenticationWrapper {
                 PollRequest pollRequest = PollRequestBuilder.builder()
                         .withStateHandle(proceedContext.getStateHandle())
                         .build();
-                return client.poll(pollRequest, proceedContext.getPollInfo().getHref());
+                String href = proceedContext.getPollInfo() != null
+                        ? proceedContext.getPollInfo().getHref()
+                        : proceedContext.getHref();
+                return client.poll(pollRequest, href);
             }).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
