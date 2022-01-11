@@ -141,8 +141,8 @@ public class LoginController {
         if (authenticatorType != null && authenticatorType.equals("webauthn")) {
             ModelAndView modelAndView;
 
-            Optional<Authenticator> authenticatorOptional =
-                    authenticators.stream().filter(auth -> auth.getType().equals(authenticatorType)).findFirst();
+            Optional<Authenticator> authenticatorOptional = authenticators.stream()
+                    .filter(auth -> auth.getType() != null && auth.getType().equals(authenticatorType)).findFirst();
             String authId = authenticatorOptional.get().getId();
 
             AuthenticationResponse enrollResponse = idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authId);
