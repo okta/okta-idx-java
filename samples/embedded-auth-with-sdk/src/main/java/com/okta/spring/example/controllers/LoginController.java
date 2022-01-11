@@ -183,9 +183,7 @@ public class LoginController {
                 if (foundAuthenticator.getFactors().size() == 1) {
                     authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
                     Optional.ofNullable(authenticationResponse.getContextualData())
-                            .map(ContextualData::getQrcode)
-                            .map(Qrcode::getHref)
-                            .ifPresent(qrCode -> session.setAttribute("qrCode", qrCode));
+                            .ifPresent(contextualData -> session.setAttribute("totp", contextualData));
                 } else {
                     // user should select the factor in a separate view
                     ModelAndView modelAndView = new ModelAndView("select-factor");

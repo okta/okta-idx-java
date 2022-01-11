@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 import pages.ForgotPasswordPage;
 import pages.LoginPage;
+import pages.Page;
 import pages.RootPage;
 
 public class Login extends CucumberRoot {
@@ -86,15 +87,34 @@ public class Login extends CucumberRoot {
 		Assert.assertFalse("Can't access refresh_token", refreshToken.isEmpty());
 	}
 
-	@And("the cell for the value of \"email\" is shown and contains her {word}")
+	@And("the cell for the value of \"email\" is shown and contains {word}")
 	public void the_cell_for_email_is_shown_and_contains_her_email(String email) {
 		Assert.assertTrue(rootPage.email.isDisplayed());
 		Assert.assertEquals(System.getenv(email), rootPage.email.getText());
 		user = getUser(System.getenv(email));
 	}
 
+	@And("^the cell for the value of \"email\" is shown and contains her email$")
+	public void the_cell_for_email_is_shown_and_contains_her_email() {
+		Assert.assertTrue(rootPage.email.isDisplayed());
+		Assert.assertEquals(Page.getA18NProfile().getEmailAddress(), rootPage.email.getText());
+	}
+
+	@And("^the cell for the value of \"email\" is shown and contains her email for mfa$")
+	public void the_cell_for_email_is_shown_and_contains_her_email_for_mfa() {
+		Assert.assertTrue(rootPage.email.isDisplayed());
+		Assert.assertEquals(Page.getUser().getProfile().getEmail(), rootPage.email.getText());
+		user = Page.getUser();
+	}
+
+	@And("the cell for the value of \"name\" is shown and contains {word} {word}")
+	public void the_cell_for_name_is_shown_and_contains_her_name(String name, String surname) {
+		Assert.assertTrue(rootPage.name.isDisplayed());
+		Assert.assertEquals(name + " " + surname + "-" + Page.getA18NProfile().getProfileId(), rootPage.name.getText());
+	}
+
 	@And("^the cell for the value of \"name\" is shown and contains her first name and last name$")
-	public void the_cell_for_name_is_shown_and_contains_her_name() {
+	public void the_cell_for_name_is_shown_and_contains_her_name_for_mfa() {
 		Assert.assertTrue(rootPage.name.isDisplayed());
 		Assert.assertTrue(rootPage.name.getText().contains(user.getProfile().getFirstName()));
 		Assert.assertTrue(rootPage.name.getText().contains(user.getProfile().getLastName()));

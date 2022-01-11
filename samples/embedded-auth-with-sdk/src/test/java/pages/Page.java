@@ -41,6 +41,7 @@ public class Page {
     private static A18NClient a18NClient;
     private static A18NProfile a18NProfile;
     private static User user;
+    private static String totpSharedSecret;
 
     public static A18NClient getA18NClient() {
         return a18NClient;
@@ -64,6 +65,14 @@ public class Page {
 
     public static void setUser(User user) {
         Page.user = user;
+    }
+
+    public static String getTotpSharedSecret() {
+        return totpSharedSecret;
+    }
+
+    public static void setTotpSharedSecret(String totpSharedSecret) {
+        Page.totpSharedSecret = totpSharedSecret;
     }
 
     public Page(WebDriver driver) {
