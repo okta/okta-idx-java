@@ -983,7 +983,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "credential/enroll", scenario + "/credential-enroll-phone-response", 200, mediaTypeAppIonJson)
 
         Authenticator.Factor smsFactor = new Authenticator.Factor(
-                phoneAuthenticator.getId(), "sms", null, phoneAuthenticator.getLabel()
+                phoneAuthenticator.getId(), "sms", null, phoneAuthenticator.getLabel(), null
         )
 
         authenticationResponse = idxAuthenticationWrapper.selectFactor(authenticationResponse.getProceedContext(), smsFactor)
@@ -1118,7 +1118,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "credential/enroll", scenario + "/credential-enroll-phone-response", 200, mediaTypeAppIonJson)
 
         Authenticator.Factor smsFactor = new Authenticator.Factor(
-                phoneAuthenticator.getId(), "sms", null, phoneAuthenticator.getLabel()
+                phoneAuthenticator.getId(), "sms", null, phoneAuthenticator.getLabel(), null
         )
 
         idxAuthenticationWrapper.selectFactor(authenticationResponse.getProceedContext(), smsFactor)

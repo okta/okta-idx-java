@@ -185,6 +185,12 @@ public final class ResponseHandler {
         return new ModelAndView("verify");
     }
 
+    /**
+     * Return the view for okta verify form via channel data.
+     * @param factor the factor
+     * @param session the session
+     * @return the view for okta verify form via channel data.
+     */
     public ModelAndView oktaVerifyViaChannelDataForm(Authenticator.Factor factor, HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("setup-okta-verify-via-channel-data");
         modelAndView.addObject("channelName", factor.getChannel());
@@ -205,10 +211,17 @@ public final class ResponseHandler {
                 modelAndView.addObject("channelName", "phoneNumber");
                 session.setAttribute("channelName", "phoneNumber");
                 break;
+            default:
+                break;
         }
         return modelAndView;
     }
 
+    /**
+     * Return the view for okta verify form.
+     * @param session the session
+     * @return the view for okta verify form.
+     */
     public ModelAndView setupOktaVerifyForm(HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("setup-okta-verify");
         modelAndView.addObject("channelName", String.valueOf(session.getAttribute("channelName")));
