@@ -26,6 +26,7 @@ import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Qrcode;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
+import com.okta.idx.sdk.api.model.VerifyChannelDataOptions;
 import com.okta.idx.sdk.api.request.WebAuthnRequest;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.spring.example.helpers.ResponseHandler;
@@ -215,7 +216,7 @@ public class LoginController {
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
                 return responseHandler.registerVerifyForm(foundAuthenticator);
             case AWAITING_POLL_ENROLLMENT:
-                return responseHandler.setupOktaVerifyForm();
+                return responseHandler.setupOktaVerifyForm(session);
             default:
                 return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
@@ -255,6 +256,13 @@ public class LoginController {
             if (factor.getMethod().equals(mode)) {
                 foundFactor = factor;
                 authenticationResponse = idxAuthenticationWrapper.selectFactor(proceedContext, foundFactor);
+                Optional.ofNullable(authenticationResponse.getContextualData())
+                        .map(ContextualData::getQrcode)
+                        .map(Qrcode::getHref)
+                        .ifPresent(qrCode -> {
+                            session.setAttribute("qrCode", qrCode);
+                            session.setAttribute("channelName", "qrcode");
+                        });
                 break;
             }
         }
@@ -272,6 +280,10 @@ public class LoginController {
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
                 return responseHandler.registerVerifyForm(foundFactor);
+            case AWAITING_CHANNEL_DATA_ENROLLMENT:
+                return responseHandler.oktaVerifyViaChannelDataForm(foundFactor, session);
+            case AWAITING_POLL_ENROLLMENT:
+                return responseHandler.setupOktaVerifyForm(session);
             default:
                 return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
@@ -306,6 +318,37 @@ public class LoginController {
 
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.verifyAuthenticator(proceedContext, verifyAuthenticatorOptions);
+
+        if (responseHandler.needsToShowErrors(authenticationResponse)) {
+            ModelAndView modelAndView = new ModelAndView("verify");
+            modelAndView.addObject("errors", authenticationResponse.getErrors());
+            return modelAndView;
+        }
+
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
+    }
+
+    /**
+     * Handle channel data verification functionality.
+     *
+     * @param channelName   the channel name
+     * @param channelValue  the value for
+     * @param session the session
+     * @return the view associated with authentication response.
+     */
+    @PostMapping("/verify-channel-data")
+    public ModelAndView verifyChannelData(final @RequestParam("channelName") String channelName,
+                                          final @RequestParam("channelValue") String channelValue,
+                                          final HttpSession session) {
+        logger.info(":: Verify Channel Name :: {}", channelName);
+        logger.info(":: Verify Channel Value :: {}", channelValue);
+
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        VerifyChannelDataOptions verifyChannelDataOptions = new VerifyChannelDataOptions(channelName, channelValue);
+
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.verifyAuthenticator(proceedContext, verifyChannelDataOptions);
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("verify");

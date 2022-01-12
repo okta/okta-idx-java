@@ -33,6 +33,7 @@ import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.model.TokenType;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
+import com.okta.idx.sdk.api.model.VerifyChannelDataOptions;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
 import com.okta.idx.sdk.api.request.ChallengeRequest;
@@ -322,6 +323,10 @@ public class IDXAuthenticationWrapper {
                 authenticator.setId(factor.getId());
                 authenticator.setEnrollmentId(factor.getEnrollmentId());
                 authenticator.setMethodType(factor.getMethod());
+                if(factor.getChannel() != null) {
+                    authenticator.setChannel(factor.getChannel());
+                    authenticator.setMethodType(null);
+                }
                 ChallengeRequest request = ChallengeRequestBuilder.builder()
                         .withStateHandle(proceedContext.getStateHandle())
                         .withAuthenticator(authenticator)
@@ -417,6 +422,31 @@ public class IDXAuthenticationWrapper {
                     .withStateHandle(proceedContext.getStateHandle())
                     .withCredentials(credentials)
                     .build();
+
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
+            ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    public AuthenticationResponse verifyAuthenticator(ProceedContext proceedContext,
+                                                      VerifyChannelDataOptions verifyChannelDataOptions) {
+        try {
+            AnswerChallengeRequestBuilder builder = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(proceedContext.getStateHandle());
+
+            if("phoneNumber".equals(verifyChannelDataOptions.getChannelName())) {
+                builder.withPhoneNumber(verifyChannelDataOptions.getValue());
+            }
+            if("email".equals(verifyChannelDataOptions.getChannelName())) {
+                builder.withEmail(verifyChannelDataOptions.getValue());
+            }
+
+            AnswerChallengeRequest challengeAuthenticatorRequest = builder.build();
 
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
                     client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
