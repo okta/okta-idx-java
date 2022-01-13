@@ -351,7 +351,7 @@ public class LoginController {
     public ModelAndView verifyChannelData(final @RequestParam("channelName") String channelName,
                                           final @RequestParam("channelValue") String channelValue,
                                           final HttpSession session) {
-        logger.info(":: Verify Channel Name :: {}\n:: Verify Channel Value :: {}", channelName, channelValue);
+        logger.info(":: Verify Channel Name, Value :: {}, {}", channelName, channelValue);
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
