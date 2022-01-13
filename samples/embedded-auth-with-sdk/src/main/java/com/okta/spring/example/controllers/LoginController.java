@@ -263,6 +263,9 @@ public class LoginController {
                             session.setAttribute("qrCode", qrCode);
                             session.setAttribute("channelName", "qrcode");
                         });
+                if("totp".equals(foundFactor.getMethod())) {
+                    session.setAttribute("totp", "totp");
+                }
                 break;
             }
         }
@@ -316,10 +319,16 @@ public class LoginController {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(code);
-
-        AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.verifyAuthenticator(proceedContext, verifyAuthenticatorOptions);
+        AuthenticationResponse authenticationResponse;
+        if("totp".equals(String.valueOf(session.getAttribute("totp")))) {
+            authenticationResponse = idxAuthenticationWrapper
+                    .verifyAuthenticator(proceedContext, new VerifyChannelDataOptions("totp", code));
+            session.removeAttribute("totp");
+        } else {
+            VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(code);
+            authenticationResponse = idxAuthenticationWrapper
+                    .verifyAuthenticator(proceedContext, verifyAuthenticatorOptions);
+        }
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("verify");

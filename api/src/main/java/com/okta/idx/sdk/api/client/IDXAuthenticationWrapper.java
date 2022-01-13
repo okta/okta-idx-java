@@ -445,6 +445,11 @@ public class IDXAuthenticationWrapper {
             if("email".equals(verifyChannelDataOptions.getChannelName())) {
                 builder.withEmail(verifyChannelDataOptions.getValue());
             }
+            if("totp".equals(verifyChannelDataOptions.getChannelName())) {
+                Credentials credentials = new Credentials();
+                credentials.setTotp(verifyChannelDataOptions.getValue());
+                builder.withCredentials(credentials);
+            }
 
             AnswerChallengeRequest challengeAuthenticatorRequest = builder.build();
 
