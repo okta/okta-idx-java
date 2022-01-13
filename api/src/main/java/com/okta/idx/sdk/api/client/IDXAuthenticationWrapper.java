@@ -450,7 +450,7 @@ public class IDXAuthenticationWrapper {
 
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
                     client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
-            ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+            ).asAuthenticationResponse(AuthenticationStatus.AWAITING_POLL_ENROLLMENT);
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {

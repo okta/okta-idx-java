@@ -332,7 +332,7 @@ public class LoginController {
      * Handle channel data verification functionality.
      *
      * @param channelName   the channel name
-     * @param channelValue  the value for
+     * @param channelValue  the value for channel
      * @param session the session
      * @return the view associated with authentication response.
      */
