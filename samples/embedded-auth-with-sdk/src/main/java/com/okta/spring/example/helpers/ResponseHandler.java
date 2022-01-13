@@ -136,6 +136,11 @@ public final class ResponseHandler {
         return modelAndView;
     }
 
+    /**
+     * Return the view for Okta Verify challenge.
+     * @param response the response
+     * @return the view for the register verify form.
+     */
     public ModelAndView oktaVerifyChallenge(AuthenticationResponse response) {
         ModelAndView modelAndView = new ModelAndView("okta-verify-challenge");
         modelAndView.addObject("correctAnswer", response.getContextualData().getCorrectAnswer());
