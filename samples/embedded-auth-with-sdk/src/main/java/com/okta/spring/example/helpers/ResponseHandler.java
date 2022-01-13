@@ -136,6 +136,12 @@ public final class ResponseHandler {
         return modelAndView;
     }
 
+    public ModelAndView oktaVerifyChallenge(AuthenticationResponse response) {
+        ModelAndView modelAndView = new ModelAndView("okta-verify-challenge");
+        modelAndView.addObject("correctAnswer", response.getContextualData().getCorrectAnswer());
+        return modelAndView;
+    }
+
     /**
      * Return the view for register verify form.
      * @param factor the factor

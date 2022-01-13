@@ -247,6 +247,9 @@ final class AuthenticationTransaction {
             case RemediationType.ENROLLMENT_CHANNEL_DATA:
                 authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_CHANNEL_DATA_ENROLLMENT);
                 break;
+            case RemediationType.CHALLENGE_POLL:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_CHALLENGE_POLL);
+                break;
             default:
                 authenticationResponse.setAuthenticationStatus(defaultStatus);
                 break;

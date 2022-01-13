@@ -45,6 +45,8 @@ public enum AuthenticationStatus {
 
     AWAITING_CHANNEL_DATA_ENROLLMENT("awaiting_channel_data_enrollment"),
 
+    AWAITING_CHALLENGE_POLL("awaiting_challenge_poll"),
+
     UNKNOWN("unknown");
 
     private String value;

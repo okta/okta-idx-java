@@ -284,6 +284,8 @@ public class LoginController {
                 return responseHandler.oktaVerifyViaChannelDataForm(foundFactor, session);
             case AWAITING_POLL_ENROLLMENT:
                 return responseHandler.setupOktaVerifyForm(session);
+            case AWAITING_CHALLENGE_POLL:
+                return responseHandler.oktaVerifyChallenge(authenticationResponse);
             default:
                 return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }

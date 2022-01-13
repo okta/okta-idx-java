@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2021-Present, Okta, Inc.
+  ~ Copyright (c) 2022-Present, Okta, Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Setup Okta Verify</title>
+    <title>Okta Verify</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
@@ -64,31 +64,10 @@
     <div class="enroll-poll-ov-view">
         <form id="enroll-poll-ov-form" th:action="@{/poll}">
             <div>
-                <h2 class="text-center">Setup Okta Verify</h2>
-                <div th:if="${channelName == 'qrcode'}">
-                    <ol class="qrcode-info ov-info">
-                        <li>On your mobile device, download the Okta Verify app from the App Store (iPhone and iPad) or Google Play (Android devices).</li>
-                        <li>Open the app and follow the instructions to add your account</li>
-                        <li>When prompted, tap Scan a QR code, then scan the QR code below:</li>
-                    </ol>
-                    <div class="qrcode-container">
-                        <img class="qrcode" th:src="@{${session.qrCode}}" alt="qr code">
-                    </div>
-                </div>
-                <div th:if="${channelName == 'phoneNumber'}">
+                <h2 class="text-center">Okta Verify</h2>
+                <div>
                     <p>
-                        Check your text messages
-                    </p>
-                    <p>
-                        We sent an SMS with an Okta Verify setup link. To continue, open the link on your mobile device.
-                    </p>
-                </div>
-                <div th:if="${channelName == 'email'}">
-                    <p>
-                        Check your email
-                    </p>
-                    <p>
-                        We sent an email with an Okta Verify setup link. To continue, open the link on your mobile device.
+                        Correct answer is <span th:text="${correctAnswer}"></span>
                     </p>
                 </div>
             </div>

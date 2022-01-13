@@ -50,5 +50,7 @@ public class RemediationType {
 
     public static final String ENROLLMENT_CHANNEL_DATA = "enrollment-channel-data";
 
+    public static final String CHALLENGE_POLL = "challenge-poll";
+
     public static final String UNKNOWN = "unknown";
 }
