@@ -263,7 +263,7 @@ public class LoginController {
                             session.setAttribute("qrCode", qrCode);
                             session.setAttribute("channelName", "qrcode");
                         });
-                if("totp".equals(foundFactor.getMethod())) {
+                if ("totp".equals(foundFactor.getMethod())) {
                     session.setAttribute("totp", "totp");
                 }
                 break;
@@ -320,7 +320,7 @@ public class LoginController {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         AuthenticationResponse authenticationResponse;
-        if("totp".equals(String.valueOf(session.getAttribute("totp")))) {
+        if ("totp".equals(String.valueOf(session.getAttribute("totp")))) {
             authenticationResponse = idxAuthenticationWrapper
                     .verifyAuthenticator(proceedContext, new VerifyChannelDataOptions("totp", code));
             session.removeAttribute("totp");
