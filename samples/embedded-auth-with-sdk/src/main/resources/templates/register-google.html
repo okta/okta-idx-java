@@ -73,8 +73,9 @@
                     <p class="font-weight-light">Launch Google Authenticator, tap the "+" icon, then select "Scan
                         a QR code".</p>
                     <div class="qrcode">
-                        <img id="qr-code" th:src="@{${session.qrCode}}" alt="qr code">
+                        <img id="qr-code" th:src="@{${session.totp.qrcode.href}}" alt="qr code">
                     </div>
+                    Secret Key: <p id="secret-key" th:text="${session.totp.sharedSecret}"></p>
                 </div>
             </div>
             <div class="form-group">
