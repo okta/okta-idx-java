@@ -21,9 +21,7 @@ import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
-import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.FormValue;
-import com.okta.idx.sdk.api.model.Qrcode;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.model.VerifyChannelDataOptions;
@@ -184,9 +182,7 @@ public class LoginController {
                 if (foundAuthenticator.getFactors().size() == 1) {
                     authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
                     Optional.ofNullable(authenticationResponse.getContextualData())
-                            .map(ContextualData::getQrcode)
-                            .map(Qrcode::getHref)
-                            .ifPresent(qrCode -> session.setAttribute("qrCode", qrCode));
+                            .ifPresent(contextualData -> session.setAttribute("totp", contextualData));
                 } else {
                     // user should select the factor in a separate view
                     ModelAndView modelAndView = new ModelAndView("select-factor");
