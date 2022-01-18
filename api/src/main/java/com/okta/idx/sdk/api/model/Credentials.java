@@ -36,6 +36,8 @@ public class Credentials {
 
     public String signatureData;
 
+    public String totp;
+
     public void setPasscode(char[] passcode) {
         this.passcode = passcode;
     }
@@ -66,5 +68,9 @@ public class Credentials {
 
     public void setSignatureData(String signatureData) {
         this.signatureData = signatureData;
+    }
+
+    public void setTotp(String totp) {
+        this.totp = totp;
     }
 }

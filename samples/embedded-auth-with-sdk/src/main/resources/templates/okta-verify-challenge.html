@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2021-Present, Okta, Inc.
+  ~ Copyright (c) 2022-Present, Okta, Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,34 +14,41 @@
   ~ limitations under the License.
   -->
 <!DOCTYPE html>
-<html lang="en"><html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Select Factor</title>
+    <title>Okta Verify</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
-        .select-factor-form {
+        .enroll-poll-ov-view {
             width: 440px;
             margin: 50px auto;
         }
-        .select-factor-form form {
+
+        .enroll-poll-ov-view form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-        .select-factor-form h2 {
+
+        .enroll-poll-ov-view h2 {
             margin: 0 0 15px;
         }
-        .form-control, .btn {
-            min-height: 38px;
-            border-radius: 2px;
+
+        .qrcode-container .qrcode {
+            width: 300px;
+            margin: auto;
+            display: block;
         }
+
         .btn {
             font-size: 15px;
             font-weight: bold;
@@ -50,32 +57,26 @@
 </head>
 
 <body>
+    <div style="padding:1em">
+        <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
+    </div>
 
-<div style="padding:1em">
-    <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
-</div>
+    <div class="enroll-poll-ov-view">
+        <form id="enroll-poll-ov-form" th:action="@{/poll}">
+            <div>
+                <h2 class="text-center">Okta Verify</h2>
+                <div>
+                    <p>
+                        Correct answer is <span th:text="${correctAnswer}"></span>
+                    </p>
+                </div>
+            </div>
+            <div class="form-group">
+                <button id="next-btn" type="submit" class="btn btn-primary btn-block">Next</button>
+            </div>
+        </form>
+    </div>
 
-<div class="select-factor-form">
-    <form th:action="@{/select-factor}" method="post">
-        <h2 class="text-center"><span th:text="${title}"></span></h2>
-        <div th:if="${errors}" class="alert alert-danger">
-            <span th:text="${errors}"></span>
-        </div>
-        <p class="font-weight-light">Please choose the method for this factor</p>
-
-        <div id="phone-authenticator-mode" class="form-check" th:each="factor : ${factors}">
-            <input class="form-check-input" type="radio" name="mode" th:value="${factor.method}">
-            <label class="form-check-label" th:text="${factor.label}"></label>
-            <br>
-        </div>
-        <input type="hidden" class="form-control" name="authenticatorId" th:value="${authenticatorId}" required="required">
-        <div class="form-group">
-            <button id="submit-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
-        </div>
-    </form>
-</div>
-
-<div th:replace="fragments/footer :: footer"></div>
-
+    <div th:replace="fragments/footer :: footer"></div>
 </body>
 </html>
