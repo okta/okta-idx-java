@@ -21,12 +21,7 @@ import com.okta.sdk.client.Clients;
 import com.okta.sdk.resource.group.Group;
 import com.okta.sdk.resource.user.User;
 import com.okta.sdk.resource.user.UserBuilder;
-import com.okta.sdk.resource.user.factor.ActivateFactorRequest;
-import com.okta.sdk.resource.user.factor.FactorProvider;
-import com.okta.sdk.resource.user.factor.FactorType;
 import com.okta.sdk.resource.user.factor.SmsUserFactor;
-import com.okta.sdk.resource.user.factor.TokenUserFactor;
-import com.okta.sdk.resource.user.factor.UserFactor;
 import env.a18n.client.DefaultA18NClientBuilder;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -38,11 +33,9 @@ import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pages.Page;
-import pages.QrCodePage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -122,7 +115,6 @@ public class Hooks {
 			Page.getUser().deactivate();
 			Page.getUser().delete();
 			Page.setUser(null);
-			Page.setTotpSharedSecret(null);
 			logger.info("User deleted: " + userEmail);
 		} else {
 			logger.warn("No user to delete");
@@ -144,34 +136,6 @@ public class Hooks {
 				.collect(Collectors.toList());
 		Assert.assertFalse(groupList.isEmpty());
 		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
-	}
-
-	@Before("@requireTOTPGroupForUser")
-	public void assignTOTPGroupBeforeScenario() {
-		Assert.assertNotNull(Page.getUser());
-		List<Group> groupList = client.listGroups()
-				.stream()
-				.filter(group -> group.getProfile().getName().equals("TOTP Required"))
-				.collect(Collectors.toList());
-		Assert.assertFalse(groupList.isEmpty());
-		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
-	}
-
-	@Before("@requireEnrolledGoogleQR")
-	public void enrollTotpUserFactor() {
-		Assert.assertNotNull(Page.getA18NProfile());
-		Assert.assertNotNull(Page.getUser());
-
-		UserFactor totpUserFactor = client.instantiate(TokenUserFactor.class)
-				.setFactorType(FactorType.TOKEN_SOFTWARE_TOTP)
-				.setProvider(FactorProvider.GOOGLE);
-		Page.getUser().enrollFactor(totpUserFactor);
-		String secret = ((Map<String, String>) totpUserFactor.getEmbedded().get("activation")).get("sharedSecret");
-		Page.setTotpSharedSecret(secret);
-
-		ActivateFactorRequest activateFactorRequest = client.instantiate(ActivateFactorRequest.class);
-		activateFactorRequest.setPassCode(QrCodePage.getOneTimePassword(secret));
-		totpUserFactor.activate(activateFactorRequest);
 	}
 
 	@After("@requireUserDeletionAfterRegistration")

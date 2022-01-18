@@ -47,9 +47,6 @@ public class QrCodePage extends Page {
     @FindBy(id = "qr-code")
     public WebElement qrCode;
 
-    @FindBy(id = "secret-key")
-    public WebElement secretKey;
-
     @FindBy(id = "next-btn")
     public WebElement nextButton;
 
