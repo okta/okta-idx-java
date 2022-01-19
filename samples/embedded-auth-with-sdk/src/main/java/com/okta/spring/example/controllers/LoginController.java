@@ -321,7 +321,6 @@ public class LoginController {
         if ("totp".equals(String.valueOf(session.getAttribute("totp")))) {
             authenticationResponse = idxAuthenticationWrapper
                     .verifyAuthenticator(proceedContext, new VerifyChannelDataOptions("totp", code));
-            session.removeAttribute("totp");
         } else {
             VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(code);
             authenticationResponse = idxAuthenticationWrapper
