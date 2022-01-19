@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,6 +94,13 @@ public class LoginController {
             modelAndView.addObject("errors", authenticationResponse.getErrors());
             return modelAndView;
         }
+
+        Arrays.stream(authenticationResponse.getAuthenticatorEnrollments().getValue())
+                .filter(x -> x.getDisplayName().equals("Okta Verify")).findFirst()
+                .flatMap(enroll -> Arrays.stream(enroll.getMethods())
+                        .filter(methodType -> methodType.getType().equals("totp")).findFirst()
+                )
+                .ifPresent(methodType -> session.setAttribute("totp", "totp"));
 
         return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
