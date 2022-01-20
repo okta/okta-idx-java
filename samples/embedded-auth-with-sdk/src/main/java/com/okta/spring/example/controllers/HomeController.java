@@ -202,8 +202,12 @@ public class HomeController {
             return homeHelper.proceedToHome(tokenResponse, session);
         }
 
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+        boolean canSkip = authenticationWrapper.isSkipAuthenticatorPresent(proceedContext);
+
         ModelAndView modelAndView = new ModelAndView("select-authenticator");
         modelAndView.addObject("title", "Select Authenticator");
+        modelAndView.addObject("canSkip", canSkip);
         modelAndView.addObject("authenticators", authenticators);
         return modelAndView;
     }
