@@ -136,9 +136,20 @@ public class LoginController {
                                             final @RequestParam(value = "action") String action,
                                             final HttpSession session) {
 
+        AuthenticationResponse authenticationResponse = null;
+        Authenticator foundAuthenticator = null;
+
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        if ("skip".equals(action)) {
+            logger.info("Skipping {} authenticator", authenticatorType);
+            authenticationResponse = idxAuthenticationWrapper.skipAuthenticatorEnrollment(proceedContext);
+            return responseHandler.handleKnownTransitions(authenticationResponse, session);
+        }
+
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
-        if (authenticatorType != null && authenticatorType.equals("webauthn")) {
+
+        if ("webauthn".equals(authenticatorType)) {
             ModelAndView modelAndView;
 
             Optional<Authenticator> authenticatorOptional =
@@ -165,16 +176,6 @@ public class LoginController {
             }
             return modelAndView;
         }
-
-        AuthenticationResponse authenticationResponse = null;
-
-        if ("skip".equals(action)) {
-            logger.info("Skipping {} authenticator", authenticatorType);
-            authenticationResponse = idxAuthenticationWrapper.skipAuthenticatorEnrollment(proceedContext);
-            return responseHandler.handleKnownTransitions(authenticationResponse, session);
-        }
-
-        Authenticator foundAuthenticator = null;
 
         for (Authenticator authenticator : authenticators) {
             if (authenticatorType.equals(authenticator.getType())) {
