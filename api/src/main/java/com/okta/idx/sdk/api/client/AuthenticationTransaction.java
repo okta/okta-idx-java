@@ -60,6 +60,19 @@ final class AuthenticationTransaction {
         return new AuthenticationTransaction(client, idxClientContext, introspectResponse);
     }
 
+    static AuthenticationTransaction create(IDXClient client, String recoveryToken) throws ProcessingException {
+        IDXClientContext idxClientContext = client.interact(recoveryToken);
+        Assert.notNull(idxClientContext, "IDX client context may not be null");
+
+        IDXResponse introspectResponse = client.introspect(idxClientContext);
+        String stateHandle = introspectResponse.getStateHandle();
+        Assert.hasText(stateHandle, "State handle may not be null");
+
+        WrapperUtil.printRemediationOptions(introspectResponse);
+
+        return new AuthenticationTransaction(client, idxClientContext, introspectResponse);
+    }
+
     static AuthenticationTransaction introspect(IDXClient client, IDXClientContext clientContext) throws ProcessingException {
         IDXResponse introspectResponse = client.introspect(clientContext);
 

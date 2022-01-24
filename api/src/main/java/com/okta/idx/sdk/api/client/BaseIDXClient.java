@@ -96,7 +96,12 @@ final class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXClientContext interact() throws ProcessingException {
+    public IDXClientContext interact () throws ProcessingException {
+        return interact(null);
+    }
+
+    @Override
+    public IDXClientContext interact(String recoveryToken) throws ProcessingException {
 
         InteractResponse interactResponse;
         String codeVerifier, codeChallenge, state;
@@ -106,14 +111,17 @@ final class BaseIDXClient implements IDXClient {
             codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
             state = UUID.randomUUID().toString();
 
-            StringBuilder urlParameters = new StringBuilder();
-            urlParameters.append("client_id=").append(clientConfiguration.getClientId());
-            urlParameters.append("&scope=").append(clientConfiguration.getScopes().stream()
-                    .map(Object::toString).collect(Collectors.joining(" ")));
-            urlParameters.append("&code_challenge=").append(codeChallenge);
-            urlParameters.append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD);
-            urlParameters.append("&redirect_uri=").append(clientConfiguration.getRedirectUri());
-            urlParameters.append("&state=").append(state);
+            StringBuilder urlParameters = new StringBuilder()
+                    .append("client_id=").append(clientConfiguration.getClientId())
+                    .append("&scope=").append(clientConfiguration.getScopes().stream()
+                            .map(Object::toString).collect(Collectors.joining(" ")))
+                    .append("&code_challenge=").append(codeChallenge)
+                    .append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD)
+                    .append("&redirect_uri=").append(clientConfiguration.getRedirectUri())
+                    .append("&state=").append(state);
+            if (Strings.hasText(recoveryToken)) {
+                urlParameters.append("&recovery_token=").append(recoveryToken);
+            }
 
             Request request = new DefaultRequest(
                 HttpMethod.POST,
