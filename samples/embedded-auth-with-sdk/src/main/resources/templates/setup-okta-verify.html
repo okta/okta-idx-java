@@ -54,6 +54,38 @@
             font-weight: bold;
         }
     </style>
+
+    <script th:inline="javascript">
+
+        function poll() {
+            fetch("/poll", {method: 'GET'})
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response:", data);
+                    switch (data['status']) {
+                        case "AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION":
+                        case "SUCCESS":
+                            document.getElementById("enroll-poll-ov-form").submit();
+                            break;
+                        case "AWAITING_POLL_ENROLLMENT":
+                            setTimeout(poll, 5000);
+                            break;
+                        default:
+                            console.log("Default:", data);
+                    }
+                }).catch(function (err) {
+                    console.error(err);
+                }
+            );
+        }
+        setTimeout(poll, 5000);
+
+        function displaySelectFactorOvForm() {
+            document.getElementById("enroll-poll-ov-form").style.display = "none";
+            document.getElementById("select-factor-ov-form").style.display = "block";
+        }
+
+    </script>
 </head>
 
 <body>
@@ -62,7 +94,7 @@
     </div>
 
     <div class="enroll-poll-ov-view">
-        <form id="enroll-poll-ov-form" th:action="@{/poll}">
+        <form id="enroll-poll-ov-form" th:action="@{/poll}" method="post">
             <div>
                 <h2 class="text-center">Setup Okta Verify</h2>
                 <div th:if="${channelName == 'qrcode'}">
@@ -72,7 +104,10 @@
                         <li>When prompted, tap Scan a QR code, then scan the QR code below:</li>
                     </ol>
                     <div class="qrcode-container">
-                        <img class="qrcode" th:src="@{${session.qrCode}}" alt="qr code">
+                        <img class="qrcode" th:src="@{${qrCode}}" alt="qr code">
+                    </div>
+                    <div class="switch-channel-text">
+                        <a href="#" class="switch-channel-link" onclick="displaySelectFactorOvForm()">Can't scan?</a>
                     </div>
                 </div>
                 <div th:if="${channelName == 'phoneNumber'}">
@@ -92,8 +127,24 @@
                     </p>
                 </div>
             </div>
+            <input type="hidden" name="completed" value="Okta Verify">
+        </form>
+
+        <form id="select-factor-ov-form" th:action="@{/select-factor}" method="post" style="display: none">
+            <h2 class="text-center"><span th:text="${title}"></span></h2>
+            <p class="font-weight-light">Please choose the method for this factor</p>
+
+            <div id="phone-authenticator-mode" class="form-check" th:each="factor : ${factors}">
+                <input class="form-check-input" type="radio" name="mode" th:value="${factor.method}">
+                <label class="form-check-label" th:text="${factor.label}"></label>
+                <br>
+            </div>
+            <input type="hidden" class="form-control" name="authenticatorId" th:value="${authenticatorId}" required="required">
             <div class="form-group">
-                <button id="next-btn" type="submit" class="btn btn-primary btn-block">Next</button>
+                <button id="submit-btn" type="submit" class="btn btn-primary btn-block">Next</button>
+            </div>
+            <div class="switch-channel-text">
+                <a th:href="@{/select-authenticator}" class="switch-channel-link">Return to authenticator list</a>
             </div>
         </form>
     </div>

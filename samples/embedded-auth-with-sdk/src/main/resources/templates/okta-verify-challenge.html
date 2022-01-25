@@ -54,6 +54,36 @@
             font-weight: bold;
         }
     </style>
+
+    <script th:inline="javascript">
+
+        function poll() {
+            fetch("/poll", {method: 'GET'})
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response:", data);
+                    switch (data['status']) {
+                        case "AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION":
+                            document.getElementById("enroll-poll-ov-form").submit();
+                            break;
+                        case "AWAITING_POLL_ENROLLMENT":
+                        case "AWAITING_CHALLENGE_POLL":
+                            setTimeout(poll, 5000)
+                            break;
+                        case "SUCCESS":
+                            location.href = '/';
+                            break;
+                        default:
+                            console.log("Default:", data);
+                    }
+                }).catch(function (err) {
+                    console.error(err);
+                }
+            );
+        }
+        setTimeout(poll, 5000);
+
+    </script>
 </head>
 
 <body>
@@ -62,7 +92,7 @@
     </div>
 
     <div class="enroll-poll-ov-view">
-        <form id="enroll-poll-ov-form" th:action="@{/poll}">
+        <form id="enroll-poll-ov-form" th:action="@{/poll}" method="post">
             <div>
                 <h2 class="text-center">Okta Verify</h2>
                 <div>
@@ -70,9 +100,6 @@
                         Correct answer is <span th:text="${correctAnswer}"></span>
                     </p>
                 </div>
-            </div>
-            <div class="form-group">
-                <button id="next-btn" type="submit" class="btn btn-primary btn-block">Next</button>
             </div>
         </form>
     </div>
