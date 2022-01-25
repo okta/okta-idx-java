@@ -24,6 +24,7 @@ import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.Credentials;
+import com.okta.idx.sdk.api.model.DeviceContext;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.PollInfo;
@@ -85,23 +86,30 @@ public class IDXAuthenticationWrapper {
         this.client = Clients.builder().build();
     }
 
+    public IDXAuthenticationWrapper(String issuer, String clientId, String clientSecret,
+                                    Set<String> scopes, String redirectUri) {
+        this(issuer, clientId, clientSecret, scopes, redirectUri, null);
+    }
+
     /**
      * Creates {@link IDXAuthenticationWrapper} instance.
      *
-     * @param issuer the issuer url
-     * @param clientId the client id
-     * @param clientSecret the client secret
-     * @param scopes the set of scopes
-     * @param redirectUri the redirect uri
+     * @param issuer        the issuer url
+     * @param clientId      the client id
+     * @param clientSecret  the client secret
+     * @param scopes        the set of scopes
+     * @param redirectUri   the redirect uri
+     * @param deviceContext the device context information
      */
     public IDXAuthenticationWrapper(String issuer, String clientId, String clientSecret,
-                                    Set<String> scopes, String redirectUri) {
+                                    Set<String> scopes, String redirectUri, DeviceContext deviceContext) {
         this.client = Clients.builder()
                 .setIssuer(issuer)
                 .setClientId(clientId)
                 .setClientSecret(clientSecret)
                 .setScopes(scopes)
                 .setRedirectUri(redirectUri)
+                .setDeviceContext(deviceContext)
                 .build();
     }
 

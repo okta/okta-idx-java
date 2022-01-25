@@ -115,13 +115,18 @@ final class BaseIDXClient implements IDXClient {
             urlParameters.append("&redirect_uri=").append(clientConfiguration.getRedirectUri());
             urlParameters.append("&state=").append(state);
 
+            HttpHeaders httpHeaders = getHttpHeaders(true);
+            if (clientConfiguration.getDeviceContext() != null) {
+                httpHeaders.setAll(clientConfiguration.getDeviceContext().getAll());
+            }
+
             Request request = new DefaultRequest(
-                HttpMethod.POST,
-                getNormalizedUri(clientConfiguration.getIssuer(), "/v1/interact"),
-                null,
-                getHttpHeaders(true),
-                new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
-                -1L);
+                    HttpMethod.POST,
+                    getNormalizedUri(clientConfiguration.getIssuer(), "/v1/interact"),
+                    null,
+                    httpHeaders,
+                    new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
+                    -1L);
 
             Response response = requestExecutor.executeRequest(request);
 
