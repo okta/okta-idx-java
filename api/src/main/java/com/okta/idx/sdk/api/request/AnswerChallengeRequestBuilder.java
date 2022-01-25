@@ -23,6 +23,10 @@ public class AnswerChallengeRequestBuilder {
 
     private Credentials credentials;
 
+    private String phoneNumber;
+
+    private String email;
+
     public static AnswerChallengeRequestBuilder builder() {
         return new AnswerChallengeRequestBuilder();
     }
@@ -32,12 +36,22 @@ public class AnswerChallengeRequestBuilder {
         return this;
     }
 
+    public AnswerChallengeRequestBuilder withPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+        return this;
+    }
+
+    public AnswerChallengeRequestBuilder withEmail(String email) {
+        this.email = email;
+        return this;
+    }
+
     public AnswerChallengeRequestBuilder withCredentials(Credentials credentials) {
         this.credentials = credentials;
         return this;
     }
 
     public AnswerChallengeRequest build() {
-        return new AnswerChallengeRequest(stateHandle, credentials);
+        return new AnswerChallengeRequest(stateHandle, credentials, phoneNumber, email);
     }
 }

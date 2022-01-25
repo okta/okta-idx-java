@@ -96,7 +96,7 @@ final class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXClientContext interact () throws ProcessingException {
+    public IDXClientContext interact() throws ProcessingException {
         return interact(null);
     }
 

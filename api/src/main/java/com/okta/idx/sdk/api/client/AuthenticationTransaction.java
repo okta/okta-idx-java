@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -253,6 +254,15 @@ final class AuthenticationTransaction {
             case RemediationType.ENROLL_AUTHENTICATOR:
                 authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT);
                 break;
+            case RemediationType.ENROLL_POLL:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_POLL_ENROLLMENT);
+                break;
+            case RemediationType.ENROLLMENT_CHANNEL_DATA:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_CHANNEL_DATA_ENROLLMENT);
+                break;
+            case RemediationType.CHALLENGE_POLL:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_CHALLENGE_POLL);
+                break;
             default:
                 authenticationResponse.setAuthenticationStatus(defaultStatus);
                 break;
@@ -357,6 +367,7 @@ final class AuthenticationTransaction {
             String enrollmentId = null;
             String authenticatorType = null;
             boolean hasNestedFactors = false;
+            boolean isChannelFactor = false;
             Map<String, String> nestedMethods = new LinkedHashMap<>();
 
             FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
@@ -373,6 +384,19 @@ final class AuthenticationTransaction {
                     } else {
                         nestedMethods.put(String.valueOf(formValue.getValue()), label);
                     }
+                } else if ("channel".equals(formValue.getName())) {
+                    authenticatorType = String.valueOf(option.getLabel())
+                            .toLowerCase(Locale.ROOT).replaceAll(" ", "_");
+                    isChannelFactor = true;
+                    Options[] nestedOptions = formValue.options();
+                    if (nestedOptions.length > 0) {
+                        for (Options children : nestedOptions) {
+                            nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
+                        }
+                        hasNestedFactors = true;
+                    } else {
+                        nestedMethods.put(authenticatorType, label);
+                    }
                 }
                 if (formValue.getName().equals("id")) {
                     id = String.valueOf(formValue.getValue());
@@ -384,7 +408,9 @@ final class AuthenticationTransaction {
 
             List<Authenticator.Factor> factors = new ArrayList<>();
             for (Map.Entry<String, String> entry : nestedMethods.entrySet()) {
-                factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue()));
+                factors.add(new Authenticator.Factor(
+                        id, entry.getKey(), enrollmentId, entry.getValue(), isChannelFactor ? entry.getKey() : null)
+                );
             }
             authenticators.add(new Authenticator(id, authenticatorType, label, factors, hasNestedFactors));
         }
@@ -428,7 +454,7 @@ final class AuthenticationTransaction {
 
         List<Authenticator.Factor> factors = new ArrayList<>();
         for (Map.Entry<String, String> entry : nestedMethods.entrySet()) {
-            factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue()));
+            factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue(), null));
         }
         authenticators.add(new Authenticator(id, authenticatorType, label, factors, hasNestedFactors));
 

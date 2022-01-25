@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2021-Present, Okta, Inc.
+  ~ Copyright (c) 2022-Present, Okta, Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,45 +14,34 @@
   ~ limitations under the License.
   -->
 <!DOCTYPE html>
-<html lang="en">
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en"><html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Enroll Google Authenticator</title>
+    <title th:text="${title}"></title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
-        .enroll-google-authenticator-form {
+        .verify-form {
             width: 440px;
             margin: 50px auto;
         }
-
-        .enroll-google-authenticator-form form {
+        .verify-form form {
             margin-bottom: 15px;
             background: #f7f7f7;
             box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
             padding: 30px;
         }
-
-        .enroll-google-authenticator-form h2 {
+        .verify-form h2 {
             margin: 0 0 15px;
         }
-
-        .enroll-google-authenticator-form .qrcode {
-            width: 200px;
-            margin: auto;
-        }
-
         .form-control, .btn {
             min-height: 38px;
             border-radius: 2px;
         }
-
         .btn {
             font-size: 15px;
             font-weight: bold;
@@ -61,29 +50,27 @@
 </head>
 
 <body>
-    <div style="padding:1em">
-        <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
-    </div>
 
-    <div class="enroll-google-authenticator-form">
-        <form id="enroll-google-form" th:action="@{verify}">
-            <div>
-                <h2 class="text-center">Scan QR code</h2>
-                <div>
-                    <p class="font-weight-light">Launch Google Authenticator, tap the "+" icon, then select "Scan
-                        a QR code".</p>
-                    <div class="qrcode">
-                        <img id="qr-code" th:src="@{${session.totp.qrcode.href}}" alt="qr code">
-                    </div>
-                    Secret Key: <p id="secret-key" th:text="${session.totp.sharedSecret}"></p>
-                </div>
-            </div>
-            <div class="form-group">
-                <button id="next-btn" type="submit" class="btn btn-primary btn-block">Next</button>
-            </div>
-        </form>
-    </div>
+<div style="padding:1em">
+    <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
+</div>
 
-    <div th:replace="fragments/footer :: footer"></div>
+<div class="verify-form">
+    <form th:action="@{/verify-channel-data}" method="post">
+        <h4 class="text-center" th:text="${title}">Title</h4>
+        <div class="form-group">
+            <label class="form-check-label" th:text="${labelTitle}"></label>
+            <input type="text" class="form-control" name="channelValue" required="required">
+        </div>
+        <input type="hidden" class="form-control" name="channelName" th:value="${channelName}">
+        <p class="font-weight-light" th:text="${message}"></p>
+        <div class="form-group">
+            <button id="verify-btn" type="submit" class="btn btn-primary btn-block" th:text="${buttonTitle}">Submit</button>
+        </div>
+    </form>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
 </body>
 </html>

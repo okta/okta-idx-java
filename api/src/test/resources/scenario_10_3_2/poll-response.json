@@ -1,0 +1,66 @@
+{
+  "version": "1.0.0",
+  "stateHandle": "02Lz727Rh7NRXDuQJk-_r_EUeFBv_0EBXe1ICupY8z",
+  "expiresAt": "2022-01-14T14:33:44.000Z",
+  "intent": "LOGIN",
+  "user": {
+    "type": "object",
+    "value": {
+      "id": "00u3l0p9tv2Hi01js5d7",
+      "identifier": "some.user@example.com",
+      "profile": {
+        "firstName": "Some",
+        "lastName": "User",
+        "timeZone": "America/Los_Angeles",
+        "locale": "en_US"
+      }
+    }
+  },
+  "cancel": {
+    "rel": ["create-form"],
+    "name": "cancel",
+    "href": "https://foo.oktapreview.com/idp/idx/cancel",
+    "method": "POST",
+    "produces": "application/ion+json; okta-version=1.0.0",
+    "value": [
+      {
+        "name": "stateHandle",
+        "required": true,
+        "value": "02Lz727Rh7NRXDuQJk-_r_EUeFBv_0EBXe1ICupY8z",
+        "visible": false,
+        "mutable": false
+      }
+    ],
+    "accepts": "application/json; okta-version=1.0.0"
+  },
+  "app": {
+    "type": "object",
+    "value": {
+      "name": "oidc_client",
+      "label": "Java Embedded Widget Web App",
+      "id": "0oawmevid1zSde3N15d6"
+    }
+  },
+  "successWithInteractionCode": {
+    "rel": ["create-form"],
+    "name": "issue",
+    "href": "https://foo.oktapreview.com/oauth2/austyaz1n2TJjdwUQ5d6/v1/token",
+    "method": "POST",
+    "value": [
+      { "name": "grant_type", "required": true, "value": "interaction_code" },
+      {
+        "name": "interaction_code",
+        "required": true,
+        "value": "vl5Wz1kL_ld4fZUS4XZ4--cL_zRGSU_s0f0zFFVtIpE"
+      },
+      {
+        "name": "client_id",
+        "required": true,
+        "value": "0oawmevid1zSde3N15d6"
+      },
+      { "name": "client_secret", "required": true },
+      { "name": "code_verifier", "required": true }
+    ],
+    "accepts": "application/x-www-form-urlencoded"
+  }
+}
