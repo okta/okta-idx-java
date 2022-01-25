@@ -213,6 +213,7 @@ public class LoginController {
             modelAndView.addObject("channelName", "qrcode");
             modelAndView.addObject("factors", factors);
             modelAndView.addObject("authenticatorId", authenticatorOptional.get().getId());
+            modelAndView.addObject("pollTimeout", Util.getPollTimeout());
             return modelAndView;
         }
 

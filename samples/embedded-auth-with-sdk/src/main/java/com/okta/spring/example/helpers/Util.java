@@ -21,6 +21,8 @@ import javax.servlet.http.HttpSession;
 
 public final class Util {
 
+    private static final int POLL_TIMEOUT = 5000;
+
     /**
      * removeProceedContextFromSession.
      *
@@ -72,5 +74,14 @@ public final class Util {
      */
     public static ProceedContext getProceedContextForPoll(final HttpSession session) {
         return (ProceedContext) session.getAttribute("proceedContextForPoll");
+    }
+
+    /**
+     * Return timeout value for poll request
+     *
+     * @return timeout for poll request
+     */
+    public static int getPollTimeout() {
+        return POLL_TIMEOUT;
     }
 }

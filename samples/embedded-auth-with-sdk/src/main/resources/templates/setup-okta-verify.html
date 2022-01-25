@@ -68,7 +68,7 @@
                             document.getElementById("enroll-poll-ov-form").submit();
                             break;
                         case "AWAITING_POLL_ENROLLMENT":
-                            setTimeout(poll, 5000);
+                            setTimeout(poll, [[${pollTimeout}]]);
                             break;
                         default:
                             console.log("Default:", data);
@@ -78,7 +78,7 @@
                 }
             );
         }
-        setTimeout(poll, 5000);
+        setTimeout(poll, [[${pollTimeout}]]);
 
         function displaySelectFactorOvForm() {
             document.getElementById("enroll-poll-ov-form").style.display = "none";

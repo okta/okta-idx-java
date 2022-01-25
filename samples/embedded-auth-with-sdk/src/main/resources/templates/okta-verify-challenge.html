@@ -68,7 +68,7 @@
                             break;
                         case "AWAITING_POLL_ENROLLMENT":
                         case "AWAITING_CHALLENGE_POLL":
-                            setTimeout(poll, 5000)
+                            setTimeout(poll, [[${pollTimeout}]])
                             break;
                         case "SUCCESS":
                             location.href = '/';
@@ -81,7 +81,7 @@
                 }
             );
         }
-        setTimeout(poll, 5000);
+        setTimeout(poll, [[${pollTimeout}]])
 
     </script>
 </head>
