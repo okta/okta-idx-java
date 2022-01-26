@@ -21,6 +21,9 @@ import javax.servlet.http.HttpSession;
 
 public final class Util {
 
+    /**
+     * Poll refresh interval.
+     */
     private static final int POLL_TIMEOUT = 5000;
 
     /**
@@ -77,7 +80,7 @@ public final class Util {
     }
 
     /**
-     * Return timeout value for poll request
+     * Return timeout value for poll request.
      *
      * @return timeout for poll request
      */
