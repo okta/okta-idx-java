@@ -143,7 +143,9 @@ public final class ResponseHandler {
      */
     public ModelAndView oktaVerifyChallenge(AuthenticationResponse response) {
         ModelAndView modelAndView = new ModelAndView("okta-verify-challenge");
-        modelAndView.addObject("correctAnswer", response.getContextualData().getCorrectAnswer());
+        if (response.getContextualData() != null) {
+            modelAndView.addObject("correctAnswer", response.getContextualData().getCorrectAnswer());
+        }
         modelAndView.addObject("pollTimeout", Util.getPollTimeout());
         return modelAndView;
     }

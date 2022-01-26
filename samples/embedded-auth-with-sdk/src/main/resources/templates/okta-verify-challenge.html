@@ -95,10 +95,16 @@
         <form id="enroll-poll-ov-form" th:action="@{/poll}" method="post">
             <div>
                 <h2 class="text-center">Okta Verify</h2>
-                <div>
+                <div th:if="${correctAnswer}">
                     <p>
                         Correct answer is <span th:text="${correctAnswer}"></span>
                     </p>
+                </div>
+                <div th:unless="${correctAnswer}">
+                    <p>
+                        Get a push notification
+                    </p>
+                    <a th:href="@{/select-authenticator}" class="switch-channel-link">Verify with something else</a>
                 </div>
             </div>
         </form>
