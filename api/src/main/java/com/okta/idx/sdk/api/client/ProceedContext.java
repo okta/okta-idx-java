@@ -32,9 +32,10 @@ public final class ProceedContext {
     private final String selectProfileEnrollHref;
     private final String resendHref;
     private final PollInfo pollInfo;
+    private final String refresh;
 
     ProceedContext(IDXClientContext clientContext, String stateHandle, String href, String skipHref, boolean isIdentifyInOneStep,
-                   String selectProfileEnrollHref, String resendHref, PollInfo pollInfo) {
+                   String selectProfileEnrollHref, String resendHref, PollInfo pollInfo, String refresh) {
         this.clientContext = clientContext;
         this.stateHandle = stateHandle;
         this.href = href;
@@ -43,6 +44,7 @@ public final class ProceedContext {
         this.selectProfileEnrollHref = selectProfileEnrollHref;
         this.resendHref = resendHref;
         this.pollInfo = pollInfo;
+        this.refresh = refresh;
     }
 
     public IDXClientContext getClientContext() {
@@ -75,5 +77,9 @@ public final class ProceedContext {
 
     public PollInfo getPollInfo() {
         return pollInfo;
+    }
+
+    public String getRefresh() {
+        return refresh;
     }
 }

@@ -146,7 +146,7 @@ public final class ResponseHandler {
         if (response.getContextualData() != null) {
             modelAndView.addObject("correctAnswer", response.getContextualData().getCorrectAnswer());
         }
-        modelAndView.addObject("pollTimeout", Util.getPollTimeout());
+        modelAndView.addObject("pollTimeout", response.getProceedContext().getRefresh());
         return modelAndView;
     }
 
@@ -239,7 +239,7 @@ public final class ResponseHandler {
     public ModelAndView setupOktaVerifyForm(HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("setup-okta-verify");
         modelAndView.addObject("channelName", String.valueOf(session.getAttribute("channelName")));
-        modelAndView.addObject("pollTimeout", Util.getPollTimeout());
+        modelAndView.addObject("pollTimeout", Util.getProceedContextFromSession(session).getRefresh());
         return modelAndView;
     }
 

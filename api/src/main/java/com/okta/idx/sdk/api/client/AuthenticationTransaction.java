@@ -117,6 +117,7 @@ final class AuthenticationTransaction {
 
         RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
         String href = remediationOptions[0].getHref();
+        String refresh = remediationOptions[0].getRefresh();
 
         String skipHref = null;
         Optional<RemediationOption> skipOptional = getOptionalRemediationOption(RemediationType.SKIP);
@@ -157,7 +158,7 @@ final class AuthenticationTransaction {
         }
 
         return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep,
-                selectProfileEnrollHref, resendHref, pollInfo);
+                selectProfileEnrollHref, resendHref, pollInfo, refresh);
     }
 
     RemediationOption getRemediationOption(String name) {
