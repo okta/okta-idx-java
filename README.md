@@ -296,5 +296,5 @@ We are happy to accept contributions and PRs! Please see the [contribution guide
 [jdk-11]: https://www.oracle.com/java/technologies/javase-jdk11-downloads.html
 [java-samples]: https://github.com/okta/okta-idx-java/tree/master/samples
 [apache-maven]: https://maven.apache.org/download.cgi
-[okta-identity-engine]: https://developer.okta.com/docs/concepts/ie-intro/
-[interaction-code-intro]: https://developer.okta.com/docs/guides/oie-embedded-sdk-overview/main/
+[okta-identity-engine]: https://developer.okta.com/docs/guides/oie-intro/
+[interaction-code-intro]: hhttps://developer.okta.com/docs/guides/implement-grant-type/interactioncode/main/#interaction-code-flow
