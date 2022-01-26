@@ -297,4 +297,4 @@ We are happy to accept contributions and PRs! Please see the [contribution guide
 [java-samples]: https://github.com/okta/okta-idx-java/tree/master/samples
 [apache-maven]: https://maven.apache.org/download.cgi
 [okta-identity-engine]: https://developer.okta.com/docs/guides/oie-intro/
-[interaction-code-intro]: hhttps://developer.okta.com/docs/guides/implement-grant-type/interactioncode/main/#interaction-code-flow
+[interaction-code-intro]: https://developer.okta.com/docs/guides/implement-grant-type/interactioncode/main/#interaction-code-flow
