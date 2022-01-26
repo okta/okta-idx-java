@@ -123,11 +123,16 @@ final class BaseIDXClient implements IDXClient {
                 urlParameters.append("&recovery_token=").append(recoveryToken);
             }
 
+            HttpHeaders httpHeaders = getHttpHeaders(true);
+            if (clientConfiguration.getDeviceContext() != null) {
+                httpHeaders.setAll(clientConfiguration.getDeviceContext().getAll());
+            }
+
             Request request = new DefaultRequest(
                 HttpMethod.POST,
                 getNormalizedUri(clientConfiguration.getIssuer(), "/v1/interact"),
                 null,
-                getHttpHeaders(true),
+                httpHeaders,
                 new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
                 -1L);
 
