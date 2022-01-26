@@ -24,7 +24,7 @@ These Examples are:
 6. Progressive Profiling
 
 For information and guides on how to build your app with this sample, please take a look at the [Java
-guides for Embedded Widget](https://developer.okta.com/docs/guides/oie-embedded-widget-use-cases/java/oie-embedded-widget-use-case-overview/)
+guides for Embedded Widget](https://developer.okta.com/docs/guides/oie-embedded-widget-use-case-basic-sign-in/java/main/)
 
 ## Prerequisites
 
