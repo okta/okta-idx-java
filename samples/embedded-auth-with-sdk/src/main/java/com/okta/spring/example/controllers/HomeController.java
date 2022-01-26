@@ -149,6 +149,20 @@ public class HomeController {
     }
 
     /**
+     * Handle the self-service password reset redirect.
+     *
+     * @param recoveryToken the recovery token (from email link)
+     * @param session the http session
+     * @return the register-password view
+     */
+    @GetMapping(value = "/reset-password")
+    public ModelAndView displayResetPasswordPage(final @RequestParam(name = "recovery_token") String recoveryToken,
+                                                 final HttpSession session) {
+        beginPasswordRecovery(session, recoveryToken);
+        return new ModelAndView("register-password");
+    }
+
+    /**
      * Display the login page.
      *
      * @param session the http session
@@ -271,6 +285,12 @@ public class HomeController {
 
     private AuthenticationResponse begin(final HttpSession session) {
         AuthenticationResponse authenticationResponse = authenticationWrapper.begin();
+        Util.updateSession(session, authenticationResponse.getProceedContext());
+        return authenticationResponse;
+    }
+
+    private AuthenticationResponse beginPasswordRecovery(final HttpSession session, String recoveryToken) {
+        AuthenticationResponse authenticationResponse = authenticationWrapper.beginPasswordRecovery(recoveryToken);
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;
     }

@@ -17,6 +17,7 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
+import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
@@ -49,7 +50,11 @@ import java.util.stream.Collectors;
 final class AuthenticationTransaction {
 
     static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
-        IDXClientContext idxClientContext = client.interact();
+        return create(client, null);
+    }
+
+    static AuthenticationTransaction create(IDXClient client, String recoveryToken) throws ProcessingException {
+        IDXClientContext idxClientContext = Strings.hasText(recoveryToken) ? client.interact(recoveryToken) : client.interact();
         Assert.notNull(idxClientContext, "IDX client context may not be null");
 
         IDXResponse introspectResponse = client.introspect(idxClientContext);

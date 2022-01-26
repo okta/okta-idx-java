@@ -619,7 +619,7 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Get IDX client context by calling the interact endpoint.
+     * Get IDX client context by calling interact endpoint.
      * ClientContext reference contains the interaction handle and PKCE params.
      * <p>
      * This function can be used by the client applications to get a handle
@@ -775,6 +775,16 @@ public class IDXAuthenticationWrapper {
     public AuthenticationResponse begin() {
         try {
             return AuthenticationTransaction.create(client).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    public AuthenticationResponse beginPasswordRecovery(String recoveryToken) {
+        try {
+            return AuthenticationTransaction.create(client, recoveryToken).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
