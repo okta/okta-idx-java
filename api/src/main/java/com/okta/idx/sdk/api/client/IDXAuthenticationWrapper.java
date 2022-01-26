@@ -86,6 +86,15 @@ public class IDXAuthenticationWrapper {
         this.client = Clients.builder().build();
     }
 
+    /**
+     * Creates {@link IDXAuthenticationWrapper} instance.
+     *
+     * @param issuer        the issuer url
+     * @param clientId      the client id
+     * @param clientSecret  the client secret
+     * @param scopes        the set of scopes
+     * @param redirectUri   the redirect uri
+     */
     public IDXAuthenticationWrapper(String issuer, String clientId, String clientSecret,
                                     Set<String> scopes, String redirectUri) {
         this(issuer, clientId, clientSecret, scopes, redirectUri, null);
