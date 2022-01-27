@@ -8,7 +8,7 @@ to request to gain access to the Okta Identity Engine, please reach out to your 
 do not have an account manager, please reach out to oie@okta.com for more information.
 
 This Sample Application will show you the best practices for integrating Authentication into your app
-using [Okta's Identity Engine](https://developer.okta.com/docs/concepts/ie-intro/). Specifically, this
+using [Okta's Identity Engine](https://developer.okta.com/docs/guides/oie-intro/). Specifically, this
 application will cover some basic needed use cases to get you up and running quickly with Okta.
 These Examples are:
 1. Sign In
@@ -17,8 +17,7 @@ These Examples are:
 4. Sign In/Sign Up with Social Identity Providers
 5. Sign In with Multifactor Authentication using Email or Phone
 
-For information and guides on how to build your app with this sample, please take a look at the [Java
-guides for Embedded Authentication](https://developer.okta.com/docs/guides/oie-embedded-sdk-use-cases/java/oie-embedded-sdk-use-case-overview/#start-with-a-use-case)
+For information on how to build your app with this sample, please take a look at our guides, starting with [Get set up](https://developer.okta.com/docs/guides/oie-embedded-common-org-setup/java/main/).
 
 ## Prerequisites
 
