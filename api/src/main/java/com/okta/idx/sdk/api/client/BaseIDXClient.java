@@ -112,13 +112,14 @@ final class BaseIDXClient implements IDXClient {
             state = UUID.randomUUID().toString();
 
             StringBuilder urlParameters = new StringBuilder()
-                    .append("client_id=").append(clientConfiguration.getClientId())
-                    .append("&scope=").append(clientConfiguration.getScopes().stream()
-                            .map(Object::toString).collect(Collectors.joining(" ")))
-                    .append("&code_challenge=").append(codeChallenge)
-                    .append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD)
-                    .append("&redirect_uri=").append(clientConfiguration.getRedirectUri())
-                    .append("&state=").append(state);
+                .append("client_id=").append(clientConfiguration.getClientId())
+                .append("&client_secret=").append(clientConfiguration.getClientSecret())
+                .append("&scope=").append(clientConfiguration.getScopes().stream()
+                    .map(Object::toString).collect(Collectors.joining(" ")))
+                .append("&code_challenge=").append(codeChallenge)
+                .append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD)
+                .append("&redirect_uri=").append(clientConfiguration.getRedirectUri())
+                .append("&state=").append(state);
             if (Strings.hasText(recoveryToken)) {
                 urlParameters.append("&recovery_token=").append(recoveryToken);
             }
