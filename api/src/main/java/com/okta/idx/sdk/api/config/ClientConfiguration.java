@@ -19,6 +19,7 @@ package com.okta.idx.sdk.api.config;
 import com.okta.commons.http.authc.DisabledAuthenticator;
 import com.okta.commons.http.authc.RequestAuthenticator;
 import com.okta.commons.http.config.HttpClientConfiguration;
+import com.okta.idx.sdk.api.model.DeviceContext;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,6 +42,7 @@ public class ClientConfiguration extends HttpClientConfiguration {
     private String clientSecret;
     private Set<String> scopes = new HashSet<>();
     private String redirectUri;
+    private DeviceContext deviceContext;
 
     public String getIssuer() {
         return issuer;
@@ -80,6 +82,14 @@ public class ClientConfiguration extends HttpClientConfiguration {
 
     public void setRedirectUri(String redirectUri) {
         this.redirectUri = redirectUri;
+    }
+
+    public DeviceContext getDeviceContext() {
+        return deviceContext;
+    }
+
+    public void setDeviceContext(DeviceContext deviceContext) {
+        this.deviceContext = deviceContext;
     }
 
     @Override

@@ -30,6 +30,7 @@ import com.okta.idx.sdk.api.io.ClasspathResource;
 import com.okta.idx.sdk.api.io.DefaultResourceFactory;
 import com.okta.idx.sdk.api.io.Resource;
 import com.okta.idx.sdk.api.io.ResourceFactory;
+import com.okta.idx.sdk.api.model.DeviceContext;
 
 import static com.okta.idx.sdk.api.util.Constants.*;
 
@@ -158,6 +159,12 @@ final class DefaultIDXClientBuilder extends IDXClientBuilder {
     @Override
     public IDXClientBuilder setRedirectUri(String redirectUri) {
         this.clientConfig.setRedirectUri(redirectUri);
+        return this;
+    }
+
+    @Override
+    protected IDXClientBuilder setDeviceContext(DeviceContext deviceContext) {
+        this.clientConfig.setDeviceContext(deviceContext);
         return this;
     }
 

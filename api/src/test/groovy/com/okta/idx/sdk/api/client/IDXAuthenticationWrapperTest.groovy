@@ -20,6 +20,7 @@ import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
 import com.okta.idx.sdk.api.model.AuthenticationOptions
 import com.okta.idx.sdk.api.model.AuthenticationStatus
+import com.okta.idx.sdk.api.model.DeviceContext
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Idp
 import com.okta.idx.sdk.api.model.PollInfo
@@ -36,7 +37,6 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 import static org.mockito.ArgumentMatchers.argThat
 import static org.mockito.Mockito.mock
-import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
 
 class IDXAuthenticationWrapperTest {
@@ -52,7 +52,8 @@ class IDXAuthenticationWrapperTest {
                 clientConfig.getClientId(),
                 clientConfig.getClientSecret(),
                 clientConfig.getScopes(),
-                clientConfig.getRedirectUri()
+                clientConfig.getRedirectUri(),
+                clientConfig.getDeviceContext()
         )
         IDXClient client = getInternalState(idxAuthenticationWrapper, "client") as IDXClient
         assertThat(client, notNullValue())
@@ -64,6 +65,7 @@ class IDXAuthenticationWrapperTest {
         assertThat(config.clientSecret, is(clientConfig.getClientSecret()))
         assertThat(config.getScopes(), is(clientConfig.getScopes()))
         assertThat(config.redirectUri, is(clientConfig.getRedirectUri()))
+        assertThat(config.deviceContext, is(clientConfig.getDeviceContext()))
     }
 
     @Test
@@ -841,7 +843,7 @@ class IDXAuthenticationWrapperTest {
 
         setMockResponse(requestExecutor, "challenge/answer", scenario + "/challenge-answer-password-response", 200, mediaTypeAppIonJson)
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd1234")
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd12cd134")
 
         authenticationResponse =
                 idxAuthenticationWrapper.verifyAuthenticator(authenticationResponse.getProceedContext(), verifyAuthenticatorOptions)
@@ -950,7 +952,7 @@ class IDXAuthenticationWrapperTest {
 
         setMockResponse(requestExecutor, "challenge/answer", scenario + "/challenge-answer-password-response", 200, mediaTypeAppIonJson)
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd1234")
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd12cd134")
 
         authenticationResponse =
                 idxAuthenticationWrapper.verifyAuthenticator(authenticationResponse.getProceedContext(), verifyAuthenticatorOptions)
@@ -1083,7 +1085,7 @@ class IDXAuthenticationWrapperTest {
 
         setMockResponse(requestExecutor, "challenge/answer", scenario + "/challenge-answer-password-response", 200, mediaTypeAppIonJson)
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd1234")
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd12cd134")
 
         authenticationResponse =
                 idxAuthenticationWrapper.verifyAuthenticator(authenticationResponse.getProceedContext(), verifyAuthenticatorOptions)
@@ -1208,7 +1210,7 @@ class IDXAuthenticationWrapperTest {
 
         setMockResponse(requestExecutor, "challenge/answer", scenario + "/challenge-answer-response", 200, mediaTypeAppIonJson)
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd1234")
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd12cd134")
 
         setMockResponse(requestExecutor, "token", scenario + "/token-response", 200, mediaTypeAppIonJson)
         setMockResponse(requestExecutor, "userinfo", scenario + "/user-info-response", 200, mediaTypeAppIonJson)
@@ -1604,7 +1606,7 @@ class IDXAuthenticationWrapperTest {
 
         setMockResponse(requestExecutor, "challenge/answer", scenario + "/challenge-answer-password-response", 200, mediaTypeAppIonJson)
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd1234")
+        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions("Abcd12cd134")
 
         authenticationResponse =
                 idxAuthenticationWrapper.verifyAuthenticator(authenticationResponse.getProceedContext(), verifyAuthenticatorOptions)
@@ -2020,6 +2022,7 @@ class IDXAuthenticationWrapperTest {
         clientConfiguration.setClientSecret("test-client-secret")
         clientConfiguration.setScopes(["test-scope"] as Set)
         clientConfiguration.setRedirectUri("https://example.com/login/callback")
+        clientConfiguration.setDeviceContext(new DeviceContext().addParam(DeviceContext.USER_AGENT, "example-user-agent"))
         return clientConfiguration
     }
 
