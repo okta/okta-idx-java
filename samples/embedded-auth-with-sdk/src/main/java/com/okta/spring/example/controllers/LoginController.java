@@ -21,13 +21,16 @@ import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
+import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Qrcode;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
+import com.okta.idx.sdk.api.model.VerifyChannelDataOptions;
 import com.okta.idx.sdk.api.request.WebAuthnRequest;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
+import com.okta.spring.example.helpers.PollResults;
 import com.okta.spring.example.helpers.ResponseHandler;
 import com.okta.spring.example.helpers.Util;
 import org.slf4j.Logger;
@@ -38,11 +41,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class LoginController {
@@ -92,6 +98,13 @@ public class LoginController {
             modelAndView.addObject("errors", authenticationResponse.getErrors());
             return modelAndView;
         }
+
+        Arrays.stream(authenticationResponse.getAuthenticatorEnrollments().getValue())
+                .filter(x -> x.getDisplayName().equals("Okta Verify")).findFirst()
+                .flatMap(enroll -> Arrays.stream(enroll.getMethods())
+                        .filter(methodType -> methodType.getType().equals("totp")).findFirst()
+                )
+                .ifPresent(methodType -> session.setAttribute("totp", "totp"));
 
         return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
@@ -177,6 +190,33 @@ public class LoginController {
             return modelAndView;
         }
 
+        if ("okta_verify".equals(authenticatorType)) {
+            ModelAndView modelAndView;
+
+            Optional<Authenticator> authenticatorOptional = authenticators.stream()
+                    .filter(auth -> auth.getType().equals(authenticatorType)).findFirst();
+            Assert.isTrue(authenticatorOptional.isPresent(), "Authenticator not found");
+
+            //Looking for QRCODE factor
+            Optional<Authenticator.Factor> factorOptional = authenticatorOptional.get().getFactors().stream()
+                    .filter(x -> "QRCODE".equals(x.getLabel())).findFirst();
+            Assert.isTrue(factorOptional.isPresent(), "Authenticator not found");
+
+            authenticationResponse = idxAuthenticationWrapper.selectFactor(proceedContext, factorOptional.get());
+            Util.setProceedContextForPoll(session, authenticationResponse.getProceedContext());
+
+            List<Authenticator.Factor> factors = authenticatorOptional.get().getFactors().stream()
+                    .filter(x -> !"QRCODE".equals(x.getLabel())).collect(Collectors.toList());
+
+            modelAndView = new ModelAndView("setup-okta-verify");
+            modelAndView.addObject("qrCode", authenticationResponse.getContextualData().getQrcode().getHref());
+            modelAndView.addObject("channelName", "qrcode");
+            modelAndView.addObject("factors", factors);
+            modelAndView.addObject("authenticatorId", authenticatorOptional.get().getId());
+            modelAndView.addObject("pollTimeout", authenticationResponse.getProceedContext().getRefresh());
+            return modelAndView;
+        }
+
         for (Authenticator authenticator : authenticators) {
             if (authenticatorType.equals(authenticator.getType())) {
                 foundAuthenticator = authenticator;
@@ -184,9 +224,7 @@ public class LoginController {
                 if (foundAuthenticator.getFactors().size() == 1) {
                     authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
                     Optional.ofNullable(authenticationResponse.getContextualData())
-                            .map(ContextualData::getQrcode)
-                            .map(Qrcode::getHref)
-                            .ifPresent(qrCode -> session.setAttribute("qrCode", qrCode));
+                            .ifPresent(contextualData -> session.setAttribute("totp", contextualData));
                 } else {
                     // user should select the factor in a separate view
                     ModelAndView modelAndView = new ModelAndView("select-factor");
@@ -215,6 +253,8 @@ public class LoginController {
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
                 return responseHandler.registerVerifyForm(foundAuthenticator);
+            case AWAITING_POLL_ENROLLMENT:
+                return responseHandler.setupOktaVerifyForm(session);
             default:
                 return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
@@ -254,6 +294,16 @@ public class LoginController {
             if (factor.getMethod().equals(mode)) {
                 foundFactor = factor;
                 authenticationResponse = idxAuthenticationWrapper.selectFactor(proceedContext, foundFactor);
+                Optional.ofNullable(authenticationResponse.getContextualData())
+                        .map(ContextualData::getQrcode)
+                        .map(Qrcode::getHref)
+                        .ifPresent(qrCode -> {
+                            session.setAttribute("qrCode", qrCode);
+                            session.setAttribute("channelName", "qrcode");
+                        });
+                if ("totp".equals(foundFactor.getMethod())) {
+                    session.setAttribute("totp", "totp");
+                }
                 break;
             }
         }
@@ -271,6 +321,12 @@ public class LoginController {
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
                 return responseHandler.registerVerifyForm(foundFactor);
+            case AWAITING_CHANNEL_DATA_ENROLLMENT:
+                return responseHandler.oktaVerifyViaChannelDataForm(foundFactor, session);
+            case AWAITING_POLL_ENROLLMENT:
+                return responseHandler.setupOktaVerifyForm(session);
+            case AWAITING_CHALLENGE_POLL:
+                return responseHandler.oktaVerifyChallenge(authenticationResponse);
             default:
                 return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
@@ -301,13 +357,99 @@ public class LoginController {
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
-        VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(code);
-
-        AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.verifyAuthenticator(proceedContext, verifyAuthenticatorOptions);
+        AuthenticationResponse authenticationResponse;
+        if ("totp".equals(String.valueOf(session.getAttribute("totp")))) {
+            authenticationResponse = idxAuthenticationWrapper
+                    .verifyAuthenticator(proceedContext, new VerifyChannelDataOptions("totp", code));
+        } else {
+            VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(code);
+            authenticationResponse = idxAuthenticationWrapper
+                    .verifyAuthenticator(proceedContext, verifyAuthenticatorOptions);
+        }
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("verify");
+            modelAndView.addObject("errors", authenticationResponse.getErrors());
+            return modelAndView;
+        }
+
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
+    }
+
+    /**
+     * Handle channel data verification functionality.
+     *
+     * @param channelName   the channel name
+     * @param channelValue  the value for channel
+     * @param session the session
+     * @return the view associated with authentication response.
+     */
+    @PostMapping("/verify-channel-data")
+    public ModelAndView verifyChannelData(final @RequestParam("channelName") String channelName,
+                                          final @RequestParam("channelValue") String channelValue,
+                                          final HttpSession session) {
+        logger.info(":: Verify Channel Name, Value :: {}, {}", channelName, channelValue);
+
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        VerifyChannelDataOptions verifyChannelDataOptions = new VerifyChannelDataOptions(channelName, channelValue);
+
+        AuthenticationResponse authenticationResponse =
+                idxAuthenticationWrapper.verifyAuthenticator(proceedContext, verifyChannelDataOptions);
+
+        if (responseHandler.needsToShowErrors(authenticationResponse)) {
+            ModelAndView modelAndView = new ModelAndView("verify");
+            modelAndView.addObject("errors", authenticationResponse.getErrors());
+            return modelAndView;
+        }
+
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
+    }
+
+    /**
+     * Handle poll functionality.
+     *
+     * @param session the session
+     * @return the view associated with authentication response.
+     */
+    @GetMapping("/poll")
+    @ResponseBody
+    public PollResults pollResults(final HttpSession session) {
+        PollResults pollResults = new PollResults();
+        ProceedContext proceedContext = Util.getProceedContextForPoll(session);
+        if (proceedContext == null) {
+            proceedContext = Util.getProceedContextFromSession(session);
+        }
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.poll(proceedContext);
+
+        if (responseHandler.needsToShowErrors(authenticationResponse)) {
+            pollResults.setErrors(authenticationResponse.getErrors());
+        }
+        pollResults.setStatus(authenticationResponse.getAuthenticationStatus());
+
+        if (authenticationResponse.getAuthenticationStatus() == AuthenticationStatus.SUCCESS) {
+            responseHandler.handleTerminalTransitions(authenticationResponse, session);
+        }
+
+        return pollResults;
+    }
+
+    /**
+     * Handle Okta verify functionality.
+     *
+     * @param session the session
+     * @return the view associated with authentication response.
+     */
+    @PostMapping("/poll")
+    public ModelAndView poll(final HttpSession session) {
+        ProceedContext proceedContext = Util.getProceedContextForPoll(session);
+        if (proceedContext == null) {
+            proceedContext = Util.getProceedContextFromSession(session);
+        }
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.poll(proceedContext);
+
+        if (responseHandler.needsToShowErrors(authenticationResponse)) {
+            ModelAndView modelAndView = new ModelAndView("error");
             modelAndView.addObject("errors", authenticationResponse.getErrors());
             return modelAndView;
         }

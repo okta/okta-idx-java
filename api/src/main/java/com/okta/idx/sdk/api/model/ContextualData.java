@@ -24,6 +24,7 @@ public class ContextualData {
     private String sharedSecret;
     private ActivationData activationData;
     private ChallengeData challengeData;
+    private String correctAnswer;
 
     public Qrcode getQrcode() {
         return qrcode;
@@ -37,4 +38,5 @@ public class ContextualData {
 
     public ChallengeData getChallengeData() { return challengeData; }
 
+    public String getCorrectAnswer() { return correctAnswer; }
 }

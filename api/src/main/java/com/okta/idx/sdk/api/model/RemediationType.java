@@ -36,6 +36,8 @@ public class RemediationType {
 
     public static final String ENROLL_PROFILE = "enroll-profile";
 
+    public static final String ENROLL_POLL = "enroll-poll";
+
     public static final String SELECT_ENROLL_PROFILE = "select-enroll-profile";
 
     public static final String SELECT_AUTHENTICATOR_ENROLL = "select-authenticator-enroll";
@@ -45,6 +47,10 @@ public class RemediationType {
     public static final String AUTHENTICATOR_ENROLLMENT_DATA  = "authenticator-enrollment-data";
 
     public static final String AUTHENTICATOR_VERIFICATION_DATA = "authenticator-verification-data";
+
+    public static final String ENROLLMENT_CHANNEL_DATA = "enrollment-channel-data";
+
+    public static final String CHALLENGE_POLL = "challenge-poll";
 
     public static final String UNKNOWN = "unknown";
 }

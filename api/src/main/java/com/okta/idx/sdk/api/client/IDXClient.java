@@ -36,6 +36,8 @@ public interface IDXClient {
 
     IDXClientContext interact() throws ProcessingException;
 
+    IDXClientContext interact(String recoveryToken) throws ProcessingException;
+
     IDXResponse introspect(IDXClientContext idxClientContext) throws ProcessingException;
 
     IDXResponse identify(IdentifyRequest identifyRequest, String href) throws ProcessingException;
