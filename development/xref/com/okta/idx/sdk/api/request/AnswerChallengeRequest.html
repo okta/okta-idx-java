@@ -31,13 +31,19 @@
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>      <strong class="jxr_keyword">public</strong> <a name="Credentials" href="../../../../../../com/okta/idx/sdk/api/model/Credentials.html#Credentials">Credentials</a> credentials;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>      <a name="AnswerChallengeRequest" href="../../../../../../com/okta/idx/sdk/api/request/AnswerChallengeRequest.html#AnswerChallengeRequest">AnswerChallengeRequest</a>(String stateHandle, <a name="Credentials" href="../../../../../../com/okta/idx/sdk/api/model/Credentials.html#Credentials">Credentials</a> credentials) {
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>          <strong class="jxr_keyword">this</strong>.stateHandle = stateHandle;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>          <strong class="jxr_keyword">this</strong>.credentials = credentials;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>      }
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  }
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>      <strong class="jxr_keyword">public</strong> String phoneNumber;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>      <strong class="jxr_keyword">public</strong> String email;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>      <a name="AnswerChallengeRequest" href="../../../../../../com/okta/idx/sdk/api/request/AnswerChallengeRequest.html#AnswerChallengeRequest">AnswerChallengeRequest</a>(String stateHandle, <a name="Credentials" href="../../../../../../com/okta/idx/sdk/api/model/Credentials.html#Credentials">Credentials</a> credentials, String phoneNumber, String email) {
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>          <strong class="jxr_keyword">this</strong>.stateHandle = stateHandle;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>          <strong class="jxr_keyword">this</strong>.credentials = credentials;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>          <strong class="jxr_keyword">this</strong>.phoneNumber = phoneNumber;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>          <strong class="jxr_keyword">this</strong>.email = email;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>      }
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2020&#x2013;2021 <a href="http://developer.okta.com/">Okta</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2020&#x2013;2022 <a href="http://developer.okta.com/">Okta</a>. All rights reserved.</div>
 </body>
 </html>
