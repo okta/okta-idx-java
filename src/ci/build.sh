@@ -34,8 +34,8 @@ deploy () {
     echo "Downloading chromedriver"
     "${CHROMEDRIVER_DOWNLOAD_SCRIPT}"
 
-    echo "Deploying SNAPSHOT build"
-    ${MVN_CMD} deploy -Pci
+    echo "Running mvn verify"
+    ${MVN_CMD} verify -Pci
 
     # also deploy the javadocs to the site
     git clone -b gh-pages "https://github.com/${REPO_SLUG}.git" target/gh-pages/

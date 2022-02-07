@@ -18,6 +18,7 @@ package com.okta.idx.sdk.api.client
 
 import com.okta.commons.http.DefaultResponse
 import com.okta.commons.http.HttpException
+import com.okta.commons.http.HttpHeaders
 import com.okta.commons.http.MediaType
 import com.okta.commons.http.Request
 import com.okta.commons.http.RequestExecutor
@@ -26,6 +27,7 @@ import com.okta.idx.sdk.api.exception.ProcessingException
 import com.okta.idx.sdk.api.model.Authenticator
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment
 import com.okta.idx.sdk.api.model.Credentials
+import com.okta.idx.sdk.api.model.DeviceContext
 import com.okta.idx.sdk.api.model.FormValue
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Options
@@ -78,8 +80,7 @@ class BaseIDXClientTest {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
-        final IDXClient idxClient =
-                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        final IDXClient idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
         final Response stubbedResponse = new DefaultResponse(
                 200,
@@ -88,9 +89,15 @@ class BaseIDXClientTest {
                 -1)
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
+        ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
 
         IDXClientContext idxClientContext = idxClient.interact()
 
+        verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
+        def httpHeaders = argumentCaptor.getValue().getHeaders()
+        assertThat(httpHeaders.size(), is(3))
+        assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
+        assertThat(httpHeaders.getFirst(DeviceContext.USER_AGENT), is("example-user-agent"))
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getCodeVerifier(), notNullValue())
         assertThat(idxClientContext.getState(), notNullValue())
@@ -1302,6 +1309,7 @@ class BaseIDXClientTest {
         clientConfiguration.setClientId("test-client-id")
         clientConfiguration.setClientSecret("test-client-secret")
         clientConfiguration.setScopes(["test-scope"] as Set)
+        clientConfiguration.setDeviceContext(new DeviceContext().addParam(DeviceContext.USER_AGENT, "example-user-agent"))
         return clientConfiguration
     }
 }
