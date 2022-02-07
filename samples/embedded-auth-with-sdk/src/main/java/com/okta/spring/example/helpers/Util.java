@@ -51,4 +51,26 @@ public final class Util {
     public static ProceedContext getProceedContextFromSession(final HttpSession session) {
         return (ProceedContext) session.getAttribute("proceedContext");
     }
+
+    /**
+     * Set the proceedContext in session for poll operation.
+     *
+     * @param session the session
+     * @param proceedContext the ProceedContext
+     */
+    public static void setProceedContextForPoll(final HttpSession session, final ProceedContext proceedContext) {
+        if (proceedContext != null) {
+            session.setAttribute("proceedContextForPoll", proceedContext);
+        }
+    }
+
+    /**
+     * Fetches the proceedContext from session for poll operation.
+     *
+     * @param session the session
+     * @return ProceedContext
+     */
+    public static ProceedContext getProceedContextForPoll(final HttpSession session) {
+        return (ProceedContext) session.getAttribute("proceedContextForPoll");
+    }
 }

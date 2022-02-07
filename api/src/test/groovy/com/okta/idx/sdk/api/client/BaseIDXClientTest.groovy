@@ -49,7 +49,11 @@ import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder
 import com.okta.idx.sdk.api.response.IDXResponse
 import com.okta.idx.sdk.api.response.TokenResponse
 import com.okta.idx.sdk.api.config.ClientConfiguration
+import org.hamcrest.CoreMatchers
+import org.mockito.ArgumentCaptor
 import org.testng.annotations.Test
+
+import java.util.stream.Collectors
 
 import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri
 
@@ -57,6 +61,8 @@ import static org.hamcrest.Matchers.arrayWithSize
 import static org.hamcrest.Matchers.is
 import static org.mockito.Mockito.any
 import static org.mockito.Mockito.mock
+import static org.mockito.Mockito.times
+import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
 
 import static org.hamcrest.MatcherAssert.assertThat
@@ -89,6 +95,31 @@ class BaseIDXClientTest {
         assertThat(idxClientContext.getCodeVerifier(), notNullValue())
         assertThat(idxClientContext.getState(), notNullValue())
         assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
+    }
+
+    @Test
+    void testInteractWithRecoveryToken() {
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+        final Response stubbedResponse = new DefaultResponse(
+                200,
+                MediaType.APPLICATION_JSON,
+                new FileInputStream(getClass().getClassLoader().getResource("interact-response.json").getFile()),
+                -1)
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
+        ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
+        final IDXClient idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        IDXClientContext idxClientContext = idxClient.interact("sample-token_123")
+
+        verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
+        InputStream body = argumentCaptor.getValue().getBody()
+        String parameters = new BufferedReader(new InputStreamReader(body)).lines().collect(Collectors.joining())
+
+        assertThat(idxClientContext, notNullValue())
+        assertThat(idxClientContext.getCodeVerifier(), notNullValue())
+        assertThat(idxClientContext.getState(), notNullValue())
+        assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
+        assertThat(parameters, CoreMatchers.containsString("&recovery_token=sample-token_123"))
     }
 
     @Test

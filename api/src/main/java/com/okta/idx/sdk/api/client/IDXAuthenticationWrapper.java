@@ -33,6 +33,7 @@ import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.model.TokenType;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
+import com.okta.idx.sdk.api.model.VerifyChannelDataOptions;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
 import com.okta.idx.sdk.api.request.ChallengeRequest;
@@ -322,6 +323,10 @@ public class IDXAuthenticationWrapper {
                 authenticator.setId(factor.getId());
                 authenticator.setEnrollmentId(factor.getEnrollmentId());
                 authenticator.setMethodType(factor.getMethod());
+                if(factor.getChannel() != null) {
+                    authenticator.setChannel(factor.getChannel());
+                    authenticator.setMethodType(null);
+                }
                 ChallengeRequest request = ChallengeRequestBuilder.builder()
                         .withStateHandle(proceedContext.getStateHandle())
                         .withAuthenticator(authenticator)
@@ -421,6 +426,36 @@ public class IDXAuthenticationWrapper {
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
                     client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
             ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    public AuthenticationResponse verifyAuthenticator(ProceedContext proceedContext,
+                                                      VerifyChannelDataOptions verifyChannelDataOptions) {
+        try {
+            AnswerChallengeRequestBuilder builder = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(proceedContext.getStateHandle());
+
+            if("phoneNumber".equals(verifyChannelDataOptions.getChannelName())) {
+                builder.withPhoneNumber(verifyChannelDataOptions.getValue());
+            }
+            if("email".equals(verifyChannelDataOptions.getChannelName())) {
+                builder.withEmail(verifyChannelDataOptions.getValue());
+            }
+            if("totp".equals(verifyChannelDataOptions.getChannelName())) {
+                Credentials credentials = new Credentials();
+                credentials.setTotp(verifyChannelDataOptions.getValue());
+                builder.withCredentials(credentials);
+            }
+
+            AnswerChallengeRequest challengeAuthenticatorRequest = builder.build();
+
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
+            ).asAuthenticationResponse(AuthenticationStatus.AWAITING_POLL_ENROLLMENT);
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -571,7 +606,10 @@ public class IDXAuthenticationWrapper {
                 PollRequest pollRequest = PollRequestBuilder.builder()
                         .withStateHandle(proceedContext.getStateHandle())
                         .build();
-                return client.poll(pollRequest, proceedContext.getPollInfo().getHref());
+                String href = proceedContext.getPollInfo() != null
+                        ? proceedContext.getPollInfo().getHref()
+                        : proceedContext.getHref();
+                return client.poll(pollRequest, href);
             }).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
@@ -581,7 +619,7 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Get IDX client context by calling the interact endpoint.
+     * Get IDX client context by calling interact endpoint.
      * ClientContext reference contains the interaction handle and PKCE params.
      * <p>
      * This function can be used by the client applications to get a handle
@@ -737,6 +775,16 @@ public class IDXAuthenticationWrapper {
     public AuthenticationResponse begin() {
         try {
             return AuthenticationTransaction.create(client).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    public AuthenticationResponse beginPasswordRecovery(String recoveryToken) {
+        try {
+            return AuthenticationTransaction.create(client, recoveryToken).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
