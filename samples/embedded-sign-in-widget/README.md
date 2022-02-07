@@ -24,7 +24,7 @@ These Examples are:
 6. Progressive Profiling
 
 For information and guides on how to build your app with this sample, please take a look at the [Java
-guides for Embedded Widget](https://developer.okta.com/docs/guides/oie-embedded-widget-use-cases/java/oie-embedded-widget-use-case-overview/)
+guides for Embedded Widget](https://developer.okta.com/docs/guides/oie-embedded-widget-use-case-basic-sign-in/java/main/)
 
 ## Prerequisites
 
@@ -79,5 +79,5 @@ You can login with the same account that you created when signing up for your De
 > **NOTE:** You should use an incognito tab to test the flow from a blank slate.
 
 [Okta Spring Boot Library]: https://github.com/okta/okta-spring-boot
-[OIDC Web Application Setup Instructions]: https://developer.okta.com/authentication-guide/implementing-authentication/auth-code#1-setting-up-your-application
+[OIDC Web Application Setup Instructions]: https://developer.okta.com/docs/guides/implement-grant-type/authcode/main/#set-up-your-app
 [Okta Sign In Widget]: https://github.com/okta/okta-signin-widget
