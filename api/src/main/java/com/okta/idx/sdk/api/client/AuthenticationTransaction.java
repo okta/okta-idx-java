@@ -213,6 +213,10 @@ final class AuthenticationTransaction {
             authenticationResponse.getWebAuthnParams().setCurrentAuthenticator(idxResponse.getCurrentAuthenticator());
         }
 
+        if (idxResponse.getCurrentAuthenticatorEnrollment() != null) {
+            authenticationResponse.setCurrentAuthenticatorEnrollment(idxResponse.getCurrentAuthenticatorEnrollment());
+        }
+
         if (idxResponse.getAuthenticatorEnrollments() != null) {
             authenticationResponse.setAuthenticatorEnrollments(idxResponse.getAuthenticatorEnrollments());
         }

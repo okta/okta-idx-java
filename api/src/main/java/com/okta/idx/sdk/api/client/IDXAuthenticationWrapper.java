@@ -33,6 +33,7 @@ import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.model.TokenType;
 import com.okta.idx.sdk.api.model.UserProfile;
+import com.okta.idx.sdk.api.model.VerifyAuthenticatorAnswer;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.model.VerifyChannelDataOptions;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
@@ -433,6 +434,36 @@ public class IDXAuthenticationWrapper {
         try {
             Credentials credentials = new Credentials();
             credentials.setPasscode(verifyAuthenticatorOptions.getCode().toCharArray());
+
+            // build answer password authenticator challenge request
+            AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(proceedContext.getStateHandle())
+                    .withCredentials(credentials)
+                    .build();
+
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
+            ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Verify Authenticator with the supplied authenticator options.
+     *
+     * @param proceedContext the ProceedContext
+     * @param verifyAuthenticatorAnswer the verify Authenticator answer
+     * @return the Authentication response
+     */
+    public AuthenticationResponse verifyAuthenticator(ProceedContext proceedContext,
+                                                      VerifyAuthenticatorAnswer verifyAuthenticatorAnswer) {
+        try {
+            Credentials credentials = new Credentials();
+            credentials.setQuestionKey(verifyAuthenticatorAnswer.getQuestionKey());
+            credentials.setAnswer(verifyAuthenticatorAnswer.getAnswer().toCharArray());
 
             // build answer password authenticator challenge request
             AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
