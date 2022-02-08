@@ -206,15 +206,13 @@ public final class ResponseHandler {
      */
     public ModelAndView verifyForm(AuthenticationResponse response) {
         ModelAndView modelAndView = new ModelAndView("verify");
-        if (response.getCurrentAuthenticatorEnrollment() != null) {
-            if ("security_question".equals(response.getCurrentAuthenticatorEnrollment().getValue().getType())) {
-                modelAndView.addObject("security_question",
-                        response.getCurrentAuthenticatorEnrollment().getValue().getProfile().getQuestion());
-                modelAndView.addObject("security_question_key",
-                        response.getCurrentAuthenticatorEnrollment().getValue().getProfile().getQuestionKey());
-            }
+        if (response.getCurrentAuthenticatorEnrollment() != null &&
+                "security_question".equals(response.getCurrentAuthenticatorEnrollment().getValue().getType())) {
+            modelAndView.addObject("security_question",
+                    response.getCurrentAuthenticatorEnrollment().getValue().getProfile().getQuestion());
+            modelAndView.addObject("security_question_key",
+                    response.getCurrentAuthenticatorEnrollment().getValue().getProfile().getQuestionKey());
         }
-
         return modelAndView;
     }
 
