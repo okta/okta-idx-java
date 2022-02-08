@@ -223,8 +223,11 @@ public class LoginController {
 
                 if (foundAuthenticator.getFactors().size() == 1) {
                     authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
-                    Optional.ofNullable(authenticationResponse.getContextualData())
-                            .ifPresent(contextualData -> session.setAttribute("totp", contextualData));
+                    if (authenticationResponse.getContextualData() != null) {
+                        session.setAttribute("totp", authenticationResponse.getContextualData());
+                    } else {
+                        session.removeAttribute("totp");
+                    }
                 } else {
                     // user should select the factor in a separate view
                     ModelAndView modelAndView = new ModelAndView("select-factor");
