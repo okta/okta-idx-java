@@ -350,8 +350,9 @@ public class LoginController {
     /**
      * Handle authenticator verification functionality.
      *
-     * @param code    the verification code
-     * @param session the session
+     * @param code                  the verification code
+     * @param securityQuestionKey   the security question key
+     * @param session               the session
      * @return the view associated with authentication response.
      */
     @PostMapping("/verify")
@@ -363,7 +364,7 @@ public class LoginController {
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         AuthenticationResponse authenticationResponse;
-        if(!Strings.isEmpty(securityQuestionKey)) {
+        if (!Strings.isEmpty(securityQuestionKey)) {
             authenticationResponse = idxAuthenticationWrapper
                     .verifyAuthenticator(proceedContext, new VerifyAuthenticatorAnswer(code, securityQuestionKey));
         } else if ("totp".equals(String.valueOf(session.getAttribute("totp")))) {

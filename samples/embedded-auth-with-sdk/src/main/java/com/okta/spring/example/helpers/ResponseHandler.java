@@ -201,12 +201,13 @@ public final class ResponseHandler {
 
     /**
      * Return the view for verify form.
+     * @param response the authentication response
      * @return the view for verifyForm.
      */
     public ModelAndView verifyForm(AuthenticationResponse response) {
         ModelAndView modelAndView = new ModelAndView("verify");
         if (response.getCurrentAuthenticatorEnrollment() != null) {
-            if("security_question".equals(response.getCurrentAuthenticatorEnrollment().getValue().getType())) {
+            if ("security_question".equals(response.getCurrentAuthenticatorEnrollment().getValue().getType())) {
                 modelAndView.addObject("security_question",
                         response.getCurrentAuthenticatorEnrollment().getValue().getProfile().getQuestion());
                 modelAndView.addObject("security_question_key",
