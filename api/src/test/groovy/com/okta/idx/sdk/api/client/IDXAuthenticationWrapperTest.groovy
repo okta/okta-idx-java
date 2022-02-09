@@ -25,6 +25,7 @@ import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Idp
 import com.okta.idx.sdk.api.model.PollInfo
 import com.okta.idx.sdk.api.model.UserProfile
+import com.okta.idx.sdk.api.model.VerifyAuthenticatorAnswer
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
 import com.okta.idx.sdk.api.model.VerifyChannelDataOptions
 import com.okta.idx.sdk.api.request.WebAuthnRequest
@@ -749,6 +750,47 @@ class IDXAuthenticationWrapperTest {
         )
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItem("Authentication failed"))
+        assertThat(authenticationResponse.getAuthenticators(), nullValue())
+    }
+
+    @Test(testName = "User logs in with password and security question")
+    void testLoginWithPasswordAndSecurityQuestion() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", "identify-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "challenge", "challenge-security-question-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", "answer-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "token", "token-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("some.user@example.com", "superSecret".toCharArray()), beginResponse.proceedContext
+        )
+
+        Optional<Authenticator> authenticator = authenticationResponse.getAuthenticators().stream()
+                .filter(x -> "security_question".equals(x.type)).findFirst()
+        assertThat(authenticator.isPresent(), is(true))
+
+        authenticationResponse = idxAuthenticationWrapper
+                .selectAuthenticator(authenticationResponse.proceedContext, authenticator.get())
+
+        authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
+                authenticationResponse.proceedContext,
+                new VerifyAuthenticatorAnswer("Answer", "first_computer_game")
+        )
+
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(),
+                is(AuthenticationStatus.SUCCESS)
+        )
         assertThat(authenticationResponse.getAuthenticators(), nullValue())
     }
 
