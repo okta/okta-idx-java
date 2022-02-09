@@ -1,0 +1,220 @@
+{
+  "version": "1.0.0",
+  "stateHandle": "02Fq1neMjG-zUE2738idmaV246JRIQolX4vTKitOS7",
+  "expiresAt": "2022-02-09T11:04:50.000Z",
+  "intent": "LOGIN",
+  "remediation": {
+    "type": "array",
+    "value": [
+      {
+        "rel": ["create-form"],
+        "name": "challenge-authenticator",
+        "relatesTo": ["$.currentAuthenticatorEnrollment"],
+        "href": "https://foo.oktapreview.com/idp/idx/challenge/answer",
+        "method": "POST",
+        "produces": "application/ion+json; okta-version=1.0.0",
+        "value": [
+          {
+            "name": "credentials",
+            "type": "object",
+            "form": {
+              "value": [
+                {
+                  "name": "questionKey",
+                  "label": "What was the first computer game you played?",
+                  "required": true,
+                  "value": "first_computer_game",
+                  "visible": false,
+                  "mutable": false
+                },
+                {
+                  "name": "answer",
+                  "label": "Answer",
+                  "required": true,
+                  "secret": true
+                }
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "stateHandle",
+            "required": true,
+            "value": "02Fq1neMjG-zUE2738idmaV246JRIQolX4vTKitOS7",
+            "visible": false,
+            "mutable": false
+          }
+        ],
+        "accepts": "application/json; okta-version=1.0.0"
+      },
+      {
+        "rel": ["create-form"],
+        "name": "select-authenticator-authenticate",
+        "href": "https://foo.oktapreview.com/idp/idx/challenge",
+        "method": "POST",
+        "produces": "application/ion+json; okta-version=1.0.0",
+        "value": [
+          {
+            "name": "authenticator",
+            "type": "object",
+            "options": [
+              {
+                "label": "Email",
+                "value": {
+                  "form": {
+                    "value": [
+                      {
+                        "name": "id",
+                        "required": true,
+                        "value": "aut47hb8fj3PqU6dh0g7",
+                        "mutable": false
+                      },
+                      {
+                        "name": "methodType",
+                        "required": false,
+                        "value": "email",
+                        "mutable": false
+                      }
+                    ]
+                  }
+                },
+                "relatesTo": "$.authenticatorEnrollments.value[0]"
+              },
+              {
+                "label": "Security Question",
+                "value": {
+                  "form": {
+                    "value": [
+                      {
+                        "name": "id",
+                        "required": true,
+                        "value": "aut47hb8fllgs7BO50g7",
+                        "mutable": false
+                      },
+                      {
+                        "name": "methodType",
+                        "required": false,
+                        "value": "security_question",
+                        "mutable": false
+                      }
+                    ]
+                  }
+                },
+                "relatesTo": "$.authenticatorEnrollments.value[2]"
+              }
+            ]
+          },
+          {
+            "name": "stateHandle",
+            "required": true,
+            "value": "02Fq1neMjG-zUE2738idmaV246JRIQolX4vTKitOS7",
+            "visible": false,
+            "mutable": false
+          }
+        ],
+        "accepts": "application/json; okta-version=1.0.0"
+      }
+    ]
+  },
+  "currentAuthenticatorEnrollment": {
+    "type": "object",
+    "value": {
+      "profile": {
+        "questionKey": "first_computer_game",
+        "question": "What was the first computer game you played?"
+      },
+      "contextualData": {
+        "enrolledQuestion": {
+          "questionKey": "first_computer_game",
+          "question": "What was the first computer game you played?"
+        }
+      },
+      "type": "security_question",
+      "key": "security_question",
+      "id": "qae47sh59g7Zqv6lQ0g7",
+      "displayName": "Security Question",
+      "methods": [{ "type": "security_question" }]
+    }
+  },
+  "authenticators": {
+    "type": "array",
+    "value": [
+      {
+        "type": "email",
+        "key": "okta_email",
+        "id": "aut47hb8fj3PqU6dh0g7",
+        "displayName": "Email",
+        "methods": [{ "type": "email" }]
+      },
+      {
+        "type": "security_question",
+        "key": "security_question",
+        "id": "aut47hb8fllgs7BO50g7",
+        "displayName": "Security Question",
+        "methods": [{ "type": "security_question" }]
+      }
+    ]
+  },
+  "authenticatorEnrollments": {
+    "type": "array",
+    "value": [
+      {
+        "profile": { "email": "s***r@example.com" },
+        "type": "email",
+        "key": "okta_email",
+        "id": "eae47sh489OMNdAbQ0g7",
+        "displayName": "Email",
+        "methods": [{ "type": "email" }]
+      },
+      {
+        "profile": {
+          "questionKey": "first_computer_game",
+          "question": "What was the first computer game you played?"
+        },
+        "type": "security_question",
+        "key": "security_question",
+        "id": "qae47sh59g7Zqv6lQ0g7",
+        "displayName": "Security Question",
+        "methods": [{ "type": "security_question" }]
+      }
+    ]
+  },
+  "user": {
+    "type": "object",
+    "value": {
+      "id": "00u47sgutfwnIImiK0g7",
+      "identifier": "some.user@example.com",
+      "profile": {
+        "firstName": "Some",
+        "lastName": "User",
+        "timeZone": "America/Los_Angeles",
+        "locale": "en_US"
+      }
+    }
+  },
+  "cancel": {
+    "rel": ["create-form"],
+    "name": "cancel",
+    "href": "https://foo.oktapreview.com/idp/idx/cancel",
+    "method": "POST",
+    "produces": "application/ion+json; okta-version=1.0.0",
+    "value": [
+      {
+        "name": "stateHandle",
+        "required": true,
+        "value": "02Fq1neMjG-zUE2738idmaV246JRIQolX4vTKitOS7",
+        "visible": false,
+        "mutable": false
+      }
+    ],
+    "accepts": "application/json; okta-version=1.0.0"
+  },
+  "app": {
+    "type": "object",
+    "value": {
+      "name": "oidc_client",
+      "label": "IDX Web App",
+      "id": "0oa47kzef6o7xZrAs0g7"
+    }
+  }
+}
