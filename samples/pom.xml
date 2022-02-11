@@ -33,24 +33,5 @@
         <module>embedded-auth-with-sdk</module>
         <module>embedded-sign-in-widget</module>
     </modules>
-
-    <dependencyManagement>
-        <dependencies>
-
-            <!-- logging -->
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-to-slf4j</artifactId>
-                <version>2.15.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-api</artifactId>
-                <version>2.15.0</version>
-            </dependency>
-       </dependencies>
-    </dependencyManagement>
-
 </project>
 

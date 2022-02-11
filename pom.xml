@@ -35,9 +35,12 @@
 
     <properties>
         <jackson.version>2.13.0</jackson.version>
-        <snakeyaml.version>1.27</snakeyaml.version>
+        <snakeyaml.version>1.29</snakeyaml.version>
         <okta.commons.version>1.3.0</okta.commons.version>
         <okta.sdk.previousVersion>1.0.0</okta.sdk.previousVersion>
+        <org.apache.tomcat.embed.version>9.0.58</org.apache.tomcat.embed.version>
+        <org.jetbrains.kotlin.version>1.6.10</org.jetbrains.kotlin.version>
+        <ch.qos.logback.version>1.2.10</ch.qos.logback.version>
         <github.slug>okta/okta-idx-java</github.slug>
     </properties>
 
@@ -102,6 +105,26 @@
                 <artifactId>javax.annotation-api</artifactId>
                 <version>1.3.2</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${org.apache.tomcat.embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${org.apache.tomcat.embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>${org.jetbrains.kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-common</artifactId>
+                <version>${org.jetbrains.kotlin.version}</version>
+            </dependency>
 
             <!-- ITs -->
             <dependency>
@@ -131,7 +154,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.2.2</version>
+                <version>${ch.qos.logback.version}</version>
             </dependency>
 
             <dependency>
