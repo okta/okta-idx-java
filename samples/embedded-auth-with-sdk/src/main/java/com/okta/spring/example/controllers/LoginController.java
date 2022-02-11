@@ -26,6 +26,7 @@ import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Qrcode;
 import com.okta.idx.sdk.api.model.UserProfile;
+import com.okta.idx.sdk.api.model.VerifyAuthenticatorAnswer;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.model.VerifyChannelDataOptions;
 import com.okta.idx.sdk.api.request.WebAuthnRequest;
@@ -223,8 +224,11 @@ public class LoginController {
 
                 if (foundAuthenticator.getFactors().size() == 1) {
                     authenticationResponse = idxAuthenticationWrapper.selectAuthenticator(proceedContext, authenticator);
-                    Optional.ofNullable(authenticationResponse.getContextualData())
-                            .ifPresent(contextualData -> session.setAttribute("totp", contextualData));
+                    if (authenticationResponse.getContextualData() != null) {
+                        session.setAttribute("totp", authenticationResponse.getContextualData());
+                    } else {
+                        session.removeAttribute("totp");
+                    }
                 } else {
                     // user should select the factor in a separate view
                     ModelAndView modelAndView = new ModelAndView("select-factor");
@@ -346,19 +350,24 @@ public class LoginController {
     /**
      * Handle authenticator verification functionality.
      *
-     * @param code    the verification code
-     * @param session the session
+     * @param code                  the verification code
+     * @param securityQuestionKey   the security question key
+     * @param session               the session
      * @return the view associated with authentication response.
      */
     @PostMapping("/verify")
     public ModelAndView verify(final @RequestParam("code") String code,
+                               final @RequestParam(value = "security_question_key", required = false) String securityQuestionKey,
                                final HttpSession session) {
         logger.info(":: Verify Code :: {}", code);
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
         AuthenticationResponse authenticationResponse;
-        if ("totp".equals(String.valueOf(session.getAttribute("totp")))) {
+        if (!Strings.isEmpty(securityQuestionKey)) {
+            authenticationResponse = idxAuthenticationWrapper
+                    .verifyAuthenticator(proceedContext, new VerifyAuthenticatorAnswer(code, securityQuestionKey));
+        } else if ("totp".equals(String.valueOf(session.getAttribute("totp")))) {
             authenticationResponse = idxAuthenticationWrapper
                     .verifyAuthenticator(proceedContext, new VerifyChannelDataOptions("totp", code));
         } else {

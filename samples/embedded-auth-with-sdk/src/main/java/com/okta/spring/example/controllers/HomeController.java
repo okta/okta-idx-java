@@ -20,6 +20,7 @@ import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.FormValue;
+import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
 import com.okta.spring.example.helpers.HomeHelper;
@@ -133,7 +134,9 @@ public class HomeController {
                 return mav;
             }
 
-            authenticationResponse = authenticationWrapper.introspect(proceedContext.getClientContext());
+            VerifyAuthenticatorOptions verifyAuthenticatorOptions = new VerifyAuthenticatorOptions(otp);
+            authenticationResponse = authenticationWrapper
+                    .verifyAuthenticator(proceedContext, verifyAuthenticatorOptions);
             return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
 
