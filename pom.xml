@@ -25,7 +25,7 @@
 
     <groupId>com.okta.idx.sdk</groupId>
     <artifactId>okta-idx-java-root</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>2.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Okta IDX Java SDK</name>
@@ -34,10 +34,13 @@
     <inceptionYear>2020</inceptionYear>
 
     <properties>
-        <jackson.version>2.11.3</jackson.version>
-        <snakeyaml.version>1.27</snakeyaml.version>
-        <okta.commons.version>1.2.6</okta.commons.version>
-        <okta.sdk.previousVersion>0.1.0-beta.8</okta.sdk.previousVersion>
+        <jackson.version>2.13.0</jackson.version>
+        <snakeyaml.version>1.29</snakeyaml.version>
+        <okta.commons.version>1.3.0</okta.commons.version>
+        <okta.sdk.previousVersion>1.0.0</okta.sdk.previousVersion>
+        <org.apache.tomcat.embed.version>9.0.58</org.apache.tomcat.embed.version>
+        <org.jetbrains.kotlin.version>1.6.10</org.jetbrains.kotlin.version>
+        <ch.qos.logback.version>1.2.10</ch.qos.logback.version>
         <github.slug>okta/okta-idx-java</github.slug>
     </properties>
 
@@ -102,6 +105,26 @@
                 <artifactId>javax.annotation-api</artifactId>
                 <version>1.3.2</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${org.apache.tomcat.embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${org.apache.tomcat.embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>${org.jetbrains.kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-common</artifactId>
+                <version>${org.jetbrains.kotlin.version}</version>
+            </dependency>
 
             <!-- ITs -->
             <dependency>
@@ -131,7 +154,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.2.2</version>
+                <version>${ch.qos.logback.version}</version>
             </dependency>
 
             <dependency>
@@ -162,6 +185,12 @@
     </dependencyManagement>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+            <version>2.8.0</version>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -278,7 +307,7 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <version>0.15.3</version>
+                <version>0.15.4</version>
                 <configuration>
                     <oldVersion>
                         <dependency>
@@ -295,19 +324,6 @@
                     </parameter>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>sonatype-nexus-staging</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose> <!-- TODO change to true after first release -->
-                    <keepStagingRepositoryOnFailure>true</keepStagingRepositoryOnFailure>
-                    <keepStagingRepositoryOnCloseRuleFailure>true</keepStagingRepositoryOnCloseRuleFailure>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -318,11 +334,6 @@
                     <plugin>
                         <groupId>com.okta</groupId>
                         <artifactId>okta-doclist-maven-plugin</artifactId>
-                        <configuration>
-                            <legacyVersions>
-                                <legacyVersion>0.0.4</legacyVersion>
-                            </legacyVersions>
-                        </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -336,4 +347,3 @@
         </profile>
     </profiles>
 </project>
-

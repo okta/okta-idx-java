@@ -18,8 +18,12 @@ package com.okta.idx.sdk.api.response;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
+import com.okta.idx.sdk.api.model.ContextualData;
+import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Idp;
+import com.okta.idx.sdk.webauthn.WebAuthnParams;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +43,14 @@ public class AuthenticationResponse {
     private List<Authenticator> authenticators;
 
     private List<Idp> idps = new LinkedList<>();
+
+    private ContextualData contextualData;
+
+    private AuthenticatorEnrollments authenticatorEnrollments;
+
+    private WebAuthnParams webAuthnParams = new WebAuthnParams();
+
+    private CurrentAuthenticatorEnrollment currentAuthenticatorEnrollment;
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
@@ -94,5 +106,31 @@ public class AuthenticationResponse {
 
     public void setIdps(List<Idp> idps) {
         this.idps = idps;
+    }
+
+    public AuthenticatorEnrollments getAuthenticatorEnrollments() {
+        return authenticatorEnrollments;
+    }
+
+    public void setAuthenticatorEnrollments(AuthenticatorEnrollments authenticatorEnrollments) {
+        this.authenticatorEnrollments = authenticatorEnrollments;
+    }
+
+    public ContextualData getContextualData() {
+        return contextualData;
+    }
+
+    public void setContextualData(ContextualData contextualData) {
+        this.contextualData = contextualData;
+    }
+
+    public WebAuthnParams getWebAuthnParams() {
+        return webAuthnParams;
+    }
+
+    public CurrentAuthenticatorEnrollment getCurrentAuthenticatorEnrollment() { return currentAuthenticatorEnrollment; }
+
+    public void setCurrentAuthenticatorEnrollment(CurrentAuthenticatorEnrollment currentAuthenticatorEnrollment) {
+        this.currentAuthenticatorEnrollment = currentAuthenticatorEnrollment;
     }
 }

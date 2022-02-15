@@ -1,0 +1,115 @@
+<!--
+  ~ Copyright (c) 2022-Present, Okta, Inc.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Okta Verify</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        .enroll-poll-ov-view {
+            width: 440px;
+            margin: 50px auto;
+        }
+
+        .enroll-poll-ov-view form {
+            margin-bottom: 15px;
+            background: #f7f7f7;
+            box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+
+        .enroll-poll-ov-view h2 {
+            margin: 0 0 15px;
+        }
+
+        .qrcode-container .qrcode {
+            width: 300px;
+            margin: auto;
+            display: block;
+        }
+
+        .btn {
+            font-size: 15px;
+            font-weight: bold;
+        }
+    </style>
+
+    <script th:inline="javascript">
+
+        function poll() {
+            fetch("/poll", {method: 'GET'})
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response:", data);
+                    switch (data['status']) {
+                        case "AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION":
+                            document.getElementById("enroll-poll-ov-form").submit();
+                            break;
+                        case "AWAITING_POLL_ENROLLMENT":
+                        case "AWAITING_CHALLENGE_POLL":
+                            setTimeout(poll, [[${pollTimeout}]])
+                            break;
+                        case "SUCCESS":
+                            location.href = '/';
+                            break;
+                        default:
+                            console.log("Default:", data);
+                    }
+                }).catch(function (err) {
+                    console.error(err);
+                }
+            );
+        }
+        setTimeout(poll, [[${pollTimeout}]])
+
+    </script>
+</head>
+
+<body>
+    <div style="padding:1em">
+        <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
+    </div>
+
+    <div class="enroll-poll-ov-view">
+        <form id="enroll-poll-ov-form" th:action="@{/poll}" method="post">
+            <div>
+                <h2 class="text-center">Okta Verify</h2>
+                <div th:if="${correctAnswer}">
+                    <p>
+                        Correct answer is <span th:text="${correctAnswer}"></span>
+                    </p>
+                </div>
+                <div th:unless="${correctAnswer}">
+                    <p>
+                        Get a push notification
+                    </p>
+                    <a th:href="@{/select-authenticator}" class="switch-channel-link">Verify with something else</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

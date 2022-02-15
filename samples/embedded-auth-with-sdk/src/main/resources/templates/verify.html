@@ -57,14 +57,17 @@
 
 <div class="verify-form">
     <form th:action="@{/verify}" method="post">
-        <h2 class="text-center">Verify Code</h2>
+        <h2 class="text-center" th:if="${security_question}">Verify Answer</h2>
+        <h2 class="text-center" th:unless="${security_question}">Verify Code</h2>
         <div th:if="${errors}" class="alert alert-danger">
             <span th:text="${errors}"></span>
         </div>
-        <p class="font-weight-light">Please enter the code below.</p>
+        <p class="font-weight-light" th:if="${security_question}" th:text="${security_question}"></p>
+        <p class="font-weight-light" th:unless="${security_question}">Please enter the code below.</p>
         <div class="form-group">
             <input type="text" class="form-control" name="code" required="required">
         </div>
+        <input type="hidden" th:if="${security_question_key}" name="security_question_key" th:value="${security_question_key}">
         <div class="form-group">
             <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
         </div>

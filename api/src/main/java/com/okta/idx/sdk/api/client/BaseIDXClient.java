@@ -46,6 +46,7 @@ import com.okta.idx.sdk.api.request.EnrollRequest;
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IntrospectRequest;
+import com.okta.idx.sdk.api.request.PollRequest;
 import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.response.ErrorResponse;
@@ -66,7 +67,7 @@ import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri;
 
 final class BaseIDXClient implements IDXClient {
 
-    private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/1.0.0";
+    private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/2.0.0";
 
     private final ClientConfiguration clientConfiguration;
 
@@ -96,6 +97,11 @@ final class BaseIDXClient implements IDXClient {
 
     @Override
     public IDXClientContext interact() throws ProcessingException {
+        return interact(null);
+    }
+
+    @Override
+    public IDXClientContext interact(String recoveryToken) throws ProcessingException {
 
         InteractResponse interactResponse;
         String codeVerifier, codeChallenge, state;
@@ -105,20 +111,29 @@ final class BaseIDXClient implements IDXClient {
             codeChallenge = PkceUtil.generateCodeChallenge(codeVerifier);
             state = UUID.randomUUID().toString();
 
-            StringBuilder urlParameters = new StringBuilder();
-            urlParameters.append("client_id=").append(clientConfiguration.getClientId());
-            urlParameters.append("&scope=").append(clientConfiguration.getScopes().stream()
-                    .map(Object::toString).collect(Collectors.joining(" ")));
-            urlParameters.append("&code_challenge=").append(codeChallenge);
-            urlParameters.append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD);
-            urlParameters.append("&redirect_uri=").append(clientConfiguration.getRedirectUri());
-            urlParameters.append("&state=").append(state);
+            StringBuilder urlParameters = new StringBuilder()
+                .append("client_id=").append(clientConfiguration.getClientId())
+                .append("&client_secret=").append(clientConfiguration.getClientSecret())
+                .append("&scope=").append(clientConfiguration.getScopes().stream()
+                    .map(Object::toString).collect(Collectors.joining(" ")))
+                .append("&code_challenge=").append(codeChallenge)
+                .append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD)
+                .append("&redirect_uri=").append(clientConfiguration.getRedirectUri())
+                .append("&state=").append(state);
+            if (Strings.hasText(recoveryToken)) {
+                urlParameters.append("&recovery_token=").append(recoveryToken);
+            }
+
+            HttpHeaders httpHeaders = getHttpHeaders(true);
+            if (clientConfiguration.getDeviceContext() != null) {
+                httpHeaders.setAll(clientConfiguration.getDeviceContext().getAll());
+            }
 
             Request request = new DefaultRequest(
                 HttpMethod.POST,
                 getNormalizedUri(clientConfiguration.getIssuer(), "/v1/interact"),
                 null,
-                getHttpHeaders(true),
+                httpHeaders,
                 new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
                 -1L);
 
@@ -427,6 +442,37 @@ final class BaseIDXClient implements IDXClient {
     }
 
     @Override
+    public IDXResponse poll(PollRequest pollRequest, String href) throws ProcessingException {
+
+        IDXResponse idxResponse;
+
+        try {
+            Request request = new DefaultRequest(
+                    HttpMethod.POST,
+                    Strings.hasText(href) ? href : clientConfiguration.getBaseUrl() + "/idp/idx/challenge/poll",
+                    null,
+                    getHttpHeaders(false),
+                    new ByteArrayInputStream(objectMapper.writeValueAsBytes(pollRequest)),
+                    -1L);
+
+            Response response = requestExecutor.executeRequest(request);
+
+            if (response.getHttpStatus() != 200) {
+                handleErrorResponse(request, response);
+            }
+
+            JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
+
+        } catch (IOException | HttpException e) {
+            throw new ProcessingException(e);
+        }
+
+        return idxResponse;
+    }
+
+    @Override
     public TokenResponse token(String url, String grantType, String interactionCode, IDXClientContext idxClientContext) throws ProcessingException {
 
         TokenResponse tokenResponse;
@@ -488,6 +534,27 @@ final class BaseIDXClient implements IDXClient {
 
             requestExecutor.executeRequest(request);
         } catch (HttpException | MalformedURLException e) {
+            throw new ProcessingException(e);
+        }
+    }
+
+    @Override
+    public Response verifyEmailToken(String token) throws ProcessingException {
+
+        StringBuilder urlParameter = new StringBuilder();
+        urlParameter.append("token=").append(token);
+
+        try {
+            Request request = new DefaultRequest(
+                    HttpMethod.GET,
+                    clientConfiguration.getBaseUrl() + "/email/verify",
+                    null,
+                    getHttpHeaders(false),
+                    new ByteArrayInputStream(urlParameter.toString().getBytes(StandardCharsets.UTF_8)),
+                    -1L);
+
+            return requestExecutor.executeRequest(request);
+        } catch (HttpException e) {
             throw new ProcessingException(e);
         }
     }

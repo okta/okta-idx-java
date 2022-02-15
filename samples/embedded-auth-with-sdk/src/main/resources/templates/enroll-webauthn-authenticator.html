@@ -1,0 +1,133 @@
+<!--
+  ~ Copyright (c) 2021-Present, Okta, Inc.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title th:text="${title}"></title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        .enroll-webauthn-authenticator-form {
+            width: 340px;
+            margin: 50px auto;
+        }
+        .enroll-webauthn-authenticator-form form {
+            margin-bottom: 15px;
+            background: #f7f7f7;
+            box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+        .enroll-webauthn-authenticator-form h2 {
+            margin: 0 0 15px;
+        }
+    </style>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+
+        const challenge = /*[[${currentAuthenticator.value.contextualData.activationData.challenge}]]*/ '';
+        const userId = /*[[${currentAuthenticator.value.contextualData.activationData.user.id}]]*/ '';
+        const username = /*[[${currentAuthenticator.value.contextualData.activationData.user.name}]]*/ '';
+        const displayName = /*[[${currentAuthenticator.value.contextualData.activationData.user.displayName}]]*/ '';
+
+        const publicKeyCredentialCreationOptions = {
+            rp: {
+                name: "localhost",
+                id: "localhost",
+            },
+            challenge: strToBin(challenge),
+            user: {
+                id: strToBin(userId),
+                name: name,
+                displayName: displayName,
+            },
+            pubKeyCredParams: [{alg: -7, type: "public-key"}],
+        };
+
+        navigator.credentials.create({
+            publicKey: publicKeyCredentialCreationOptions
+        }).then((newCredential) => {
+            const clientDataJSON = binToStr(newCredential.response.clientDataJSON);
+            const attestationObject = binToStr(newCredential.response.attestationObject);
+
+            const params = {
+                "clientData": clientDataJSON,
+                "attestation": attestationObject
+            };
+
+            const options = {
+                method: 'POST',
+                body: JSON.stringify(params),
+                headers: { "Content-type": "application/json; charset=UTF-8" }
+            };
+
+            fetch("/enroll-webauthn", options)
+                .then(res => {
+                    console.log("Request successful! Response:", res);
+                    location.href = '/select-authenticator?completed=Security%20Key%20or%20Biometric';
+                }).catch(function(err) {
+                    console.error(err);
+                }
+            );
+        }).catch(function(err) {
+            console.error(err);
+        });
+        /*]]>*/
+
+        // original source: https://github.com/okta/okta-signin-widget/blob/master/src/util/CryptoUtil.js
+        function binToStr(bin) {
+            return btoa(new Uint8Array(bin).reduce((s, byte) => s + String.fromCharCode(byte), ''));
+        }
+
+        function strToBin(str) {
+            return Uint8Array.from(atob(base64UrlSafeToBase64(str)), c => c.charCodeAt(0));
+        }
+
+        function base64UrlSafeToBase64(str) {
+            return str.replace(new RegExp('_', 'g'), '/').replace(new RegExp('-', 'g'), '+');
+        }
+    </script>
+</head>
+
+<body>
+
+<div style="padding:1em">
+    <a href="/"><i class="fa fa-home fa_custom fa"></i> Home</a>
+</div>
+
+<div class="enroll-webauthn-authenticator-form">
+    <h2 class="text-center"><span th:text="${title}"></span></h2>
+
+    <div class="d-flex justify-content-center">
+        <div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+</div>
+
+<div th:if="${errors}" class="alert alert-danger">
+    <span th:text="${errors}"></span>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

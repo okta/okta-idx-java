@@ -32,7 +32,11 @@ public class Credentials {
 
     public String clientData;
 
+    public String attestation;
+
     public String signatureData;
+
+    public String totp;
 
     public void setPasscode(char[] passcode) {
         this.passcode = passcode;
@@ -58,7 +62,15 @@ public class Credentials {
         this.clientData = clientData;
     }
 
+    public void setAttestation(String attestation) {
+        this.attestation = attestation;
+    }
+
     public void setSignatureData(String signatureData) {
         this.signatureData = signatureData;
+    }
+
+    public void setTotp(String totp) {
+        this.totp = totp;
     }
 }

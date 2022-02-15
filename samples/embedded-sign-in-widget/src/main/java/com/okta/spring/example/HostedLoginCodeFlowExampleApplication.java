@@ -16,7 +16,9 @@
 package com.okta.spring.example;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
+import com.okta.idx.sdk.api.model.DeviceContext;
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +71,9 @@ public class HostedLoginCodeFlowExampleApplication {
     @Value("${okta.oauth2.redirectUri}")
     private String redirectUri;
 
+    @Value("${okta.oauth2.deviceToken:#{null}}")
+    private String deviceToken;
+
     /**
      * Create an ApplicationListener that listens for successful logins and simply just logs the principal name.
      * @return a new listener
@@ -80,8 +85,10 @@ public class HostedLoginCodeFlowExampleApplication {
 
     @Bean
     public IDXAuthenticationWrapper idxClient() {
-        return new IDXAuthenticationWrapper(issuer, clientId, clientSecret,
-                new HashSet<>(Arrays.asList(scopes.split(" "))),redirectUri);
+        HashSet<String> scopes = new HashSet<>(Arrays.asList(this.scopes.split(" ")));
+        return Strings.hasText(deviceToken)
+                ? new IDXAuthenticationWrapper(issuer, clientId, clientSecret, scopes, redirectUri, new DeviceContext().addParam(DeviceContext.X_DEVICE_TOKEN, deviceToken))
+                : new IDXAuthenticationWrapper(issuer, clientId, clientSecret, scopes, redirectUri);
     }
 
     @Bean

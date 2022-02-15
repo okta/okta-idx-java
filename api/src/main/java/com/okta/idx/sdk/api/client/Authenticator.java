@@ -23,12 +23,14 @@ public final class Authenticator {
         private final String method;
         private final String enrollmentId;
         private final String label;
+        private final String channel;
 
-        Factor(String id, String method, String enrollmentId, String label) {
+        Factor(String id, String method, String enrollmentId, String label, String channel) {
             this.id = id;
             this.method = method;
             this.enrollmentId = enrollmentId;
             this.label = label;
+            this.channel = channel;
         }
 
         String getId() {
@@ -46,15 +48,21 @@ public final class Authenticator {
         public String getLabel() {
             return label;
         }
+
+        public String getChannel() {
+            return channel;
+        }
     }
 
     private final String id;
+    private final String type;
     private final String label;
     private final List<Factor> factors;
     private final boolean hasNestedFactors;
 
-    Authenticator(String id, String label, List<Factor> factors, boolean hasNestedFactors) {
+    Authenticator(String id, String type, String label, List<Factor> factors, boolean hasNestedFactors) {
         this.id = id;
+        this.type = type;
         this.label = label;
         this.factors = factors;
         this.hasNestedFactors = hasNestedFactors;
@@ -62,6 +70,10 @@ public final class Authenticator {
 
     public String getId() {
         return id;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public String getLabel() {

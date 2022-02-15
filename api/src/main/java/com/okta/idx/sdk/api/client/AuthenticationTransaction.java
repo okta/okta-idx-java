@@ -15,14 +15,19 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
+import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
+import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
+import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollmentValue;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.Idp;
 import com.okta.idx.sdk.api.model.Options;
 import com.okta.idx.sdk.api.model.OptionsForm;
+import com.okta.idx.sdk.api.model.PollInfo;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -37,6 +42,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,7 +50,11 @@ import java.util.stream.Collectors;
 final class AuthenticationTransaction {
 
     static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
-        IDXClientContext idxClientContext = client.interact();
+        return create(client, null);
+    }
+
+    static AuthenticationTransaction create(IDXClient client, String recoveryToken) throws ProcessingException {
+        IDXClientContext idxClientContext = Strings.hasText(recoveryToken) ? client.interact(recoveryToken) : client.interact();
         Assert.notNull(idxClientContext, "IDX client context may not be null");
 
         IDXResponse introspectResponse = client.introspect(idxClientContext);
@@ -69,6 +79,10 @@ final class AuthenticationTransaction {
         WrapperUtil.printRemediationOptions(idxResponse);
         WrapperUtil.printMessage(idxResponse);
         return new AuthenticationTransaction(client, proceedContext.getClientContext(), idxResponse);
+    }
+
+    static Response verifyEmailToken(IDXClient client, String token) throws ProcessingException {
+        return client.verifyEmailToken(token);
     }
 
     interface Factory {
@@ -96,14 +110,14 @@ final class AuthenticationTransaction {
     }
 
     ProceedContext createProceedContext() {
-        if (idxResponse == null || idxResponse.remediation() == null || idxResponse.remediation().remediationOptions().length == 0) {
-            logger.debug("ProceedContext is null");
+        if (idxResponse == null || idxResponse.remediation() == null || idxResponse.remediation().remediationOptions() == null) {
+            logger.error("ProceedContext is null");
             return null;
         }
 
         RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
         String href = remediationOptions[0].getHref();
-        logger.debug("ProceedContext href: {}", href);
+        String refresh = remediationOptions[0].getRefresh();
 
         String skipHref = null;
         Optional<RemediationOption> skipOptional = getOptionalRemediationOption(RemediationType.SKIP);
@@ -121,18 +135,30 @@ final class AuthenticationTransaction {
         }
 
         String resendHref = null;
+        PollInfo pollInfo = null;
+
         if (idxResponse.getCurrentAuthenticatorEnrollment() != null &&
-                idxResponse.getCurrentAuthenticatorEnrollment().getValue() != null &&
-                idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend() != null) {
-            resendHref = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend().getHref();
+                idxResponse.getCurrentAuthenticatorEnrollment().getValue() != null) {
+            if (idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend() != null) {
+                resendHref = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getResend().getHref();
+            }
+            if (idxResponse.getCurrentAuthenticatorEnrollment().getValue().getPoll() != null) {
+                RemediationOption pollRemediationOption = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getPoll();
+                pollInfo = new PollInfo(pollRemediationOption.getHref(), pollRemediationOption.getRefresh());
+            }
         } else if (idxResponse.getCurrentAuthenticator() != null &&
-                idxResponse.getCurrentAuthenticator().getValue() != null &&
-                idxResponse.getCurrentAuthenticator().getValue().getResend() != null) {
-            resendHref = idxResponse.getCurrentAuthenticator().getValue().getResend().getHref();
+                idxResponse.getCurrentAuthenticator().getValue() != null) {
+            if (idxResponse.getCurrentAuthenticator().getValue().getResend() != null) {
+                resendHref = idxResponse.getCurrentAuthenticator().getValue().getResend().getHref();
+            }
+            if (idxResponse.getCurrentAuthenticator().getValue().getPoll() != null) {
+                RemediationOption pollRemediationOption = idxResponse.getCurrentAuthenticator().getValue().getPoll();
+                pollInfo = new PollInfo(pollRemediationOption.getHref(), pollRemediationOption.getRefresh());
+            }
         }
 
-        return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep, selectProfileEnrollHref,
-                resendHref);
+        return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep,
+                selectProfileEnrollHref, resendHref, pollInfo, refresh);
     }
 
     RemediationOption getRemediationOption(String name) {
@@ -176,11 +202,23 @@ final class AuthenticationTransaction {
 
         if (idxResponse.isLoginSuccessful()) {
             // login successful
-            logger.debug("Login Successful!");
+            logger.info("Login Successful!");
             TokenResponse tokenResponse = idxResponse.getSuccessWithInteractionCode().exchangeCode(client, clientContext);
             authenticationResponse.setAuthenticationStatus(AuthenticationStatus.SUCCESS);
             authenticationResponse.setTokenResponse(tokenResponse);
             return authenticationResponse;
+        }
+
+        if (idxResponse.getCurrentAuthenticator() != null) {
+            authenticationResponse.getWebAuthnParams().setCurrentAuthenticator(idxResponse.getCurrentAuthenticator());
+        }
+
+        if (idxResponse.getCurrentAuthenticatorEnrollment() != null) {
+            authenticationResponse.setCurrentAuthenticatorEnrollment(idxResponse.getCurrentAuthenticatorEnrollment());
+        }
+
+        if (idxResponse.getAuthenticatorEnrollments() != null) {
+            authenticationResponse.setAuthenticatorEnrollments(idxResponse.getAuthenticatorEnrollments());
         }
 
         String firstRemediation = "";
@@ -213,11 +251,24 @@ final class AuthenticationTransaction {
             case RemediationType.ENROLL_AUTHENTICATOR:
                 authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT);
                 break;
+            case RemediationType.ENROLL_POLL:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_POLL_ENROLLMENT);
+                break;
+            case RemediationType.ENROLLMENT_CHANNEL_DATA:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_CHANNEL_DATA_ENROLLMENT);
+                break;
+            case RemediationType.CHALLENGE_POLL:
+                authenticationResponse.setAuthenticationStatus(AuthenticationStatus.AWAITING_CHALLENGE_POLL);
+                break;
             default:
                 authenticationResponse.setAuthenticationStatus(defaultStatus);
                 break;
         }
 
+        Optional.ofNullable(idxResponse.getCurrentAuthenticator())
+                .map(CurrentAuthenticatorEnrollment::getValue)
+                .map(CurrentAuthenticatorEnrollmentValue::getContextualData)
+                .ifPresent(authenticationResponse::setContextualData);
         return authenticationResponse;
     }
 
@@ -311,12 +362,15 @@ final class AuthenticationTransaction {
             String id = null;
             String label = option.getLabel();
             String enrollmentId = null;
+            String authenticatorType = null;
             boolean hasNestedFactors = false;
+            boolean isChannelFactor = false;
             Map<String, String> nestedMethods = new LinkedHashMap<>();
 
             FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
             for (FormValue formValue : optionFormValues) {
                 if (formValue.getName().equals("methodType")) {
+                    authenticatorType = String.valueOf(formValue.getValue());
                     // parse value from children
                     Options[] nestedOptions = formValue.options();
                     if (nestedOptions.length > 0) {
@@ -326,6 +380,19 @@ final class AuthenticationTransaction {
                         hasNestedFactors = true;
                     } else {
                         nestedMethods.put(String.valueOf(formValue.getValue()), label);
+                    }
+                } else if ("channel".equals(formValue.getName())) {
+                    authenticatorType = String.valueOf(option.getLabel())
+                            .toLowerCase(Locale.ROOT).replaceAll(" ", "_");
+                    isChannelFactor = true;
+                    Options[] nestedOptions = formValue.options();
+                    if (nestedOptions.length > 0) {
+                        for (Options children : nestedOptions) {
+                            nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
+                        }
+                        hasNestedFactors = true;
+                    } else {
+                        nestedMethods.put(authenticatorType, label);
                     }
                 }
                 if (formValue.getName().equals("id")) {
@@ -338,9 +405,11 @@ final class AuthenticationTransaction {
 
             List<Authenticator.Factor> factors = new ArrayList<>();
             for (Map.Entry<String, String> entry : nestedMethods.entrySet()) {
-                factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue()));
+                factors.add(new Authenticator.Factor(
+                        id, entry.getKey(), enrollmentId, entry.getValue(), isChannelFactor ? entry.getKey() : null)
+                );
             }
-            authenticators.add(new Authenticator(id, label, factors, hasNestedFactors));
+            authenticators.add(new Authenticator(id, authenticatorType, label, factors, hasNestedFactors));
         }
         return authenticators;
     }
@@ -354,11 +423,13 @@ final class AuthenticationTransaction {
         String id = null;
         String label = parent.getLabel();
         String enrollmentId = null;
+        String authenticatorType = null;
         Map<String, String> nestedMethods = new LinkedHashMap<>();
         boolean hasNestedFactors = false;
 
         for (FormValue formValue : parent.form().getValue()) {
             if (formValue.getName().equals("methodType")) {
+                authenticatorType = String.valueOf(formValue.getValue());
                 // parse value from children
                 Options[] nestedOptions = formValue.options();
                 if (nestedOptions.length > 0) {
@@ -380,9 +451,9 @@ final class AuthenticationTransaction {
 
         List<Authenticator.Factor> factors = new ArrayList<>();
         for (Map.Entry<String, String> entry : nestedMethods.entrySet()) {
-            factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue()));
+            factors.add(new Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue(), null));
         }
-        authenticators.add(new Authenticator(id, label, factors, hasNestedFactors));
+        authenticators.add(new Authenticator(id, authenticatorType, label, factors, hasNestedFactors));
 
         return authenticators;
     }

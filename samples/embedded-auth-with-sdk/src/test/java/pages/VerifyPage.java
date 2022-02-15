@@ -25,7 +25,13 @@ public class VerifyPage extends Page {
         super(driver);
     }
 
-    @FindBy(css = "input[name='authenticator-type'][value='Phone']")
+    @FindBy(name = "code")
+    public WebElement codeInput;
+
+    @FindBy(id = "verify-btn")
+    public WebElement verifyButton;
+
+    @FindBy(css = "input[name='authenticator-type'][value='null']")
     public WebElement phoneRadioButton;
 
     @FindBy(id = "proceed-btn")

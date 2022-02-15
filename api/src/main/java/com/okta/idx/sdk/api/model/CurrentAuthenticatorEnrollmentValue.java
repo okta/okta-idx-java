@@ -34,6 +34,10 @@ public class CurrentAuthenticatorEnrollmentValue {
 
     private RemediationOption poll;
 
+    private ContextualData contextualData;
+
+    private Profile profile;
+
     public Recover getRecover() {
         return recover;
     }
@@ -56,5 +60,13 @@ public class CurrentAuthenticatorEnrollmentValue {
 
     public RemediationOption getPoll() {
         return poll;
+    }
+
+    public ContextualData getContextualData() {
+        return contextualData;
+    }
+
+    public Profile getProfile() {
+        return profile;
     }
 }
