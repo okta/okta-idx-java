@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta.idx.sdk</groupId>
         <artifactId>okta-idx-java-samples</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>2.0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,7 +30,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring.boot.version>2.5.1</spring.boot.version>
+        <spring.boot.version>2.6.3</spring.boot.version>
+        <okta.springboot.starter.version>2.1.4</okta.springboot.starter.version>
         <java.version>1.8</java.version>
     </properties>
 
@@ -50,7 +51,15 @@
         <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-boot-starter</artifactId>
-            <version>2.0.0</version>
+            <version>${okta.springboot.starter.version}</version>
+            <exclusions>
+                <!-- brought in transitively by jars
+                     okta-spring-security-oauth2 >> spring-security-oauth2-client >> com.nimbusds:oauth2-oidc-sdk -->
+                <exclusion>
+                    <groupId>com.nimbusds</groupId>
+                    <artifactId>lang-tag</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.okta.idx.sdk</groupId>
@@ -80,7 +89,7 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>9.1.2</version>
+            <version>9.19</version>
         </dependency>
 
         <!-- These are the selenium dependencies -->
@@ -125,7 +134,7 @@
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-java</artifactId>
-            <version>1.2.5</version>
+            <version>1.2.6</version>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>

@@ -101,9 +101,11 @@ public final class ResponseHandler {
             case AWAITING_AUTHENTICATOR_VERIFICATION_DATA:
                 return selectAuthenticatorForm(response, "Select Authenticator", session);
             case AWAITING_AUTHENTICATOR_VERIFICATION:
-                return verifyForm();
+                return verifyForm(response);
             case AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION:
                 return selectAuthenticatorForm(response, "Enroll Authenticator", session);
+            case AWAITING_POLL_ENROLLMENT:
+                return setupOktaVerifyForm(session);
             default:
                 return unsupportedPolicy();
         }
@@ -131,6 +133,20 @@ public final class ResponseHandler {
         modelAndView.addObject("factorList", factorMethods);
         modelAndView.addObject("authenticators", response.getAuthenticators());
         modelAndView.addObject("title", title);
+        return modelAndView;
+    }
+
+    /**
+     * Return the view for Okta Verify challenge.
+     * @param response the response
+     * @return the view for the register verify form.
+     */
+    public ModelAndView oktaVerifyChallenge(AuthenticationResponse response) {
+        ModelAndView modelAndView = new ModelAndView("okta-verify-challenge");
+        if (response.getContextualData() != null) {
+            modelAndView.addObject("correctAnswer", response.getContextualData().getCorrectAnswer());
+        }
+        modelAndView.addObject("pollTimeout", response.getProceedContext().getRefresh());
         return modelAndView;
     }
 
@@ -181,6 +197,67 @@ public final class ResponseHandler {
      */
     public ModelAndView verifyForm() {
         return new ModelAndView("verify");
+    }
+
+    /**
+     * Return the view for verify form.
+     * @param response the authentication response
+     * @return the view for verifyForm.
+     */
+    public ModelAndView verifyForm(AuthenticationResponse response) {
+        ModelAndView modelAndView = new ModelAndView("verify");
+        if (response.getCurrentAuthenticatorEnrollment() != null
+                && "security_question".equals(response.getCurrentAuthenticatorEnrollment().getValue().getType())) {
+            modelAndView.addObject("security_question",
+                    response.getCurrentAuthenticatorEnrollment().getValue().getProfile().getQuestion());
+            modelAndView.addObject("security_question_key",
+                    response.getCurrentAuthenticatorEnrollment().getValue().getProfile().getQuestionKey());
+        }
+        return modelAndView;
+    }
+
+    /**
+     * Return the view for okta verify form via channel data.
+     * @param factor the factor
+     * @param session the session
+     * @return the view for okta verify form via channel data.
+     */
+    public ModelAndView oktaVerifyViaChannelDataForm(Authenticator.Factor factor, HttpSession session) {
+        ModelAndView modelAndView = new ModelAndView("setup-okta-verify-via-channel-data");
+        modelAndView.addObject("channelName", factor.getChannel());
+        switch (factor.getChannel()) {
+            case "email":
+                modelAndView.addObject("title", "Set up Okta Verify via email link");
+                modelAndView.addObject("labelTitle", "Email");
+                modelAndView.addObject("buttonTitle", "Send me the setup link");
+                modelAndView.addObject("message", "Make sure you can access the email on your mobile device.");
+                modelAndView.addObject("channelName", "email");
+                session.setAttribute("channelName", "email");
+                break;
+            case "sms":
+                modelAndView.addObject("title", "Set up Okta Verify via SMS");
+                modelAndView.addObject("labelTitle", "Phone number");
+                modelAndView.addObject("buttonTitle", "Send me the setup link");
+                modelAndView.addObject("message", "Make sure you can access the text on your mobile device.");
+                modelAndView.addObject("channelName", "phoneNumber");
+                session.setAttribute("channelName", "phoneNumber");
+                break;
+            default:
+                break;
+        }
+        return modelAndView;
+    }
+
+    /**
+     * Return the view for okta verify form.
+     * @param session the session
+     * @return the view for okta verify form.
+     */
+    public ModelAndView setupOktaVerifyForm(HttpSession session) {
+        ModelAndView modelAndView = new ModelAndView("setup-okta-verify");
+        modelAndView.addObject("channelName", String.valueOf(session.getAttribute("channelName")));
+        modelAndView.addObject("pollTimeout", Util.getProceedContextFromSession(session).getRefresh());
+        return modelAndView;
     }
 
     /**

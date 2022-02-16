@@ -23,18 +23,11 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.commons.http.MediaType
 import com.okta.idx.sdk.api.client.Clients
 import com.okta.idx.sdk.api.client.IDXClient
-import com.okta.idx.sdk.api.client.IDXClientBuilder
 import com.okta.idx.sdk.api.model.Authenticator
 import com.okta.idx.sdk.api.model.Credentials
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.RemediationOption
-import com.okta.idx.sdk.api.request.AnswerChallengeRequest
-import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
-import com.okta.idx.sdk.api.request.ChallengeRequest
-import com.okta.idx.sdk.api.request.ChallengeRequestBuilder
-import com.okta.idx.sdk.api.request.IdentifyRequest
-import com.okta.idx.sdk.api.request.IdentifyRequestBuilder
-
+import com.okta.idx.sdk.api.request.*
 import com.okta.idx.sdk.api.response.IDXResponse
 import com.okta.idx.sdk.api.util.Constants
 import org.testng.annotations.AfterClass
@@ -73,7 +66,7 @@ class EndToEndIT {
             .setClientId("test-client-id")
             .setClientSecret("test-client-secret")
             .setScopes(["test-scope-1", "test-scope-2"] as Set)
-            .setRedirectUri("http://okta.com")
+            .setRedirectUri("https://okta.com")
             .build()
     }
 
@@ -88,7 +81,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("interact-response.json")))
 
-        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
+        IDXClientContext idxClientContext = idxClient.interact()
 
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
@@ -297,7 +290,7 @@ class EndToEndIT {
                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("interact-response.json")))
 
-        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
+        IDXClientContext idxClientContext = idxClient.interact()
 
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))

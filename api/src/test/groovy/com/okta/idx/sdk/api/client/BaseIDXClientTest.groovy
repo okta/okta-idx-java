@@ -26,10 +26,12 @@ import com.okta.idx.sdk.api.exception.ProcessingException
 import com.okta.idx.sdk.api.model.Authenticator
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment
 import com.okta.idx.sdk.api.model.Credentials
+import com.okta.idx.sdk.api.model.DeviceContext
 import com.okta.idx.sdk.api.model.FormValue
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Options
 import com.okta.idx.sdk.api.model.RemediationOption
+import com.okta.idx.sdk.api.model.TokenType
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
@@ -49,7 +51,11 @@ import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequestBuilder
 import com.okta.idx.sdk.api.response.IDXResponse
 import com.okta.idx.sdk.api.response.TokenResponse
 import com.okta.idx.sdk.api.config.ClientConfiguration
+import org.hamcrest.CoreMatchers
+import org.mockito.ArgumentCaptor
 import org.testng.annotations.Test
+
+import java.util.stream.Collectors
 
 import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri
 
@@ -57,6 +63,8 @@ import static org.hamcrest.Matchers.arrayWithSize
 import static org.hamcrest.Matchers.is
 import static org.mockito.Mockito.any
 import static org.mockito.Mockito.mock
+import static org.mockito.Mockito.times
+import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
 
 import static org.hamcrest.MatcherAssert.assertThat
@@ -72,8 +80,7 @@ class BaseIDXClientTest {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
-        final IDXClient idxClient =
-                new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        final IDXClient idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
         final Response stubbedResponse = new DefaultResponse(
                 200,
@@ -82,13 +89,44 @@ class BaseIDXClientTest {
                 -1)
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
+        ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
 
-        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
+        IDXClientContext idxClientContext = idxClient.interact()
+
+        verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
+        def httpHeaders = argumentCaptor.getValue().getHeaders()
+        assertThat(httpHeaders.size(), is(3))
+        assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
+        assertThat(httpHeaders.getFirst(DeviceContext.USER_AGENT), is("example-user-agent"))
+        assertThat(idxClientContext, notNullValue())
+        assertThat(idxClientContext.getCodeVerifier(), notNullValue())
+        assertThat(idxClientContext.getState(), notNullValue())
+        assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
+    }
+
+    @Test
+    void testInteractWithRecoveryToken() {
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+        final Response stubbedResponse = new DefaultResponse(
+                200,
+                MediaType.APPLICATION_JSON,
+                new FileInputStream(getClass().getClassLoader().getResource("interact-response.json").getFile()),
+                -1)
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
+        ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
+        final IDXClient idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        IDXClientContext idxClientContext = idxClient.interact("sample-token_123", TokenType.RECOVERY_TOKEN)
+
+        verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
+        InputStream body = argumentCaptor.getValue().getBody()
+        String parameters = new BufferedReader(new InputStreamReader(body)).lines().collect(Collectors.joining())
 
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getCodeVerifier(), notNullValue())
         assertThat(idxClientContext.getState(), notNullValue())
         assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
+        assertThat(parameters, CoreMatchers.containsString("&recovery_token=sample-token_123"))
     }
 
     @Test
@@ -107,7 +145,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
 
-        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
+        IDXClientContext idxClientContext = idxClient.interact()
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 200,
@@ -185,7 +223,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
 
-        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
+        IDXClientContext idxClientContext = idxClient.interact()
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 200,
@@ -344,7 +382,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
 
-        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
+        IDXClientContext idxClientContext = idxClient.interact()
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 200,
@@ -1023,7 +1061,7 @@ class BaseIDXClientTest {
 
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
 
-        IDXClientContext idxClientContext = idxClient.interact(Optional.empty())
+        IDXClientContext idxClientContext = idxClient.interact()
 
         final Response stubbedIntrospectResponse = new DefaultResponse(
                 200,
@@ -1105,7 +1143,7 @@ class BaseIDXClientTest {
         AnswerChallengeRequest answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
                 .withStateHandle("02C563D3IFfsob9PQlzC70FO_H9FLKGMturswYm1at")
                 .withCredentials(credentials)
-                .build();
+                .build()
 
         final Response stubbedAnswerAuthenticatorEnrollmentChallengeResponse = new DefaultResponse(
                 200,
@@ -1152,7 +1190,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedInteractResponse)
 
         try {
-            idxClient.interact(Optional.empty())
+            idxClient.interact()
         } catch (ProcessingException e) {
             String interactUrl = getNormalizedUri(clientConfiguration.getIssuer(),"/v1/interact")
             assertThat(e.getHttpStatus(), is(400))
@@ -1240,7 +1278,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedTokenResponse)
 
         try {
-            idxClient.interact(Optional.empty())
+            idxClient.interact()
         } catch (ProcessingException e) {
             String interactUrl = getNormalizedUri(clientConfiguration.getIssuer(),"/v1/interact")
             assertThat(e.getHttpStatus(), is(500))
@@ -1259,7 +1297,7 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenThrow(new HttpException("Connection failed!"))
 
         try {
-            idxClient.interact(Optional.empty())
+            idxClient.interact()
         } catch (ProcessingException e) {
             assertThat(e.getMessage(), is("com.okta.commons.http.HttpException: Connection failed!"))
         }
@@ -1271,6 +1309,7 @@ class BaseIDXClientTest {
         clientConfiguration.setClientId("test-client-id")
         clientConfiguration.setClientSecret("test-client-secret")
         clientConfiguration.setScopes(["test-scope"] as Set)
+        clientConfiguration.setDeviceContext(new DeviceContext().addParam(DeviceContext.USER_AGENT, "example-user-agent"))
         return clientConfiguration
     }
 }

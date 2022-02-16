@@ -20,6 +20,7 @@ import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.ContextualData;
+import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Idp;
 import com.okta.idx.sdk.webauthn.WebAuthnParams;
@@ -48,6 +49,8 @@ public class AuthenticationResponse {
     private AuthenticatorEnrollments authenticatorEnrollments;
 
     private WebAuthnParams webAuthnParams = new WebAuthnParams();
+
+    private CurrentAuthenticatorEnrollment currentAuthenticatorEnrollment;
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
@@ -123,5 +126,11 @@ public class AuthenticationResponse {
 
     public WebAuthnParams getWebAuthnParams() {
         return webAuthnParams;
+    }
+
+    public CurrentAuthenticatorEnrollment getCurrentAuthenticatorEnrollment() { return currentAuthenticatorEnrollment; }
+
+    public void setCurrentAuthenticatorEnrollment(CurrentAuthenticatorEnrollment currentAuthenticatorEnrollment) {
+        this.currentAuthenticatorEnrollment = currentAuthenticatorEnrollment;
     }
 }

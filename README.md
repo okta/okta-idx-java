@@ -1,4 +1,4 @@
-[<img src="https://aws1.discourse-cdn.com/standard14/uploads/oktadev/original/1X/0c6402653dfb70edc661d4976a43a46f33e5e919.png" align="right" width="256px"/>](https://devforum.okta.com/)
+[<img src="https://www.okta.com/sites/default/files/Dev_Logo-01_Large-thumbnail.png" align="right" width="256px"/>](https://devforum.okta.com/)
 [![Maven Central](https://img.shields.io/maven-central/v/com.okta.idx.sdk/okta-idx-java-api.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.okta.idx.sdk%22%20a%3A%22okta-idx-java-api%22)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Support](https://img.shields.io/badge/support-Developer%20Forum-blue.svg)][devforum]
@@ -28,13 +28,14 @@ To see this library working in a sample, check out our [Java Samples][java-sampl
 
 ## Release Status
 
-✔️ The current stable major version series is: 1.x
+✔️ The current stable major version series is: 2.x
 
 This library uses semantic versioning and follows Okta's [Library Version Policy][okta-library-versioning].
 
 | Version | Status                             |
 | ------- | ---------------------------------- |
 | 1.0.0 | :heavy_check_mark: Stable     |
+| 2.0.0 | :heavy_check_mark: Stable     |
 
 The latest release can always be found on the [releases page][github-releases].
 
@@ -49,7 +50,7 @@ If you run into problems using the SDK, you can
 
 ### Prerequisites
 
-- [JDK 8][jdk-8] or [JDK-11][jdk-11]
+- [JDK 8][jdk-8] or [JDK 11][jdk-11]
 - [Apache Maven][apache-maven] 3.6.x or later
 
 To use this SDK, you will need to include the following dependencies:
@@ -64,15 +65,14 @@ For Apache Maven:
 </dependency>
 ```
 
-where `{okta.sdk.version}` is the Java IDX SDK version. 
-
 For Gradle:
 
 ```groovy
 compile "com.okta.idx.sdk:okta-idx-java-api:${okta.sdk.version}"
 ```
 
-where `okta.sdk.version` is the latest stable release version listed [here](#release-status).
+where ${okta.sdk.version} is the latest published version in [Maven Central](https://search.maven.org/search?q=g:com.okta.idx.sdk%20AND%20a:okta-idx-java-api).
+
 ### SNAPSHOT Dependencies
 
 Snapshots are deployed off of the 'master' branch to [OSSRH](https://oss.sonatype.org/) and can be consumed using the following repository configured for Apache Maven or Gradle:
@@ -312,5 +312,5 @@ We are happy to accept contributions and PRs! Please see the [contribution guide
 [jdk-11]: https://www.oracle.com/java/technologies/javase-jdk11-downloads.html
 [java-samples]: https://github.com/okta/okta-idx-java/tree/master/samples
 [apache-maven]: https://maven.apache.org/download.cgi
-[okta-identity-engine]: https://developer.okta.com/docs/concepts/ie-intro/
-[interaction-code-intro]: https://developer.okta.com/docs/guides/oie-embedded-sdk-overview/main/
+[okta-identity-engine]: https://developer.okta.com/docs/guides/oie-intro/
+[interaction-code-intro]: https://developer.okta.com/docs/guides/implement-grant-type/interactioncode/main/#interaction-code-flow

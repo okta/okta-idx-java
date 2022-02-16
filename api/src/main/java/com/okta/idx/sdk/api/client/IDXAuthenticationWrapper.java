@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
@@ -23,14 +24,18 @@ import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.Credentials;
+import com.okta.idx.sdk.api.model.DeviceContext;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
+import com.okta.idx.sdk.api.model.PollInfo;
 import com.okta.idx.sdk.api.model.Recover;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.model.TokenType;
 import com.okta.idx.sdk.api.model.UserProfile;
+import com.okta.idx.sdk.api.model.VerifyAuthenticatorAnswer;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
+import com.okta.idx.sdk.api.model.VerifyChannelDataOptions;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder;
 import com.okta.idx.sdk.api.request.ChallengeRequest;
@@ -41,6 +46,8 @@ import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequest;
 import com.okta.idx.sdk.api.request.EnrollUserProfileUpdateRequestBuilder;
 import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IdentifyRequestBuilder;
+import com.okta.idx.sdk.api.request.PollRequest;
+import com.okta.idx.sdk.api.request.PollRequestBuilder;
 import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.request.RecoverRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
@@ -84,20 +91,36 @@ public class IDXAuthenticationWrapper {
     /**
      * Creates {@link IDXAuthenticationWrapper} instance.
      *
-     * @param issuer the issuer url
-     * @param clientId the client id
-     * @param clientSecret the client secret
-     * @param scopes the set of scopes
-     * @param redirectUri the redirect uri
+     * @param issuer        the issuer url
+     * @param clientId      the client id
+     * @param clientSecret  the client secret
+     * @param scopes        the set of scopes
+     * @param redirectUri   the redirect uri
      */
     public IDXAuthenticationWrapper(String issuer, String clientId, String clientSecret,
                                     Set<String> scopes, String redirectUri) {
+        this(issuer, clientId, clientSecret, scopes, redirectUri, null);
+    }
+
+    /**
+     * Creates {@link IDXAuthenticationWrapper} instance.
+     *
+     * @param issuer        the issuer url
+     * @param clientId      the client id
+     * @param clientSecret  the client secret
+     * @param scopes        the set of scopes
+     * @param redirectUri   the redirect uri
+     * @param deviceContext the device context information
+     */
+    public IDXAuthenticationWrapper(String issuer, String clientId, String clientSecret,
+                                    Set<String> scopes, String redirectUri, DeviceContext deviceContext) {
         this.client = Clients.builder()
                 .setIssuer(issuer)
                 .setClientId(clientId)
                 .setClientSecret(clientSecret)
                 .setScopes(scopes)
                 .setRedirectUri(redirectUri)
+                .setDeviceContext(deviceContext)
                 .build();
     }
 
@@ -318,6 +341,10 @@ public class IDXAuthenticationWrapper {
                 authenticator.setId(factor.getId());
                 authenticator.setEnrollmentId(factor.getEnrollmentId());
                 authenticator.setMethodType(factor.getMethod());
+                if(factor.getChannel() != null) {
+                    authenticator.setChannel(factor.getChannel());
+                    authenticator.setMethodType(null);
+                }
                 ChallengeRequest request = ChallengeRequestBuilder.builder()
                         .withStateHandle(proceedContext.getStateHandle())
                         .withAuthenticator(authenticator)
@@ -417,6 +444,66 @@ public class IDXAuthenticationWrapper {
             return AuthenticationTransaction.proceed(client, proceedContext, () ->
                     client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
             ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Verify Authenticator with the supplied authenticator options.
+     *
+     * @param proceedContext the ProceedContext
+     * @param verifyAuthenticatorAnswer the verify Authenticator answer
+     * @return the Authentication response
+     */
+    public AuthenticationResponse verifyAuthenticator(ProceedContext proceedContext,
+                                                      VerifyAuthenticatorAnswer verifyAuthenticatorAnswer) {
+        try {
+            Credentials credentials = new Credentials();
+            credentials.setQuestionKey(verifyAuthenticatorAnswer.getQuestionKey());
+            credentials.setAnswer(verifyAuthenticatorAnswer.getAnswer().toCharArray());
+
+            // build answer password authenticator challenge request
+            AnswerChallengeRequest challengeAuthenticatorRequest = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(proceedContext.getStateHandle())
+                    .withCredentials(credentials)
+                    .build();
+
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
+            ).asAuthenticationResponse(AuthenticationStatus.AWAITING_PASSWORD_RESET);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    public AuthenticationResponse verifyAuthenticator(ProceedContext proceedContext,
+                                                      VerifyChannelDataOptions verifyChannelDataOptions) {
+        try {
+            AnswerChallengeRequestBuilder builder = AnswerChallengeRequestBuilder.builder()
+                    .withStateHandle(proceedContext.getStateHandle());
+
+            if("phoneNumber".equals(verifyChannelDataOptions.getChannelName())) {
+                builder.withPhoneNumber(verifyChannelDataOptions.getValue());
+            }
+            if("email".equals(verifyChannelDataOptions.getChannelName())) {
+                builder.withEmail(verifyChannelDataOptions.getValue());
+            }
+            if("totp".equals(verifyChannelDataOptions.getChannelName())) {
+                Credentials credentials = new Credentials();
+                credentials.setTotp(verifyChannelDataOptions.getValue());
+                builder.withCredentials(credentials);
+            }
+
+            AnswerChallengeRequest challengeAuthenticatorRequest = builder.build();
+
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.answerChallenge(challengeAuthenticatorRequest, proceedContext.getHref())
+            ).asAuthenticationResponse(AuthenticationStatus.AWAITING_POLL_ENROLLMENT);
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -539,7 +626,48 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Get IDX client context by calling the interact endpoint.
+     * Cancel transaction.
+     *
+     * @param proceedContext the ProceedContext
+     * @return the Authentication response
+     */
+    public AuthenticationResponse cancel(ProceedContext proceedContext) {
+        try {
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.cancel(proceedContext.getStateHandle())).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Handle Polling.
+     *
+     * @param proceedContext the ProceedContext
+     * @return the Authentication response
+     */
+    public AuthenticationResponse poll(ProceedContext proceedContext) {
+        try {
+            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
+                PollRequest pollRequest = PollRequestBuilder.builder()
+                        .withStateHandle(proceedContext.getStateHandle())
+                        .build();
+                String href = proceedContext.getPollInfo() != null
+                        ? proceedContext.getPollInfo().getHref()
+                        : proceedContext.getHref();
+                return client.poll(pollRequest, href);
+            }).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Get IDX client context by calling interact endpoint.
      * ClientContext reference contains the interaction handle and PKCE params.
      * <p>
      * This function can be used by the client applications to get a handle
@@ -551,7 +679,7 @@ public class IDXAuthenticationWrapper {
     public IDXClientContext getClientContext() throws ProcessingException {
 
         try {
-            return client.interact(Optional.empty());
+            return client.interact();
         } catch (ProcessingException e) {
             logger.error("Error occurred:", e);
             ErrorResponse errorResponse = e.getErrorResponse();
@@ -663,6 +791,26 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
+     * Helper to verify the token query parameter contained in the link of user verification email.
+     *
+     * @param token the token string.
+     * @return response object.
+     */
+    public Response verifyEmailToken(String token) throws ProcessingException {
+        return AuthenticationTransaction.verifyEmailToken(client, token);
+    }
+
+    /**
+     * Helper to get polling information from authentication response.
+     *
+     * @param authenticationResponse the authentication response
+     * @return polling info wrapper object.
+     */
+    public PollInfo getPollInfo(AuthenticationResponse authenticationResponse) {
+        return authenticationResponse.getProceedContext().getPollInfo();
+    }
+
+    /**
      * Helper to check if we have optional authenticators to skip in current remediation step.
      *
      * @param proceedContext the ProceedContext
@@ -672,10 +820,10 @@ public class IDXAuthenticationWrapper {
         return proceedContext.getSkipHref() != null;
     }
 
-    /** Begin transaction **/
+    /** Begin flow without any recovery or activation token **/
     public AuthenticationResponse begin() {
         try {
-            return AuthenticationTransaction.create(client, Optional.empty()).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -683,13 +831,21 @@ public class IDXAuthenticationWrapper {
         }
     }
 
-    /** Begin transaction with activation token **/
-    public AuthenticationResponse begin(String activationToken) {
+    /** Begin password recovery flow with a recovery token **/
+    public AuthenticationResponse beginPasswordRecovery(String token) {
         try {
-            AuthenticationTransaction authenticationTransaction =
-                    AuthenticationTransaction.create(client, Optional.of(activationToken));
-            authenticationTransaction.getRemediationOption(RemediationType.SELECT_AUTHENTICATOR_ENROLL);
-            return authenticationTransaction.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT);
+            return AuthenticationTransaction.create(client, token, TokenType.RECOVERY_TOKEN).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /** Begin password recovery flow with an activation token **/
+    public AuthenticationResponse beginUserActivation(String token) {
+        try {
+            return AuthenticationTransaction.create(client, token, TokenType.ACTIVATION_TOKEN).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {

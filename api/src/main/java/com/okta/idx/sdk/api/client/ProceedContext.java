@@ -16,6 +16,7 @@
 package com.okta.idx.sdk.api.client;
 
 import com.okta.idx.sdk.api.model.IDXClientContext;
+import com.okta.idx.sdk.api.model.PollInfo;
 
 /**
  * An opaque to the developer object that's expected to be given back on the next request.
@@ -30,9 +31,11 @@ public final class ProceedContext {
     private final boolean isIdentifyInOneStep;
     private final String selectProfileEnrollHref;
     private final String resendHref;
+    private final PollInfo pollInfo;
+    private final String refresh;
 
     ProceedContext(IDXClientContext clientContext, String stateHandle, String href, String skipHref, boolean isIdentifyInOneStep,
-                   String selectProfileEnrollHref, String resendHref) {
+                   String selectProfileEnrollHref, String resendHref, PollInfo pollInfo, String refresh) {
         this.clientContext = clientContext;
         this.stateHandle = stateHandle;
         this.href = href;
@@ -40,6 +43,8 @@ public final class ProceedContext {
         this.isIdentifyInOneStep = isIdentifyInOneStep;
         this.selectProfileEnrollHref = selectProfileEnrollHref;
         this.resendHref = resendHref;
+        this.pollInfo = pollInfo;
+        this.refresh = refresh;
     }
 
     public IDXClientContext getClientContext() {
@@ -68,5 +73,13 @@ public final class ProceedContext {
 
     public String getResendHref() {
         return resendHref;
+    }
+
+    public PollInfo getPollInfo() {
+        return pollInfo;
+    }
+
+    public String getRefresh() {
+        return refresh;
     }
 }
