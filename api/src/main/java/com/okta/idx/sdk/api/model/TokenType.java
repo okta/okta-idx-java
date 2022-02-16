@@ -17,15 +17,9 @@ package com.okta.idx.sdk.api.model;
 
 public enum TokenType {
 
-    ACCESS_TOKEN("access_token"),
+    ACCESS_TOKEN("access_token");
 
-    REFRESH_TOKEN("refresh_token"),
-
-    ACTIVATION_TOKEN("activation_token"),
-
-    RECOVERY_TOKEN("recovery_token");
-
-    private String value;
+    private final String value;
 
     TokenType(String value) {
         this.value = value;

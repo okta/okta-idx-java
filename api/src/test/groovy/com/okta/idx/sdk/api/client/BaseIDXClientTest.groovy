@@ -27,6 +27,7 @@ import com.okta.idx.sdk.api.model.Authenticator
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment
 import com.okta.idx.sdk.api.model.Credentials
 import com.okta.idx.sdk.api.model.DeviceContext
+import com.okta.idx.sdk.api.model.EmailTokenType
 import com.okta.idx.sdk.api.model.FormValue
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Options
@@ -116,7 +117,7 @@ class BaseIDXClientTest {
         ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
         final IDXClient idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
-        IDXClientContext idxClientContext = idxClient.interact("sample-token_123", TokenType.RECOVERY_TOKEN)
+        IDXClientContext idxClientContext = idxClient.interact("sample-token_123", EmailTokenType.RECOVERY_TOKEN)
 
         verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
         InputStream body = argumentCaptor.getValue().getBody()

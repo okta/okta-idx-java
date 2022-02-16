@@ -17,11 +17,11 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
-import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollmentValue;
+import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.Idp;
@@ -30,7 +30,6 @@ import com.okta.idx.sdk.api.model.OptionsForm;
 import com.okta.idx.sdk.api.model.PollInfo;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
-import com.okta.idx.sdk.api.model.TokenType;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
@@ -54,7 +53,7 @@ final class AuthenticationTransaction {
         return create(client, null, null);
     }
 
-    static AuthenticationTransaction create(IDXClient client, String token, TokenType tokenType) throws ProcessingException {
+    static AuthenticationTransaction create(IDXClient client, String token, EmailTokenType tokenType) throws ProcessingException {
         IDXClientContext idxClientContext;
 
         if (token == null) {

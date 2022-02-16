@@ -25,6 +25,7 @@ import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.DeviceContext;
+import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.PollInfo;
@@ -834,7 +835,7 @@ public class IDXAuthenticationWrapper {
     /** Begin password recovery flow with a recovery token **/
     public AuthenticationResponse beginPasswordRecovery(String token) {
         try {
-            return AuthenticationTransaction.create(client, token, TokenType.RECOVERY_TOKEN).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -845,7 +846,7 @@ public class IDXAuthenticationWrapper {
     /** Begin password recovery flow with an activation token **/
     public AuthenticationResponse beginUserActivation(String token) {
         try {
-            return AuthenticationTransaction.create(client, token, TokenType.ACTIVATION_TOKEN).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
