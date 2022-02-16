@@ -15,13 +15,15 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public enum TokenType {
+public enum EmailTokenType {
 
-    ACCESS_TOKEN("access_token");
+    ACTIVATION_TOKEN("activation_token"),
+
+    RECOVERY_TOKEN("recovery_token");
 
     private final String value;
 
-    TokenType(String value) {
+    EmailTokenType(String value) {
         this.value = value;
     }
 

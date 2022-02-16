@@ -96,14 +96,30 @@ These examples will help you understand how to use this library.
 Begin Transaction:
 
 ```java
-AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin();
+```
+
+Begin Transaction with Activation token:
+
+```java
+AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin("activation-token");
 ```
 
 Authenticate User:
 
 ```java
- AuthenticationResponse authenticationResponse =
+AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password), beginResponse.getProceedContext());
+```
+
+#### Activation token flow:
+
+```java
+AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin("activation-token");
+
+if (beginResponse.getAuthenticationStatus() == AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT) {
+    // redirect users to the enrollment view
+}
 ```
 
 ### Authentication Status

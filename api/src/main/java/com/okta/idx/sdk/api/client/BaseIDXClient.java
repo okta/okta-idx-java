@@ -35,6 +35,7 @@ import com.okta.commons.lang.Classes;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.config.ClientConfiguration;
 import com.okta.idx.sdk.api.exception.ProcessingException;
+import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.RemediationOption;
@@ -97,11 +98,11 @@ final class BaseIDXClient implements IDXClient {
 
     @Override
     public IDXClientContext interact() throws ProcessingException {
-        return interact(null);
+        return interact(null, null);
     }
 
     @Override
-    public IDXClientContext interact(String recoveryToken) throws ProcessingException {
+    public IDXClientContext interact(String token, EmailTokenType tokenType) throws ProcessingException {
 
         InteractResponse interactResponse;
         String codeVerifier, codeChallenge, state;
@@ -120,8 +121,12 @@ final class BaseIDXClient implements IDXClient {
                 .append("&code_challenge_method=").append(PkceUtil.CODE_CHALLENGE_METHOD)
                 .append("&redirect_uri=").append(clientConfiguration.getRedirectUri())
                 .append("&state=").append(state);
-            if (Strings.hasText(recoveryToken)) {
-                urlParameters.append("&recovery_token=").append(recoveryToken);
+            if (Strings.hasText(token) && !Strings.isEmpty(tokenType)) {
+                if (tokenType == EmailTokenType.ACTIVATION_TOKEN) {
+                    urlParameters.append("&activation_token=").append(token);
+                } else if (tokenType == EmailTokenType.RECOVERY_TOKEN) {
+                    urlParameters.append("&recovery_token=").append(token);
+                }
             }
 
             HttpHeaders httpHeaders = getHttpHeaders(true);

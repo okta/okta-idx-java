@@ -18,7 +18,6 @@ package com.okta.idx.sdk.api.client
 
 import com.okta.commons.http.DefaultResponse
 import com.okta.commons.http.HttpException
-import com.okta.commons.http.HttpHeaders
 import com.okta.commons.http.MediaType
 import com.okta.commons.http.Request
 import com.okta.commons.http.RequestExecutor
@@ -28,10 +27,12 @@ import com.okta.idx.sdk.api.model.Authenticator
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment
 import com.okta.idx.sdk.api.model.Credentials
 import com.okta.idx.sdk.api.model.DeviceContext
+import com.okta.idx.sdk.api.model.EmailTokenType
 import com.okta.idx.sdk.api.model.FormValue
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Options
 import com.okta.idx.sdk.api.model.RemediationOption
+import com.okta.idx.sdk.api.model.TokenType
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
@@ -116,7 +117,7 @@ class BaseIDXClientTest {
         ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
         final IDXClient idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
-        IDXClientContext idxClientContext = idxClient.interact("sample-token_123")
+        IDXClientContext idxClientContext = idxClient.interact("sample-token_123", EmailTokenType.RECOVERY_TOKEN)
 
         verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
         InputStream body = argumentCaptor.getValue().getBody()
@@ -1143,7 +1144,7 @@ class BaseIDXClientTest {
         AnswerChallengeRequest answerChallengeRequest = AnswerChallengeRequestBuilder.builder()
                 .withStateHandle("02C563D3IFfsob9PQlzC70FO_H9FLKGMturswYm1at")
                 .withCredentials(credentials)
-                .build();
+                .build()
 
         final Response stubbedAnswerAuthenticatorEnrollmentChallengeResponse = new DefaultResponse(
                 200,

@@ -25,6 +25,7 @@ import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.DeviceContext;
+import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.PollInfo;
@@ -820,6 +821,7 @@ public class IDXAuthenticationWrapper {
         return proceedContext.getSkipHref() != null;
     }
 
+    /** Begin flow without any recovery or activation token **/
     public AuthenticationResponse begin() {
         try {
             return AuthenticationTransaction.create(client).asAuthenticationResponse();
@@ -830,9 +832,10 @@ public class IDXAuthenticationWrapper {
         }
     }
 
-    public AuthenticationResponse beginPasswordRecovery(String recoveryToken) {
+    /** Begin password recovery flow with a recovery token **/
+    public AuthenticationResponse beginPasswordRecovery(String token) {
         try {
-            return AuthenticationTransaction.create(client, recoveryToken).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -840,6 +843,18 @@ public class IDXAuthenticationWrapper {
         }
     }
 
+    /** Begin password recovery flow with an activation token **/
+    public AuthenticationResponse beginUserActivation(String token) {
+        try {
+            return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN).asAuthenticationResponse();
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        } catch (IllegalArgumentException e) {
+            return handleIllegalArgumentException(e);
+        }
+    }
+
+    /** Exchange interaction code for token **/
     public AuthenticationResponse fetchTokenWithInteractionCode(String issuer,
                                                                 ProceedContext proceedContext,
                                                                 String interactionCode) {

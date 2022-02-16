@@ -152,7 +152,7 @@ public class HomeController {
     }
 
     /**
-     * Handle the self-service password reset redirect.
+     * Handle the self-service password reset (SSPR) redirect.
      *
      * @param recoveryToken the recovery token (from email link)
      * @param session the http session
@@ -163,6 +163,22 @@ public class HomeController {
                                                  final HttpSession session) {
         beginPasswordRecovery(session, recoveryToken);
         return new ModelAndView("register-password");
+    }
+
+    /**
+     * Activate user with activation token.
+     *
+     * @param activationToken the activation token (from email link)
+     * @param session the http session
+     * @return the authenticator selection or home page view
+     */
+    @GetMapping(value = "/activate")
+    public ModelAndView displayUserActivationPage(final @RequestParam(name = "token") String activationToken,
+                                                  final HttpSession session) {
+        beginUserActivation(session, activationToken);
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+        AuthenticationResponse authenticationResponse = authenticationWrapper.introspect(proceedContext.getClientContext());
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
 
     /**
@@ -294,6 +310,12 @@ public class HomeController {
 
     private AuthenticationResponse beginPasswordRecovery(final HttpSession session, String recoveryToken) {
         AuthenticationResponse authenticationResponse = authenticationWrapper.beginPasswordRecovery(recoveryToken);
+        Util.updateSession(session, authenticationResponse.getProceedContext());
+        return authenticationResponse;
+    }
+
+    private AuthenticationResponse beginUserActivation(final HttpSession session, String activationToken) {
+        AuthenticationResponse authenticationResponse = authenticationWrapper.beginUserActivation(activationToken);
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;
     }

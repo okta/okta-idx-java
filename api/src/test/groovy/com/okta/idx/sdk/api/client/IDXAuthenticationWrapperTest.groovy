@@ -356,6 +356,38 @@ class IDXAuthenticationWrapperTest {
     }
 
     @Test
+    void beginTransactionWithAndWithoutActivationTokenTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        // test with activation token
+
+        setMockResponseOnlyIfBodyParamMatches(requestExecutor, "interact", "activation_token", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-with-activation-token-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.beginUserActivation("activation-token")
+
+        assertThat(beginResponse, notNullValue())
+        assertThat(beginResponse.getErrors(), empty())
+        assertThat(beginResponse.getAuthenticationStatus(), is(AuthenticationStatus.AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION))
+
+        // test without activation token
+
+        setMockResponseOnlyIfBodyParamWontMatch(requestExecutor, "interact", "activation_token", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-response", 200, mediaTypeAppIonJson)
+
+        beginResponse = idxAuthenticationWrapper.begin()
+
+        assertThat(beginResponse, notNullValue())
+        assertThat(beginResponse.getErrors(), empty())
+        assertThat(beginResponse.getAuthenticationStatus(), is(AuthenticationStatus.UNKNOWN))
+    }
+
+    @Test
     void authenticateIdentifyFirstFailTest() {
 
         def requestExecutor = mock(RequestExecutor)
@@ -775,7 +807,7 @@ class IDXAuthenticationWrapperTest {
         )
 
         Optional<Authenticator> authenticator = authenticationResponse.getAuthenticators().stream()
-                .filter(x -> "security_question".equals(x.type)).findFirst()
+                .filter(x -> "security_question" == x.type).findFirst()
         assertThat(authenticator.isPresent(), is(true))
 
         authenticationResponse = idxAuthenticationWrapper
@@ -2029,6 +2061,26 @@ class IDXAuthenticationWrapperTest {
                 argThat({
                     request -> request != null &&
                             (request as Request).getResourceUrl().getPath().endsWith(resourceUrlEndsWith)
+                }) as Request)
+        ).thenReturn(getResponseByResourceFileName(responseName, httpStatus, mediaType))
+    }
+
+    void setMockResponseOnlyIfBodyParamMatches(RequestExecutor requestExecutor, String resourceUrlEndsWith, String bodyParamName,
+                                               String responseName, Integer httpStatus, MediaType mediaType) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null &&
+                            (request as Request).getResourceUrl().getPath().endsWith(resourceUrlEndsWith) && request.body.getText().contains(bodyParamName)
+                }) as Request)
+        ).thenReturn(getResponseByResourceFileName(responseName, httpStatus, mediaType))
+    }
+
+    void setMockResponseOnlyIfBodyParamWontMatch(RequestExecutor requestExecutor, String resourceUrlEndsWith, String bodyParamName,
+                                                 String responseName, Integer httpStatus, MediaType mediaType) {
+        when(requestExecutor.executeRequest(
+                argThat({
+                    request -> request != null &&
+                            (request as Request).getResourceUrl().getPath().endsWith(resourceUrlEndsWith) && !request.body.getText().contains(bodyParamName)
                 }) as Request)
         ).thenReturn(getResponseByResourceFileName(responseName, httpStatus, mediaType))
     }

@@ -17,11 +17,11 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
-import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollmentValue;
+import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.Idp;
@@ -50,13 +50,20 @@ import java.util.stream.Collectors;
 final class AuthenticationTransaction {
 
     static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
-        return create(client, null);
+        return create(client, null, null);
     }
 
-    static AuthenticationTransaction create(IDXClient client, String recoveryToken) throws ProcessingException {
-        IDXClientContext idxClientContext = Strings.hasText(recoveryToken) ? client.interact(recoveryToken) : client.interact();
-        Assert.notNull(idxClientContext, "IDX client context may not be null");
+    static AuthenticationTransaction create(IDXClient client, String token, EmailTokenType tokenType) throws ProcessingException {
+        IDXClientContext idxClientContext;
 
+        if (token == null) {
+            idxClientContext = client.interact();
+        } else {
+            Assert.notNull(tokenType, "token type may not be null");
+            idxClientContext = client.interact(token, tokenType);
+        }
+
+        Assert.notNull(idxClientContext, "IDX client context may not be null");
         IDXResponse introspectResponse = client.introspect(idxClientContext);
         String stateHandle = introspectResponse.getStateHandle();
         Assert.hasText(stateHandle, "State handle may not be null");
