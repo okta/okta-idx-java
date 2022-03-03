@@ -20,6 +20,8 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,12 +32,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
 
 @Controller
 public class LoginController {
 
+    private final Logger logger = LoggerFactory.getLogger(LoginController.class);
+
     private static final String STATE = "state";
+    private static final String OTP = "otp";
     private static final String NONCE = "nonce";
     private static final String SCOPES = "scopes";
     private static final String OKTA_BASE_URL = "oktaBaseUrl";
@@ -62,10 +66,12 @@ public class LoginController {
     }
 
     @GetMapping(value = "/custom-login")
-    public ModelAndView login(HttpServletRequest request,
-                              @RequestParam(name = "state", required = false) String state,
-                              @RequestParam(name = "nonce") String nonce,
-                              HttpSession session) throws MalformedURLException, NoSuchAlgorithmException {
+    public ModelAndView handleLogin(HttpServletRequest request,
+                                    @RequestParam(name = "state", required = false) String state,
+                                    @RequestParam(name = "nonce") String nonce,
+                                    HttpSession session) throws MalformedURLException {
+
+        logger.info("Handling login with state: {}, nonce {}", state, nonce);
 
         if (session.getAttribute(IDX_CLIENT_CONTEXT) == null) {
             try {
@@ -112,8 +118,70 @@ public class LoginController {
 
         // from ClientRegistration.redirectUriTemplate, if the template is change you must update this
         mav.addObject(REDIRECT_URI,
-            request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() +
-            request.getContextPath() + "/authorization-code/callback"
+                request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() +
+                        request.getContextPath() + "/authorization-code/callback"
+        );
+        mav.addObject(ISSUER_URI, issuer);
+
+        session.setAttribute(CODE_VERIFIER, idxClientContext.getCodeVerifier());
+        return mav;
+    }
+
+    @GetMapping("/magic-link/callback")
+    public ModelAndView handleMagicLinkCallback(HttpServletRequest request,
+                                                @RequestParam(name = "state") String state,
+                                                @RequestParam(name = "otp") String otp,
+                                                HttpSession session) throws MalformedURLException {
+
+        logger.info("Handling Magic link callback with state: {}, otp {}", state, otp);
+
+        if (session.getAttribute(IDX_CLIENT_CONTEXT) == null) {
+            try {
+                idxClientContext = idxAuthenticationWrapper.getClientContext();
+            } catch (ProcessingException e) {
+                ModelAndView modelAndView = new ModelAndView("error");
+                ErrorResponse errorResponse = e.getErrorResponse();
+                if (errorResponse != null) {
+                    modelAndView.addObject("errorDetails",
+                            errorResponse.getError() + "," + errorResponse.getErrorDescription());
+                } else {
+                    modelAndView.addObject("errorDetails", "Unknown error");
+                }
+                return modelAndView;
+            }
+            session.setAttribute(IDX_CLIENT_CONTEXT, idxClientContext);
+        }
+
+        if (idxClientContext == null) {
+            ModelAndView modelAndView = new ModelAndView("error");
+            modelAndView.addObject("error_details", "Unknown error");
+            return modelAndView;
+        }
+
+        // if we don't have the state parameter redirect
+        if (state == null) {
+            return new ModelAndView("redirect:" + oktaOAuth2Properties.getRedirectUri());
+        }
+
+        String issuer = oktaOAuth2Properties.getIssuer();
+        // the widget needs the base url, just grab the root of the issuer
+        String orgUrl = new URL(new URL(issuer), "/").toString();
+
+        ModelAndView mav = new ModelAndView("login");
+        mav.addObject(STATE, state);
+        mav.addObject(OTP, otp);
+        mav.addObject(SCOPES, oktaOAuth2Properties.getScopes());
+        mav.addObject(OKTA_BASE_URL, orgUrl);
+        mav.addObject(OKTA_CLIENT_ID, oktaOAuth2Properties.getClientId());
+        mav.addObject(INTERACTION_HANDLE, idxClientContext.getInteractionHandle());
+        mav.addObject(CODE_VERIFIER, idxClientContext.getCodeVerifier());
+        mav.addObject(CODE_CHALLENGE, idxClientContext.getCodeChallenge());
+        mav.addObject(CODE_CHALLENGE_METHOD, CODE_CHALLENGE_METHOD_VALUE);
+
+        // from ClientRegistration.redirectUriTemplate, if the template is change you must update this
+        mav.addObject(REDIRECT_URI,
+                request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() +
+                        request.getContextPath() + "/authorization-code/callback"
         );
         mav.addObject(ISSUER_URI, issuer);
 

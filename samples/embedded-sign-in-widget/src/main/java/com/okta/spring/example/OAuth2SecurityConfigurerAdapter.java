@@ -46,7 +46,7 @@ public class OAuth2SecurityConfigurerAdapter extends WebSecurityConfigurerAdapte
 
                 .and().addFilterBefore(customAuthenticationProcessingFilter(), OAuth2LoginAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/", "/custom-login", "/css/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/", "/custom-login", "/magic-link/callback", "/css/**").permitAll()
                 .anyRequest().authenticated()
 
                 // send the user back to the root page when they logout
