@@ -52,14 +52,6 @@
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-boot-starter</artifactId>
             <version>${okta.springboot.starter.version}</version>
-            <exclusions>
-                <!-- brought in transitively by jars
-                     okta-spring-security-oauth2 >> spring-security-oauth2-client >> com.nimbusds:oauth2-oidc-sdk -->
-                <exclusion>
-                    <groupId>com.nimbusds</groupId>
-                    <artifactId>lang-tag</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.okta.idx.sdk</groupId>
