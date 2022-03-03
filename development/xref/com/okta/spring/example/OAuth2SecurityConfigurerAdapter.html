@@ -54,7 +54,7 @@
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>                  .and().addFilterBefore(customAuthenticationProcessingFilter(), OAuth2LoginAuthenticationFilter.<strong class="jxr_keyword">class</strong>)
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>                  .authorizeRequests()
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>                  .antMatchers(HttpMethod.GET, <span class="jxr_string">"/"</span>, <span class="jxr_string">"/custom-login"</span>, <span class="jxr_string">"/css/**"</span>).permitAll()
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>                  .antMatchers(HttpMethod.GET, <span class="jxr_string">"/"</span>, <span class="jxr_string">"/custom-login"</span>, <span class="jxr_string">"/magic-link/callback"</span>, <span class="jxr_string">"/css/**"</span>).permitAll()
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>                  .anyRequest().authenticated()
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>                  <em class="jxr_comment">// send the user back to the root page when they logout</em>
