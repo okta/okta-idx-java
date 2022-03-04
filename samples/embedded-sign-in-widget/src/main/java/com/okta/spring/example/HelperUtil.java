@@ -95,7 +95,7 @@ public class HelperUtil {
 
         final HttpEntity<MultiValueMap<String, String>> requestEntity =
                 new HttpEntity<>(requestParams, headers);
-        final String tokenUri = ClientUtil.getNormalizedUri(issuer, "/v1/token");
+        final String tokenUri = ClientUtil.normalizedIssuerUri(issuer, "/v1/token");
 
         final ResponseEntity<JsonNode> responseEntity =
                 restTemplate.postForEntity(tokenUri, requestEntity, JsonNode.class);

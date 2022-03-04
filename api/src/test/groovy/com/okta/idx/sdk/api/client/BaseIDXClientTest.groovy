@@ -58,7 +58,7 @@ import org.testng.annotations.Test
 
 import java.util.stream.Collectors
 
-import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri
+import static com.okta.idx.sdk.api.util.ClientUtil.normalizedIssuerUri
 
 import static org.hamcrest.Matchers.arrayWithSize
 import static org.hamcrest.Matchers.is
@@ -1193,7 +1193,7 @@ class BaseIDXClientTest {
         try {
             idxClient.interact()
         } catch (ProcessingException e) {
-            String interactUrl = getNormalizedUri(clientConfiguration.getIssuer(),"/v1/interact")
+            String interactUrl = normalizedIssuerUri(clientConfiguration.getIssuer(),"/v1/interact")
             assertThat(e.getHttpStatus(), is(400))
             assertThat(e.getMessage(), is("Request to " + interactUrl + " failed. HTTP status: 400"))
             assertThat(e.getErrorResponse(), notNullValue())
@@ -1281,7 +1281,7 @@ class BaseIDXClientTest {
         try {
             idxClient.interact()
         } catch (ProcessingException e) {
-            String interactUrl = getNormalizedUri(clientConfiguration.getIssuer(),"/v1/interact")
+            String interactUrl = normalizedIssuerUri(clientConfiguration.getIssuer(),"/v1/interact")
             assertThat(e.getHttpStatus(), is(500))
             assertThat(e.getMessage(), is("Request to " + interactUrl + " failed. HTTP status: 500"))
         }

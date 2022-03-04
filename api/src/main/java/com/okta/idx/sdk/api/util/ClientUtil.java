@@ -32,9 +32,23 @@ public class ClientUtil {
      * @param issuer the issuer url
      * @param resourceUri the uri of resource
      * @return the normalized full url
-     * @throws MalformedURLException if the issuer URi is malformed
+     * @throws IllegalArgumentException if the issuer URi is malformed
+     * @deprecated This method has been renamed to getNormalizedIssuerUri
      */
+    @Deprecated
     public static String getNormalizedUri(String issuer, String resourceUri) throws MalformedURLException {
+        return normalizedIssuerUri(issuer, resourceUri);
+    }
+
+    /**
+     * Construct the normalized URL given an issuer and a resource uri.
+     *
+     * @param issuer the issuer url
+     * @param resourceUri the uri of resource
+     * @return the normalized full url
+     * @throws IllegalArgumentException if the issuer URi is malformed
+     */
+    public static String normalizedIssuerUri(String issuer, String resourceUri) {
         // remove trailing forward slash
         String normalizedUri = issuer.replaceAll("$/", "");
 
@@ -59,23 +73,26 @@ public class ClientUtil {
      *
      * @param issuerUri the issuer uri
      * @return true if root/org, false otherwise
-     * @throws MalformedURLException if the issuer uri is invalid
      */
-    public static boolean isRootOrgIssuer(String issuerUri) throws MalformedURLException {
-        String uriPath = new URL(issuerUri).getPath();
+    public static boolean isRootOrgIssuer(String issuerUri) {
+        try {
+            String uriPath = new URL(issuerUri).getPath();
 
-        if (Strings.hasText(uriPath)) {
-            String[] tokenizedUri = uriPath.substring(uriPath.indexOf("/")+1).split("/");
+            if (Strings.hasText(uriPath)) {
+                String[] tokenizedUri = uriPath.substring(uriPath.indexOf("/") + 1).split("/");
 
-            if (tokenizedUri.length >= 2 &&
+                if (tokenizedUri.length >= 2 &&
                     "oauth2".equals(tokenizedUri[0]) &&
                     Strings.hasText(tokenizedUri[1])) {
-                logger.debug("The issuer URL: '{}' is an Okta custom authorization server", issuerUri);
-                return false;
+                    logger.debug("The issuer URL: '{}' is an Okta custom authorization server", issuerUri);
+                    return false;
+                }
             }
-        }
 
-        logger.debug("The issuer URL: '{}' is an Okta root/org authorization server", issuerUri);
-        return true;
+            logger.debug("The issuer URL: '{}' is an Okta root/org authorization server", issuerUri);
+            return true;
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Issuer URL was not a valid URL", e);
+        }
     }
 }

@@ -58,13 +58,12 @@ import com.okta.idx.sdk.api.util.PkceUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri;
+import static com.okta.idx.sdk.api.util.ClientUtil.normalizedIssuerUri;
 
 final class BaseIDXClient implements IDXClient {
 
@@ -136,7 +135,7 @@ final class BaseIDXClient implements IDXClient {
 
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                getNormalizedUri(clientConfiguration.getIssuer(), "/v1/interact"),
+                normalizedIssuerUri(clientConfiguration.getIssuer(), "/v1/interact"),
                 null,
                 httpHeaders,
                 new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
@@ -531,14 +530,14 @@ final class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                     HttpMethod.POST,
-                    getNormalizedUri(clientConfiguration.getIssuer(), "/v1/revoke"),
+                    normalizedIssuerUri(clientConfiguration.getIssuer(), "/v1/revoke"),
                     null,
                     getHttpHeaders(true),
                     new ByteArrayInputStream(urlParameters.toString().getBytes(StandardCharsets.UTF_8)),
                     -1L);
 
             requestExecutor.executeRequest(request);
-        } catch (HttpException | MalformedURLException e) {
+        } catch (HttpException e) {
             throw new ProcessingException(e);
         }
     }
