@@ -855,6 +855,24 @@ public class IDXAuthenticationWrapper {
     }
 
     /** Exchange interaction code for token **/
+    public AuthenticationResponse fetchTokenWithInteractionCode(ProceedContext proceedContext,
+                                                                String interactionCode) {
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        try {
+            TokenResponse tokenResponse =
+                    client.token("interaction_code", interactionCode, proceedContext.getClientContext());
+            authenticationResponse.setTokenResponse(tokenResponse);
+        } catch (ProcessingException e) {
+            return handleProcessingException(e);
+        }
+        return authenticationResponse;
+    }
+
+    /**
+     * Exchange interaction code for token.
+     * @deprecated the {@code issuer} param is automatically resolved.
+     */
+    @Deprecated
     public AuthenticationResponse fetchTokenWithInteractionCode(String issuer,
                                                                 ProceedContext proceedContext,
                                                                 String interactionCode) {
