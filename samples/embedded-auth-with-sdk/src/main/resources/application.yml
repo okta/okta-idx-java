@@ -27,3 +27,8 @@ spring:
       org.springframework.security: INFO
       com.okta.spring.example: INFO
 
+  # import standard okta configuration files
+  config:
+    import:
+    - optional:file:${user.home}/.okta/okta.yaml
+    - optional:okta.yaml
