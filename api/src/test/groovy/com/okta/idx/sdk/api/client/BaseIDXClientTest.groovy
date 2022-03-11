@@ -32,7 +32,6 @@ import com.okta.idx.sdk.api.model.FormValue
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Options
 import com.okta.idx.sdk.api.model.RemediationOption
-import com.okta.idx.sdk.api.model.TokenType
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
@@ -265,7 +264,7 @@ class BaseIDXClientTest {
         // authenticatorEnrollments
         assertThat(identifyResponse.authenticatorEnrollments, notNullValue())
 
-        AuthenticatorEnrollment emailAuthEnrollment = identifyResponse.authenticatorEnrollments.value.find {it.type == "email"}
+        AuthenticatorEnrollment emailAuthEnrollment = identifyResponse.authenticatorEnrollments.values.find {it.type == "email"}
         assertThat(emailAuthEnrollment, notNullValue())
         assertThat(emailAuthEnrollment.profile, notNullValue())
         assertThat(emailAuthEnrollment.id, equalTo("eae3iyi3yzHZN4Cji1d6"))
@@ -276,7 +275,7 @@ class BaseIDXClientTest {
         assertThat(emailAuthEnrollment.methods.first(), notNullValue())
         assertThat(emailAuthEnrollment.methods.first().type, equalTo("email"))
 
-        AuthenticatorEnrollment passwordAuthEnrollment = identifyResponse.authenticatorEnrollments.value.find {it.type == "password"}
+        AuthenticatorEnrollment passwordAuthEnrollment = identifyResponse.authenticatorEnrollments.values.find {it.type == "password"}
         assertThat(passwordAuthEnrollment, notNullValue())
         assertThat(passwordAuthEnrollment.profile, nullValue())
         assertThat(passwordAuthEnrollment.id, equalTo("laekusi77LNcWg2rX1d5"))
@@ -286,7 +285,7 @@ class BaseIDXClientTest {
         assertThat(passwordAuthEnrollment.methods.first(), notNullValue())
         assertThat(passwordAuthEnrollment.methods.first().type, equalTo("password"))
 
-        AuthenticatorEnrollment secQnAuthEnrollment = identifyResponse.authenticatorEnrollments.value.find {it.type == "security_question"}
+        AuthenticatorEnrollment secQnAuthEnrollment = identifyResponse.authenticatorEnrollments.values.find {it.type == "security_question"}
         assertThat(secQnAuthEnrollment, notNullValue())
         assertThat(secQnAuthEnrollment.profile, notNullValue())
         assertThat(secQnAuthEnrollment.id, equalTo("qae3iypdrSLDqUoY81d6"))
@@ -1023,7 +1022,7 @@ class BaseIDXClientTest {
         // authenticatorEnrollments
         assertThat(recoverResponse.authenticatorEnrollments, notNullValue())
 
-        AuthenticatorEnrollment secQnAuthEnrollment = recoverResponse.authenticatorEnrollments.value.find {it.type == "security_question"}
+        AuthenticatorEnrollment secQnAuthEnrollment = recoverResponse.authenticatorEnrollments.values.find {it.type == "security_question"}
         assertThat(secQnAuthEnrollment, notNullValue())
         assertThat(secQnAuthEnrollment.profile, notNullValue())
         assertThat(secQnAuthEnrollment.id, equalTo("qae3m4ksak2mzReE60g7"))

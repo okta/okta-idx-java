@@ -18,9 +18,13 @@ package com.okta.idx.sdk.api.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Stream;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AuthenticatorEnrollments {
+public class AuthenticatorEnrollments implements Iterable<AuthenticatorEnrollment> {
 
     private String type;
 
@@ -32,5 +36,24 @@ public class AuthenticatorEnrollments {
 
     public AuthenticatorEnrollment[] getValue() {
         return Arrays.copyOf(this.value, this.value.length);
+    }
+
+    public List<AuthenticatorEnrollment> getValues() {
+        if (value != null) {
+            return Arrays.asList(value);
+        }
+        return Collections.emptyList();
+    }
+
+    public Stream<AuthenticatorEnrollment> stream() {
+        if (value == null) {
+            return Stream.empty();
+        }
+        return Arrays.stream(getValue());
+    }
+
+    @Override
+    public Iterator<AuthenticatorEnrollment> iterator() {
+        return stream().iterator();
     }
 }

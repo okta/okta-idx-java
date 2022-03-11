@@ -376,7 +376,7 @@ public class IDXAuthenticationWrapper {
             if (authenticationResponse.getWebAuthnParams() != null) {
                 AuthenticatorEnrollments authenticatorEnrollments = authenticationResponse.getAuthenticatorEnrollments();
 
-                Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
+                Optional<AuthenticatorEnrollment> authenticatorEnrollmentOptional = authenticatorEnrollments.stream()
                         .filter(x -> "security_key".equals(x.getType()))
                         .findAny();
 
