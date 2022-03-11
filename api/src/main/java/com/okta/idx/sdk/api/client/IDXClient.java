@@ -61,6 +61,8 @@ public interface IDXClient {
 
     TokenResponse token(String url, String grantType, String interactionCode, IDXClientContext idxClientContext) throws ProcessingException;
 
+    TokenResponse token(String grantType, String interactionCode, IDXClientContext idxClientContext) throws ProcessingException;
+
     void revokeToken(String tokenType, String token) throws ProcessingException;
 
     Response verifyEmailToken(String token) throws ProcessingException;

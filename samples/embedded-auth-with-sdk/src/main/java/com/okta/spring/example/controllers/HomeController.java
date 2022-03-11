@@ -27,7 +27,6 @@ import com.okta.spring.example.helpers.HomeHelper;
 import com.okta.spring.example.helpers.ResponseHandler;
 import com.okta.spring.example.helpers.Util;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,12 +43,6 @@ import java.util.Optional;
 
 @Controller
 public class HomeController {
-
-    /**
-     * The issuer url.
-     */
-    @Value("${okta.idx.issuer}")
-    private String issuer;
 
     /**
      * homeHelper instance.
@@ -120,7 +113,7 @@ public class HomeController {
 
         // if interaction code is present, exchange it for a token
         if (Strings.hasText(interactionCode)) {
-            authenticationResponse = authenticationWrapper.fetchTokenWithInteractionCode(issuer, proceedContext, interactionCode);
+            authenticationResponse = authenticationWrapper.fetchTokenWithInteractionCode(proceedContext, interactionCode);
             return responseHandler.handleKnownTransitions(authenticationResponse, session);
         }
 
