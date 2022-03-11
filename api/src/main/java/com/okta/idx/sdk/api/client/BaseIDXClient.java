@@ -54,6 +54,7 @@ import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
+import com.okta.idx.sdk.api.util.ClientUtil;
 import com.okta.idx.sdk.api.util.PkceUtil;
 
 import java.io.ByteArrayInputStream;
@@ -478,13 +479,8 @@ final class BaseIDXClient implements IDXClient {
 
     @Override
     public TokenResponse token(String grantType, String interactionCode, IDXClientContext idxClientContext) throws ProcessingException {
-        try {
-            String tokenUrl = getNormalizedUri(clientConfiguration.getIssuer(), "/v1/token");
-            return token(tokenUrl, grantType, interactionCode, idxClientContext);
-        } catch (MalformedURLException e) {
-            // TODO: remove this catch clause after #304 is merged
-            throw new IllegalArgumentException("Configured Issuer URL is invalid");
-        }
+        String tokenUrl = ClientUtil.normalizedIssuerUri(clientConfiguration.getIssuer(), "/v1/token");
+        return token(tokenUrl, grantType, interactionCode, idxClientContext);
     }
 
     @Override
