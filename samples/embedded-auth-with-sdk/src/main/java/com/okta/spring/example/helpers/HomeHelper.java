@@ -34,7 +34,7 @@ import javax.servlet.http.HttpSession;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.okta.idx.sdk.api.util.ClientUtil.getNormalizedUri;
+import static com.okta.idx.sdk.api.util.ClientUtil.normalizedIssuerUri;
 
 @Component
 public class HomeHelper {
@@ -74,7 +74,7 @@ public class HomeHelper {
 
         try {
             // get user claim info from /v1/userinfo endpoint
-            String userInfoUrl = getNormalizedUri(issuer, "/v1/userinfo");
+            String userInfoUrl = normalizedIssuerUri(issuer, "/v1/userinfo");
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setBearerAuth(tokenResponse.getAccessToken());

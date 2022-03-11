@@ -62,7 +62,6 @@ import com.okta.idx.sdk.api.util.ClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -862,13 +861,11 @@ public class IDXAuthenticationWrapper {
 
         try {
             TokenResponse tokenResponse =
-                    client.token(ClientUtil.getNormalizedUri(issuer, "/v1/token"),
+                    client.token(ClientUtil.normalizedIssuerUri(issuer, "/v1/token"),
                             "interaction_code", interactionCode, proceedContext.getClientContext());
             authenticationResponse.setTokenResponse(tokenResponse);
         } catch (ProcessingException e) {
             return handleProcessingException(e);
-        } catch (MalformedURLException e) {
-            logger.error("Error occurred", e);
         }
 
         return authenticationResponse;

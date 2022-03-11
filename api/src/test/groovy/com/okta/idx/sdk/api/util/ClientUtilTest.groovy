@@ -25,10 +25,10 @@ class ClientUtilTest {
     @Test
     void testNormalizedUrl() {
         // root org issuer
-        assertThat(ClientUtil.getNormalizedUri("https://foo.oktapreview.com", "/v1/interact"),
+        assertThat(ClientUtil.normalizedIssuerUri("https://foo.oktapreview.com", "/v1/interact"),
                 is("https://foo.oktapreview.com/oauth2/v1/interact"))
         // non root org issuer
-        assertThat(ClientUtil.getNormalizedUri("https://foo.oktapreview.com/oauth2/default", "/v1/interact"),
+        assertThat(ClientUtil.normalizedIssuerUri("https://foo.oktapreview.com/oauth2/default", "/v1/interact"),
                 is("https://foo.oktapreview.com/oauth2/default/v1/interact"))
     }
 
