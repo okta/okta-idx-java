@@ -54,7 +54,6 @@ import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.InteractResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
-import com.okta.idx.sdk.api.util.ClientUtil;
 import com.okta.idx.sdk.api.util.PkceUtil;
 
 import java.io.ByteArrayInputStream;
@@ -479,7 +478,7 @@ final class BaseIDXClient implements IDXClient {
 
     @Override
     public TokenResponse token(String grantType, String interactionCode, IDXClientContext idxClientContext) throws ProcessingException {
-        String tokenUrl = ClientUtil.normalizedIssuerUri(clientConfiguration.getIssuer(), "/v1/token");
+        String tokenUrl = normalizedIssuerUri(clientConfiguration.getIssuer(), "/v1/token");
         return token(tokenUrl, grantType, interactionCode, idxClientContext);
     }
 
