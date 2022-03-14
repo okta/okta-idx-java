@@ -478,13 +478,8 @@ final class BaseIDXClient implements IDXClient {
 
     @Override
     public TokenResponse token(String grantType, String interactionCode, IDXClientContext idxClientContext) throws ProcessingException {
-        try {
-            String tokenUrl = getNormalizedUri(clientConfiguration.getIssuer(), "/v1/token");
-            return token(tokenUrl, grantType, interactionCode, idxClientContext);
-        } catch (MalformedURLException e) {
-            // TODO: remove this catch clause after #304 is merged
-            throw new IllegalArgumentException("Configured Issuer URL is invalid");
-        }
+        String tokenUrl = normalizedIssuerUri(clientConfiguration.getIssuer(), "/v1/token");
+        return token(tokenUrl, grantType, interactionCode, idxClientContext);
     }
 
     @Override
