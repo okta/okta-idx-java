@@ -384,7 +384,7 @@
 <a class="jxr_linenumber" name="L376" href="#L376">376</a>             <strong class="jxr_keyword">if</strong> (authenticationResponse.getWebAuthnParams() != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L377" href="#L377">377</a>                 <a name="AuthenticatorEnrollments" href="../../../../../../com/okta/idx/sdk/api/model/AuthenticatorEnrollments.html#AuthenticatorEnrollments">AuthenticatorEnrollments</a> authenticatorEnrollments = authenticationResponse.getAuthenticatorEnrollments();
 <a class="jxr_linenumber" name="L378" href="#L378">378</a> 
-<a class="jxr_linenumber" name="L379" href="#L379">379</a>                 Optional&lt;AuthenticatorEnrollment&gt; authenticatorEnrollmentOptional = Arrays.stream(authenticatorEnrollments.getValue())
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>                 Optional&lt;AuthenticatorEnrollment&gt; authenticatorEnrollmentOptional = authenticatorEnrollments.stream()
 <a class="jxr_linenumber" name="L380" href="#L380">380</a>                         .filter(x -&gt; <span class="jxr_string">"security_key"</span>.equals(x.getType()))
 <a class="jxr_linenumber" name="L381" href="#L381">381</a>                         .findAny();
 <a class="jxr_linenumber" name="L382" href="#L382">382</a> 
@@ -862,23 +862,41 @@
 <a class="jxr_linenumber" name="L854" href="#L854">854</a>     }
 <a class="jxr_linenumber" name="L855" href="#L855">855</a> 
 <a class="jxr_linenumber" name="L856" href="#L856">856</a>     <em class="jxr_javadoccomment">/** Exchange interaction code for token **/</em>
-<a class="jxr_linenumber" name="L857" href="#L857">857</a>     <strong class="jxr_keyword">public</strong> <a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/AuthenticationResponse.html#AuthenticationResponse">AuthenticationResponse</a> fetchTokenWithInteractionCode(String issuer,
-<a class="jxr_linenumber" name="L858" href="#L858">858</a>                                                                 <a name="ProceedContext" href="../../../../../../com/okta/idx/sdk/api/client/ProceedContext.html#ProceedContext">ProceedContext</a> proceedContext,
-<a class="jxr_linenumber" name="L859" href="#L859">859</a>                                                                 String interactionCode) {
-<a class="jxr_linenumber" name="L860" href="#L860">860</a>         <a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/Au<a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/AuthenticationResponse.html#AuthenticationResponse">AuthenticationResponse</a>tml#AuthenticationResponse">AuthenticationResponse</a> authenticationResponse = <strong class="jxr_keyword">new</strong> <a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/AuthenticationResponse.html#AuthenticationResponse">AuthenticationResponse</a>();
-<a class="jxr_linenumber" name="L861" href="#L861">861</a> 
-<a class="jxr_linenumber" name="L862" href="#L862">862</a>         <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L863" href="#L863">863</a>             <a name="TokenResponse" href="../../../../../../com/okta/idx/sdk/api/response/TokenResponse.html#TokenResponse">TokenResponse</a> tokenResponse =
-<a class="jxr_linenumber" name="L864" href="#L864">864</a>                     client.token(ClientUtil.normalizedIssuerUri(issuer, <span class="jxr_string">"/v1/token"</span>),
-<a class="jxr_linenumber" name="L865" href="#L865">865</a>                             <span class="jxr_string">"interaction_code"</span>, interactionCode, proceedContext.getClientContext());
-<a class="jxr_linenumber" name="L866" href="#L866">866</a>             authenticationResponse.setTokenResponse(tokenResponse);
-<a class="jxr_linenumber" name="L867" href="#L867">867</a>         } <strong class="jxr_keyword">catch</strong> (<a name="ProcessingException" href="../../../../../../com/okta/idx/sdk/api/exception/ProcessingException.html#ProcessingException">ProcessingException</a> e) {
-<a class="jxr_linenumber" name="L868" href="#L868">868</a>             <strong class="jxr_keyword">return</strong> handleProcessingException(e);
-<a class="jxr_linenumber" name="L869" href="#L869">869</a>         }
-<a class="jxr_linenumber" name="L870" href="#L870">870</a> 
-<a class="jxr_linenumber" name="L871" href="#L871">871</a>         <strong class="jxr_keyword">return</strong> authenticationResponse;
-<a class="jxr_linenumber" name="L872" href="#L872">872</a>     }
-<a class="jxr_linenumber" name="L873" href="#L873">873</a> }
+<a class="jxr_linenumber" name="L857" href="#L857">857</a>     <strong class="jxr_keyword">public</strong> <a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/AuthenticationResponse.html#AuthenticationResponse">AuthenticationResponse</a> fetchTokenWithInteractionCode(<a name="ProceedContext" href="../../../../../../com/okta/idx/sdk/api/client/ProceedContext.html#ProceedContext">ProceedContext</a> proceedContext,
+<a class="jxr_linenumber" name="L858" href="#L858">858</a>                                                                 String interactionCode) {
+<a class="jxr_linenumber" name="L859" href="#L859">859</a>         <a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/Au<a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/AuthenticationResponse.html#AuthenticationResponse">AuthenticationResponse</a>tml#AuthenticationResponse">AuthenticationResponse</a> authenticationResponse = <strong class="jxr_keyword">new</strong> <a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/AuthenticationResponse.html#AuthenticationResponse">AuthenticationResponse</a>();
+<a class="jxr_linenumber" name="L860" href="#L860">860</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L861" href="#L861">861</a>             <a name="TokenResponse" href="../../../../../../com/okta/idx/sdk/api/response/TokenResponse.html#TokenResponse">TokenResponse</a> tokenResponse =
+<a class="jxr_linenumber" name="L862" href="#L862">862</a>                     client.token(<span class="jxr_string">"interaction_code"</span>, interactionCode, proceedContext.getClientContext());
+<a class="jxr_linenumber" name="L863" href="#L863">863</a>             authenticationResponse.setTokenResponse(tokenResponse);
+<a class="jxr_linenumber" name="L864" href="#L864">864</a>         } <strong class="jxr_keyword">catch</strong> (<a name="ProcessingException" href="../../../../../../com/okta/idx/sdk/api/exception/ProcessingException.html#ProcessingException">ProcessingException</a> e) {
+<a class="jxr_linenumber" name="L865" href="#L865">865</a>             <strong class="jxr_keyword">return</strong> handleProcessingException(e);
+<a class="jxr_linenumber" name="L866" href="#L866">866</a>         }
+<a class="jxr_linenumber" name="L867" href="#L867">867</a>         <strong class="jxr_keyword">return</strong> authenticationResponse;
+<a class="jxr_linenumber" name="L868" href="#L868">868</a>     }
+<a class="jxr_linenumber" name="L869" href="#L869">869</a> 
+<a class="jxr_linenumber" name="L870" href="#L870">870</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L871" href="#L871">871</a> <em class="jxr_javadoccomment">     * Exchange interaction code for token.</em>
+<a class="jxr_linenumber" name="L872" href="#L872">872</a> <em class="jxr_javadoccomment">     * @deprecated the {@code issuer} param is automatically resolved.</em>
+<a class="jxr_linenumber" name="L873" href="#L873">873</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L874" href="#L874">874</a>     @Deprecated
+<a class="jxr_linenumber" name="L875" href="#L875">875</a>     <strong class="jxr_keyword">public</strong> <a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/AuthenticationResponse.html#AuthenticationResponse">AuthenticationResponse</a> fetchTokenWithInteractionCode(String issuer,
+<a class="jxr_linenumber" name="L876" href="#L876">876</a>                                                                 <a name="ProceedContext" href="../../../../../../com/okta/idx/sdk/api/client/ProceedContext.html#ProceedContext">ProceedContext</a> proceedContext,
+<a class="jxr_linenumber" name="L877" href="#L877">877</a>                                                                 String interactionCode) {
+<a class="jxr_linenumber" name="L878" href="#L878">878</a>         <a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/Au<a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/AuthenticationResponse.html#AuthenticationResponse">AuthenticationResponse</a>tml#AuthenticationResponse">AuthenticationResponse</a> authenticationResponse = <strong class="jxr_keyword">new</strong> <a name="AuthenticationResponse" href="../../../../../../com/okta/idx/sdk/api/response/AuthenticationResponse.html#AuthenticationResponse">AuthenticationResponse</a>();
+<a class="jxr_linenumber" name="L879" href="#L879">879</a> 
+<a class="jxr_linenumber" name="L880" href="#L880">880</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L881" href="#L881">881</a>             <a name="TokenResponse" href="../../../../../../com/okta/idx/sdk/api/response/TokenResponse.html#TokenResponse">TokenResponse</a> tokenResponse =
+<a class="jxr_linenumber" name="L882" href="#L882">882</a>                     client.token(ClientUtil.normalizedIssuerUri(issuer, <span class="jxr_string">"/v1/token"</span>),
+<a class="jxr_linenumber" name="L883" href="#L883">883</a>                             <span class="jxr_string">"interaction_code"</span>, interactionCode, proceedContext.getClientContext());
+<a class="jxr_linenumber" name="L884" href="#L884">884</a>             authenticationResponse.setTokenResponse(tokenResponse);
+<a class="jxr_linenumber" name="L885" href="#L885">885</a>         } <strong class="jxr_keyword">catch</strong> (<a name="ProcessingException" href="../../../../../../com/okta/idx/sdk/api/exception/ProcessingException.html#ProcessingException">ProcessingException</a> e) {
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>             <strong class="jxr_keyword">return</strong> handleProcessingException(e);
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>         }
+<a class="jxr_linenumber" name="L888" href="#L888">888</a> 
+<a class="jxr_linenumber" name="L889" href="#L889">889</a>         <strong class="jxr_keyword">return</strong> authenticationResponse;
+<a class="jxr_linenumber" name="L890" href="#L890">890</a>     }
+<a class="jxr_linenumber" name="L891" href="#L891">891</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2020&#x2013;2022 <a href="http://developer.okta.com/">Okta</a>. All rights reserved.</div>
