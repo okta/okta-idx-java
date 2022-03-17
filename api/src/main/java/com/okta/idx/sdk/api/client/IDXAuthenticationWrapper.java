@@ -308,6 +308,7 @@ public class IDXAuthenticationWrapper {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 Authenticator authenticatorRequest = new Authenticator();
                 authenticatorRequest.setId(authenticator.getId());
+                authenticatorRequest.setMethodType(authenticator.getType());
                 if (authenticator.hasNestedFactors() && authenticator.getFactors().size() == 1) {
                     com.okta.idx.sdk.api.client.Authenticator.Factor factor = authenticator.getFactors().get(0);
                     authenticatorRequest.setMethodType(factor.getMethod());
