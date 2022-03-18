@@ -100,11 +100,13 @@ public class LoginController {
             return modelAndView;
         }
 
-        authenticationResponse.getAuthenticatorEnrollments().stream()
-            .filter(x -> x.getDisplayName().equals("Okta Verify")).findFirst()
-            .flatMap(enroll -> Arrays.stream(enroll.getMethods())
-                .filter(methodType -> methodType.getType().equals("totp")).findFirst()
-            ).ifPresent(methodType -> session.setAttribute("totp", "totp"));
+        if (authenticationResponse.getAuthenticatorEnrollments() != null) {
+            authenticationResponse.getAuthenticatorEnrollments().stream()
+                    .filter(x -> x.getDisplayName().equals("Okta Verify")).findFirst()
+                    .flatMap(enroll -> Arrays.stream(enroll.getMethods())
+                            .filter(methodType -> methodType.getType().equals("totp")).findFirst()
+                    ).ifPresent(methodType -> session.setAttribute("totp", "totp"));
+        }
 
         return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
