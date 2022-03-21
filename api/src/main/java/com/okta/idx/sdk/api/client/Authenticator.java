@@ -33,7 +33,7 @@ public final class Authenticator {
             this.channel = channel;
         }
 
-        String getId() {
+        public String getId() {
             return id;
         }
 
