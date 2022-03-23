@@ -208,7 +208,7 @@ public class HomeController {
             modelAndView.addObject("idps", authenticationResponse.getIdps());
         }
 
-        modelAndView.addObject("isPasswordRequired", isPasswordRequired);
+        session.setAttribute("isPasswordRequired", isPasswordRequired);
         return modelAndView;
     }
 

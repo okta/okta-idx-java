@@ -364,7 +364,7 @@ public class LoginController {
     public ModelAndView verify(final @RequestParam("code") String code,
                                final @RequestParam(value = "security_question_key", required = false) String securityQuestionKey,
                                final HttpSession session) {
-        logger.info(":: Verify Code :: {}", code);
+        logger.info(":: Verify Code ::");
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
@@ -385,6 +385,10 @@ public class LoginController {
             ModelAndView modelAndView = new ModelAndView("verify");
             modelAndView.addObject("errors", authenticationResponse.getErrors());
             return modelAndView;
+        }
+
+        if (session.getAttribute("isPasswordRequired") != null) {
+            session.removeAttribute("isPasswordRequired");
         }
 
         return responseHandler.handleKnownTransitions(authenticationResponse, session);

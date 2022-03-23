@@ -65,7 +65,12 @@
         <p class="font-weight-light" th:if="${security_question}" th:text="${security_question}"></p>
         <p class="font-weight-light" th:unless="${security_question}">Please enter the code below.</p>
         <div class="form-group">
-            <input type="text" class="form-control" name="code" required="required">
+            <div th:if="${session.isPasswordRequired != null and !session.isPasswordRequired}">
+                <input type="password" class="form-control" name="code" placeholder="Password" id="password" required="required">
+            </div>
+            <div th:unless="${session.isPasswordRequired != null and !session.isPasswordRequired}">
+                <input type="text" class="form-control" name="code" required="required">
+            </div>
         </div>
         <input type="hidden" th:if="${security_question_key}" name="security_question_key" th:value="${security_question_key}">
         <div class="form-group">
