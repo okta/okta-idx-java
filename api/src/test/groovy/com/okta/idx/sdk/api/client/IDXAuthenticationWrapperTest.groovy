@@ -343,6 +343,8 @@ class IDXAuthenticationWrapperTest {
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
                 new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
+
+        assertThat(beginResponse.proceedContext.isIdentifyInOneStep(), is(false)) // password not required
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
         assertThat(authenticationResponse.getAuthenticationStatus(), is(AuthenticationStatus.SUCCESS))
@@ -353,6 +355,32 @@ class IDXAuthenticationWrapperTest {
         assertThat(authenticationResponse.getTokenResponse().getAccessToken(), notNullValue())
         assertThat(authenticationResponse.getTokenResponse().getRefreshToken(), notNullValue())
         assertThat(authenticationResponse.getTokenResponse().getIdToken(), notNullValue())
+    }
+
+    @Test
+    void authenticateWithoutPasswordSuccessTest() {
+
+        def requestExecutor = mock(RequestExecutor)
+        def idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+        def idxAuthenticationWrapper = new IDXAuthenticationWrapper()
+        //replace idxClient with mock idxClient
+        setInternalState(idxAuthenticationWrapper, "client", idxClient)
+
+        setMockResponse(requestExecutor, "interact", "interact-response", 200, MediaType.APPLICATION_JSON)
+        setMockResponse(requestExecutor, "introspect", "introspect-identify-first-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "identify", "identify-first-success-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "answer", "challenge-identify-first-response", 200, mediaTypeAppIonJson)
+        setMockResponse(requestExecutor, "token", "token-response", 200, mediaTypeAppIonJson)
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin()
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.authenticate(
+                new AuthenticationOptions("username"), beginResponse.proceedContext
+        )
+
+        assertThat(beginResponse.proceedContext.isIdentifyInOneStep(), is(false)) // password not required
+        assertThat(authenticationResponse, notNullValue())
+        assertThat(authenticationResponse.getErrors(), empty())
+        assertThat(authenticationResponse.getAuthenticationStatus(), is(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION))
     }
 
     @Test

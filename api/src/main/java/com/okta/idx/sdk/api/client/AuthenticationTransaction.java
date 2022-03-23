@@ -48,6 +48,18 @@ import java.util.stream.Collectors;
 
 final class AuthenticationTransaction {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationTransaction.class);
+
+    private final IDXClient client;
+    private final IDXClientContext clientContext;
+    private final IDXResponse idxResponse;
+
+    AuthenticationTransaction(IDXClient client, IDXClientContext clientContext, IDXResponse idxResponse) {
+        this.client = client;
+        this.clientContext = clientContext;
+        this.idxResponse = idxResponse;
+    }
+
     static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
         return create(client, null, null);
     }
@@ -93,18 +105,6 @@ final class AuthenticationTransaction {
 
     interface Factory {
         IDXResponse create() throws ProcessingException;
-    }
-
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationTransaction.class);
-
-    private final IDXClient client;
-    private final IDXClientContext clientContext;
-    private final IDXResponse idxResponse;
-
-    AuthenticationTransaction(IDXClient client, IDXClientContext clientContext, IDXResponse idxResponse) {
-        this.client = client;
-        this.clientContext = clientContext;
-        this.idxResponse = idxResponse;
     }
 
     String getStateHandle() {

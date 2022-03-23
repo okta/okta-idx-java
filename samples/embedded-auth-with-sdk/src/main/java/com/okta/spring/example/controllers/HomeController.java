@@ -195,7 +195,6 @@ public class HomeController {
         // get proceed context
         ProceedContext proceedContext = authenticationResponse.getProceedContext();
 
-        // password is NOT required in login page for identifier first flow
         boolean isPasswordRequired = proceedContext.isIdentifyInOneStep();
 
         if (authenticationResponse.getErrors().size() > 0) {

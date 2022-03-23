@@ -41,8 +41,7 @@ public class AuthenticationOptions {
     }
 
     public char[] getPassword() {
-        if (password == null) return null;
-        return Arrays.copyOf(password, password.length);
+        return password != null ? Arrays.copyOf(password, password.length) : null;
     }
 
     public void setPassword(char[] password) {
