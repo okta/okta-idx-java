@@ -15,7 +15,6 @@
  */
 package com.okta.idx.sdk.api.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.exception.ProcessingException;
@@ -27,14 +26,13 @@ import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.Idp;
 import com.okta.idx.sdk.api.model.Options;
-import com.okta.idx.sdk.api.model.OptionsForm;
+import com.okta.idx.sdk.api.model.OptionsForm
 import com.okta.idx.sdk.api.model.PollInfo;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,11 +142,6 @@ final class AuthenticationTransaction {
 
         String resendHref = null;
         PollInfo pollInfo = null;
-
-        try {
-            logger.info("==== IDX RAW ===:\n{}", idxResponse.raw());
-        } catch (JsonProcessingException e) {
-        }
 
         if (idxResponse.getCurrentAuthenticatorEnrollment() != null &&
                 idxResponse.getCurrentAuthenticatorEnrollment().getValue() != null) {
