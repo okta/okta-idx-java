@@ -15,6 +15,13 @@
  */
 package info.seleniumcucumber.userStepDefinitions;
 
+import com.okta.sdk.client.Client;
+import com.okta.sdk.client.ClientBuilder;
+import com.okta.sdk.client.Clients;
+import com.okta.sdk.resource.user.User;
+import com.okta.sdk.resource.user.UserActivationToken;
+import com.okta.sdk.resource.user.UserBuilder;
+import env.Hooks;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -23,6 +30,8 @@ import env.DriverUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pages.Page;
 import pages.RegisterPage;
 import pages.RegisterPhonePage;
@@ -37,6 +46,11 @@ public class SelfServiceRegistration extends CucumberRoot {
     private RegisterPhonePage registerPhonePage = new RegisterPhonePage(driver);
     private SelectAuthenticatorPage selectAuthenticatorPage = new SelectAuthenticatorPage(driver);
     private VerifyPage verifyPage = new VerifyPage(driver);
+
+    private ClientBuilder builder = Clients.builder();
+    private Client client = builder.build();
+
+    private final Logger logger = LoggerFactory.getLogger(SelfServiceRegistration.class);
 
     @When("^she fills out her First Name$")
     public void she_fills_out_her_first_name() {
@@ -255,5 +269,41 @@ public class SelfServiceRegistration extends CucumberRoot {
                 error.contains("Invalid Phone Number."));
     }
 
+    @When("^Mary navigates to the Self Service Registration View with activation token$")
+    public void mary_opens_activate_page_with_token() {
+        User user = createUserWithoutCredentials();
+        String activationToken = getActivationTokenForUser(user);
+        String activateURL = "http://localhost:8080/activate?token=" + activationToken;
+
+        driver.manage().window().maximize();
+        driver.get(activateURL);
+    }
+
+    private User createUserWithoutCredentials() {
+        // Create a user without credentials in "STAGED" state
+        Assert.assertNotNull(Page.getA18NProfile());
+
+        User user = UserBuilder.instance()
+                .setEmail(Page.getA18NProfile().getEmailAddress())
+                .setFirstName("Mary E2E")
+                .setLastName(Page.getA18NProfile().getProfileId())
+                .setMobilePhone(Page.getA18NProfile().getPhoneNumber())
+                .setActive(false)
+                .buildAndCreate(client);
+        Assert.assertNotNull(user.getId());
+        logger.info("User created: " + user.getProfile().getEmail());
+        Page.setUser(user);
+
+        return user;
+    }
+
+    private String getActivationTokenForUser(User user) {
+        // Activate the user and return the activation token
+        Assert.assertNotNull(user != null);
+        UserActivationToken token = user.activate(false);
+        Assert.assertNotNull(token != null);
+        System.out.println(token.getActivationToken());
+        return token.getActivationToken();
+    }
 
 }

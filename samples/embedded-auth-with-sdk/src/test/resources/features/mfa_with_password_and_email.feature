@@ -29,3 +29,18 @@ Feature: 6.1 Multi-Factor Authentication with Password And Email
     Then she sees a page to input a code
     And she inputs the incorrect code from the email
     Then the sample shows an error message "Invalid code. Try again." on the Sample App
+
+  @requireA18NProfile
+  @requireExistingUser
+  @requireMFAGroupsForUser
+  Scenario: 6.1.4 Mary Logs in with Password and Email Magic Link on the same Browser
+    Given Mary navigates to the Basic Login View
+    When she fills in her correct username for mfa
+    And she fills in her correct password for mfa
+    And she submits the Login form
+    Then she is presented with an option to select Email to verify
+    When she selects Email
+    Then she sees a page to input a code
+    When she opens the magic link in another tab
+    Then she is redirected to the Root View
+    And an application session is created

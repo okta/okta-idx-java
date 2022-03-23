@@ -118,6 +118,6 @@ public class SocialAuth extends CucumberRoot {
     @Then("^Mary should see an interaction_required error message$")
     public void mary_should_see_an_error_message(){
         Assert.assertTrue(rootPage.alertDanger.isDisplayed());
-        Assert.assertEquals("Your client is configured to use the interaction code flow and user interaction is required to complete the request.", rootPage.alertDanger.getText());
+        Assert.assertTrue(rootPage.alertDanger.getText().contains("interaction_required"));
     }
 }

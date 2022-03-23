@@ -144,6 +144,12 @@ public class Page {
         return matcher.find() ? matcher.group(1) : null;
     }
 
+    public String fetchMagicLinkFromEmail(String emailContent) {
+        Pattern pattern = Pattern.compile("\\\"email-authentication-button\\\" href=\\\"(.*?)\\\"");
+        Matcher matcher = pattern.matcher(emailContent);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
     int getRetryCountDuringVerificationCodeFetching() {
         int retry = 5;
         try {

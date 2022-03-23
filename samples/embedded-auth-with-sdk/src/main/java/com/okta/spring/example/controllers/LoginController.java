@@ -220,7 +220,7 @@ public class LoginController {
         }
 
         for (Authenticator authenticator : authenticators) {
-            if (authenticatorType.equals(authenticator.getType())) {
+            if (authenticatorType.equals(authenticator.getLabel())) {
                 foundAuthenticator = authenticator;
 
                 if (foundAuthenticator.getFactors().size() == 1) {

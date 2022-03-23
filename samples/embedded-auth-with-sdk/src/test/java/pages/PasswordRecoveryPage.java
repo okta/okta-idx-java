@@ -31,7 +31,7 @@ public class PasswordRecoveryPage extends Page {
     @FindBy(id = "next-btn")
     public WebElement nextButton;
 
-    @FindBy(css = "input[name='authenticator-type'][value='email']")
+    @FindBy(css = "input[name='authenticator-type'][value='Email']")
     public WebElement emailRadioButton;
 
     @FindBy(id = "proceed-btn")
