@@ -63,7 +63,7 @@ public final class ProceedContext {
         return skipHref;
     }
 
-    boolean isIdentifyInOneStep() {
+    public boolean isIdentifyInOneStep() {
         return isIdentifyInOneStep;
     }
 

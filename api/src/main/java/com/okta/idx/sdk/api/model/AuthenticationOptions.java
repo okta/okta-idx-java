@@ -23,6 +23,10 @@ public class AuthenticationOptions {
 
     private char[] password;
 
+    public AuthenticationOptions(String username) {
+        this.username = username;
+    }
+
     public AuthenticationOptions(String username, char[] password) {
         this.username = username;
         this.password = password;
@@ -37,6 +41,7 @@ public class AuthenticationOptions {
     }
 
     public char[] getPassword() {
+        if (password == null) return null;
         return Arrays.copyOf(password, password.length);
     }
 

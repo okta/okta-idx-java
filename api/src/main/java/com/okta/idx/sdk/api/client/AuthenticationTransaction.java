@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.exception.ProcessingException;
@@ -143,6 +144,11 @@ final class AuthenticationTransaction {
 
         String resendHref = null;
         PollInfo pollInfo = null;
+
+        try {
+            logger.info("==== IDX RAW ===:\n{}", idxResponse.raw());
+        } catch (JsonProcessingException e) {
+        }
 
         if (idxResponse.getCurrentAuthenticatorEnrollment() != null &&
                 idxResponse.getCurrentAuthenticatorEnrollment().getValue() != null) {
