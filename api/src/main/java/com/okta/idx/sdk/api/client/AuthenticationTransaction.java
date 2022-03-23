@@ -26,7 +26,7 @@ import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.Idp;
 import com.okta.idx.sdk.api.model.Options;
-import com.okta.idx.sdk.api.model.OptionsForm
+import com.okta.idx.sdk.api.model.OptionsForm;
 import com.okta.idx.sdk.api.model.PollInfo;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
