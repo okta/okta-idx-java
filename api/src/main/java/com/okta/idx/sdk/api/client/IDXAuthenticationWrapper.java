@@ -729,7 +729,7 @@ public class IDXAuthenticationWrapper {
         AuthenticationResponse newUserRegistrationResponse = new AuthenticationResponse();
 
         try {
-            Assert.notNull(proceedContext.getSelectProfileEnrollHref(), "Policy not configured.");
+            Assert.notNull(proceedContext.getSelectProfileEnrollHref(), "Org policy is not configured to register new users.");
 
             // enroll new user
             AuthenticationTransaction enrollTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
