@@ -233,7 +233,7 @@ final class BaseIDXClient implements IDXClient {
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
-                Strings.hasText(href) ? href : clientConfiguration.getBaseUrl() + "/idp/idx/enroll",
+                href,
                 null,
                 getHttpHeaders(false),
                 new ByteArrayInputStream(objectMapper.writeValueAsBytes(enrollRequest)),
