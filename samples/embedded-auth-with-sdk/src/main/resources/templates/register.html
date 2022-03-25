@@ -66,7 +66,7 @@
         </div>
 
         <!--display the user attributes for register form dynamically-->
-        <div th:if="${not #lists.isEmpty(userProfileAttributes)}" class="container" th:align="center">
+        <div th:if="${errors == null and not #lists.isEmpty(userProfileAttributes)}" class="container" th:align="center">
             <th:block th:each="userProfileAttribute: ${userProfileAttributes}">
                 <div class="form-group">
                     <input type="text" class="form-control" name="userProfileAttribute[]" th:placeholder="${userProfileAttribute.getLabel()}" th:required="${userProfileAttribute.required}" th:id="${userProfileAttribute.getName()}">
@@ -75,7 +75,7 @@
             </th:block>
         </div>
 
-        <div class="form-group">
+        <div th:if="${errors == null}" class="form-group">
             <button id="sign-in-btn" type="submit" class="btn btn-primary btn-block">Register</button>
         </div>
     </form>

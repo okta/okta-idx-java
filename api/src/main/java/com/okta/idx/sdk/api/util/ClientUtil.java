@@ -32,11 +32,10 @@ public class ClientUtil {
      * @param issuer the issuer url
      * @param resourceUri the uri of resource
      * @return the normalized full url
-     * @throws IllegalArgumentException if the issuer URi is malformed
      * @deprecated This method has been renamed to getNormalizedIssuerUri
      */
     @Deprecated
-    public static String getNormalizedUri(String issuer, String resourceUri) throws MalformedURLException {
+    public static String getNormalizedUri(String issuer, String resourceUri) {
         return normalizedIssuerUri(issuer, resourceUri);
     }
 
