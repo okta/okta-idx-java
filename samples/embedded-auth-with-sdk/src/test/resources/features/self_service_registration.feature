@@ -91,8 +91,6 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
     And she submits the phone mode form
     Then she should see an error message "Invalid Phone Number."
 
-  # Ignored until test runs locally
-  @ignore  
   @requireA18NProfile
   @requireUserDeletionAfterRegistration
   Scenario: 4.1.5 Mary signs up for an account using activation token
@@ -104,10 +102,6 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
     And she confirms her Password
     And she submits the verify form
     Then she sees the list of optional factors
-    When she selects Email
-    Then she sees a page to input a code
-    When she inputs the correct code from her email
-    And she submits the verify form
     When she selects "Skip" on SMS
     Then she is redirected to the Root View
     And an application session is created

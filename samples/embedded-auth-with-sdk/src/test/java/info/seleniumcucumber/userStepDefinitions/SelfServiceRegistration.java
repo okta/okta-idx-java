@@ -21,7 +21,6 @@ import com.okta.sdk.client.Clients;
 import com.okta.sdk.resource.user.User;
 import com.okta.sdk.resource.user.UserActivationToken;
 import com.okta.sdk.resource.user.UserBuilder;
-import env.Hooks;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -303,6 +302,7 @@ public class SelfServiceRegistration extends CucumberRoot {
         UserActivationToken token = user.activate(false);
         Assert.assertNotNull(token != null);
         System.out.println(token.getActivationToken());
+
         return token.getActivationToken();
     }
 
