@@ -134,6 +134,7 @@ public class IDXAuthenticationWrapper {
      * Note: This requires 'Password' as the ONLY required factor in app Sign-on policy configuration.
      *
      * @param authenticationOptions the Authenticator options
+     * @param proceedContext the proceed context for the transaction
      * @return the Authentication response
      */
     public AuthenticationResponse authenticate(AuthenticationOptions authenticationOptions, ProceedContext proceedContext) {
@@ -198,6 +199,7 @@ public class IDXAuthenticationWrapper {
      * Recover Password with the supplied username.
      *
      * @param username the username
+     * @param proceedContext the proceed context
      * @return the Authentication response
      */
     public AuthenticationResponse recoverPassword(String username, ProceedContext proceedContext) {
@@ -729,8 +731,6 @@ public class IDXAuthenticationWrapper {
         AuthenticationResponse newUserRegistrationResponse = new AuthenticationResponse();
 
         try {
-            Assert.notNull(proceedContext.getSelectProfileEnrollHref(), "Org policy is not configured to register new users.");
-
             // enroll new user
             AuthenticationTransaction enrollTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
@@ -795,6 +795,7 @@ public class IDXAuthenticationWrapper {
      * Helper to verify the token query parameter contained in the link of user verification email.
      *
      * @param token the token string.
+     * @throws ProcessingException when there is an error
      * @return response object.
      */
     public Response verifyEmailToken(String token) throws ProcessingException {

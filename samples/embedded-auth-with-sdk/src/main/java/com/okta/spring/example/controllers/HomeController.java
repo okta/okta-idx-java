@@ -265,6 +265,11 @@ public class HomeController {
 
         ModelAndView modelAndView = new ModelAndView("register");
 
+        if (responseHandler.needsToShowErrors(authenticationResponse)) {
+            modelAndView.addObject("errors", authenticationResponse.getErrors());
+            return modelAndView;
+        }
+
         Optional<FormValue> userProfileFormValue = authenticationResponse.getFormValues()
                     .stream()
                     .filter(x -> x.getName().equals("userProfile"))
