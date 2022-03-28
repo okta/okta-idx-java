@@ -344,7 +344,7 @@ class IDXAuthenticationWrapperTest {
                 new AuthenticationOptions("username", "password".toCharArray()), beginResponse.proceedContext
         )
 
-        assertThat(beginResponse.proceedContext.isIdentifyInOneStep(), is(false)) // password not required
+        assertThat(beginResponse.proceedContext.isIdentifierFirstFlow(), is(true)) // password not required
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
         assertThat(authenticationResponse.getAuthenticationStatus(), is(AuthenticationStatus.SUCCESS))
@@ -377,7 +377,7 @@ class IDXAuthenticationWrapperTest {
                 new AuthenticationOptions("username"), beginResponse.proceedContext
         )
 
-        assertThat(beginResponse.proceedContext.isIdentifyInOneStep(), is(false)) // password not required
+        assertThat(beginResponse.proceedContext.isIdentifierFirstFlow(), is(true)) // password not required
         assertThat(authenticationResponse, notNullValue())
         assertThat(authenticationResponse.getErrors(), empty())
         assertThat(authenticationResponse.getAuthenticationStatus(), is(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION))

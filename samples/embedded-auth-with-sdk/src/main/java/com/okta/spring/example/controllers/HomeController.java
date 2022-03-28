@@ -195,7 +195,7 @@ public class HomeController {
         // get proceed context
         ProceedContext proceedContext = authenticationResponse.getProceedContext();
 
-        boolean isPasswordRequired = proceedContext.isIdentifyInOneStep();
+        boolean isPasswordRequired = !proceedContext.isIdentifierFirstFlow();
 
         if (authenticationResponse.getErrors().size() > 0) {
             ModelAndView modelAndView = new ModelAndView("error");
