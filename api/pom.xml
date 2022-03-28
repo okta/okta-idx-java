@@ -100,7 +100,7 @@
                         <artifactId>japicmp-maven-plugin</artifactId>
                         <version>0.15.7</version>
                         <configuration>
-                            <skip>true</skip> <!-- releasing initial version - no prev version to compare against -->
+                            <skip>false</skip>
                             <oldVersion>
                                 <dependency>
                                     <groupId>${project.groupId}</groupId>
