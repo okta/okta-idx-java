@@ -127,7 +127,7 @@ public class PasswordRecovery extends CucumberRoot {
 		Assert.assertTrue(forgotPasswordPage.alertDanger.isDisplayed());
 		String errorMsg = forgotPasswordPage.alertDanger.getText();
 		Assert.assertFalse("Error is not shown", errorMsg.isEmpty());
-//		Assert.assertEquals("Wrong error message is shown", "[There is no account with the Username " + EXAMPLE_EMAIL + ".]", errorMsg);
-		Assert.assertEquals("Wrong error message is shown", "[Reset password is not allowed at this time. Please contact support for assistance.]", errorMsg);
+		Assert.assertEquals("Wrong error message is shown", "[There is no account with the Username " + EXAMPLE_EMAIL + ".]", errorMsg);
+//		Assert.assertEquals("Wrong error message is shown", "[Reset password is not allowed at this time. Please contact support for assistance.]", errorMsg);
 	}
 }
