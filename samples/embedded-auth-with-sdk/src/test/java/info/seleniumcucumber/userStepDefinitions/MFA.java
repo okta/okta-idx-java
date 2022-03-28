@@ -110,4 +110,13 @@ public class MFA extends CucumberRoot {
     public void she_sees_a_field_to_reenter_another_code(){
         Assert.assertTrue(selectAuthenticatorPage.codeInput.isDisplayed());
     }
+
+    @When("^she opens the magic link in another tab$")
+    public void she_opens_magic_link() {
+        String emailContent = selectAuthenticatorPage.fetchEmailContent();
+        Assert.assertNotNull(emailContent);
+        String magicLink = registerPage.fetchMagicLinkFromEmail(emailContent);
+        driver.manage().window().maximize();
+        driver.get(magicLink);
+    }
 }

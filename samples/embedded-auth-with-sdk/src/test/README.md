@@ -14,10 +14,6 @@ Next, we need to set some environment variables to run the tests. Variable names
 For example,
 ```
 export USERNAME=mary@acme.com
-export USERNAME_LOCKED=mary-locked@acme.com
-export USERNAME_SUSPENDED=mary-suspended@acme.com
-export USERNAME_DEACTIVATED=mary-deactivated@acme.com
-export USERNAME_WITH_APP_UNASSIGNED=mary-not-assigned-app@acme.com
 export PASSWORD=SuperSecret123 
 ```
 We assume all accounts use the same password. 
@@ -31,6 +27,8 @@ export OKTA_IDX_CLIENTSECRET=xxxxxx
 export OKTA_IDX_SCOPES="openid email profile offline_access"
 export OKTA_IDX_REDIRECTURI=http://localhost:8080/authorization-code/callback
 export A18N_API_KEY=xxxxxx
+export OKTA_CLIENT_ORGURL=https://dev-1234.okta.com
+export OKTA_CLIENT_TOKEN=<org-api-token>
 ```
 
 Now we're ready to run the tests

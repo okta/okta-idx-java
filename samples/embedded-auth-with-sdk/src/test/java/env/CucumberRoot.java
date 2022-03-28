@@ -16,8 +16,6 @@
 package env;
 
 import io.cucumber.spring.CucumberContextConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -26,14 +24,6 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestApplication.class, loader = SpringBootContextLoader.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CucumberRoot {
-
-    private final Logger logger = LoggerFactory.getLogger(CucumberRoot.class);
-
     protected String USERNAME = System.getenv("USERNAME");
-    protected String USERNAME_WITH_APP_UNASSIGNED = System.getenv("USERNAME_WITH_APP_UNASSIGNED");
-    protected String USERNAME_SUSPENDED = System.getenv("USERNAME_SUSPENDED");
-    protected String USERNAME_LOCKED = System.getenv("USERNAME_LOCKED");
-    protected String USERNAME_DEACTIVATED = System.getenv("USERNAME_DEACTIVATED");
     protected String PASSWORD = System.getenv("PASSWORD");
-
 }

@@ -100,6 +100,7 @@ public final class ResponseHandler {
             case AWAITING_AUTHENTICATOR_SELECTION:
             case AWAITING_AUTHENTICATOR_VERIFICATION_DATA:
                 return selectAuthenticatorForm(response, "Select Authenticator", session);
+            case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_VERIFICATION:
                 return verifyForm(response);
             case AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION:

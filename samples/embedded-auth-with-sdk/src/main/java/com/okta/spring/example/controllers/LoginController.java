@@ -106,11 +106,13 @@ public class LoginController {
             return modelAndView;
         }
 
-        authenticationResponse.getAuthenticatorEnrollments().stream()
-            .filter(x -> x.getDisplayName().equals("Okta Verify")).findFirst()
-            .flatMap(enroll -> Arrays.stream(enroll.getMethods())
-                .filter(methodType -> methodType.getType().equals("totp")).findFirst()
-            ).ifPresent(methodType -> session.setAttribute("totp", "totp"));
+        if (authenticationResponse.getAuthenticatorEnrollments() != null) {
+            authenticationResponse.getAuthenticatorEnrollments().stream()
+                    .filter(x -> x.getDisplayName().equals("Okta Verify")).findFirst()
+                    .flatMap(enroll -> Arrays.stream(enroll.getMethods())
+                            .filter(methodType -> methodType.getType().equals("totp")).findFirst()
+                    ).ifPresent(methodType -> session.setAttribute("totp", "totp"));
+        }
 
         return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
@@ -224,7 +226,7 @@ public class LoginController {
         }
 
         for (Authenticator authenticator : authenticators) {
-            if (authenticatorType.equals(authenticator.getType())) {
+            if (authenticatorType.equals(authenticator.getLabel())) {
                 foundAuthenticator = authenticator;
 
                 if (foundAuthenticator.getFactors().size() == 1) {
@@ -633,7 +635,7 @@ public class LoginController {
 
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.submitPhoneAuthenticator(proceedContext,
-                        phone, getFactorFromMethod(session, mode));
+                        phone, getPhoneFactorFromMethod(session, mode));
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("register-phone");
@@ -654,7 +656,7 @@ public class LoginController {
      * Handle webauthn authenticator enrollment functionality.
      *
      * @param webauthnRequest body
-     * @param session the session
+     * @param session         the session
      * @return the view associated with authentication response.
      */
     @PostMapping(value = "/enroll-webauthn")
@@ -672,17 +674,18 @@ public class LoginController {
 
     /**
      * Fetch the factor associated with factor method.
+     *
      * @param session the http session
-     * @param method the factor method
+     * @param method  the factor method
      * @return the factor associated with the supplied factor method.
      * @throws IllegalStateException if factor could not be found.
      */
-    private Authenticator.Factor getFactorFromMethod(final HttpSession session,
-                                                     final String method) {
+    private Authenticator.Factor getPhoneFactorFromMethod(final HttpSession session,
+                                                          final String method) {
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
         for (Authenticator authenticator : authenticators) {
             for (Authenticator.Factor factor : authenticator.getFactors()) {
-                if (factor.getMethod().equals(method)) {
+                if (authenticator.getLabel().equals("Phone") && factor.getMethod().equals(method)) {
                     return factor;
                 }
             }

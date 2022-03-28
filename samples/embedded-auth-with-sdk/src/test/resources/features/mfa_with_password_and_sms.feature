@@ -10,10 +10,9 @@ Feature: 6.2 Multi-Factor Authentication with Password and SMS
     And she submits the Login form
     Then she is presented with a list of factors
     When she selects Phone from the list
-    And she inputs a valid phone number
+    And she selects SMS
     And submits the enrollment form
-    Then she sees a list of phone modes
-    When she selects SMS
+    And she inputs a valid phone number
     And she submits the phone mode form
     Then the screen changes to receive an input for a code
     When she inputs the correct code from the SMS
@@ -30,9 +29,10 @@ Feature: 6.2 Multi-Factor Authentication with Password and SMS
     When she fills in her correct username for mfa
     And she fills in her correct password for mfa
     And she submits the Login form
-    Then she is presented with an option to select SMS to verify
-    When she selects SMS from the list
-    And she selects Receive a Code
+    Then she is presented with a list of factors
+    When she selects Phone from the list
+    And she selects SMS
+    And submits the enrollment form
     Then the screen changes to receive an input for a code
     When she inputs the correct code from the SMS
     And she submits the verify form
@@ -49,11 +49,10 @@ Feature: 6.2 Multi-Factor Authentication with Password and SMS
     And she submits the Login form
     Then she is presented with a list of factors
     When she selects Phone from the list
+    And she selects SMS
+    And submits the enrollment form
     And she inputs an invalid phone number
     And submits the enrollment form
-    Then she sees a list of phone modes
-    When she selects SMS
-    And she submits the phone mode form
     Then she should see a message "Invalid Phone Number"
 
   @requireA18NProfile
@@ -66,10 +65,9 @@ Feature: 6.2 Multi-Factor Authentication with Password and SMS
     And she submits the Login form
     Then she is presented with a list of factors
     When she selects Phone from the list
-    And she inputs a valid phone number
+    And she selects SMS
     And submits the enrollment form
-    Then she sees a list of phone modes
-    When she selects SMS
+    And she inputs a valid phone number
     And she submits the phone mode form
     Then the screen changes to receive an input for a code
     When she inputs the incorrect code from the phone

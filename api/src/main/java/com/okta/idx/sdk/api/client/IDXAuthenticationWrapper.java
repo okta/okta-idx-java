@@ -135,6 +135,7 @@ public class IDXAuthenticationWrapper {
      * Note: This requires 'Password' as the ONLY required factor in app Sign-on policy configuration.
      *
      * @param authenticationOptions the Authenticator options
+     * @param proceedContext the proceed context for the transaction
      * @return the Authentication response
      */
     public AuthenticationResponse authenticate(AuthenticationOptions authenticationOptions, ProceedContext proceedContext) {
@@ -202,6 +203,7 @@ public class IDXAuthenticationWrapper {
      * Recover Password with the supplied username.
      *
      * @param username the username
+     * @param proceedContext the proceed context
      * @return the Authentication response
      */
     public AuthenticationResponse recoverPassword(String username, ProceedContext proceedContext) {
@@ -312,6 +314,7 @@ public class IDXAuthenticationWrapper {
             return AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 Authenticator authenticatorRequest = new Authenticator();
                 authenticatorRequest.setId(authenticator.getId());
+                authenticatorRequest.setMethodType(authenticator.getType());
                 if (authenticator.hasNestedFactors() && authenticator.getFactors().size() == 1) {
                     com.okta.idx.sdk.api.client.Authenticator.Factor factor = authenticator.getFactors().get(0);
                     authenticatorRequest.setMethodType(factor.getMethod());
@@ -732,8 +735,6 @@ public class IDXAuthenticationWrapper {
         AuthenticationResponse newUserRegistrationResponse = new AuthenticationResponse();
 
         try {
-            Assert.notNull(proceedContext.getSelectProfileEnrollHref(), "Policy not configured.");
-
             // enroll new user
             AuthenticationTransaction enrollTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
@@ -798,6 +799,7 @@ public class IDXAuthenticationWrapper {
      * Helper to verify the token query parameter contained in the link of user verification email.
      *
      * @param token the token string.
+     * @throws ProcessingException when there is an error
      * @return response object.
      */
     public Response verifyEmailToken(String token) throws ProcessingException {
