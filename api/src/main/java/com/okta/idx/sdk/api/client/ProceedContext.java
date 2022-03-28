@@ -82,4 +82,12 @@ public final class ProceedContext {
     public String getRefresh() {
         return refresh;
     }
+
+    /**
+     * Identifier first flow is one where just the identifier (email) is sufficient to start
+     * the flow (i.e. password is not required at the start of flow).
+     */
+    public boolean isIdentifierFirstFlow() {
+        return !isIdentifyInOneStep();
+    }
 }

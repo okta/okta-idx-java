@@ -175,7 +175,7 @@ public class HomeController {
     }
 
     /**
-     * Display the login page.
+     * Display the login page with username and password (optional).
      *
      * @param session the http session
      * @return the login view
@@ -192,6 +192,11 @@ public class HomeController {
 
         AuthenticationResponse authenticationResponse = begin(session);
 
+        // get proceed context
+        ProceedContext proceedContext = authenticationResponse.getProceedContext();
+
+        boolean isPasswordRequired = !proceedContext.isIdentifierFirstFlow();
+
         if (authenticationResponse.getErrors().size() > 0) {
             ModelAndView modelAndView = new ModelAndView("error");
             modelAndView.addObject("errors", authenticationResponse.getErrors());
@@ -202,6 +207,8 @@ public class HomeController {
         if (!CollectionUtils.isEmpty(authenticationResponse.getIdps())) {
             modelAndView.addObject("idps", authenticationResponse.getIdps());
         }
+
+        session.setAttribute("isPasswordRequired", isPasswordRequired);
         return modelAndView;
     }
 

@@ -17,6 +17,7 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
+import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
@@ -172,6 +173,9 @@ public class IDXAuthenticationWrapper {
             }
 
             AuthenticationTransaction passwordTransaction = selectPasswordAuthenticatorIfNeeded(identifyTransaction);
+            if (Strings.isEmpty(authenticationOptions.getPassword())) {
+                return passwordTransaction.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
+            }
             AuthenticationTransaction answerTransaction = passwordTransaction.proceed(() -> {
                 // answer password authenticator challenge
                 Credentials credentials = new Credentials();

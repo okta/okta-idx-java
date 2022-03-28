@@ -33,7 +33,6 @@ import com.okta.idx.sdk.api.model.RemediationType;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +47,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 final class AuthenticationTransaction {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationTransaction.class);
+
+    private final IDXClient client;
+    private final IDXClientContext clientContext;
+    private final IDXResponse idxResponse;
+
+    AuthenticationTransaction(IDXClient client, IDXClientContext clientContext, IDXResponse idxResponse) {
+        this.client = client;
+        this.clientContext = clientContext;
+        this.idxResponse = idxResponse;
+    }
 
     static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
         return create(client, null, null);
@@ -94,18 +105,6 @@ final class AuthenticationTransaction {
 
     interface Factory {
         IDXResponse create() throws ProcessingException;
-    }
-
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationTransaction.class);
-
-    private final IDXClient client;
-    private final IDXClientContext clientContext;
-    private final IDXResponse idxResponse;
-
-    AuthenticationTransaction(IDXClient client, IDXClientContext clientContext, IDXResponse idxResponse) {
-        this.client = client;
-        this.clientContext = clientContext;
-        this.idxResponse = idxResponse;
     }
 
     String getStateHandle() {

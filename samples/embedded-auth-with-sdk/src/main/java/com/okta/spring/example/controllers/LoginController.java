@@ -72,16 +72,16 @@ public class LoginController {
     private ResponseHandler responseHandler;
 
     /**
-     * Handle login with the supplied username and password.
+     * Handle login with the supplied username and optional password.
      *
      * @param username the username
-     * @param password the password
+     * @param password the password (optional)
      * @param session the session
      * @return the home page view (if login is successful), else the login page with errors.
      */
     @PostMapping("/login")
     public ModelAndView login(final @RequestParam("username") String username,
-                              final @RequestParam("password") String password,
+                              final @RequestParam(value = "password", required = false) String password,
                               final HttpSession session) {
 
         // begin transaction
@@ -91,8 +91,14 @@ public class LoginController {
         ProceedContext proceedContext = beginResponse.getProceedContext();
 
         // trigger authentication
-        AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username, password.toCharArray()), proceedContext);
+        AuthenticationResponse authenticationResponse;
+
+        if (Strings.hasText(password)) {
+            authenticationResponse = idxAuthenticationWrapper.authenticate(
+                    new AuthenticationOptions(username, password.toCharArray()), proceedContext);
+        } else {
+            authenticationResponse = idxAuthenticationWrapper.authenticate(new AuthenticationOptions(username), proceedContext);
+        }
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("redirect:/login");
@@ -360,7 +366,7 @@ public class LoginController {
     public ModelAndView verify(final @RequestParam("code") String code,
                                final @RequestParam(value = "security_question_key", required = false) String securityQuestionKey,
                                final HttpSession session) {
-        logger.info(":: Verify Code :: {}", code);
+        logger.info(":: Verify Code ::");
 
         ProceedContext proceedContext = Util.getProceedContextFromSession(session);
 
@@ -381,6 +387,10 @@ public class LoginController {
             ModelAndView modelAndView = new ModelAndView("verify");
             modelAndView.addObject("errors", authenticationResponse.getErrors());
             return modelAndView;
+        }
+
+        if (session.getAttribute("isPasswordRequired") != null) {
+            session.removeAttribute("isPasswordRequired");
         }
 
         return responseHandler.handleKnownTransitions(authenticationResponse, session);
@@ -562,13 +572,6 @@ public class LoginController {
         }
 
         UserProfile userProfile = new UserProfile();
-//        FormValue userProfileFormValue = null;
-
-//        for (FormValue formValue: newUserRegistrationResponse.getFormValues()) {
-//            if (formValue.getName().contentEquals("userProfile")) {
-//                userProfileFormValue = formValue;
-//            }
-//        }
 
         Optional<FormValue> userProfileFormValue = newUserRegistrationResponse.getFormValues()
                     .stream()
@@ -675,7 +678,7 @@ public class LoginController {
      * @param session the http session
      * @param method  the factor method
      * @return the factor associated with the supplied factor method.
-     * @throws {@link IllegalArgumentException} if factor could not be found.
+     * @throws IllegalStateException if factor could not be found.
      */
     private Authenticator.Factor getPhoneFactorFromMethod(final HttpSession session,
                                                           final String method) {
