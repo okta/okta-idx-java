@@ -98,23 +98,23 @@
                     <plugin>
                         <groupId>com.github.siom79.japicmp</groupId>
                         <artifactId>japicmp-maven-plugin</artifactId>
-                        <version>0.14.3</version>
+                        <version>0.15.7</version>
                         <configuration>
                             <skip>true</skip> <!-- releasing initial version - no prev version to compare against -->
-<!--                            <oldVersion>-->
-<!--                                <dependency>-->
-<!--                                    <groupId>${project.groupId}</groupId>-->
-<!--                                    <artifactId>${project.artifactId}</artifactId>-->
-<!--                                    <version>${previousVersion}</version>-->
-<!--                                    <type>jar</type>-->
-<!--                                </dependency>-->
-<!--                            </oldVersion>-->
-<!--                            <parameter>-->
-<!--                                <onlyModified>true</onlyModified>-->
-<!--                                <breakBuildOnBinaryIncompatibleModifications>false</breakBuildOnBinaryIncompatibleModifications>-->
-<!--                                <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>-->
-<!--                                <postAnalysisScript>${root.dir}/src/japicmp/postAnalysisScript.groovy</postAnalysisScript>-->
-<!--                            </parameter>-->
+                            <oldVersion>
+                                <dependency>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${okta.sdk.previousVersion}</version>
+                                    <type>jar</type>
+                                </dependency>
+                            </oldVersion>
+                            <parameter>
+                                <onlyModified>true</onlyModified>
+                                <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
+                                <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>
+                                <postAnalysisScript>${root.dir}/src/japicmp/postAnalysisScript.groovy</postAnalysisScript>
+                            </parameter>
                         </configuration>
                     </plugin>
                 </plugins>
