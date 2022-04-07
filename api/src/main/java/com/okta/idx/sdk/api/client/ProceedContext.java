@@ -86,6 +86,7 @@ public final class ProceedContext {
     /**
      * Identifier first flow is one where just the identifier (email) is sufficient to start
      * the flow (i.e. password is not required at the start of flow).
+     * @return true if identifier first flow, false otherwise
      */
     public boolean isIdentifierFirstFlow() {
         return !isIdentifyInOneStep();

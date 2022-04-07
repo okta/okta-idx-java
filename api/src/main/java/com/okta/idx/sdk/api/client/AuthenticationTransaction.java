@@ -30,6 +30,7 @@ import com.okta.idx.sdk.api.model.OptionsForm;
 import com.okta.idx.sdk.api.model.PollInfo;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.model.RemediationType;
+import com.okta.idx.sdk.api.model.SecurityQuestion;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
@@ -338,7 +339,6 @@ final class AuthenticationTransaction {
     private void fillOutAuthenticators(RemediationOption remediationOption, AuthenticationResponse authenticationResponse) {
         if (remediationOption != null) {
             FormValue[] formValues = remediationOption.form();
-
             if (formValues != null) {
                 Optional<FormValue> formValueOptional = Arrays.stream(formValues)
                         .filter(x -> "authenticator".equals(x.getName()))
@@ -353,9 +353,47 @@ final class AuthenticationTransaction {
                     }
 
                     authenticationResponse.setAuthenticators(authenticators);
+                } else {
+                    formValueOptional = Arrays.stream(formValues)
+                            .filter(x -> "credentials".equals(x.getName()))
+                            .findFirst();
+
+                    if (formValueOptional.isPresent()) {
+                        Options[] options = formValueOptional.get().options();
+
+                        if (options != null) {
+                            boolean isSecQnAuth = Arrays.stream(options).anyMatch(x -> "Choose a security question".equals(x.getLabel()));
+
+                            if (isSecQnAuth) {
+                                List<SecurityQuestion> securityQuestions = getSecurityQuestions(options);
+                                if (securityQuestions != null) {
+                                    authenticationResponse.setSecurityQuestions(securityQuestions);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private List<SecurityQuestion> getSecurityQuestions(Options[] options) {
+        if (options == null || options.length == 0) {
+            return null;
+        }
+
+        List<SecurityQuestion> securityQuestions = new ArrayList<>();
+
+        for (Options option : options) {
+            FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
+            for (FormValue formValue : optionFormValues) {
+                if (formValue.options() != null) {
+                    Arrays.stream(formValue.options()).forEach(e -> securityQuestions.add(new SecurityQuestion(e.getLabel(), String.valueOf(e.getValue()))));
+                }
+            }
+        }
+
+        return securityQuestions;
     }
 
     private List<Authenticator> getAuthenticators(Options[] options) {

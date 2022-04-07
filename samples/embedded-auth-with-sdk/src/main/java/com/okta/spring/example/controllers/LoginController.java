@@ -15,6 +15,9 @@
  */
 package com.okta.spring.example.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.Authenticator;
@@ -157,6 +160,7 @@ public class LoginController {
                                             final @RequestParam(value = "action") String action,
                                             final HttpSession session) {
 
+        logger.info("=== inside selectAuthenticator with authenticatorType {}, action {}", authenticatorType, action);
         AuthenticationResponse authenticationResponse = null;
         Authenticator foundAuthenticator = null;
 
@@ -225,6 +229,31 @@ public class LoginController {
             return modelAndView;
         }
 
+        if ("Security Question".equals(authenticatorType)) {
+            ModelAndView modelAndView;
+
+            Optional<Authenticator> authenticatorOptional = authenticators.stream()
+                    .filter(auth -> auth.getType().equals("security_question")).findFirst();
+            Assert.isTrue(authenticatorOptional.isPresent(), "Authenticator not found");
+
+            String authId = authenticatorOptional.get().getId();
+
+            AuthenticationResponse enrollResponse = idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authId);
+
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            try {
+                logger.info("== ENROLL SEC QN RESPONSE: {} ==", ow.writeValueAsString(enrollResponse));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+
+            Util.updateSession(session, enrollResponse.getProceedContext());
+
+            modelAndView = new ModelAndView("register-sec-qn");
+            modelAndView.addObject("questions", enrollResponse.getSecurityQuestions());
+            return modelAndView;
+        }
+
         for (Authenticator authenticator : authenticators) {
             if (authenticatorType.equals(authenticator.getLabel())) {
                 foundAuthenticator = authenticator;
@@ -263,7 +292,7 @@ public class LoginController {
                 return responseHandler.verifyForm();
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
-                return responseHandler.registerVerifyForm(foundAuthenticator);
+                return responseHandler.registerVerifyForm(foundAuthenticator, authenticationResponse);
             case AWAITING_POLL_ENROLLMENT:
                 return responseHandler.setupOktaVerifyForm(session);
             default:
@@ -331,7 +360,7 @@ public class LoginController {
                 return responseHandler.verifyForm();
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
-                return responseHandler.registerVerifyForm(foundFactor);
+                return responseHandler.registerVerifyForm(foundFactor, authenticationResponse);
             case AWAITING_CHANNEL_DATA_ENROLLMENT:
                 return responseHandler.oktaVerifyViaChannelDataForm(foundFactor, session);
             case AWAITING_POLL_ENROLLMENT:
@@ -602,6 +631,7 @@ public class LoginController {
             return modelAndView;
         }
 
+        logger.info("== BEFORE handleKnownTransitions() ==");
         return responseHandler.handleKnownTransitions(authenticationResponse, session);
     }
 

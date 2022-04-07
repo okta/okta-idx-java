@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Strings;
@@ -287,7 +288,13 @@ public class IDXAuthenticationWrapper {
                                 .withUserProfile(userProfile)
                                 .withStateHandle(proceedContext.getStateHandle())
                                 .build();
-                return client.enrollUpdateUserProfile(enrollUserProfileUpdateRequest, proceedContext.getHref());
+                IDXResponse idxResponse = client.enrollUpdateUserProfile(enrollUserProfileUpdateRequest, proceedContext.getHref());
+                try {
+                    logger.info("=== AFTER ENROLL UPDATE USER PROFILE ===\n{}", idxResponse.raw());
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+                return idxResponse;
             });
 
             // Verify the next remediation is correct.
@@ -377,7 +384,13 @@ public class IDXAuthenticationWrapper {
                                 .withStateHandle(proceedContext.getStateHandle())
                                 .build();
 
-                        return client.enroll(enrollRequest, proceedContext.getHref());
+                        IDXResponse idxResponse = client.enroll(enrollRequest, proceedContext.getHref());
+                        try {
+                            logger.info("=== ENROLL AUTHENTICATOR RESPONSE RAW === \n{}", idxResponse.raw());
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
+                        return idxResponse;
                     }).asAuthenticationResponse();
 
             if (authenticationResponse.getWebAuthnParams() != null) {
@@ -433,7 +446,7 @@ public class IDXAuthenticationWrapper {
      * Verify Authenticator with the supplied authenticator options.
      *
      * @param proceedContext the ProceedContext
-     * @param verifyAuthenticatorOptions the verify Authenticator options
+     * @param verifyAuthenticatorOptions verify authenticator options
      * @return the Authentication response
      */
     public AuthenticationResponse verifyAuthenticator(ProceedContext proceedContext,
@@ -826,7 +839,10 @@ public class IDXAuthenticationWrapper {
         return proceedContext.getSkipHref() != null;
     }
 
-    /** Begin flow without any recovery or activation token **/
+    /**
+     * Begin flow without any recovery or activation token.
+     * @return authentication response
+     */
     public AuthenticationResponse begin() {
         try {
             return AuthenticationTransaction.create(client).asAuthenticationResponse();
@@ -837,7 +853,11 @@ public class IDXAuthenticationWrapper {
         }
     }
 
-    /** Begin password recovery flow with a recovery token **/
+    /**
+     * Begin password recovery flow with a recovery token.
+     * @param token recovery token
+     * @return authentication response
+     */
     public AuthenticationResponse beginPasswordRecovery(String token) {
         try {
             return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN).asAuthenticationResponse();
@@ -848,7 +868,11 @@ public class IDXAuthenticationWrapper {
         }
     }
 
-    /** Begin password recovery flow with an activation token **/
+    /**
+     * Begin password recovery flow with an activation token.
+     * @param token activation token
+     * @return authentication response
+     */
     public AuthenticationResponse beginUserActivation(String token) {
         try {
             return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN).asAuthenticationResponse();
@@ -859,7 +883,12 @@ public class IDXAuthenticationWrapper {
         }
     }
 
-    /** Exchange interaction code for token **/
+    /**
+     * Exchange interaction code for token.
+     * @param proceedContext proceed context
+     * @param interactionCode interaction code
+     * @return authentication response
+     */
     public AuthenticationResponse fetchTokenWithInteractionCode(ProceedContext proceedContext,
                                                                 String interactionCode) {
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
