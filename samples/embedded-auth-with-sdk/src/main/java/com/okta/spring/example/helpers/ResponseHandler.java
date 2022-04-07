@@ -192,6 +192,7 @@ public final class ResponseHandler {
                 return new ModelAndView("register-google");
             case "Security Question":
                 ModelAndView modelAndView = new ModelAndView("register-sec-qn");
+                modelAndView.addObject("title", "Security Question");
                 modelAndView.addObject("questions", authenticationResponse.getSecurityQuestions());
                 return modelAndView;
             default:

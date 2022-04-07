@@ -57,9 +57,7 @@
 <div class="sec-qn-form">
     <form th:action="@{/verify}" method="post">
         <h2 class="text-center"><span th:text="${title}"></span></h2>
-        <div th:if="${errors}" class="alert alert-danger">
-            <span th:text="${errors}"></span>
-        </div>
+        <a th:href="@{/register-custom-sec-qn}">Create my own security question</a>
         <select class="form-control selectpicker" id="questions" th:name="security_question_key">
             <option value="">Choose a security question</option>
             <option th:each="question : ${questions}"

@@ -438,6 +438,7 @@ public class IDXAuthenticationWrapper {
                                                       VerifyAuthenticatorAnswer verifyAuthenticatorAnswer) {
         try {
             Credentials credentials = new Credentials();
+            credentials.setQuestion(verifyAuthenticatorAnswer.getQuestion());
             credentials.setQuestionKey(verifyAuthenticatorAnswer.getQuestionKey());
             credentials.setAnswer(verifyAuthenticatorAnswer.getAnswer().toCharArray());
 

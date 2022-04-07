@@ -370,12 +370,14 @@ public class LoginController {
      * Handle authenticator verification functionality.
      *
      * @param code                  the verification code
+     * @param securityQuestion      the security question (custom case)
      * @param securityQuestionKey   the security question key
      * @param session               the session
      * @return the view associated with authentication response.
      */
     @PostMapping("/verify")
     public ModelAndView verify(final @RequestParam("code") String code,
+                               final @RequestParam(value = "security_question", required = false) String securityQuestion,
                                final @RequestParam(value = "security_question_key", required = false) String securityQuestionKey,
                                final HttpSession session) {
         logger.info(":: Verify Code ::");
@@ -385,7 +387,10 @@ public class LoginController {
         AuthenticationResponse authenticationResponse;
         if (!Strings.isEmpty(securityQuestionKey)) {
             authenticationResponse = idxAuthenticationWrapper
-                    .verifyAuthenticator(proceedContext, new VerifyAuthenticatorAnswer(code, securityQuestionKey));
+                    .verifyAuthenticator(proceedContext, new VerifyAuthenticatorAnswer(code, null, securityQuestionKey));
+        } else if (!Strings.isEmpty(securityQuestion)) {
+            authenticationResponse = idxAuthenticationWrapper
+                    .verifyAuthenticator(proceedContext, new VerifyAuthenticatorAnswer(code, securityQuestion, "custom"));
         } else if ("totp".equals(String.valueOf(session.getAttribute("totp")))) {
             authenticationResponse = idxAuthenticationWrapper
                     .verifyAuthenticator(proceedContext, new VerifyChannelDataOptions("totp", code));
