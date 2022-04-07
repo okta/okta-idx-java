@@ -843,7 +843,7 @@ class IDXAuthenticationWrapperTest {
 
         authenticationResponse = idxAuthenticationWrapper.verifyAuthenticator(
                 authenticationResponse.proceedContext,
-                new VerifyAuthenticatorAnswer("Answer", "first_computer_game")
+                new VerifyAuthenticatorAnswer("Answer", null, "first_computer_game")
         )
 
         assertThat(authenticationResponse, notNullValue())
