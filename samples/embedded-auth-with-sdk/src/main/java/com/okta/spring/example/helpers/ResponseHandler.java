@@ -15,9 +15,6 @@
  */
 package com.okta.spring.example.helpers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -189,9 +186,12 @@ public final class ResponseHandler {
      * Return the view for verify form.
      * @param authenticator the authenticator
      * @param authenticationResponse authentication response
+     * @param session http session
      * @return the view for the register verify form.
      */
-    public ModelAndView registerVerifyForm(Authenticator authenticator, AuthenticationResponse authenticationResponse) {
+    public ModelAndView registerVerifyForm(Authenticator authenticator,
+                                           AuthenticationResponse authenticationResponse,
+                                           HttpSession session) {
         switch (authenticator.getLabel()) {
             case "Email":
                 return verifyForm();
@@ -202,13 +202,38 @@ public final class ResponseHandler {
             case "Google Authenticator":
                 return new ModelAndView("register-google");
             case "Security Question":
-                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-                try {
-                    logger.info("== AUTH RESPONSE: {} ==", ow.writeValueAsString(authenticationResponse));
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
-                return new ModelAndView("register-sec-qn");
+//                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+//                try {
+//                    logger.info("== AUTH RESPONSE: {} ==", ow.writeValueAsString(authenticationResponse));
+//                } catch (JsonProcessingException e) {
+//                    e.printStackTrace();
+//                }
+//                return new ModelAndView("register-sec-qn");
+            ModelAndView modelAndView;
+
+//            Optional<Authenticator> authenticatorOptional = authenticators.stream()
+//                    .filter(auth -> auth.getType().equals("security_question")).findFirst();
+//            Assert.isTrue(authenticatorOptional.isPresent(), "Authenticator not found");
+//
+//            String authId = authenticatorOptional.get().getId();
+
+                logger.info("== HREF == {}", authenticationResponse.getProceedContext().getHref());
+                logger.info("== HREF (ideal) == {}", Util.getProceedContextFromSession(session).getHref());
+
+//                AuthenticationResponse enrollResponse =
+//                    authenticationWrapper.enrollAuthenticator(Util.getProceedContextFromSession(session),
+//                            authenticator.getId());
+//
+//            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+//            try {
+//                logger.info("== ENROLL SEC QN RESPONSE: {} ==", ow.writeValueAsString(enrollResponse));
+//            } catch (JsonProcessingException e) {
+//                e.printStackTrace();
+//            }
+
+            modelAndView = new ModelAndView("register-sec-qn");
+            modelAndView.addObject("questions", authenticationResponse.getSecurityQuestions());
+            return modelAndView;
             default:
                 return unsupportedPolicy();
         }

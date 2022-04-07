@@ -34,6 +34,7 @@ This project includes:
   Kotlin Stdlib Common under The Apache License, Version 2.0
   Nimbus Content Type under The Apache Software License, Version 2.0
   Nimbus JOSE+JWT under The Apache Software License, Version 2.0
+  Nimbus LangTag under The Apache Software License, Version 2.0
   OAuth 2.0 SDK with OpenID Connect extensions under Apache License, version 2.0
   Okio under The Apache Software License, Version 2.0
   Okta Commons :: Config Check under The Apache License, Version 2.0
@@ -42,8 +43,6 @@ This project includes:
   Okta Spring Boot :: OAuth2 under The Apache License, Version 2.0
   Okta Spring Boot :: SDK under The Apache License, Version 2.0
   Okta Spring Boot :: Starter under The Apache License, Version 2.0
-  org.jetbrains.kotlin:kotlin-stdlib under The Apache License, Version 2.0
-  org.jetbrains.kotlin:kotlin-stdlib-common under The Apache License, Version 2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
   Spring AOP under Apache License, Version 2.0

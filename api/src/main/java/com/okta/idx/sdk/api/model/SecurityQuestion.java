@@ -13,22 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.example;
+package com.okta.idx.sdk.api.model;
 
-import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.okta.idx.sdk.webauthn.User;
 
-@SpringBootApplication
-public class ExampleApplication {
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class SecurityQuestion {
 
-    /**
-     * Application entry point.
-     *
-     * @param args main args
-     */
-    public static void main(final String[] args) {
-        TomcatURLStreamHandlerFactory.disable(); //Prevent "factory already defined" error in E2E tests
-        SpringApplication.run(ExampleApplication.class, args);
+    private String label;
+    private String value;
+
+    public SecurityQuestion(String label, String value) {
+        this.label = label;
+        this.value = value;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public String getValue() {
+        return value;
     }
 }
