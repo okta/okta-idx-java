@@ -15,7 +15,6 @@
  */
 package com.okta.idx.sdk.api.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Strings;
@@ -60,7 +59,6 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
 import com.okta.idx.sdk.api.response.TokenResponse;
-import com.okta.idx.sdk.api.util.ClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -288,13 +286,7 @@ public class IDXAuthenticationWrapper {
                                 .withUserProfile(userProfile)
                                 .withStateHandle(proceedContext.getStateHandle())
                                 .build();
-                IDXResponse idxResponse = client.enrollUpdateUserProfile(enrollUserProfileUpdateRequest, proceedContext.getHref());
-                try {
-                    logger.info("=== AFTER ENROLL UPDATE USER PROFILE ===\n{}", idxResponse.raw());
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
-                return idxResponse;
+                return client.enrollUpdateUserProfile(enrollUserProfileUpdateRequest, proceedContext.getHref());
             });
 
             // Verify the next remediation is correct.
@@ -384,13 +376,7 @@ public class IDXAuthenticationWrapper {
                                 .withStateHandle(proceedContext.getStateHandle())
                                 .build();
 
-                        IDXResponse idxResponse = client.enroll(enrollRequest, proceedContext.getHref());
-                        try {
-                            logger.info("=== ENROLL AUTHENTICATOR RESPONSE RAW === \n{}", idxResponse.raw());
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
-                        }
-                        return idxResponse;
+                        return client.enroll(enrollRequest, proceedContext.getHref());
                     }).asAuthenticationResponse();
 
             if (authenticationResponse.getWebAuthnParams() != null) {
@@ -405,36 +391,6 @@ public class IDXAuthenticationWrapper {
             }
 
             return authenticationResponse;
-        } catch (ProcessingException e) {
-            return handleProcessingException(e);
-        } catch (IllegalArgumentException e) {
-            return handleIllegalArgumentException(e);
-        }
-    }
-
-    /**
-     * Enroll authenticator of the supplied type.
-     *
-     * @param proceedContext the ProceedContext
-     * @param factor the factor
-     * @return the Authentication response
-     */
-    public AuthenticationResponse enrollAuthenticator(ProceedContext proceedContext,
-                                                      com.okta.idx.sdk.api.client.Authenticator.Factor factor) {
-        try {
-            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
-                Authenticator authenticator = new Authenticator();
-
-                authenticator.setId(factor.getId());
-                authenticator.setMethodType(factor.getMethod());
-
-                EnrollRequest enrollRequest = EnrollRequestBuilder.builder()
-                        .withAuthenticator(authenticator)
-                        .withStateHandle(proceedContext.getStateHandle())
-                        .build();
-
-                return client.enroll(enrollRequest, proceedContext.getHref());
-            }).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -899,28 +855,6 @@ public class IDXAuthenticationWrapper {
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         }
-        return authenticationResponse;
-    }
-
-    /**
-     * Exchange interaction code for token.
-     * @deprecated the {@code issuer} param is automatically resolved.
-     */
-    @Deprecated
-    public AuthenticationResponse fetchTokenWithInteractionCode(String issuer,
-                                                                ProceedContext proceedContext,
-                                                                String interactionCode) {
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-
-        try {
-            TokenResponse tokenResponse =
-                    client.token(ClientUtil.normalizedIssuerUri(issuer, "/v1/token"),
-                            "interaction_code", interactionCode, proceedContext.getClientContext());
-            authenticationResponse.setTokenResponse(tokenResponse);
-        } catch (ProcessingException e) {
-            return handleProcessingException(e);
-        }
-
         return authenticationResponse;
     }
 }

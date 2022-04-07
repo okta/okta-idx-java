@@ -55,7 +55,7 @@ public final class ProceedContext {
         return stateHandle;
     }
 
-    public String getHref() {
+    String getHref() {
         return href;
     }
 

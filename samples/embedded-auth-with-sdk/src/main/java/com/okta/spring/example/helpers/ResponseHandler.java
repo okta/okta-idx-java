@@ -18,8 +18,6 @@ package com.okta.spring.example.helpers;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
@@ -32,11 +30,6 @@ import static com.okta.idx.sdk.api.model.AuthenticationStatus.SKIP_COMPLETE;
 
 @Component
 public final class ResponseHandler {
-
-    /**
-     * logger instance.
-     */
-    private final Logger logger = LoggerFactory.getLogger(ResponseHandler.class);
 
     /**
      * response handler.
@@ -94,8 +87,6 @@ public final class ResponseHandler {
      * @return the view with the status associated with the response.
      */
     public ModelAndView handleKnownTransitions(AuthenticationResponse response, HttpSession session) {
-        logger.info("== INSIDE handleKnownTransitions() == {}", response.getAuthenticationStatus());
-
         ModelAndView terminalModelAndView = handleTerminalTransitions(response, session);
         if (terminalModelAndView != null) {
             return terminalModelAndView;
@@ -186,12 +177,10 @@ public final class ResponseHandler {
      * Return the view for verify form.
      * @param authenticator the authenticator
      * @param authenticationResponse authentication response
-     * @param session http session
      * @return the view for the register verify form.
      */
     public ModelAndView registerVerifyForm(Authenticator authenticator,
-                                           AuthenticationResponse authenticationResponse,
-                                           HttpSession session) {
+                                           AuthenticationResponse authenticationResponse) {
         switch (authenticator.getLabel()) {
             case "Email":
                 return verifyForm();
@@ -202,38 +191,9 @@ public final class ResponseHandler {
             case "Google Authenticator":
                 return new ModelAndView("register-google");
             case "Security Question":
-//                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-//                try {
-//                    logger.info("== AUTH RESPONSE: {} ==", ow.writeValueAsString(authenticationResponse));
-//                } catch (JsonProcessingException e) {
-//                    e.printStackTrace();
-//                }
-//                return new ModelAndView("register-sec-qn");
-            ModelAndView modelAndView;
-
-//            Optional<Authenticator> authenticatorOptional = authenticators.stream()
-//                    .filter(auth -> auth.getType().equals("security_question")).findFirst();
-//            Assert.isTrue(authenticatorOptional.isPresent(), "Authenticator not found");
-//
-//            String authId = authenticatorOptional.get().getId();
-
-                logger.info("== HREF == {}", authenticationResponse.getProceedContext().getHref());
-                logger.info("== HREF (ideal) == {}", Util.getProceedContextFromSession(session).getHref());
-
-//                AuthenticationResponse enrollResponse =
-//                    authenticationWrapper.enrollAuthenticator(Util.getProceedContextFromSession(session),
-//                            authenticator.getId());
-//
-//            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-//            try {
-//                logger.info("== ENROLL SEC QN RESPONSE: {} ==", ow.writeValueAsString(enrollResponse));
-//            } catch (JsonProcessingException e) {
-//                e.printStackTrace();
-//            }
-
-            modelAndView = new ModelAndView("register-sec-qn");
-            modelAndView.addObject("questions", authenticationResponse.getSecurityQuestions());
-            return modelAndView;
+                ModelAndView modelAndView = new ModelAndView("register-sec-qn");
+                modelAndView.addObject("questions", authenticationResponse.getSecurityQuestions());
+                return modelAndView;
             default:
                 return unsupportedPolicy();
         }
@@ -253,12 +213,9 @@ public final class ResponseHandler {
      * @return the view for verifyForm.
      */
     public ModelAndView verifyForm(AuthenticationResponse response) {
-        logger.info("=== VERIFY FORM ===");
         ModelAndView modelAndView = new ModelAndView("verify");
         if (response.getCurrentAuthenticatorEnrollment() != null
                 && "security_question".equals(response.getCurrentAuthenticatorEnrollment().getValue().getType())) {
-            logger.info("=== VERIFY FORM 1 ===");
-
             modelAndView.addObject("security_question",
                     response.getCurrentAuthenticatorEnrollment().getValue().getProfile().getQuestion());
             modelAndView.addObject("security_question_key",
