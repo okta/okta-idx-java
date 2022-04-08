@@ -55,6 +55,8 @@ public interface IDXClient {
 
     IDXResponse skip(SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest, String href) throws ProcessingException;
 
+    IDXResponse resend(String stateHandle) throws ProcessingException;
+
     IDXResponse recover(RecoverRequest recoverRequest, String href) throws ProcessingException;
 
     IDXResponse poll(PollRequest pollRequest, String href) throws ProcessingException;

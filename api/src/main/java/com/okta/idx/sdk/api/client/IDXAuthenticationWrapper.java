@@ -588,13 +588,8 @@ public class IDXAuthenticationWrapper {
      */
     public AuthenticationResponse resend(ProceedContext proceedContext) {
         try {
-            return AuthenticationTransaction.proceed(client, proceedContext, () -> {
-                SkipAuthenticatorEnrollmentRequest skipAuthenticatorEnrollmentRequest =
-                        SkipAuthenticatorEnrollmentRequestBuilder.builder()
-                                .withStateHandle(proceedContext.getStateHandle())
-                                .build();
-                return client.skip(skipAuthenticatorEnrollmentRequest, proceedContext.getResendHref());
-            }).asAuthenticationResponse();
+            return AuthenticationTransaction.proceed(client, proceedContext, () ->
+                    client.resend(proceedContext.getStateHandle())).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {

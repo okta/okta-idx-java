@@ -670,6 +670,23 @@ public class LoginController {
     }
 
     /**
+     * Handle resend code functionality.
+     *
+     * @param session http session
+     * @return the view associated with authentication response.
+     */
+    @PostMapping(value = "/resend")
+    public ModelAndView resendCode(final HttpSession session) {
+        logger.info(":: Resend Code ::");
+
+        ProceedContext proceedContext = Util.getProceedContextFromSession(session);
+
+        AuthenticationResponse authenticationResponse = idxAuthenticationWrapper.resend(proceedContext);
+
+        return responseHandler.handleKnownTransitions(authenticationResponse, session);
+    }
+
+    /**
      * Handle webauthn authenticator enrollment functionality.
      *
      * @param webauthnRequest body

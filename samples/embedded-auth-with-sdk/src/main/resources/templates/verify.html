@@ -77,6 +77,11 @@
             <button id="verify-btn" type="submit" class="btn btn-primary btn-block">Submit</button>
         </div>
     </form>
+    <div th:if="${#strings.isEmpty(security_question)}">
+        <form method="POST" th:action="@{/resend}">
+            <button type="submit" name="submit" value="value" class="btn btn-link">Resend Code</button>
+        </form>
+    </div>
 </div>
 
 <div th:replace="fragments/footer :: footer"></div>

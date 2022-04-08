@@ -49,6 +49,8 @@ import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.IntrospectRequest;
 import com.okta.idx.sdk.api.request.PollRequest;
 import com.okta.idx.sdk.api.request.RecoverRequest;
+import com.okta.idx.sdk.api.request.ResendRequest;
+import com.okta.idx.sdk.api.request.ResendRequestBuilder;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.response.ErrorResponse;
 import com.okta.idx.sdk.api.response.IDXResponse;
@@ -395,6 +397,39 @@ final class BaseIDXClient implements IDXClient {
                     null,
                     getHttpHeaders(false),
                     new ByteArrayInputStream(objectMapper.writeValueAsBytes(skipAuthenticatorEnrollmentRequest)),
+                    -1L);
+
+            Response response = requestExecutor.executeRequest(request);
+
+            if (response.getHttpStatus() != 200) {
+                handleErrorResponse(request, response);
+            }
+
+            JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
+
+            idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
+
+        } catch (IOException | HttpException e) {
+            throw new ProcessingException(e);
+        }
+
+        return idxResponse;
+    }
+
+    @Override
+    public IDXResponse resend(String stateHandle) throws ProcessingException {
+
+        IDXResponse idxResponse;
+
+        ResendRequest resendRequest = ResendRequestBuilder.builder().withStateHandle(stateHandle).build();
+
+        try {
+            Request request = new DefaultRequest(
+                    HttpMethod.POST,
+                    clientConfiguration.getBaseUrl() + "/idp/idx/challenge/resend",
+                    null,
+                    getHttpHeaders(false),
+                    new ByteArrayInputStream(objectMapper.writeValueAsBytes(resendRequest)),
                     -1L);
 
             Response response = requestExecutor.executeRequest(request);
