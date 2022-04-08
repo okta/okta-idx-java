@@ -298,6 +298,18 @@ public class HomeController {
     }
 
     /**
+     * Display the custom sec qn registration page.
+     *
+     * @return the custom sec qn registration page view
+     */
+    @GetMapping("/register-custom-sec-qn")
+    public ModelAndView displayCustomSecQnPage() {
+        ModelAndView modelAndView = new ModelAndView("register-custom-sec-qn");
+        modelAndView.addObject("title", "Custom Security Question");
+        return new ModelAndView();
+    }
+
+    /**
      * Display the error page.
      *
      * @return the error page view

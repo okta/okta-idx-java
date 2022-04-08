@@ -154,9 +154,10 @@ public final class ResponseHandler {
     /**
      * Return the view for register verify form.
      * @param factor the factor
+     * @param authenticationResponse authentication response
      * @return the view for the register verify form.
      */
-    public ModelAndView registerVerifyForm(Authenticator.Factor factor) {
+    public ModelAndView registerVerifyForm(Authenticator.Factor factor, AuthenticationResponse authenticationResponse) {
         switch (factor.getMethod()) {
             case "email":
                 return verifyForm();
@@ -175,9 +176,11 @@ public final class ResponseHandler {
     /**
      * Return the view for verify form.
      * @param authenticator the authenticator
+     * @param authenticationResponse authentication response
      * @return the view for the register verify form.
      */
-    public ModelAndView registerVerifyForm(Authenticator authenticator) {
+    public ModelAndView registerVerifyForm(Authenticator authenticator,
+                                           AuthenticationResponse authenticationResponse) {
         switch (authenticator.getLabel()) {
             case "Email":
                 return verifyForm();
@@ -187,6 +190,11 @@ public final class ResponseHandler {
                 return new ModelAndView("register-phone");
             case "Google Authenticator":
                 return new ModelAndView("register-google");
+            case "Security Question":
+                ModelAndView modelAndView = new ModelAndView("register-sec-qn");
+                modelAndView.addObject("title", "Security Question");
+                modelAndView.addObject("questions", authenticationResponse.getSecurityQuestions());
+                return modelAndView;
             default:
                 return unsupportedPolicy();
         }

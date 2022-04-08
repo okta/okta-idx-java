@@ -19,10 +19,13 @@ public class VerifyAuthenticatorAnswer {
 
     private String answer;
 
+    private String question;
+
     private String questionKey;
 
-    public VerifyAuthenticatorAnswer(String answer, String questionKey) {
+    public VerifyAuthenticatorAnswer(String answer, String question, String questionKey) {
         this.answer = answer;
+        this.question = question;
         this.questionKey = questionKey;
     }
 
@@ -32,6 +35,14 @@ public class VerifyAuthenticatorAnswer {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
     }
 
     public String getQuestionKey() {

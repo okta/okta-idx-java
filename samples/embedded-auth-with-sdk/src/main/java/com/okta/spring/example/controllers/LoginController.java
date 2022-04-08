@@ -225,6 +225,18 @@ public class LoginController {
             return modelAndView;
         }
 
+        if ("Security Question".equals(authenticatorType)) {
+            Optional<Authenticator> authenticatorOptional = authenticators.stream()
+                    .filter(auth -> auth.getType().equals("security_question")).findFirst();
+            Assert.isTrue(authenticatorOptional.isPresent(), "Authenticator not found");
+
+            String authId = authenticatorOptional.get().getId();
+
+            AuthenticationResponse enrollResponse = idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authId);
+
+            Util.updateSession(session, enrollResponse.getProceedContext());
+        }
+
         for (Authenticator authenticator : authenticators) {
             if (authenticatorType.equals(authenticator.getLabel())) {
                 foundAuthenticator = authenticator;
@@ -263,7 +275,7 @@ public class LoginController {
                 return responseHandler.verifyForm();
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
-                return responseHandler.registerVerifyForm(foundAuthenticator);
+                return responseHandler.registerVerifyForm(foundAuthenticator, authenticationResponse);
             case AWAITING_POLL_ENROLLMENT:
                 return responseHandler.setupOktaVerifyForm(session);
             default:
@@ -331,7 +343,7 @@ public class LoginController {
                 return responseHandler.verifyForm();
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_ENROLLMENT_DATA:
-                return responseHandler.registerVerifyForm(foundFactor);
+                return responseHandler.registerVerifyForm(foundFactor, authenticationResponse);
             case AWAITING_CHANNEL_DATA_ENROLLMENT:
                 return responseHandler.oktaVerifyViaChannelDataForm(foundFactor, session);
             case AWAITING_POLL_ENROLLMENT:
@@ -358,12 +370,14 @@ public class LoginController {
      * Handle authenticator verification functionality.
      *
      * @param code                  the verification code
+     * @param securityQuestion      the security question (custom case)
      * @param securityQuestionKey   the security question key
      * @param session               the session
      * @return the view associated with authentication response.
      */
     @PostMapping("/verify")
     public ModelAndView verify(final @RequestParam("code") String code,
+                               final @RequestParam(value = "security_question", required = false) String securityQuestion,
                                final @RequestParam(value = "security_question_key", required = false) String securityQuestionKey,
                                final HttpSession session) {
         logger.info(":: Verify Code ::");
@@ -373,7 +387,10 @@ public class LoginController {
         AuthenticationResponse authenticationResponse;
         if (!Strings.isEmpty(securityQuestionKey)) {
             authenticationResponse = idxAuthenticationWrapper
-                    .verifyAuthenticator(proceedContext, new VerifyAuthenticatorAnswer(code, securityQuestionKey));
+                    .verifyAuthenticator(proceedContext, new VerifyAuthenticatorAnswer(code, null, securityQuestionKey));
+        } else if (!Strings.isEmpty(securityQuestion)) {
+            authenticationResponse = idxAuthenticationWrapper
+                    .verifyAuthenticator(proceedContext, new VerifyAuthenticatorAnswer(code, securityQuestion, "custom"));
         } else if ("totp".equals(String.valueOf(session.getAttribute("totp")))) {
             authenticationResponse = idxAuthenticationWrapper
                     .verifyAuthenticator(proceedContext, new VerifyChannelDataOptions("totp", code));
@@ -480,7 +497,7 @@ public class LoginController {
     /**
      * Handle webauthn authenticator verification functionality.
      *
-     * @param webauthnRequest
+     * @param webauthnRequest web authn request object
      * @param session the session
      * @return the view associated with authentication response.
      */

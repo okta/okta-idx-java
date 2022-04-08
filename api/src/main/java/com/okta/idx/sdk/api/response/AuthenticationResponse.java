@@ -23,6 +23,7 @@ import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Idp;
+import com.okta.idx.sdk.api.model.SecurityQuestion;
 import com.okta.idx.sdk.webauthn.WebAuthnParams;
 
 import java.util.LinkedList;
@@ -45,6 +46,8 @@ public class AuthenticationResponse {
     private List<Idp> idps = new LinkedList<>();
 
     private ContextualData contextualData;
+
+    private List<SecurityQuestion> securityQuestions;
 
     private AuthenticatorEnrollments authenticatorEnrollments;
 
@@ -122,6 +125,14 @@ public class AuthenticationResponse {
 
     public void setContextualData(ContextualData contextualData) {
         this.contextualData = contextualData;
+    }
+
+    public List<SecurityQuestion> getSecurityQuestions() {
+        return securityQuestions;
+    }
+
+    public void setSecurityQuestions(List<SecurityQuestion> securityQuestions) {
+        this.securityQuestions = securityQuestions;
     }
 
     public WebAuthnParams getWebAuthnParams() {
