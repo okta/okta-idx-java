@@ -170,7 +170,7 @@ public class SelfServiceRegistration extends CucumberRoot {
         registerPage.skipButton.click();
     }
 
-    @When("^she selects \"Skip\" on Google Authenticator$")
+    @When("^she selects \"Skip\" on authenticators$")
     public void she_selects_skip_on_google() {
         registerPage.waitForWebElementDisplayed(registerPage.skipButton);
         registerPage.skipButton.click();

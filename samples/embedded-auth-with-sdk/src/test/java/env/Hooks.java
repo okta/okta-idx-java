@@ -19,6 +19,8 @@ import com.okta.sdk.client.Client;
 import com.okta.sdk.client.ClientBuilder;
 import com.okta.sdk.client.Clients;
 import com.okta.sdk.resource.group.Group;
+import com.okta.sdk.resource.group.GroupList;
+import com.okta.sdk.resource.policy.*;
 import com.okta.sdk.resource.user.User;
 import com.okta.sdk.resource.user.UserBuilder;
 import com.okta.sdk.resource.user.factor.ActivateFactorRequest;
@@ -40,10 +42,7 @@ import org.slf4j.LoggerFactory;
 import pages.Page;
 import pages.QrCodePage;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Hooks {
@@ -89,7 +88,6 @@ public class Hooks {
 
 	@Before("@requireExistingUser")
 	public void createUserBeforeScenario() {
-
 		Assert.assertNotNull(Page.getA18NProfile());
 
 		User user = UserBuilder.instance()
@@ -146,6 +144,20 @@ public class Hooks {
 		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
 	}
 
+	@Before("@requirePasswordOptionalGroupForUser")
+	public void assignPasswordOptionalGroupBeforeScenario(Scenario scenario) {
+		Assert.assertNotNull(Page.getUser());
+		List<String> groups = new ArrayList<>();
+		groups.add("Password Optional");
+
+		List<Group> groupList = client.listGroups()
+				.stream()
+				.filter(group -> groups.contains(group.getProfile().getName()))
+				.collect(Collectors.toList());
+		Assert.assertFalse(groupList.isEmpty());
+		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
+	}
+
 	@Before("@requireTOTPGroupForUser")
 	public void assignTOTPGroupBeforeScenario() {
 		Assert.assertNotNull(Page.getUser());
@@ -189,6 +201,53 @@ public class Hooks {
 				logger.warn("Fail to find a user to delete: " + Page.getA18NProfile().getEmailAddress());
 			}
 		}
+	}
+
+	@Before("@requireIDFirstPolicy")
+	public void createIDFirstPolicy() {
+		// Check if policy exists. Create one if not
+		final String policyName = "ID First Policy";
+		List<Policy> policyList = client.listPolicies(PolicyType.OKTA_SIGN_ON.toString())
+				.stream()
+				.filter(policy -> policy.getName().equals(policyName))
+				.collect(Collectors.toList());
+		
+		if (policyList.size() > 0) {
+			return;
+		}
+
+		OktaSignOnPolicy policy = (OktaSignOnPolicy) OktaSignOnPolicyBuilder.instance()
+				.setName("ID First Policy")
+				.setDescription("ID First Policy")
+				.setType(PolicyType.OKTA_SIGN_ON)
+				.setStatus(Policy.StatusEnum.ACTIVE)
+				.buildAndCreate(client);
+
+		OktaSignOnPolicyRule policyRule = (OktaSignOnPolicyRule) policy.createRule(client.instantiate(OktaSignOnPolicyRule.class)
+				.setName("ID First Rule")
+				.setActions(client.instantiate(OktaSignOnPolicyRuleActions.class)
+						.setSignon(client.instantiate(OktaSignOnPolicyRuleSignonActions.class)
+								.setAccess(OktaSignOnPolicyRuleSignonActions.AccessEnum.ALLOW)
+								.setRequireFactor(false))));
+	}
+
+	@After("@requireIDFirstPolicyDeletionAfterTest")
+	public void deleteIDFirstPolicy() {
+		final String policyName = "ID First Policy";
+		List<Policy> policyList = client.listPolicies(PolicyType.OKTA_SIGN_ON.toString())
+				.stream()
+				.filter(policy -> policy.getName().equals(policyName))
+				.collect(Collectors.toList());
+
+		if (policyList.size() == 0) {
+			return;
+		}
+
+		for (Policy policy : policyList) {
+			policy.deactivate();
+			policy.delete();
+		}
+
 	}
 
 	private boolean existsElement(String id) {
