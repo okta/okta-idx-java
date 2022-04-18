@@ -1,10 +1,10 @@
-Feature: 1.2 Signup and login with Identifier First
+Feature: 4.2 Self Service Registration with Email Activation And optional password
 
   @requireA18NProfile
   @requireUserDeletionAfterRegistration
   @requireIDFirstPolicy
   @requireIDFirstPolicyDeletionAfterTest
-  Scenario: 1.2.1 Mary signs up for an account with required Email factor, then skips optional password
+  Scenario: 4.2.1 Mary signs up for an account with required Email factor, then skips optional password
     Given Mary navigates to the Self Service Registration View
     When she fills out her First Name
     And she fills out her Last Name
@@ -22,7 +22,7 @@ Feature: 1.2 Signup and login with Identifier First
   @requireUserDeletionAfterRegistration
   @requireIDFirstPolicy
   @requireIDFirstPolicyDeletionAfterTest
-  Scenario: 1.2.2 Mary signs up for an account with required Email factor, then enrolls optional password
+  Scenario: 4.2.2 Mary signs up for an account with required Email factor, then enrolls optional password
     Given Mary navigates to the Self Service Registration View
     When she fills out her First Name
     And she fills out her Last Name
@@ -40,19 +40,3 @@ Feature: 1.2 Signup and login with Identifier First
     Then she is redirected to the Root View
     And an application session is created
 
-  @requireA18NProfile
-  @requireExistingUser
-  @requirePasswordOptionalGroupForUser
-  @requireIDFirstPolicy
-  @requireIDFirstPolicyDeletionAfterTest
-  Scenario: 1.2.3 2FA Login with Email
-    Given Mary navigates to the Basic Login View
-    When she fills in her correct username for mfa
-    And she submits the Login form
-    Then she is presented with an option to select Email to verify
-    When she selects Email
-    Then she sees a page to input a code
-    When she fills in the correct code
-    And she submits the verify form
-    Then she is redirected to the Root View
-    And an application session is created

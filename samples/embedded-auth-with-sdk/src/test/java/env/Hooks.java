@@ -211,7 +211,7 @@ public class Hooks {
 				.stream()
 				.filter(policy -> policy.getName().equals(policyName))
 				.collect(Collectors.toList());
-		
+
 		if (policyList.size() > 0) {
 			return;
 		}
