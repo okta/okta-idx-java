@@ -34,7 +34,7 @@ cd samples/embedded-auth-with-sdk/
 mvn -Dokta.idx.issuer=https://{yourOktaDomain}/oauth2/default \
     -Dokta.idx.clientId={clientId} \
     -Dokta.idx.clientSecret={clientSecret} \ 
-    -Dokta.idx.scopes="space separated scopes" 
+    -Dokta.idx.scopes="space separated scopes" \
     -Dokta.idx.redirectUri={redirectUri}
 ```
 
