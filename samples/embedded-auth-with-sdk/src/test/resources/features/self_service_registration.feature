@@ -51,7 +51,7 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
     Then the screen changes to receive an input for a code
     When she inputs the correct code from her SMS
     And she submits the verify form
-    When she selects "Skip" on Google Authenticator
+    When she selects "Skip" on authenticators
     Then she is redirected to the Root View
     And an application session is created
 

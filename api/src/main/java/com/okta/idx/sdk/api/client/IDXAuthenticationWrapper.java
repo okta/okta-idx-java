@@ -171,7 +171,12 @@ public class IDXAuthenticationWrapper {
                 return identifyResponse;
             }
 
-            AuthenticationTransaction passwordTransaction = selectPasswordAuthenticatorIfNeeded(identifyTransaction);
+            // If there are more than 1 authenticators, we need to allow users to choose one
+            if (identifyResponse.getAuthenticators() != null && identifyResponse.getAuthenticators().size() > 1) {
+                return identifyResponse;
+            }
+
+            AuthenticationTransaction passwordTransaction = selectPasswordOrEmailAuthenticatorIfNeeded(identifyTransaction);
             if (Strings.isEmpty(authenticationOptions.getPassword())) {
                 return passwordTransaction.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
             }
@@ -247,7 +252,7 @@ public class IDXAuthenticationWrapper {
 
                 // Check if instead of password, user is being prompted for list of authenticators to select
                 if (identifyResponse.getCurrentAuthenticatorEnrollment() == null) {
-                    identifyTransaction = selectPasswordAuthenticatorIfNeeded(identifyTransaction);
+                    identifyTransaction = selectPasswordOrEmailAuthenticatorIfNeeded(identifyTransaction);
                 }
 
                 Recover recover = identifyTransaction.getResponse()
@@ -733,7 +738,7 @@ public class IDXAuthenticationWrapper {
     // If app sign-on policy is set to "any 1 factor", the next remediation after identify is
     // select-authenticator-authenticate
     // Check if that's the case, and proceed to select password authenticator
-    private AuthenticationTransaction selectPasswordAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction)
+    private AuthenticationTransaction selectPasswordOrEmailAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction)
             throws ProcessingException {
         // If remediation contains challenge-authenticator for passcode, we don't need to check SELECT_AUTHENTICATOR_AUTHENTICATE
         Optional<RemediationOption> challengeRemediationOptionOptional =
@@ -753,7 +758,14 @@ public class IDXAuthenticationWrapper {
         Map<String, String> authenticatorOptions = remediationOptionOptional.get().getAuthenticatorOptions();
 
         Authenticator authenticator = new Authenticator();
-        authenticator.setId(authenticatorOptions.get("password"));
+        if (authenticatorOptions.get("password") != null) {
+            authenticator.setId(authenticatorOptions.get("password"));
+        }
+
+        else if (authenticatorOptions.get("email") != null) {
+            authenticator.setId(authenticatorOptions.get("email"));
+        }
+
 
         ChallengeRequest selectAuthenticatorRequest = ChallengeRequestBuilder.builder()
                 .withStateHandle(authenticationTransaction.getStateHandle())

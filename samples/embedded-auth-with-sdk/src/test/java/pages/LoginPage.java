@@ -37,7 +37,7 @@ public class LoginPage extends Page {
     @FindBy(name = "username")
     public WebElement usernameInput;
 
-    @FindBy(name = "password")
+    @FindBy(id = "password")
     public WebElement passwordInput;
 
     @FindBy(id = "sign-in-btn")
