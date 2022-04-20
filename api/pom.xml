@@ -94,6 +94,12 @@
         <profile>
             <id>ci</id>
             <build>
+                <resources>
+                   <resource>
+                      <directory>src/main/resources</directory>
+                      <filtering>true</filtering>
+                   </resource>
+                </resources>
                 <plugins>
                     <plugin>
                         <groupId>com.github.siom79.japicmp</groupId>

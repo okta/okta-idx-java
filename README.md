@@ -105,6 +105,18 @@ Begin Transaction with Activation token:
 AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin("activation-token");
 ```
 
+Begin Transaction with Device Context:
+
+```java
+DeviceContext deviceContext = new DeviceContext();
+deviceContext.addHeader(DeviceContext.USER_AGENT, "test_user_agent");
+deviceContext.addHeader(DeviceContext.X_OKTA_USER_AGENT_EXTENDED, "test_x_okta_user_agent_extended");
+deviceContext.addHeader(DeviceContext.X_DEVICE_TOKEN, "test_x_device_token");
+deviceContext.addHeader(DeviceContext.X_FORWARDED_FOR, "test_x_forwarded_for");
+
+AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin(deviceContext);
+```
+
 Authenticate User:
 
 ```java

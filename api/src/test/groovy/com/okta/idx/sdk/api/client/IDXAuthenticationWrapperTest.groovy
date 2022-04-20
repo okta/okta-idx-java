@@ -53,20 +53,17 @@ class IDXAuthenticationWrapperTest {
                 clientConfig.getClientId(),
                 clientConfig.getClientSecret(),
                 clientConfig.getScopes(),
-                clientConfig.getRedirectUri(),
-                clientConfig.getDeviceContext()
-        )
+                clientConfig.getRedirectUri())
         IDXClient client = getInternalState(idxAuthenticationWrapper, "client") as IDXClient
         assertThat(client, notNullValue())
 
-        ClientConfiguration config =  getInternalState(client, "clientConfiguration") as ClientConfiguration
+        ClientConfiguration config = getInternalState(client, "clientConfiguration") as ClientConfiguration
         assertThat(config, notNullValue())
         assertThat(config.issuer, is(clientConfig.getIssuer()))
         assertThat(config.clientId, is(clientConfig.getClientId()))
         assertThat(config.clientSecret, is(clientConfig.getClientSecret()))
         assertThat(config.getScopes(), is(clientConfig.getScopes()))
         assertThat(config.redirectUri, is(clientConfig.getRedirectUri()))
-        assertThat(config.deviceContext, is(clientConfig.getDeviceContext()))
     }
 
     @Test
@@ -2144,7 +2141,6 @@ class IDXAuthenticationWrapperTest {
         clientConfiguration.setClientSecret("test-client-secret")
         clientConfiguration.setScopes(["test-scope"] as Set)
         clientConfiguration.setRedirectUri("https://example.com/login/callback")
-        clientConfiguration.setDeviceContext(new DeviceContext().addParam(DeviceContext.USER_AGENT, "example-user-agent"))
         return clientConfiguration
     }
 

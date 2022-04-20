@@ -21,6 +21,7 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollmentValue;
+import com.okta.idx.sdk.api.model.DeviceContext;
 import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -62,17 +63,24 @@ final class AuthenticationTransaction {
     }
 
     static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
-        return create(client, null, null);
+        return create(client, null, null, null);
     }
 
-    static AuthenticationTransaction create(IDXClient client, String token, EmailTokenType tokenType) throws ProcessingException {
+    static AuthenticationTransaction create(IDXClient client, DeviceContext deviceContext) throws ProcessingException {
+        return create(client, null, null, deviceContext);
+    }
+
+    static AuthenticationTransaction create(IDXClient client,
+                                            String token,
+                                            EmailTokenType tokenType,
+                                            DeviceContext deviceContext) throws ProcessingException {
         IDXClientContext idxClientContext;
 
         if (token == null) {
             idxClientContext = client.interact();
         } else {
             Assert.notNull(tokenType, "token type may not be null");
-            idxClientContext = client.interact(token, tokenType);
+            idxClientContext = client.interact(token, tokenType, deviceContext);
         }
 
         Assert.notNull(idxClientContext, "IDX client context may not be null");

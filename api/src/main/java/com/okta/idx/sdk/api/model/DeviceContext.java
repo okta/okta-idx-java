@@ -28,18 +28,18 @@ public class DeviceContext {
     /**
      * store key value pairs of header name -> header value
      */
-    private final Map<String, String> params = new HashMap<>();
+    private final Map<String, String> headers = new HashMap<>();
 
-    public DeviceContext addParam(String name, String value) {
-        params.put(name, value);
+    public DeviceContext addHeader(String name, String value) {
+        headers.put(name, value);
         return this;
     }
 
-    public String getParam(String name) {
-        return params.get(name);
+    public String getHeader(String name) {
+        return headers.get(name);
     }
 
-    public Map<String, String> getAll() {
-        return new HashMap<>(params);
+    public Map<String, String> getAllHeaders() {
+        return new HashMap<>(headers);
     }
 }

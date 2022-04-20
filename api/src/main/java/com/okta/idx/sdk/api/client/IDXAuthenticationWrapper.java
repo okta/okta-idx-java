@@ -99,28 +99,12 @@ public class IDXAuthenticationWrapper {
      */
     public IDXAuthenticationWrapper(String issuer, String clientId, String clientSecret,
                                     Set<String> scopes, String redirectUri) {
-        this(issuer, clientId, clientSecret, scopes, redirectUri, null);
-    }
-
-    /**
-     * Creates {@link IDXAuthenticationWrapper} instance.
-     *
-     * @param issuer        the issuer url
-     * @param clientId      the client id
-     * @param clientSecret  the client secret
-     * @param scopes        the set of scopes
-     * @param redirectUri   the redirect uri
-     * @param deviceContext the device context information
-     */
-    public IDXAuthenticationWrapper(String issuer, String clientId, String clientSecret,
-                                    Set<String> scopes, String redirectUri, DeviceContext deviceContext) {
         this.client = Clients.builder()
                 .setIssuer(issuer)
                 .setClientId(clientId)
                 .setClientSecret(clientSecret)
                 .setScopes(scopes)
                 .setRedirectUri(redirectUri)
-                .setDeviceContext(deviceContext)
                 .build();
     }
 
@@ -809,12 +793,22 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Begin flow without any recovery or activation token.
+     * Begin flow without any recovery or activation token or device context.
      * @return authentication response
      */
     public AuthenticationResponse begin() {
+        return begin(null);
+    }
+
+    /**
+     * Begin flow with {@link DeviceContext} reference.
+     *
+     * @param deviceContext the DeviceContext
+     * @return authentication response
+     */
+    public AuthenticationResponse begin(DeviceContext deviceContext) {
         try {
-            return AuthenticationTransaction.create(client).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, deviceContext).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -829,7 +823,7 @@ public class IDXAuthenticationWrapper {
      */
     public AuthenticationResponse beginPasswordRecovery(String token) {
         try {
-            return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN, null).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -844,7 +838,8 @@ public class IDXAuthenticationWrapper {
      */
     public AuthenticationResponse beginUserActivation(String token) {
         try {
-            return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN, null)
+                    .asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {

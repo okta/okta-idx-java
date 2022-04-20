@@ -18,6 +18,7 @@ package com.okta.idx.sdk.api.client
 
 import com.okta.commons.http.DefaultResponse
 import com.okta.commons.http.HttpException
+import com.okta.commons.http.HttpHeaders
 import com.okta.commons.http.MediaType
 import com.okta.commons.http.Request
 import com.okta.commons.http.RequestExecutor
@@ -94,10 +95,57 @@ class BaseIDXClientTest {
         IDXClientContext idxClientContext = idxClient.interact()
 
         verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
+
         def httpHeaders = argumentCaptor.getValue().getHeaders()
+
         assertThat(httpHeaders.size(), is(3))
         assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
-        assertThat(httpHeaders.getFirst(DeviceContext.USER_AGENT), is("example-user-agent"))
+        assertThat(httpHeaders.getFirst("Accept"), is("application/json"))
+        assertThat(httpHeaders.getFirst(HttpHeaders.USER_AGENT), notNullValue())
+
+        assertThat(idxClientContext, notNullValue())
+        assertThat(idxClientContext.getCodeVerifier(), notNullValue())
+        assertThat(idxClientContext.getState(), notNullValue())
+        assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
+    }
+
+    @Test
+    void testInteractWithDeviceContext() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final IDXClient idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
+
+        final Response stubbedResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/json"),
+                new FileInputStream(getClass().getClassLoader().getResource("interact-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
+        ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
+
+        final DeviceContext deviceContext = new DeviceContext()
+        deviceContext.addHeader(DeviceContext.USER_AGENT, "test_user_agent")
+        deviceContext.addHeader(DeviceContext.X_OKTA_USER_AGENT_EXTENDED, "test_x_okta_user_agent_extended")
+        deviceContext.addHeader(DeviceContext.X_DEVICE_TOKEN, "test_x_device_token")
+        deviceContext.addHeader(DeviceContext.X_FORWARDED_FOR, "test_x_forwarded_for")
+
+        final IDXClientContext idxClientContext = idxClient.interact(null, null, deviceContext)
+
+        verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
+
+        def httpHeaders = argumentCaptor.getValue().getHeaders()
+        assertThat(httpHeaders.size(), is(6))
+        assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
+        assertThat(httpHeaders.getFirst("Accept"), is("application/json"))
+
+        // assert device context headers
+        assertThat(httpHeaders.getFirst(DeviceContext.USER_AGENT), is("test_user_agent"))
+        assertThat(httpHeaders.getFirst(DeviceContext.X_OKTA_USER_AGENT_EXTENDED), is("test_x_okta_user_agent_extended"))
+        assertThat(httpHeaders.getFirst(DeviceContext.X_DEVICE_TOKEN), is("test_x_device_token"))
+        assertThat(httpHeaders.getFirst(DeviceContext.X_FORWARDED_FOR), is("test_x_forwarded_for"))
+
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getCodeVerifier(), notNullValue())
         assertThat(idxClientContext.getState(), notNullValue())
@@ -116,7 +164,7 @@ class BaseIDXClientTest {
         ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
         final IDXClient idxClient = new BaseIDXClient(getClientConfiguration(), requestExecutor)
 
-        IDXClientContext idxClientContext = idxClient.interact("sample-token_123", EmailTokenType.RECOVERY_TOKEN)
+        IDXClientContext idxClientContext = idxClient.interact("sample-token_123", EmailTokenType.RECOVERY_TOKEN, null)
 
         verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
         InputStream body = argumentCaptor.getValue().getBody()
@@ -1309,7 +1357,6 @@ class BaseIDXClientTest {
         clientConfiguration.setClientId("test-client-id")
         clientConfiguration.setClientSecret("test-client-secret")
         clientConfiguration.setScopes(["test-scope"] as Set)
-        clientConfiguration.setDeviceContext(new DeviceContext().addParam(DeviceContext.USER_AGENT, "example-user-agent"))
         return clientConfiguration
     }
 }
