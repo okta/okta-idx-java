@@ -31,11 +31,11 @@ For information on how to build your app with this sample, please take a look at
 
 ```bash
 cd samples/embedded-auth-with-sdk/
-mvn -Dokta.idx.issuer=https://{yourOktaDomain}/oauth2/default \
-    -Dokta.idx.clientId={clientId} \
-    -Dokta.idx.clientSecret={clientSecret} \ 
-    -Dokta.idx.scopes="space separated scopes" \
-    -Dokta.idx.redirectUri={redirectUri}
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dokta.idx.issuer=https://{yourOktaDomain}/oauth2/default 
+                    -Dokta.idx.clientId={clientId}
+                    -Dokta.idx.clientSecret={clientSecret}
+                    -Dokta.idx.scopes=\"space separated scopes\"
+                    -Dokta.idx.redirectUri={redirectUri}"
 ```
 
 (or) set the below env variables and run `mvn`
