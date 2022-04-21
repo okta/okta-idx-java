@@ -18,6 +18,8 @@ package com.okta.spring.example.helpers;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
@@ -30,6 +32,11 @@ import static com.okta.idx.sdk.api.model.AuthenticationStatus.SKIP_COMPLETE;
 
 @Component
 public final class ResponseHandler {
+
+    /**
+     * logger instance.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseHandler.class);
 
     /**
      * response handler.
@@ -195,6 +202,12 @@ public final class ResponseHandler {
                 modelAndView.addObject("title", "Security Question");
                 modelAndView.addObject("questions", authenticationResponse.getSecurityQuestions());
                 return modelAndView;
+            case "Security Key or Biometric":
+                ModelAndView mav = new ModelAndView("enroll-webauthn-authenticator");
+                mav.addObject("title", "Enroll Webauthn Authenticator");
+                mav.addObject("currentAuthenticator",
+                        authenticationResponse.getWebAuthnParams().getCurrentAuthenticator());
+                return mav;
             default:
                 return unsupportedPolicy();
         }
