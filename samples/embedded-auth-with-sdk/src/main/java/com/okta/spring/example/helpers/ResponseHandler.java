@@ -195,6 +195,12 @@ public final class ResponseHandler {
                 modelAndView.addObject("title", "Security Question");
                 modelAndView.addObject("questions", authenticationResponse.getSecurityQuestions());
                 return modelAndView;
+            case "Security Key or Biometric":
+                ModelAndView mav = new ModelAndView("enroll-webauthn-authenticator");
+                mav.addObject("title", "Enroll Webauthn Authenticator");
+                mav.addObject("currentAuthenticator",
+                        authenticationResponse.getWebAuthnParams().getCurrentAuthenticator());
+                return mav;
             default:
                 return unsupportedPolicy();
         }
