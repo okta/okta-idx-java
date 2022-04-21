@@ -15,31 +15,48 @@
  */
 package com.okta.idx.sdk.api.model;
 
+import com.okta.commons.lang.Assert;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class DeviceContext {
 
-    public final static String USER_AGENT = "User-Agent";
-    public final static String X_OKTA_USER_AGENT_EXTENDED = "X-Okta-User-Agent-Extended";
-    public final static String X_DEVICE_TOKEN = "X-Device-Token";
-    public final static String X_FORWARDED_FOR = "X-Forwarded-For";
+    private static final String USER_AGENT = "User-Agent";
+    private static final String X_OKTA_USER_AGENT_EXTENDED = "X-Okta-User-Agent-Extended";
+    private static final String X_DEVICE_TOKEN = "X-Device-Token";
+    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
 
     /**
      * store key value pairs of header name -> header value
      */
     private final Map<String, String> headers = new HashMap<>();
 
-    public DeviceContext addHeader(String name, String value) {
-        headers.put(name, value);
+    public DeviceContext addUserAgentHeader(String value) {
+        Assert.hasText(value, USER_AGENT + " cannot be empty");
+        headers.put(USER_AGENT, value);
         return this;
     }
 
-    public String getHeader(String name) {
-        return headers.get(name);
+    public DeviceContext addXOktaUserAgentExtendedHeader(String value) {
+        Assert.hasText(value, X_OKTA_USER_AGENT_EXTENDED + " cannot be empty");
+        headers.put(X_OKTA_USER_AGENT_EXTENDED, value);
+        return this;
+    }
+
+    public DeviceContext addXDeviceTokenHeader(String value) {
+        Assert.hasText(value, X_DEVICE_TOKEN + " cannot be empty");
+        headers.put(X_DEVICE_TOKEN, value);
+        return this;
+    }
+
+    public DeviceContext addXForwardedForHeader(String value) {
+        Assert.hasText(value, X_FORWARDED_FOR + " cannot be empty");
+        headers.put(X_FORWARDED_FOR, value);
+        return this;
     }
 
     public Map<String, String> getAllHeaders() {
-        return new HashMap<>(headers);
+        return headers;
     }
 }

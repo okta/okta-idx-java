@@ -126,25 +126,19 @@ class BaseIDXClientTest {
         ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
 
         final DeviceContext deviceContext = new DeviceContext()
-        deviceContext.addHeader(DeviceContext.USER_AGENT, "test_user_agent")
-        deviceContext.addHeader(DeviceContext.X_OKTA_USER_AGENT_EXTENDED, "test_x_okta_user_agent_extended")
-        deviceContext.addHeader(DeviceContext.X_DEVICE_TOKEN, "test_x_device_token")
-        deviceContext.addHeader(DeviceContext.X_FORWARDED_FOR, "test_x_forwarded_for")
+        deviceContext.addXDeviceTokenHeader("test_x_device_token")
 
         final IDXClientContext idxClientContext = idxClient.interact(null, null, deviceContext)
 
         verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
 
         def httpHeaders = argumentCaptor.getValue().getHeaders()
-        assertThat(httpHeaders.size(), is(6))
+        assertThat(httpHeaders.size(), is(4))
         assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
         assertThat(httpHeaders.getFirst("Accept"), is("application/json"))
 
-        // assert device context headers
-        assertThat(httpHeaders.getFirst(DeviceContext.USER_AGENT), is("test_user_agent"))
-        assertThat(httpHeaders.getFirst(DeviceContext.X_OKTA_USER_AGENT_EXTENDED), is("test_x_okta_user_agent_extended"))
+        // assert device context header
         assertThat(httpHeaders.getFirst(DeviceContext.X_DEVICE_TOKEN), is("test_x_device_token"))
-        assertThat(httpHeaders.getFirst(DeviceContext.X_FORWARDED_FOR), is("test_x_forwarded_for"))
 
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getCodeVerifier(), notNullValue())

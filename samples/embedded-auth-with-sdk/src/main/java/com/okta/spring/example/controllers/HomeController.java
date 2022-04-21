@@ -19,6 +19,7 @@ import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
+import com.okta.idx.sdk.api.model.DeviceContext;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -320,19 +321,22 @@ public class HomeController {
     }
 
     private AuthenticationResponse begin(final HttpSession session) {
-        AuthenticationResponse authenticationResponse = authenticationWrapper.begin();
+        final DeviceContext deviceContext = Util.constructDeviceContext();
+        AuthenticationResponse authenticationResponse = authenticationWrapper.begin(deviceContext);
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;
     }
 
     private AuthenticationResponse beginPasswordRecovery(final HttpSession session, String recoveryToken) {
-        AuthenticationResponse authenticationResponse = authenticationWrapper.beginPasswordRecovery(recoveryToken);
+        final DeviceContext deviceContext = Util.constructDeviceContext();
+        AuthenticationResponse authenticationResponse = authenticationWrapper.beginPasswordRecovery(recoveryToken, deviceContext);
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;
     }
 
     private AuthenticationResponse beginUserActivation(final HttpSession session, String activationToken) {
-        AuthenticationResponse authenticationResponse = authenticationWrapper.beginUserActivation(activationToken);
+        final DeviceContext deviceContext = Util.constructDeviceContext();
+        AuthenticationResponse authenticationResponse = authenticationWrapper.beginUserActivation(activationToken, deviceContext);
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;
     }

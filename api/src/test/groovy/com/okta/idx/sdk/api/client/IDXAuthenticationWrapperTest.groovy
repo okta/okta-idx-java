@@ -394,7 +394,10 @@ class IDXAuthenticationWrapperTest {
         setMockResponseOnlyIfBodyParamMatches(requestExecutor, "interact", "activation_token", "interact-response", 200, MediaType.APPLICATION_JSON)
         setMockResponse(requestExecutor, "introspect", "introspect-with-activation-token-response", 200, mediaTypeAppIonJson)
 
-        AuthenticationResponse beginResponse = idxAuthenticationWrapper.beginUserActivation("activation-token")
+        final DeviceContext deviceContext = new DeviceContext()
+        deviceContext.addXDeviceTokenHeader("test_x_device_token")
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.beginUserActivation("activation-token", deviceContext)
 
         assertThat(beginResponse, notNullValue())
         assertThat(beginResponse.getErrors(), empty())

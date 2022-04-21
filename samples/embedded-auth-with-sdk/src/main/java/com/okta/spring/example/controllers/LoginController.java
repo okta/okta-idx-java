@@ -51,6 +51,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.okta.spring.example.helpers.Util.constructDeviceContext;
+
 @Controller
 public class LoginController {
 
@@ -85,7 +87,7 @@ public class LoginController {
                               final HttpSession session) {
 
         // begin transaction
-        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin();
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin(constructDeviceContext());
 
         // get proceed context
         ProceedContext proceedContext = beginResponse.getProceedContext();
@@ -567,7 +569,7 @@ public class LoginController {
                                  final HttpSession session) {
         logger.info(":: Register ::");
 
-        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin();
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin(constructDeviceContext());
         if (responseHandler.needsToShowErrors(beginResponse)) {
             ModelAndView modelAndView = new ModelAndView("register");
             modelAndView.addObject("errors", beginResponse.getErrors());

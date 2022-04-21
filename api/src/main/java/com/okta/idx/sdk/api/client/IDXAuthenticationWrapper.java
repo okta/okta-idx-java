@@ -818,12 +818,15 @@ public class IDXAuthenticationWrapper {
 
     /**
      * Begin password recovery flow with a recovery token.
+     *
      * @param token recovery token
+     * @param deviceContext device context (optional)
      * @return authentication response
      */
-    public AuthenticationResponse beginPasswordRecovery(String token) {
+    public AuthenticationResponse beginPasswordRecovery(String token, DeviceContext deviceContext) {
         try {
-            return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN, null).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN, deviceContext)
+                    .asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -833,12 +836,14 @@ public class IDXAuthenticationWrapper {
 
     /**
      * Begin password recovery flow with an activation token.
+     *
      * @param token activation token
+     * @param deviceContext device context (optional)
      * @return authentication response
      */
-    public AuthenticationResponse beginUserActivation(String token) {
+    public AuthenticationResponse beginUserActivation(String token, DeviceContext deviceContext) {
         try {
-            return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN, null)
+            return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN, deviceContext)
                     .asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
@@ -849,6 +854,7 @@ public class IDXAuthenticationWrapper {
 
     /**
      * Exchange interaction code for token.
+     *
      * @param proceedContext proceed context
      * @param interactionCode interaction code
      * @return authentication response
