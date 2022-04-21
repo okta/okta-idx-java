@@ -170,11 +170,13 @@ public class LoginController {
 
         List<Authenticator> authenticators = (List<Authenticator>) session.getAttribute("authenticators");
 
-        if ("webauthn".equals(authenticatorType)) {
+        logger.info("==== SELECTED AUTH TYPE === {}", authenticatorType);
+
+        if ("webauthn".equals(authenticatorType) || "Security Key or Biometric".equals(authenticatorType)) {
             ModelAndView modelAndView;
 
             Optional<Authenticator> authenticatorOptional =
-                    authenticators.stream().filter(auth -> auth.getType().equals(authenticatorType)).findFirst();
+                    authenticators.stream().filter(auth -> auth.getType().equals("webauthn")).findFirst();
             String authId = authenticatorOptional.get().getId();
 
             AuthenticationResponse enrollResponse = idxAuthenticationWrapper.enrollAuthenticator(proceedContext, authId);
