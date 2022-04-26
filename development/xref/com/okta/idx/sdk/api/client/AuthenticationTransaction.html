@@ -428,88 +428,89 @@
 <a class="jxr_linenumber" name="L420" href="#L420">420</a>                     <strong class="jxr_keyword">if</strong> (nestedOptions.length &gt; 0) {
 <a class="jxr_linenumber" name="L421" href="#L421">421</a>                         <strong class="jxr_keyword">for</strong> (<a name="Options" href="../../../../../../com/okta/idx/sdk/api/model/Options.html#Options">Options</a> children : nestedOptions) {
 <a class="jxr_linenumber" name="L422" href="#L422">422</a>                             nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
-<a class="jxr_linenumber" name="L423" href="#L423">423</a>                         }
-<a class="jxr_linenumber" name="L424" href="#L424">424</a>                         hasNestedFactors = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L425" href="#L425">425</a>                     } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L426" href="#L426">426</a>                         nestedMethods.put(String.valueOf(formValue.getValue()), label);
-<a class="jxr_linenumber" name="L427" href="#L427">427</a>                     }
-<a class="jxr_linenumber" name="L428" href="#L428">428</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (<span class="jxr_string">"channel"</span>.equals(formValue.getName())) {
-<a class="jxr_linenumber" name="L429" href="#L429">429</a>                     authenticatorType = String.valueOf(option.getLabel())
-<a class="jxr_linenumber" name="L430" href="#L430">430</a>                             .toLowerCase(Locale.ROOT).replaceAll(<span class="jxr_string">" "</span>, <span class="jxr_string">"_"</span>);
-<a class="jxr_linenumber" name="L431" href="#L431">431</a>                     isChannelFactor = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L432" href="#L432">432</a>                     <a name="Options" href="../../../../../../com/okta/idx/sdk/api/model/Options.html#Options">Options</a>[] nestedOptions = formValue.options();
-<a class="jxr_linenumber" name="L433" href="#L433">433</a>                     <strong class="jxr_keyword">if</strong> (nestedOptions.length &gt; 0) {
-<a class="jxr_linenumber" name="L434" href="#L434">434</a>                         <strong class="jxr_keyword">for</strong> (<a name="Options" href="../../../../../../com/okta/idx/sdk/api/model/Options.html#Options">Options</a> children : nestedOptions) {
-<a class="jxr_linenumber" name="L435" href="#L435">435</a>                             nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
-<a class="jxr_linenumber" name="L436" href="#L436">436</a>                         }
-<a class="jxr_linenumber" name="L437" href="#L437">437</a>                         hasNestedFactors = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L438" href="#L438">438</a>                     } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L439" href="#L439">439</a>                         nestedMethods.put(authenticatorType, label);
-<a class="jxr_linenumber" name="L440" href="#L440">440</a>                     }
-<a class="jxr_linenumber" name="L441" href="#L441">441</a>                 }
-<a class="jxr_linenumber" name="L442" href="#L442">442</a>                 <strong class="jxr_keyword">if</strong> (formValue.getName().equals(<span class="jxr_string">"id"</span>)) {
-<a class="jxr_linenumber" name="L443" href="#L443">443</a>                     id = String.valueOf(formValue.getValue());
-<a class="jxr_linenumber" name="L444" href="#L444">444</a>                 }
-<a class="jxr_linenumber" name="L445" href="#L445">445</a>                 <strong class="jxr_keyword">if</strong> (formValue.getName().equals(<span class="jxr_string">"enrollmentId"</span>)) {
-<a class="jxr_linenumber" name="L446" href="#L446">446</a>                     enrollmentId = String.valueOf(formValue.getValue());
-<a class="jxr_linenumber" name="L447" href="#L447">447</a>                 }
-<a class="jxr_linenumber" name="L448" href="#L448">448</a>             }
-<a class="jxr_linenumber" name="L449" href="#L449">449</a> 
-<a class="jxr_linenumber" name="L450" href="#L450">450</a>             List&lt;Authenticator.Factor&gt; factors = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L451" href="#L451">451</a>             <strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, String&gt; entry : nestedMethods.entrySet()) {
-<a class="jxr_linenumber" name="L452" href="#L452">452</a>                 factors.add(<strong class="jxr_keyword">new</strong> Authenticator.Factor(
-<a class="jxr_linenumber" name="L453" href="#L453">453</a>                         id, entry.getKey(), enrollmentId, entry.getValue(), isChannelFactor ? entry.getKey() : <strong class="jxr_keyword">null</strong>)
-<a class="jxr_linenumber" name="L454" href="#L454">454</a>                 );
-<a class="jxr_linenumber" name="L455" href="#L455">455</a>             }
-<a class="jxr_linenumber" name="L456" href="#L456">456</a>             authenticators.add(<strong class="jxr_keyword">new</strong> <a name="Authenticator" href="../../../../../../com/okta/idx/sdk/api/model/Authenticator.html#Authenticator">Authenticator</a>(id, authenticatorType, label, factors, hasNestedFactors));
-<a class="jxr_linenumber" name="L457" href="#L457">457</a>         }
-<a class="jxr_linenumber" name="L458" href="#L458">458</a>         <strong class="jxr_keyword">return</strong> authenticators;
-<a class="jxr_linenumber" name="L459" href="#L459">459</a>     }
-<a class="jxr_linenumber" name="L460" href="#L460">460</a> 
-<a class="jxr_linenumber" name="L461" href="#L461">461</a>     <strong class="jxr_keyword">private</strong> List&lt;Authenticator&gt; getAuthenticators(<a name="FormValue" href="../../../../../../com/okta/idx/sdk/api/model/FormValue.html#FormValue">FormValue</a> parent) {
-<a class="jxr_linenumber" name="L462" href="#L462">462</a>         <strong class="jxr_keyword">if</strong> (parent == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L463" href="#L463">463</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L464" href="#L464">464</a>         }
-<a class="jxr_linenumber" name="L465" href="#L465">465</a>         List&lt;Authenticator&gt; authenticators = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L466" href="#L466">466</a> 
-<a class="jxr_linenumber" name="L467" href="#L467">467</a>         String id = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L468" href="#L468">468</a>         String label = parent.getLabel();
-<a class="jxr_linenumber" name="L469" href="#L469">469</a>         String enrollmentId = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L470" href="#L470">470</a>         String authenticatorType = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L471" href="#L471">471</a>         Map&lt;String, String&gt; nestedMethods = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;&gt;();
-<a class="jxr_linenumber" name="L472" href="#L472">472</a>         <strong class="jxr_keyword">boolean</strong> hasNestedFactors = false;
-<a class="jxr_linenumber" name="L473" href="#L473">473</a> 
-<a class="jxr_linenumber" name="L474" href="#L474">474</a>         <strong class="jxr_keyword">for</strong> (<a name="FormValue" href="../../../../../../com/okta/idx/sdk/api/model/FormValue.html#FormValue">FormValue</a> formValue : parent.form().getValue()) {
-<a class="jxr_linenumber" name="L475" href="#L475">475</a>             <strong class="jxr_keyword">if</strong> (formValue.getName().equals(<span class="jxr_string">"methodType"</span>)) {
-<a class="jxr_linenumber" name="L476" href="#L476">476</a>                 authenticatorType = String.valueOf(formValue.getValue());
-<a class="jxr_linenumber" name="L477" href="#L477">477</a>                 <em class="jxr_comment">// parse value from children</em>
-<a class="jxr_linenumber" name="L478" href="#L478">478</a>                 <a name="Options" href="../../../../../../com/okta/idx/sdk/api/model/Options.html#Options">Options</a>[] nestedOptions = formValue.options();
-<a class="jxr_linenumber" name="L479" href="#L479">479</a>                 <strong class="jxr_keyword">if</strong> (nestedOptions.length &gt; 0) {
-<a class="jxr_linenumber" name="L480" href="#L480">480</a>                     <strong class="jxr_keyword">for</strong> (<a name="Options" href="../../../../../../com/okta/idx/sdk/api/model/Options.html#Options">Options</a> children : nestedOptions) {
-<a class="jxr_linenumber" name="L481" href="#L481">481</a>                         nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
-<a class="jxr_linenumber" name="L482" href="#L482">482</a>                     }
-<a class="jxr_linenumber" name="L483" href="#L483">483</a>                     hasNestedFactors = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L484" href="#L484">484</a>                 } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L485" href="#L485">485</a>                     nestedMethods.put(String.valueOf(formValue.getValue()), label);
-<a class="jxr_linenumber" name="L486" href="#L486">486</a>                 }
-<a class="jxr_linenumber" name="L487" href="#L487">487</a>             }
-<a class="jxr_linenumber" name="L488" href="#L488">488</a>             <strong class="jxr_keyword">if</strong> (formValue.getName().equals(<span class="jxr_string">"id"</span>)) {
-<a class="jxr_linenumber" name="L489" href="#L489">489</a>                 id = String.valueOf(formValue.getValue());
-<a class="jxr_linenumber" name="L490" href="#L490">490</a>             }
-<a class="jxr_linenumber" name="L491" href="#L491">491</a>             <strong class="jxr_keyword">if</strong> (formValue.getName().equals(<span class="jxr_string">"enrollmentId"</span>)) {
-<a class="jxr_linenumber" name="L492" href="#L492">492</a>                 enrollmentId = String.valueOf(formValue.getValue());
-<a class="jxr_linenumber" name="L493" href="#L493">493</a>             }
-<a class="jxr_linenumber" name="L494" href="#L494">494</a>         }
-<a class="jxr_linenumber" name="L495" href="#L495">495</a> 
-<a class="jxr_linenumber" name="L496" href="#L496">496</a>         List&lt;Authenticator.Factor&gt; factors = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L497" href="#L497">497</a>         <strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, String&gt; entry : nestedMethods.entrySet()) {
-<a class="jxr_linenumber" name="L498" href="#L498">498</a>             factors.add(<strong class="jxr_keyword">new</strong> Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue(), <strong class="jxr_keyword">null</strong>));
-<a class="jxr_linenumber" name="L499" href="#L499">499</a>         }
-<a class="jxr_linenumber" name="L500" href="#L500">500</a>         authenticators.add(<strong class="jxr_keyword">new</strong> <a name="Authenticator" href="../../../../../../com/okta/idx/sdk/api/model/Authenticator.html#Authenticator">Authenticator</a>(id, authenticatorType, label, factors, hasNestedFactors));
-<a class="jxr_linenumber" name="L501" href="#L501">501</a> 
-<a class="jxr_linenumber" name="L502" href="#L502">502</a>         <strong class="jxr_keyword">return</strong> authenticators;
-<a class="jxr_linenumber" name="L503" href="#L503">503</a>     }
-<a class="jxr_linenumber" name="L504" href="#L504">504</a> }
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>                             authenticatorType = String.valueOf(option.getLabel()).toLowerCase(Locale.ROOT);
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>                         }
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>                         hasNestedFactors = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>                     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>                         nestedMethods.put(String.valueOf(formValue.getValue()), label);
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>                     }
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (<span class="jxr_string">"channel"</span>.equals(formValue.getName())) {
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>                     authenticatorType = String.valueOf(option.getLabel())
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>                             .toLowerCase(Locale.ROOT).replaceAll(<span class="jxr_string">" "</span>, <span class="jxr_string">"_"</span>);
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>                     isChannelFactor = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>                     <a name="Options" href="../../../../../../com/okta/idx/sdk/api/model/Options.html#Options">Options</a>[] nestedOptions = formValue.options();
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>                     <strong class="jxr_keyword">if</strong> (nestedOptions.length &gt; 0) {
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>                         <strong class="jxr_keyword">for</strong> (<a name="Options" href="../../../../../../com/okta/idx/sdk/api/model/Options.html#Options">Options</a> children : nestedOptions) {
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>                             nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>                         }
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>                         hasNestedFactors = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>                     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>                         nestedMethods.put(authenticatorType, label);
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>                     }
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>                 }
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>                 <strong class="jxr_keyword">if</strong> (formValue.getName().equals(<span class="jxr_string">"id"</span>)) {
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>                     id = String.valueOf(formValue.getValue());
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>                 }
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>                 <strong class="jxr_keyword">if</strong> (formValue.getName().equals(<span class="jxr_string">"enrollmentId"</span>)) {
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>                     enrollmentId = String.valueOf(formValue.getValue());
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>                 }
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>             }
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>             List&lt;Authenticator.Factor&gt; factors = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>             <strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, String&gt; entry : nestedMethods.entrySet()) {
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>                 factors.add(<strong class="jxr_keyword">new</strong> Authenticator.Factor(
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>                         id, entry.getKey(), enrollmentId, entry.getValue(), isChannelFactor ? entry.getKey() : <strong class="jxr_keyword">null</strong>)
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>                 );
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>             }
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>             authenticators.add(<strong class="jxr_keyword">new</strong> <a name="Authenticator" href="../../../../../../com/okta/idx/sdk/api/model/Authenticator.html#Authenticator">Authenticator</a>(id, authenticatorType, label, factors, hasNestedFactors));
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>         }
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>         <strong class="jxr_keyword">return</strong> authenticators;
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>     }
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> 
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>     <strong class="jxr_keyword">private</strong> List&lt;Authenticator&gt; getAuthenticators(<a name="FormValue" href="../../../../../../com/okta/idx/sdk/api/model/FormValue.html#FormValue">FormValue</a> parent) {
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>         <strong class="jxr_keyword">if</strong> (parent == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>         }
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>         List&lt;Authenticator&gt; authenticators = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> 
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>         String id = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>         String label = parent.getLabel();
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>         String enrollmentId = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>         String authenticatorType = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>         Map&lt;String, String&gt; nestedMethods = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;&gt;();
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>         <strong class="jxr_keyword">boolean</strong> hasNestedFactors = false;
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> 
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>         <strong class="jxr_keyword">for</strong> (<a name="FormValue" href="../../../../../../com/okta/idx/sdk/api/model/FormValue.html#FormValue">FormValue</a> formValue : parent.form().getValue()) {
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>             <strong class="jxr_keyword">if</strong> (formValue.getName().equals(<span class="jxr_string">"methodType"</span>)) {
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>                 authenticatorType = String.valueOf(formValue.getValue());
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>                 <em class="jxr_comment">// parse value from children</em>
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>                 <a name="Options" href="../../../../../../com/okta/idx/sdk/api/model/Options.html#Options">Options</a>[] nestedOptions = formValue.options();
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>                 <strong class="jxr_keyword">if</strong> (nestedOptions.length &gt; 0) {
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>                     <strong class="jxr_keyword">for</strong> (<a name="Options" href="../../../../../../com/okta/idx/sdk/api/model/Options.html#Options">Options</a> children : nestedOptions) {
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>                         nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>                     }
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>                     hasNestedFactors = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>                     nestedMethods.put(String.valueOf(formValue.getValue()), label);
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>                 }
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>             }
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>             <strong class="jxr_keyword">if</strong> (formValue.getName().equals(<span class="jxr_string">"id"</span>)) {
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>                 id = String.valueOf(formValue.getValue());
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>             }
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>             <strong class="jxr_keyword">if</strong> (formValue.getName().equals(<span class="jxr_string">"enrollmentId"</span>)) {
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>                 enrollmentId = String.valueOf(formValue.getValue());
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>             }
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>         }
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> 
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>         List&lt;Authenticator.Factor&gt; factors = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>         <strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, String&gt; entry : nestedMethods.entrySet()) {
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>             factors.add(<strong class="jxr_keyword">new</strong> Authenticator.Factor(id, entry.getKey(), enrollmentId, entry.getValue(), <strong class="jxr_keyword">null</strong>));
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>         }
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>         authenticators.add(<strong class="jxr_keyword">new</strong> <a name="Authenticator" href="../../../../../../com/okta/idx/sdk/api/model/Authenticator.html#Authenticator">Authenticator</a>(id, authenticatorType, label, factors, hasNestedFactors));
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> 
+<a class="jxr_linenumber" name="L503" href="#L503">503</a>         <strong class="jxr_keyword">return</strong> authenticators;
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>     }
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2020&#x2013;2022 <a href="http://developer.okta.com/">Okta</a>. All rights reserved.</div>
