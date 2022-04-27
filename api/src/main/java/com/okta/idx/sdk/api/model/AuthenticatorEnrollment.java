@@ -28,6 +28,8 @@ public class AuthenticatorEnrollment {
 
     private String id;
 
+    private String key;
+
     private String displayName;
 
     private String credentialId;
@@ -45,6 +47,8 @@ public class AuthenticatorEnrollment {
     public String getId() {
         return id;
     }
+
+    public String getKey() { return key; }
 
     public String getDisplayName() {
         return displayName;
