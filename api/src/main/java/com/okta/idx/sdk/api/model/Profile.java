@@ -22,12 +22,18 @@ public class Profile {
 
     private String email;
 
+    private String phoneNumber;
+
     private String questionKey;
 
     private String question;
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public String getQuestionKey() {
