@@ -191,6 +191,26 @@ public class SelfServiceRegistration extends CucumberRoot {
                 error.contains("Provided value for property 'Email' does not match required pattern"));
     }
 
+    @When("^she selects Security Question from the list$")
+    public void she_selects_security_question() {
+        registerPage.waitForWebElementDisplayed(registerPage.securityQuestionRadioButton);
+        registerPage.securityQuestionRadioButton.click();
+        registerPage.proceedButton.click();
+    }
+
+    @And("^she selects a predefined Security Question$")
+    public void she_selects_predefined_security_question() {
+        registerPage.waitForWebElementDisplayed(registerPage.securityQuestionKey);
+        registerPage.securityQuestionKey.click();
+        registerPage.dislikedFoodSecurityQuestionKey.click();
+    }
+
+    @And("^she enters \"Okta\" as the answer$")
+    public void she_enters_answer () {
+        Assert.assertTrue(registerPage.securityQuestionAnswer.isDisplayed());
+        registerPage.securityQuestionAnswer.click();
+        registerPage.securityQuestionAnswer.sendKeys("Okta");
+    }
 
     @Then("she is redirected back to the Root View")
     public void she_is_redirected_back_to_the_root_view() {
