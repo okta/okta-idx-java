@@ -37,11 +37,23 @@ public class RegisterPage extends Page {
     @FindBy(id = "sign-in-btn")
     public WebElement signInButton;
 
-    @FindBy(css = "input[name='authenticator-type'][value='Email']")
+    @FindBy(css = "input[name='authenticator-type'][value='email']")
     public WebElement emailRadioButton;
 
-    @FindBy(css = "input[name='authenticator-type'][value='Password']")
+    @FindBy(css = "input[name='authenticator-type'][value='password']")
     public WebElement passwordRadioButton;
+
+    @FindBy(css = "input[name='authenticator-type'][value='security_question']")
+    public WebElement securityQuestionRadioButton;
+
+    @FindBy(css = "select[name='security_question_key'][id='questions']")
+    public WebElement securityQuestionKey;
+
+    @FindBy(css = "option[value='disliked_food']")
+    public WebElement dislikedFoodSecurityQuestionKey;
+
+    @FindBy(css = "input[name='code'][id='answer']")
+    public WebElement securityQuestionAnswer;
 
     @FindBy(name = "new-password")
     public WebElement newPasswordInput;
