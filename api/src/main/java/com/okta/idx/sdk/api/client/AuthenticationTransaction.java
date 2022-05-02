@@ -118,7 +118,6 @@ final class AuthenticationTransaction {
 
     ProceedContext createProceedContext() {
         if (idxResponse == null || idxResponse.remediation() == null || idxResponse.remediation().remediationOptions() == null) {
-            logger.error("ProceedContext is null");
             return null;
         }
 
