@@ -37,6 +37,7 @@ import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -150,7 +151,7 @@ final class AuthenticationTransaction {
             }
             if (idxResponse.getCurrentAuthenticatorEnrollment().getValue().getPoll() != null) {
                 RemediationOption pollRemediationOption = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getPoll();
-                pollInfo = new PollInfo(pollRemediationOption.getHref(), pollRemediationOption.getRefresh());
+                pollInfo = new PollInfo(pollRemediationOption.getHref(), Duration.ofMillis(Long.parseLong(pollRemediationOption.getRefresh())));
             }
         } else if (idxResponse.getCurrentAuthenticator() != null &&
                 idxResponse.getCurrentAuthenticator().getValue() != null) {
@@ -159,7 +160,7 @@ final class AuthenticationTransaction {
             }
             if (idxResponse.getCurrentAuthenticator().getValue().getPoll() != null) {
                 RemediationOption pollRemediationOption = idxResponse.getCurrentAuthenticator().getValue().getPoll();
-                pollInfo = new PollInfo(pollRemediationOption.getHref(), pollRemediationOption.getRefresh());
+                pollInfo = new PollInfo(pollRemediationOption.getHref(), Duration.ofMillis(Long.parseLong(pollRemediationOption.getRefresh())));
             }
         }
 

@@ -33,6 +33,7 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse
 import org.testng.annotations.Test
 
 import java.lang.reflect.Field
+import java.time.temporal.TemporalUnit
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
@@ -554,7 +555,8 @@ class IDXAuthenticationWrapperTest {
 
         assertThat(pollInfo, notNullValue())
         assertThat(pollInfo.getHref(), equalTo("https://foo.oktapreview.com/idp/idx/challenge/poll"))
-        assertThat(pollInfo.getRefresh(), equalTo("4000"))
+        assertThat(pollInfo.getRefresh(), notNullValue())
+        assertThat(pollInfo.getRefresh().getSeconds(), is(4L))
     }
 
     @Test
@@ -601,7 +603,8 @@ class IDXAuthenticationWrapperTest {
 
         assertThat(pollInfo, notNullValue())
         assertThat(pollInfo.getHref(), equalTo("https://foo.oktapreview.com/idp/idx/challenge/poll"))
-        assertThat(pollInfo.getRefresh(), equalTo("4000"))
+        assertThat(pollInfo.getRefresh(), notNullValue())
+        assertThat(pollInfo.getRefresh().getSeconds(), is(4L))
 
         AuthenticationResponse pollResponse = idxAuthenticationWrapper.poll(authenticationResponse.getProceedContext())
 

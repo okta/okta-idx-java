@@ -15,13 +15,15 @@
  */
 package com.okta.idx.sdk.api.model;
 
+import java.time.Duration;
+
 public class PollInfo {
 
     private String href;
 
-    private String refresh;
+    private Duration refresh;
 
-    public PollInfo(String href, String refresh) {
+    public PollInfo(String href, Duration refresh) {
         this.href = href;
         this.refresh = refresh;
     }
@@ -34,11 +36,11 @@ public class PollInfo {
         this.href = href;
     }
 
-    public String getRefresh() {
+    public Duration getRefresh() {
         return refresh;
     }
 
-    public void setRefresh(String refresh) {
+    public void setRefresh(Duration refresh) {
         this.refresh = refresh;
     }
 }
