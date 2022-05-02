@@ -24,7 +24,7 @@ import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.ContextualData;
 import com.okta.idx.sdk.api.model.FormValue;
-import com.okta.idx.sdk.api.model.Qrcode;
+import com.okta.idx.sdk.api.model.QrCode;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorAnswer;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
@@ -319,7 +319,7 @@ public class LoginController {
                 authenticationResponse = idxAuthenticationWrapper.selectFactor(proceedContext, foundFactor);
                 Optional.ofNullable(authenticationResponse.getContextualData())
                         .map(ContextualData::getQrcode)
-                        .map(Qrcode::getHref)
+                        .map(QrCode::getHref)
                         .ifPresent(qrCode -> {
                             session.setAttribute("qrCode", qrCode);
                             session.setAttribute("channelName", "qrcode");
