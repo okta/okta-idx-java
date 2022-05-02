@@ -149,6 +149,10 @@ public class IDXResponse {
         return authenticatorEnrollments;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     public Authenticators getAuthenticators() {
         return authenticators;
     }

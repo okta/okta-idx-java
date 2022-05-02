@@ -25,4 +25,18 @@
         <cve>CVE-2020-23171</cve>
     </suppress>
 
+    <!-- Likely false positives, Sonatype does not report any known vulnerabilites in springboot 2.6.7
+         per https://ossindex.sonatype.org/component/pkg:maven/org.springframework.boot/spring-boot@2.6.7
+         Springboot is used only in sample projects under samples/ and not used inside the SDK itself.-->
+    <suppress>
+        <notes><![CDATA[ file name: spring-boot-2.6.7.jar ]]></notes>
+        <cve>CVE-2013-4152</cve>
+        <cve>CVE-2013-7315</cve>
+        <cve>CVE-2014-0054</cve>
+        <cve>CVE-2014-0054</cve>
+        <cve>CVE-2016-1000027</cve>
+        <cve>CVE-2022-22965</cve>
+        <cve>CVE-2022-22968</cve>
+    </suppress>
+
 </suppressions>

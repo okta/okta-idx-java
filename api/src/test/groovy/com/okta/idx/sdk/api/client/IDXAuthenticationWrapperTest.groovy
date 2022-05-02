@@ -33,6 +33,7 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse
 import org.testng.annotations.Test
 
 import java.lang.reflect.Field
+import java.time.temporal.TemporalUnit
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
@@ -554,7 +555,8 @@ class IDXAuthenticationWrapperTest {
 
         assertThat(pollInfo, notNullValue())
         assertThat(pollInfo.getHref(), equalTo("https://foo.oktapreview.com/idp/idx/challenge/poll"))
-        assertThat(pollInfo.getRefresh(), equalTo("4000"))
+        assertThat(pollInfo.getRefresh(), notNullValue())
+        assertThat(pollInfo.getRefresh().getSeconds(), is(4L))
     }
 
     @Test
@@ -601,7 +603,8 @@ class IDXAuthenticationWrapperTest {
 
         assertThat(pollInfo, notNullValue())
         assertThat(pollInfo.getHref(), equalTo("https://foo.oktapreview.com/idp/idx/challenge/poll"))
-        assertThat(pollInfo.getRefresh(), equalTo("4000"))
+        assertThat(pollInfo.getRefresh(), notNullValue())
+        assertThat(pollInfo.getRefresh().getSeconds(), is(4L))
 
         AuthenticationResponse pollResponse = idxAuthenticationWrapper.poll(authenticationResponse.getProceedContext())
 
@@ -1292,6 +1295,21 @@ class IDXAuthenticationWrapperTest {
                 hasItem(hasProperty("label", is("Email")))
         )
 
+        assertThat(authenticationResponse.getAuthenticatorEnrollments(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues(), hasSize(2))
+
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(0).getType(), is("email"))
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(0).getProfile(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(0).getProfile().getEmail(), is("j***8@gmail.com"))
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(0).getMethods(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(0).getMethods().length, is(1))
+
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getType(), is("phone"))
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getProfile(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getProfile().getPhoneNumber(), is("+1 XXX-XXX-0364"))
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getMethods(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getMethods().length, is(2))
+
         Authenticator emailAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
                 authenticationResponse.authenticators.first().type,
@@ -1362,6 +1380,32 @@ class IDXAuthenticationWrapperTest {
         assertThat(authenticationResponse.getAuthenticators(),
                 hasItem(hasProperty("label", is("Email")))
         )
+
+        assertThat(authenticationResponse.getAuthenticatorEnrollments(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues(), hasSize(2))
+
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(0).getType(), is("email"))
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(0).getProfile(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(0).getProfile().getEmail(), is("j***8@gmail.com"))
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(0).getMethods(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(0).getMethods().length, is(1))
+
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getType(), is("phone"))
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getProfile(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getProfile().getPhoneNumber(), is("+1 XXX-XXX-0364"))
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getMethods(), notNullValue())
+        assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getMethods().length, is(2))
+
+        assertThat(authenticationResponse.getUser(), notNullValue())
+        assertThat(authenticationResponse.getUser().getValue(), notNullValue())
+        assertThat(authenticationResponse.getUser().getValue().getId(), is("00unr4gf3Tg9WyAMW5d6"))
+        assertThat(authenticationResponse.getUser().getValue().getIdentifier(), is("email"))
+        assertThat(authenticationResponse.getUser().getValue().getProfile(), notNullValue())
+        assertThat(authenticationResponse.getUser().getValue().getProfile().getFields(), notNullValue())
+        assertThat(authenticationResponse.getUser().getValue().getProfile().getFields().get("firstName"), is("John"))
+        assertThat(authenticationResponse.getUser().getValue().getProfile().getFields().get("lastName"), is("Ferguson"))
+        assertThat(authenticationResponse.getUser().getValue().getProfile().getFields().get("timeZone"), is("America/Los_Angeles"))
+        assertThat(authenticationResponse.getUser().getValue().getProfile().getFields().get("locale"), is("en_US"))
 
         Authenticator emailAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,

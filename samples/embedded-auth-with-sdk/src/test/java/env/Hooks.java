@@ -68,7 +68,7 @@ public class Hooks {
 		DriverUtil.closeDriver();
 	}
 
-	@Before("@requireA18NProfile")
+	@Before(order = 0, value = "@requireA18NProfile")
 	public void createA18NProfileBeforeScenario(Scenario scenario) {
 		if(Page.getA18NClient() == null) {
 			Page.setA18NClient(new DefaultA18NClientBuilder().build());
@@ -86,7 +86,7 @@ public class Hooks {
 		}
 	}
 
-	@Before("@requireExistingUser")
+	@Before(order = 1, value = "@requireExistingUser")
 	public void createUserBeforeScenario() {
 		Assert.assertNotNull(Page.getA18NProfile());
 
