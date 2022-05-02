@@ -1393,6 +1393,17 @@ class IDXAuthenticationWrapperTest {
         assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getMethods(), notNullValue())
         assertThat(authenticationResponse.getAuthenticatorEnrollments().getValues().get(1).getMethods().length, is(2))
 
+        assertThat(authenticationResponse.getUser(), notNullValue())
+        assertThat(authenticationResponse.getUser().getValue(), notNullValue())
+        assertThat(authenticationResponse.getUser().getValue().getId(), is("00unr4gf3Tg9WyAMW5d6"))
+        assertThat(authenticationResponse.getUser().getValue().getIdentifier(), is("email"))
+        assertThat(authenticationResponse.getUser().getValue().getProfile(), notNullValue())
+        assertThat(authenticationResponse.getUser().getValue().getProfile().getFields(), notNullValue())
+        assertThat(authenticationResponse.getUser().getValue().getProfile().getFields().get("firstName"), is("John"))
+        assertThat(authenticationResponse.getUser().getValue().getProfile().getFields().get("lastName"), is("Ferguson"))
+        assertThat(authenticationResponse.getUser().getValue().getProfile().getFields().get("timeZone"), is("America/Los_Angeles"))
+        assertThat(authenticationResponse.getUser().getValue().getProfile().getFields().get("locale"), is("en_US"))
+
         Authenticator emailAuthenticator = new Authenticator(
                 authenticationResponse.authenticators.first().id,
                 authenticationResponse.authenticators.first().type,

@@ -227,6 +227,10 @@ final class AuthenticationTransaction {
             authenticationResponse.setAuthenticatorEnrollments(idxResponse.getAuthenticatorEnrollments());
         }
 
+        if (idxResponse.getUser() != null) {
+            authenticationResponse.setUser(idxResponse.getUser());
+        }
+
         String firstRemediation = "";
         if (idxResponse.remediation() != null && idxResponse.remediation().remediationOptions().length > 0) {
             firstRemediation = idxResponse.remediation().remediationOptions()[0].getName();

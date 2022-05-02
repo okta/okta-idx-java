@@ -26,6 +26,10 @@ public class UserValue {
 
     private String id;
 
+    private String identifier;
+
+    private UserProfile profile;
+
     public String getName() {
         return name;
     }
@@ -36,5 +40,13 @@ public class UserValue {
 
     public String getId() {
         return id;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public UserProfile getProfile() {
+        return profile;
     }
 }

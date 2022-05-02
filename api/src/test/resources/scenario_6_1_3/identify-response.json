@@ -158,10 +158,17 @@
       }
     ]
   },
-  "user": {
-    "type": "object",
-    "value": {
-      "id": "00unr4gf3Tg9WyAMW5d6"
+  "user" : {
+    "type" : "object",
+    "value" : {
+      "id" : "00unr4gf3Tg9WyAMW5d6",
+      "identifier" : "email",
+      "profile" : {
+        "firstName" : "John",
+        "lastName" : "Ferguson",
+        "timeZone" : "America/Los_Angeles",
+        "locale" : "en_US"
+      }
     }
   },
   "cancel": {

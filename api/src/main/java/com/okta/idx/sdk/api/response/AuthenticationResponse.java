@@ -24,6 +24,7 @@ import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.Idp;
 import com.okta.idx.sdk.api.model.SecurityQuestion;
+import com.okta.idx.sdk.api.model.User;
 import com.okta.idx.sdk.webauthn.WebAuthnParams;
 
 import java.util.LinkedList;
@@ -54,6 +55,8 @@ public class AuthenticationResponse {
     private WebAuthnParams webAuthnParams = new WebAuthnParams();
 
     private CurrentAuthenticatorEnrollment currentAuthenticatorEnrollment;
+
+    private User user;
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
@@ -117,6 +120,14 @@ public class AuthenticationResponse {
 
     public void setAuthenticatorEnrollments(AuthenticatorEnrollments authenticatorEnrollments) {
         this.authenticatorEnrollments = authenticatorEnrollments;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public ContextualData getContextualData() {
