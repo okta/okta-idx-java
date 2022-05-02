@@ -20,13 +20,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ContextualData {
 
-    private Qrcode qrcode;
+    private QrCode qrcode;
     private String sharedSecret;
     private ActivationData activationData;
     private ChallengeData challengeData;
     private String correctAnswer;
 
-    public Qrcode getQrcode() {
+    public QrCode getQrcode() {
         return qrcode;
     }
 
