@@ -20,10 +20,10 @@ import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
 import com.okta.idx.sdk.api.model.AuthenticationOptions
 import com.okta.idx.sdk.api.model.AuthenticationStatus
-import com.okta.idx.sdk.api.model.DeviceContext
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Idp
 import com.okta.idx.sdk.api.model.PollInfo
+import com.okta.idx.sdk.api.model.RequestContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorAnswer
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
@@ -33,7 +33,6 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse
 import org.testng.annotations.Test
 
 import java.lang.reflect.Field
-import java.time.temporal.TemporalUnit
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
@@ -395,10 +394,10 @@ class IDXAuthenticationWrapperTest {
         setMockResponseOnlyIfBodyParamMatches(requestExecutor, "interact", "activation_token", "interact-response", 200, MediaType.APPLICATION_JSON)
         setMockResponse(requestExecutor, "introspect", "introspect-with-activation-token-response", 200, mediaTypeAppIonJson)
 
-        final DeviceContext deviceContext = new DeviceContext()
-        deviceContext.addXDeviceTokenHeader("test_x_device_token")
+        final RequestContext requestContext = new RequestContext()
+        requestContext.addXDeviceTokenHeader("test_x_device_token")
 
-        AuthenticationResponse beginResponse = idxAuthenticationWrapper.beginUserActivation("activation-token", deviceContext)
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.beginUserActivation("activation-token", requestContext)
 
         assertThat(beginResponse, notNullValue())
         assertThat(beginResponse.getErrors(), empty())

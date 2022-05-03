@@ -36,7 +36,7 @@ import com.okta.commons.lang.Classes;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.config.ClientConfiguration;
 import com.okta.idx.sdk.api.exception.ProcessingException;
-import com.okta.idx.sdk.api.model.DeviceContext;
+import com.okta.idx.sdk.api.model.RequestContext;
 import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -101,7 +101,7 @@ final class BaseIDXClient implements IDXClient {
     }
 
     @Override
-    public IDXClientContext interact(String token, EmailTokenType tokenType, DeviceContext deviceContext) throws ProcessingException {
+    public IDXClientContext interact(String token, EmailTokenType tokenType, RequestContext requestContext) throws ProcessingException {
 
         InteractResponse interactResponse;
         String codeVerifier, codeChallenge, state;
@@ -130,9 +130,25 @@ final class BaseIDXClient implements IDXClient {
 
             HttpHeaders httpHeaders = getHttpHeaders(true);
 
-            // allow setting device context per interaction
-            if (deviceContext != null) {
-                httpHeaders.setAll(deviceContext.getAllHeaders());
+            // include additional headers (for interact endpoint only), if present in request context.
+            if (requestContext != null) {
+                if (Strings.hasText(requestContext.getXOktaUserAgentExtendedHeaderValue())) {
+                    httpHeaders.set(RequestContext.X_OKTA_USER_AGENT_EXTENDED,
+                            requestContext.getXOktaUserAgentExtendedHeaderValue());
+                }
+
+                // set 'X-Forwarded-For' & 'X-Device-Token' headers for confidential clients only,
+                // these headers will be ignored for non-confidential clients.
+                if (Strings.hasText(clientConfiguration.getClientSecret())) {
+                    if (Strings.hasText(requestContext.getXDeviceTokenHeaderValue())) {
+                        httpHeaders.set(RequestContext.X_DEVICE_TOKEN,
+                                requestContext.getXDeviceTokenHeaderValue());
+                    }
+                    if (Strings.hasText(requestContext.getXForwardedForHeaderValue())) {
+                        httpHeaders.set(RequestContext.X_FORWARDED_FOR,
+                                requestContext.getXForwardedForHeaderValue());
+                    }
+                }
             }
 
             Request request = new DefaultRequest(
@@ -629,6 +645,7 @@ final class BaseIDXClient implements IDXClient {
                 .map(entry -> entry.getKey() + "/" + entry.getValue())
                 .collect(Collectors.joining(" "));
 
+        // value would look like (for e.g.): okta-idx-java/3.0.0-SNAPSHOT java/1.8.0_322 Mac OS X/12.3.1
         httpHeaders.add(HttpHeaders.USER_AGENT, userAgentValue);
         return httpHeaders;
     }

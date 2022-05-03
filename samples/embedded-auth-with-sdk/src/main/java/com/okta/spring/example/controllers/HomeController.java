@@ -19,7 +19,7 @@ import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
-import com.okta.idx.sdk.api.model.DeviceContext;
+import com.okta.idx.sdk.api.model.RequestContext;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
@@ -321,22 +321,22 @@ public class HomeController {
     }
 
     private AuthenticationResponse begin(final HttpSession session) {
-        final DeviceContext deviceContext = Util.constructDeviceContext();
-        AuthenticationResponse authenticationResponse = authenticationWrapper.begin(deviceContext);
+        final RequestContext requestContext = Util.constructRequestContext();
+        AuthenticationResponse authenticationResponse = authenticationWrapper.begin(requestContext);
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;
     }
 
     private AuthenticationResponse beginPasswordRecovery(final HttpSession session, String recoveryToken) {
-        final DeviceContext deviceContext = Util.constructDeviceContext();
-        AuthenticationResponse authenticationResponse = authenticationWrapper.beginPasswordRecovery(recoveryToken, deviceContext);
+        final RequestContext requestContext = Util.constructRequestContext();
+        AuthenticationResponse authenticationResponse = authenticationWrapper.beginPasswordRecovery(recoveryToken, requestContext);
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;
     }
 
     private AuthenticationResponse beginUserActivation(final HttpSession session, String activationToken) {
-        final DeviceContext deviceContext = Util.constructDeviceContext();
-        AuthenticationResponse authenticationResponse = authenticationWrapper.beginUserActivation(activationToken, deviceContext);
+        final RequestContext requestContext = Util.constructRequestContext();
+        AuthenticationResponse authenticationResponse = authenticationWrapper.beginUserActivation(activationToken, requestContext);
         Util.updateSession(session, authenticationResponse.getProceedContext());
         return authenticationResponse;
     }

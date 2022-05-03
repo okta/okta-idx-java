@@ -25,7 +25,7 @@ import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.Credentials;
-import com.okta.idx.sdk.api.model.DeviceContext;
+import com.okta.idx.sdk.api.model.RequestContext;
 import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -801,14 +801,14 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Begin flow with {@link DeviceContext} reference.
+     * Begin flow with {@link RequestContext} reference.
      *
-     * @param deviceContext the DeviceContext
+     * @param requestContext the RequestContext
      * @return authentication response
      */
-    public AuthenticationResponse begin(DeviceContext deviceContext) {
+    public AuthenticationResponse begin(RequestContext requestContext) {
         try {
-            return AuthenticationTransaction.create(client, deviceContext).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, null, null, requestContext).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -820,12 +820,12 @@ public class IDXAuthenticationWrapper {
      * Begin password recovery flow with a recovery token.
      *
      * @param token recovery token
-     * @param deviceContext device context (optional)
+     * @param requestContext device context (optional)
      * @return authentication response
      */
-    public AuthenticationResponse beginPasswordRecovery(String token, DeviceContext deviceContext) {
+    public AuthenticationResponse beginPasswordRecovery(String token, RequestContext requestContext) {
         try {
-            return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN, deviceContext)
+            return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN, requestContext)
                     .asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
@@ -838,12 +838,12 @@ public class IDXAuthenticationWrapper {
      * Begin password recovery flow with an activation token.
      *
      * @param token activation token
-     * @param deviceContext device context (optional)
+     * @param requestContext device context (optional)
      * @return authentication response
      */
-    public AuthenticationResponse beginUserActivation(String token, DeviceContext deviceContext) {
+    public AuthenticationResponse beginUserActivation(String token, RequestContext requestContext) {
         try {
-            return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN, deviceContext)
+            return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN, requestContext)
                     .asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);

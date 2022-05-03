@@ -21,7 +21,7 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollmentValue;
-import com.okta.idx.sdk.api.model.DeviceContext;
+import com.okta.idx.sdk.api.model.RequestContext;
 import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -57,35 +57,30 @@ final class AuthenticationTransaction {
     private final IDXClientContext clientContext;
     private final IDXResponse idxResponse;
 
+    static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
+        return create(client, null, null, null);
+    }
+
+    static AuthenticationTransaction create(IDXClient client, RequestContext requestContext) throws ProcessingException {
+        return create(client, null, null, requestContext);
+    }
+
     AuthenticationTransaction(IDXClient client, IDXClientContext clientContext, IDXResponse idxResponse) {
         this.client = client;
         this.clientContext = clientContext;
         this.idxResponse = idxResponse;
     }
 
-    static AuthenticationTransaction create(IDXClient client) throws ProcessingException {
-        return create(client, null, null, null);
-    }
-
-    static AuthenticationTransaction create(IDXClient client, DeviceContext deviceContext) throws ProcessingException {
-        return create(client, null, null, deviceContext);
-    }
-
     static AuthenticationTransaction create(IDXClient client,
                                             String token,
                                             EmailTokenType tokenType,
-                                            DeviceContext deviceContext) throws ProcessingException {
-        IDXClientContext idxClientContext;
+                                            RequestContext requestContext) throws ProcessingException {
 
-        if (token == null) {
-            idxClientContext = client.interact();
-        } else {
-            Assert.notNull(tokenType, "token type may not be null");
-            idxClientContext = client.interact(token, tokenType, deviceContext);
-        }
-
+        IDXClientContext idxClientContext = client.interact(token, tokenType, requestContext);
         Assert.notNull(idxClientContext, "IDX client context may not be null");
+
         IDXResponse introspectResponse = client.introspect(idxClientContext);
+
         String stateHandle = introspectResponse.getStateHandle();
         Assert.hasText(stateHandle, "State handle may not be null");
 

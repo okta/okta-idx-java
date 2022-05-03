@@ -17,7 +17,7 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.http.Response;
 import com.okta.idx.sdk.api.exception.ProcessingException;
-import com.okta.idx.sdk.api.model.DeviceContext;
+import com.okta.idx.sdk.api.model.RequestContext;
 import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest;
@@ -38,7 +38,7 @@ public interface IDXClient {
 
     IDXClientContext interact() throws ProcessingException;
 
-    IDXClientContext interact(String token, EmailTokenType tokenType, DeviceContext deviceContext) throws ProcessingException;
+    IDXClientContext interact(String token, EmailTokenType tokenType, RequestContext requestContext) throws ProcessingException;
 
     IDXResponse introspect(IDXClientContext idxClientContext) throws ProcessingException;
 

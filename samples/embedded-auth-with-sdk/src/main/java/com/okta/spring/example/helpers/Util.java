@@ -16,7 +16,7 @@
 package com.okta.spring.example.helpers;
 
 import com.okta.idx.sdk.api.client.ProceedContext;
-import com.okta.idx.sdk.api.model.DeviceContext;
+import com.okta.idx.sdk.api.model.RequestContext;
 
 import javax.servlet.http.HttpSession;
 import java.util.UUID;
@@ -77,16 +77,16 @@ public final class Util {
     }
 
     /**
-     * Construct DeviceContext object.
+     * Construct RequestContext object with random `X-Device-Token` header value.
      *
-     * @return device context headers
+     * @return request context object
      */
-    public static DeviceContext constructDeviceContext() {
-        final DeviceContext deviceContext = new DeviceContext();
+    public static RequestContext constructRequestContext() {
+        final RequestContext requestContext = new RequestContext();
         // generate random str 32 char long
         final UUID randomUUID = UUID.randomUUID();
         final String randomString = randomUUID.toString().replaceAll("-", "");
-        deviceContext.addXDeviceTokenHeader(randomString);
-        return deviceContext;
+        requestContext.addXDeviceTokenHeader(randomString);
+        return requestContext;
     }
 }

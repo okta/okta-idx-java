@@ -27,12 +27,12 @@ import com.okta.idx.sdk.api.exception.ProcessingException
 import com.okta.idx.sdk.api.model.Authenticator
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment
 import com.okta.idx.sdk.api.model.Credentials
-import com.okta.idx.sdk.api.model.DeviceContext
 import com.okta.idx.sdk.api.model.EmailTokenType
 import com.okta.idx.sdk.api.model.FormValue
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Options
 import com.okta.idx.sdk.api.model.RemediationOption
+import com.okta.idx.sdk.api.model.RequestContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.request.AnswerChallengeRequest
 import com.okta.idx.sdk.api.request.AnswerChallengeRequestBuilder
@@ -110,7 +110,7 @@ class BaseIDXClientTest {
     }
 
     @Test
-    void testInteractWithDeviceContext() {
+    void testInteractWithRequestContext_ConfidentialClient() {
 
         RequestExecutor requestExecutor = mock(RequestExecutor)
 
@@ -125,10 +125,58 @@ class BaseIDXClientTest {
         when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
         ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
 
-        final DeviceContext deviceContext = new DeviceContext()
-        deviceContext.addXDeviceTokenHeader("test_x_device_token")
+        final RequestContext requestContext = new RequestContext()
+        requestContext.addXDeviceTokenHeader("test_x_device_token")
+        requestContext.addXOktaUserAgentExtendedHeader("test_x_okta_user_agent_extended")
+        requestContext.addXForwardedForHeader("test_x_forwarded_for")
 
-        final IDXClientContext idxClientContext = idxClient.interact(null, null, deviceContext)
+        final IDXClientContext idxClientContext = idxClient.interact(null, null, requestContext)
+
+        verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
+
+        def httpHeaders = argumentCaptor.getValue().getHeaders()
+        assertThat(httpHeaders.size(), is(6))
+        assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
+        assertThat(httpHeaders.getFirst("Accept"), is("application/json"))
+        assertThat(httpHeaders.getFirst(HttpHeaders.USER_AGENT), notNullValue())
+
+        // assert request context headers
+        assertThat(httpHeaders.getFirst(RequestContext.X_DEVICE_TOKEN), is("test_x_device_token"))
+        assertThat(httpHeaders.getFirst(RequestContext.X_FORWARDED_FOR), is("test_x_forwarded_for"))
+        assertThat(httpHeaders.getFirst(RequestContext.X_OKTA_USER_AGENT_EXTENDED), is("test_x_okta_user_agent_extended"))
+
+        assertThat(idxClientContext, notNullValue())
+        assertThat(idxClientContext.getCodeVerifier(), notNullValue())
+        assertThat(idxClientContext.getState(), notNullValue())
+        assertThat(idxClientContext.getInteractionHandle(), is("003Q14X7li"))
+    }
+
+    @Test
+    void testInteractWithRequestContext_NonConfidentialClient() {
+
+        RequestExecutor requestExecutor = mock(RequestExecutor)
+
+        final ClientConfiguration clientConfiguration = getClientConfiguration()
+        // non-confidential client
+        clientConfiguration.setClientSecret(null)
+
+        final IDXClient idxClient = new BaseIDXClient(clientConfiguration, requestExecutor)
+
+        final Response stubbedResponse = new DefaultResponse(
+                200,
+                MediaType.valueOf("application/json"),
+                new FileInputStream(getClass().getClassLoader().getResource("interact-response.json").getFile()),
+                -1)
+
+        when(requestExecutor.executeRequest(any(Request.class))).thenReturn(stubbedResponse)
+        ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
+
+        final RequestContext requestContext = new RequestContext()
+        requestContext.addXDeviceTokenHeader("test_x_device_token")
+        requestContext.addXOktaUserAgentExtendedHeader("test_x_okta_user_agent_extended")
+        requestContext.addXForwardedForHeader("test_x_forwarded_for")
+
+        final IDXClientContext idxClientContext = idxClient.interact(null, null, requestContext)
 
         verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
 
@@ -136,9 +184,14 @@ class BaseIDXClientTest {
         assertThat(httpHeaders.size(), is(4))
         assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
         assertThat(httpHeaders.getFirst("Accept"), is("application/json"))
+        assertThat(httpHeaders.getFirst(HttpHeaders.USER_AGENT), notNullValue())
 
-        // assert device context header
-        assertThat(httpHeaders.getFirst(DeviceContext.X_DEVICE_TOKEN), is("test_x_device_token"))
+        // assert request context headers
+        // 'X-Device-Token' & 'X-Forwarded-For' headers will not be set for non-confidential clients
+        assertThat(httpHeaders.getFirst(RequestContext.X_DEVICE_TOKEN), nullValue())
+        assertThat(httpHeaders.getFirst(RequestContext.X_FORWARDED_FOR), nullValue())
+
+        assertThat(httpHeaders.getFirst(RequestContext.X_OKTA_USER_AGENT_EXTENDED), is("test_x_okta_user_agent_extended"))
 
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getCodeVerifier(), notNullValue())
