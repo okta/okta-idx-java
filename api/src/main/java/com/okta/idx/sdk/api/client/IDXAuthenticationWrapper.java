@@ -793,7 +793,7 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Begin flow without any recovery or activation token or device context.
+     * Begin flow without any recovery or activation token or request context.
      * @return authentication response
      */
     public AuthenticationResponse begin() {
@@ -820,7 +820,7 @@ public class IDXAuthenticationWrapper {
      * Begin password recovery flow with a recovery token.
      *
      * @param token recovery token
-     * @param requestContext device context (optional)
+     * @param requestContext request context (optional)
      * @return authentication response
      */
     public AuthenticationResponse beginPasswordRecovery(String token, RequestContext requestContext) {
@@ -838,7 +838,7 @@ public class IDXAuthenticationWrapper {
      * Begin password recovery flow with an activation token.
      *
      * @param token activation token
-     * @param requestContext device context (optional)
+     * @param requestContext request context (optional)
      * @return authentication response
      */
     public AuthenticationResponse beginUserActivation(String token, RequestContext requestContext) {
