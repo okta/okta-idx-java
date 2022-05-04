@@ -15,8 +15,6 @@
  */
 package com.okta.idx.sdk.api.client;
 
-import com.okta.idx.sdk.api.model.DeviceContext;
-
 import java.util.Set;
 
 abstract class IDXClientBuilder {
@@ -30,8 +28,6 @@ abstract class IDXClientBuilder {
     protected abstract IDXClientBuilder setScopes(Set<String> scopes);
 
     protected abstract IDXClientBuilder setRedirectUri(String redirectUri);
-
-    protected abstract IDXClientBuilder setDeviceContext(DeviceContext deviceContext);
 
     protected abstract IDXClient build();
 }

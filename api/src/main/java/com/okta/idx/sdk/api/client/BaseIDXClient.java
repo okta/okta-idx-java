@@ -30,11 +30,13 @@ import com.okta.commons.http.RequestExecutorFactory;
 import com.okta.commons.http.Response;
 import com.okta.commons.http.authc.DisabledAuthenticator;
 import com.okta.commons.http.config.HttpClientConfiguration;
+import com.okta.commons.lang.ApplicationInfo;
 import com.okta.commons.lang.Assert;
 import com.okta.commons.lang.Classes;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.config.ClientConfiguration;
 import com.okta.idx.sdk.api.exception.ProcessingException;
+import com.okta.idx.sdk.api.model.RequestContext;
 import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -67,8 +69,6 @@ import static com.okta.idx.sdk.api.util.ClientUtil.normalizedIssuerUri;
 
 final class BaseIDXClient implements IDXClient {
 
-    private static final String USER_AGENT_HEADER_VALUE = "okta-idx-java/2.0.0";
-
     private final ClientConfiguration clientConfiguration;
 
     private final ObjectMapper objectMapper;
@@ -97,11 +97,11 @@ final class BaseIDXClient implements IDXClient {
 
     @Override
     public IDXClientContext interact() throws ProcessingException {
-        return interact(null, null);
+        return interact(null, null, null);
     }
 
     @Override
-    public IDXClientContext interact(String token, EmailTokenType tokenType) throws ProcessingException {
+    public IDXClientContext interact(String token, EmailTokenType tokenType, RequestContext requestContext) throws ProcessingException {
 
         InteractResponse interactResponse;
         String codeVerifier, codeChallenge, state;
@@ -129,8 +129,26 @@ final class BaseIDXClient implements IDXClient {
             }
 
             HttpHeaders httpHeaders = getHttpHeaders(true);
-            if (clientConfiguration.getDeviceContext() != null) {
-                httpHeaders.setAll(clientConfiguration.getDeviceContext().getAll());
+
+            // include additional headers (for interact endpoint only), if present in request context.
+            if (requestContext != null) {
+                if (Strings.hasText(requestContext.getUserAgent())) {
+                    httpHeaders.set(RequestContext.X_OKTA_USER_AGENT_EXTENDED,
+                            requestContext.getUserAgent());
+                }
+
+                // set 'X-Forwarded-For' & 'X-Device-Token' headers for confidential clients only,
+                // these headers will be ignored for non-confidential clients.
+                if (Strings.hasText(clientConfiguration.getClientSecret())) {
+                    if (Strings.hasText(requestContext.getDeviceToken())) {
+                        httpHeaders.set(RequestContext.X_DEVICE_TOKEN,
+                                requestContext.getDeviceToken());
+                    }
+                    if (Strings.hasText(requestContext.getIpAddress())) {
+                        httpHeaders.set(RequestContext.X_FORWARDED_FOR,
+                                requestContext.getIpAddress());
+                    }
+                }
             }
 
             Request request = new DefaultRequest(
@@ -623,7 +641,12 @@ final class BaseIDXClient implements IDXClient {
             httpHeaders.add("Accept", "application/ion+json; okta-version=1.0.0");
         }
 
-        httpHeaders.add(HttpHeaders.USER_AGENT, USER_AGENT_HEADER_VALUE);
+        String userAgentValue = ApplicationInfo.get().entrySet().stream()
+                .map(entry -> entry.getKey() + "/" + entry.getValue())
+                .collect(Collectors.joining(" "));
+
+        // value would look like (for e.g.): okta-idx-java/3.0.0-SNAPSHOT java/1.8.0_322 Mac OS X/12.3.1
+        httpHeaders.add(HttpHeaders.USER_AGENT, userAgentValue);
         return httpHeaders;
     }
 }

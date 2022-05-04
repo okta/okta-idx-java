@@ -25,7 +25,7 @@ import com.okta.idx.sdk.api.model.Authenticator;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
 import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.model.Credentials;
-import com.okta.idx.sdk.api.model.DeviceContext;
+import com.okta.idx.sdk.api.model.RequestContext;
 import com.okta.idx.sdk.api.model.EmailTokenType;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.IDXClientContext;
@@ -99,28 +99,12 @@ public class IDXAuthenticationWrapper {
      */
     public IDXAuthenticationWrapper(String issuer, String clientId, String clientSecret,
                                     Set<String> scopes, String redirectUri) {
-        this(issuer, clientId, clientSecret, scopes, redirectUri, null);
-    }
-
-    /**
-     * Creates {@link IDXAuthenticationWrapper} instance.
-     *
-     * @param issuer        the issuer url
-     * @param clientId      the client id
-     * @param clientSecret  the client secret
-     * @param scopes        the set of scopes
-     * @param redirectUri   the redirect uri
-     * @param deviceContext the device context information
-     */
-    public IDXAuthenticationWrapper(String issuer, String clientId, String clientSecret,
-                                    Set<String> scopes, String redirectUri, DeviceContext deviceContext) {
         this.client = Clients.builder()
                 .setIssuer(issuer)
                 .setClientId(clientId)
                 .setClientSecret(clientSecret)
                 .setScopes(scopes)
                 .setRedirectUri(redirectUri)
-                .setDeviceContext(deviceContext)
                 .build();
     }
 
@@ -809,12 +793,22 @@ public class IDXAuthenticationWrapper {
     }
 
     /**
-     * Begin flow without any recovery or activation token.
+     * Begin flow without any recovery or activation token or request context.
      * @return authentication response
      */
     public AuthenticationResponse begin() {
+        return begin(null);
+    }
+
+    /**
+     * Begin flow with {@link RequestContext} reference.
+     *
+     * @param requestContext the RequestContext
+     * @return authentication response
+     */
+    public AuthenticationResponse begin(RequestContext requestContext) {
         try {
-            return AuthenticationTransaction.create(client).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, null, null, requestContext).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -824,12 +818,15 @@ public class IDXAuthenticationWrapper {
 
     /**
      * Begin password recovery flow with a recovery token.
+     *
      * @param token recovery token
+     * @param requestContext request context (optional)
      * @return authentication response
      */
-    public AuthenticationResponse beginPasswordRecovery(String token) {
+    public AuthenticationResponse beginPasswordRecovery(String token, RequestContext requestContext) {
         try {
-            return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, token, EmailTokenType.RECOVERY_TOKEN, requestContext)
+                    .asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -839,12 +836,15 @@ public class IDXAuthenticationWrapper {
 
     /**
      * Begin password recovery flow with an activation token.
+     *
      * @param token activation token
+     * @param requestContext request context (optional)
      * @return authentication response
      */
-    public AuthenticationResponse beginUserActivation(String token) {
+    public AuthenticationResponse beginUserActivation(String token, RequestContext requestContext) {
         try {
-            return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN).asAuthenticationResponse();
+            return AuthenticationTransaction.create(client, token, EmailTokenType.ACTIVATION_TOKEN, requestContext)
+                    .asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
         } catch (IllegalArgumentException e) {
@@ -854,6 +854,7 @@ public class IDXAuthenticationWrapper {
 
     /**
      * Exchange interaction code for token.
+     *
      * @param proceedContext proceed context
      * @param interactionCode interaction code
      * @return authentication response

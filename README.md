@@ -105,6 +105,22 @@ Begin Transaction with Activation token:
 AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin("activation-token");
 ```
 
+Begin Transaction with Request Context:
+
+`RequestContext` provides a way for clients to supply supplemental information such as
+device token, user agent and IP address to Okta as request headers.
+
+Note that Device Token and IP Address headers are relevant for Confidential clients only.
+
+```java
+RequestContext requestContext = new RequestContext();
+requestContext.setDeviceToken("26q43Ak9Eh04p7H6Nnx0m69JqYOrfVBY"); // random string of length 32 characters
+requestContext.setUserAgent("Chrome/46.0.2490.86"); // client user agent
+requestContext.setIpAddress("23.235.46.133"); // client IP address
+
+AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin(requestContext);
+```
+
 Authenticate User:
 
 ```java

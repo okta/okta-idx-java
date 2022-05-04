@@ -20,10 +20,10 @@ import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
 import com.okta.idx.sdk.api.model.AuthenticationOptions
 import com.okta.idx.sdk.api.model.AuthenticationStatus
-import com.okta.idx.sdk.api.model.DeviceContext
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Idp
 import com.okta.idx.sdk.api.model.PollInfo
+import com.okta.idx.sdk.api.model.RequestContext
 import com.okta.idx.sdk.api.model.UserProfile
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorAnswer
 import com.okta.idx.sdk.api.model.VerifyAuthenticatorOptions
@@ -33,7 +33,6 @@ import com.okta.idx.sdk.api.response.AuthenticationResponse
 import org.testng.annotations.Test
 
 import java.lang.reflect.Field
-import java.time.temporal.TemporalUnit
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
@@ -54,20 +53,17 @@ class IDXAuthenticationWrapperTest {
                 clientConfig.getClientId(),
                 clientConfig.getClientSecret(),
                 clientConfig.getScopes(),
-                clientConfig.getRedirectUri(),
-                clientConfig.getDeviceContext()
-        )
+                clientConfig.getRedirectUri())
         IDXClient client = getInternalState(idxAuthenticationWrapper, "client") as IDXClient
         assertThat(client, notNullValue())
 
-        ClientConfiguration config =  getInternalState(client, "clientConfiguration") as ClientConfiguration
+        ClientConfiguration config = getInternalState(client, "clientConfiguration") as ClientConfiguration
         assertThat(config, notNullValue())
         assertThat(config.issuer, is(clientConfig.getIssuer()))
         assertThat(config.clientId, is(clientConfig.getClientId()))
         assertThat(config.clientSecret, is(clientConfig.getClientSecret()))
         assertThat(config.getScopes(), is(clientConfig.getScopes()))
         assertThat(config.redirectUri, is(clientConfig.getRedirectUri()))
-        assertThat(config.deviceContext, is(clientConfig.getDeviceContext()))
     }
 
     @Test
@@ -398,7 +394,10 @@ class IDXAuthenticationWrapperTest {
         setMockResponseOnlyIfBodyParamMatches(requestExecutor, "interact", "activation_token", "interact-response", 200, MediaType.APPLICATION_JSON)
         setMockResponse(requestExecutor, "introspect", "introspect-with-activation-token-response", 200, mediaTypeAppIonJson)
 
-        AuthenticationResponse beginResponse = idxAuthenticationWrapper.beginUserActivation("activation-token")
+        final RequestContext requestContext = new RequestContext()
+        requestContext.setDeviceToken("test_x_device_token")
+
+        AuthenticationResponse beginResponse = idxAuthenticationWrapper.beginUserActivation("activation-token", requestContext)
 
         assertThat(beginResponse, notNullValue())
         assertThat(beginResponse.getErrors(), empty())
@@ -2188,7 +2187,6 @@ class IDXAuthenticationWrapperTest {
         clientConfiguration.setClientSecret("test-client-secret")
         clientConfiguration.setScopes(["test-scope"] as Set)
         clientConfiguration.setRedirectUri("https://example.com/login/callback")
-        clientConfiguration.setDeviceContext(new DeviceContext().addParam(DeviceContext.USER_AGENT, "example-user-agent"))
         return clientConfiguration
     }
 
