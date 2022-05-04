@@ -395,7 +395,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "introspect", "introspect-with-activation-token-response", 200, mediaTypeAppIonJson)
 
         final RequestContext requestContext = new RequestContext()
-        requestContext.addXDeviceTokenHeader("test_x_device_token")
+        requestContext.setDeviceToken("test_x_device_token")
 
         AuthenticationResponse beginResponse = idxAuthenticationWrapper.beginUserActivation("activation-token", requestContext)
 

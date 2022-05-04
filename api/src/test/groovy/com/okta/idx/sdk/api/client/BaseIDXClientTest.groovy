@@ -126,9 +126,9 @@ class BaseIDXClientTest {
         ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
 
         final RequestContext requestContext = new RequestContext()
-        requestContext.addXDeviceTokenHeader("test_x_device_token")
-        requestContext.addXOktaUserAgentExtendedHeader("test_x_okta_user_agent_extended")
-        requestContext.addXForwardedForHeader("test_x_forwarded_for")
+        requestContext.setDeviceToken("test_x_device_token")
+        requestContext.setUserAgent("test_x_okta_user_agent_extended")
+        requestContext.setIpAddress("test_x_forwarded_for")
 
         final IDXClientContext idxClientContext = idxClient.interact(null, null, requestContext)
 
@@ -172,9 +172,9 @@ class BaseIDXClientTest {
         ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class)
 
         final RequestContext requestContext = new RequestContext()
-        requestContext.addXDeviceTokenHeader("test_x_device_token")
-        requestContext.addXOktaUserAgentExtendedHeader("test_x_okta_user_agent_extended")
-        requestContext.addXForwardedForHeader("test_x_forwarded_for")
+        requestContext.setDeviceToken("test_x_device_token")
+        requestContext.setUserAgent("test_x_okta_user_agent_extended")
+        requestContext.setIpAddress("test_x_forwarded_for")
 
         final IDXClientContext idxClientContext = idxClient.interact(null, null, requestContext)
 

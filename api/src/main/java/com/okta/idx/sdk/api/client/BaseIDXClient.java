@@ -132,21 +132,21 @@ final class BaseIDXClient implements IDXClient {
 
             // include additional headers (for interact endpoint only), if present in request context.
             if (requestContext != null) {
-                if (Strings.hasText(requestContext.getXOktaUserAgentExtendedHeaderValue())) {
+                if (Strings.hasText(requestContext.getUserAgent())) {
                     httpHeaders.set(RequestContext.X_OKTA_USER_AGENT_EXTENDED,
-                            requestContext.getXOktaUserAgentExtendedHeaderValue());
+                            requestContext.getUserAgent());
                 }
 
                 // set 'X-Forwarded-For' & 'X-Device-Token' headers for confidential clients only,
                 // these headers will be ignored for non-confidential clients.
                 if (Strings.hasText(clientConfiguration.getClientSecret())) {
-                    if (Strings.hasText(requestContext.getXDeviceTokenHeaderValue())) {
+                    if (Strings.hasText(requestContext.getDeviceToken())) {
                         httpHeaders.set(RequestContext.X_DEVICE_TOKEN,
-                                requestContext.getXDeviceTokenHeaderValue());
+                                requestContext.getDeviceToken());
                     }
-                    if (Strings.hasText(requestContext.getXForwardedForHeaderValue())) {
+                    if (Strings.hasText(requestContext.getIpAddress())) {
                         httpHeaders.set(RequestContext.X_FORWARDED_FOR,
-                                requestContext.getXForwardedForHeaderValue());
+                                requestContext.getIpAddress());
                     }
                 }
             }

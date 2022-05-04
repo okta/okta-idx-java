@@ -86,7 +86,7 @@ public final class Util {
         // generate random str 32 char long
         final UUID randomUUID = UUID.randomUUID();
         final String randomString = randomUUID.toString().replaceAll("-", "");
-        requestContext.addXDeviceTokenHeader(randomString);
+        requestContext.setDeviceToken(randomString);
         return requestContext;
     }
 }

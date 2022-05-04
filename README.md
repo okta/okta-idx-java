@@ -105,13 +105,13 @@ Begin Transaction with Activation token:
 AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin("activation-token");
 ```
 
-Begin Transaction with Device Context:
+Begin Transaction with Request Context:
 
 ```java
 RequestContext requestContext = new RequestContext();
-requestContext.addXDeviceTokenHeader("test_x_device_token");
-requestContext.addXOktaUserAgentExtendedHeader("test_x_okta_user_agent_extended");
-requestContext.addXForwardedForHeader("test_x_forwarded_for");
+requestContext.setDeviceToken("foo");
+requestContext.setUserAgent("Chrome/46.0.2490.86");
+requestContext.setIpAddress("23.235.46.133");
 
 AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin(requestContext);
 ```

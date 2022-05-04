@@ -34,19 +34,19 @@ public class RequestContext {
      */
     private final Map<String, String> headers = new LinkedHashMap<>();
 
-    public RequestContext addXOktaUserAgentExtendedHeader(String value) {
+    public RequestContext setUserAgent(String value) {
         Assert.hasText(value, X_OKTA_USER_AGENT_EXTENDED + " cannot be empty");
         headers.put(X_OKTA_USER_AGENT_EXTENDED, value);
         return this;
     }
 
-    public RequestContext addXDeviceTokenHeader(String value) {
+    public RequestContext setDeviceToken(String value) {
         Assert.hasText(value, X_DEVICE_TOKEN + " cannot be empty");
         headers.put(X_DEVICE_TOKEN, value);
         return this;
     }
 
-    public RequestContext addXForwardedForHeader(String value) {
+    public RequestContext setIpAddress(String value) {
         Assert.hasText(value, X_FORWARDED_FOR + " cannot be empty");
         headers.put(X_FORWARDED_FOR, value);
         return this;
@@ -56,15 +56,15 @@ public class RequestContext {
         return headers;
     }
 
-    public String getXDeviceTokenHeaderValue() {
-        return headers.get(X_DEVICE_TOKEN);
-    }
-
-    public String getXOktaUserAgentExtendedHeaderValue() {
+    public String getUserAgent() {
         return headers.get(X_OKTA_USER_AGENT_EXTENDED);
     }
 
-    public String getXForwardedForHeaderValue() {
+    public String getDeviceToken() {
+        return headers.get(X_DEVICE_TOKEN);
+    }
+
+    public String getIpAddress() {
         return headers.get(X_FORWARDED_FOR);
     }
 }
