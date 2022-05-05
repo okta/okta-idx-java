@@ -487,6 +487,7 @@ final class AuthenticationTransaction {
                 if (nestedOptions.length > 0) {
                     for (Options children : nestedOptions) {
                         nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
+                        authenticatorType = label.toLowerCase(Locale.ROOT);
                     }
                     hasNestedFactors = true;
                 } else {
