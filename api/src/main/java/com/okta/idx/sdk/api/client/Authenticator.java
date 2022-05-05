@@ -15,6 +15,8 @@
  */
 package com.okta.idx.sdk.api.client;
 
+import com.okta.commons.lang.Assert;
+
 import java.util.List;
 
 public final class Authenticator {
@@ -61,6 +63,10 @@ public final class Authenticator {
     private final boolean hasNestedFactors;
 
     Authenticator(String id, String type, String label, List<Factor> factors, boolean hasNestedFactors) {
+        Assert.hasText(id, "id cannot be empty");
+        Assert.hasText(type, "type cannot be empty");
+        Assert.hasText(label, "label cannot be empty");
+
         this.id = id;
         this.type = type;
         this.label = label;
