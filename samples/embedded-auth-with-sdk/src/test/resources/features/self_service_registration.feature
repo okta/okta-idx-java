@@ -14,8 +14,8 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
     When she fills out her Password
     And she confirms her Password
     And she submits the verify form
-    Then she sees the list of optional factors
-    When she selects Email
+#    Then she sees the list of optional factors
+#    When she selects Email
     Then she sees a page to input a code
     When she inputs the correct code from her email
     And she submits the verify form
@@ -37,8 +37,8 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
     When she fills out her Password
     And she confirms her Password
     And she submits the verify form
-    Then she sees the list of optional factors
-    When she selects Email
+#    Then she sees the list of optional factors
+#    When she selects Email
     Then she sees a page to input a code
     When she inputs the correct code from her email
     And she submits the verify form
@@ -77,8 +77,8 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
     When she fills out her Password
     And she confirms her Password
     And she submits the verify form
-    Then she sees the list of optional factors
-    When she selects Email
+#    Then she sees the list of optional factors
+#    When she selects Email
     Then she sees a page to input a code
     When she inputs the correct code from her email
     And she submits the verify form
@@ -120,8 +120,9 @@ Feature: 4.1 Self Service Registration with Email Activation And optional SMS
     When she fills out her Password
     And she confirms her Password
     And she submits the verify form
-    Then she sees the list of optional factors
-    When she selects Email
+#   ENG_REMEMBER_LAST_USED_FACTOR_OIE feature avoids these steps
+#    Then she sees the list of optional factors
+#    When she selects Email
     Then she sees a page to input a code
     When she inputs the correct code from her email
     And she submits the verify form
