@@ -136,6 +136,10 @@ public class Hooks {
 			groups.add("Phone Enrollment Required");
 		}
 
+		if (scenario.getId().contains("mfa_with_password_and_security_question")) {
+			groups.add("Security Question Required");
+		}
+
 		List<Group> groupList = client.listGroups()
 				.stream()
 				.filter(group -> groups.contains(group.getProfile().getName()))
