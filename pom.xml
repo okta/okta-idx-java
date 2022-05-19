@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
-        <version>21</version>
+        <version>23</version>
     </parent>
 
     <groupId>com.okta.idx.sdk</groupId>
@@ -215,7 +215,7 @@
                         <trimStackTrace>false</trimStackTrace>
                         <reuseForks>true</reuseForks>
                         <forkCount>1</forkCount>
-                        <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+<!--                        <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>-->
 <!--                        <parallel>classesAndMethods</parallel>-->
 <!--                        <threadCount>5</threadCount>-->
 <!--                        <skipTests>${skipImplTests}</skipTests>-->
