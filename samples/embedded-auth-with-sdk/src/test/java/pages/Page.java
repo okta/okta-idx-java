@@ -27,6 +27,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -85,7 +86,7 @@ public class Page {
     }
 
     public void waitForWebElementDisplayed(WebElement webElement) {
-        new WebDriverWait(driver, TIME_OUT_IN_SECONDS)
+        new WebDriverWait(driver, Duration.ofSeconds(TIME_OUT_IN_SECONDS))
                 .until(ExpectedConditions.visibilityOf(webElement));
     }
 

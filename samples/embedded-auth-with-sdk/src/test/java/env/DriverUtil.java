@@ -25,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -369,8 +370,8 @@ public class DriverUtil {
     public static WebElement waitAndGetElementByCssSelector(WebDriver driver, String selector,
                                                             int seconds) {
         By selection = By.cssSelector(selector);
-        return (new WebDriverWait(driver, seconds)).until( // ensure element is visible!
-                ExpectedConditions.visibilityOfElementLocated(selection));
+        return (new WebDriverWait(driver, Duration.ofSeconds(seconds)).until( // ensure element is visible!
+                ExpectedConditions.visibilityOfElementLocated(selection)));
     }
 
 	public static void closeDriver() {
