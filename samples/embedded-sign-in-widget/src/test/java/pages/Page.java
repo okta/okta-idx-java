@@ -21,6 +21,8 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
+
 public class Page {
 
     protected WebDriver driver;
@@ -31,7 +33,7 @@ public class Page {
     }
 
     public void waitForWebElementDisplayed(WebElement webElement) {
-        new WebDriverWait(driver, 10)
+        new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.visibilityOf(webElement));
     }
 }
