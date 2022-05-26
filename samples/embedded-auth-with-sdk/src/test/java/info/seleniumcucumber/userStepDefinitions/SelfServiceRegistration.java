@@ -205,6 +205,13 @@ public class SelfServiceRegistration extends CucumberRoot {
         registerPage.dislikedFoodSecurityQuestionKey.click();
     }
 
+    @And("^she selects a custom Security Question$")
+    public void she_selects_custom_security_question() {
+        registerPage.waitForWebElementDisplayed(registerPage.customSecurityQuestionLink);
+        registerPage.customSecurityQuestionLink.click();
+        registerPage.customSecurityQuestionKey.sendKeys("What is my favorite company?");
+    }
+
     @And("^she enters \"Okta\" as the answer$")
     public void she_enters_answer () {
         Assert.assertTrue(registerPage.securityQuestionAnswer.isDisplayed());

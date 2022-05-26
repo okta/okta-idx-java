@@ -49,6 +49,12 @@ public class RegisterPage extends Page {
     @FindBy(css = "select[name='security_question_key'][id='questions']")
     public WebElement securityQuestionKey;
 
+    @FindBy(css = "a[href='/register-custom-sec-qn']")
+    public WebElement customSecurityQuestionLink;
+
+    @FindBy(css = "input[name='security_question'][id='question']")
+    public WebElement customSecurityQuestionKey;
+
     @FindBy(css = "option[value='disliked_food']")
     public WebElement dislikedFoodSecurityQuestionKey;
 
