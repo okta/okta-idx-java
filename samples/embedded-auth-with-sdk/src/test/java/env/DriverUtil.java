@@ -348,10 +348,11 @@ public class DriverUtil {
 				if (headless) {
 					chromeOptions.addArguments("--headless");
 				}
-				chromeOptions.addArguments("--disable-dev-shm-usage");
-				if (System.getenv("TRAVIS") != null) {
-					chromeOptions.addArguments("--headless", "--verbose");
-				}
+				System.out.println("Adding all chrome driver options...");
+				chromeOptions.addArguments("--disable-dev-shm-usage", "--disable-gpu", "--window-size=1600x1200", "--no-sandbox", "--whitelisted-ips", "--disable-extensions", "--headless");
+//				if (System.getenv("TRAVIS") != null) {
+//					chromeOptions.addArguments("--headless", "--verbose");
+//				}
 				try
 				{
 					driver = new ChromeDriver(chromeOptions);
