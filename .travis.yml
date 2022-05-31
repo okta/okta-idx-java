@@ -4,6 +4,7 @@ jdk:
 - openjdk8
 - openjdk11
 - openjdk17
+- openjdk18
 
 addons:
   apt:
