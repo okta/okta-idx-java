@@ -1,0 +1,8 @@
+test_suites:
+    - name: e2e-embedded-auth-with-sdk
+      script_path: ../okta-idx-java/scripts
+      sort_order: '1'
+      timeout: '25'
+      script_name: e2e
+      criteria: MERGE
+      queue_name: small
