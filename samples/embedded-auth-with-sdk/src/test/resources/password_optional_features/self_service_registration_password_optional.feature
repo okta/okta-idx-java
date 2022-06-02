@@ -1,5 +1,3 @@
-# OKTA-497595 -Needs a different client_id to run
-@ignore
 Feature: 4.2 Self Service Registration with Email Activation And optional password
 
   @requireA18NProfile
