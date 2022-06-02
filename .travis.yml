@@ -1,10 +1,9 @@
+dist: xenial
 language: java
 
 jdk:
-- openjdk10
 - openjdk11
 - openjdk17
-- oraclejdk18
 
 addons:
   apt:
