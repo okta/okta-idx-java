@@ -19,7 +19,7 @@ setup_service java 1.8.222
 setup_service google-chrome-stable 89.0.4389.72-1
 setup_service maven 3.5.4
 
-export TRAVIS=true
+export CI=true
 
 export OKTA_IDX_ISSUER=https://java-idx-sdk.trexcloud.com/oauth2/default
 export OIDC_IDP_ORG_URL=https://devex-oidc-idp.okta.com

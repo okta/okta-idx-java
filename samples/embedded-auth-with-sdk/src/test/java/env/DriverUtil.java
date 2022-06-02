@@ -349,9 +349,11 @@ public class DriverUtil {
 				if (headless) {
 					chromeOptions.addArguments("--headless");
 				}
+
 				chromeOptions.addArguments("--disable-dev-shm-usage");
-				if (System.getenv("TRAVIS") != null) {
-					chromeOptions.addArguments("--headless", "--verbose");
+				if (System.getenv("TRAVIS") != null || System.getenv("CI") != null) {
+					System.out.println("Adding all chrome driver options for CI");
+					chromeOptions.addArguments("--disable-dev-shm-usage", "--disable-gpu", "--window-size=1600x1200", "--no-sandbox", "--whitelisted-ips", "--disable-extensions", "--headless");
 				}
 				try
 				{
@@ -369,9 +371,9 @@ public class DriverUtil {
 
     public static WebElement waitAndGetElementByCssSelector(WebDriver driver, String selector,
                                                             int seconds) {
-        By selection = By.cssSelector(selector);
-        return (new WebDriverWait(driver, Duration.ofSeconds(seconds)).until( // ensure element is visible!
-                ExpectedConditions.visibilityOfElementLocated(selection)));
+		By selection = By.cssSelector(selector);
+		return (new WebDriverWait(driver, Duration.ofSeconds(seconds)).until( // ensure element is visible!
+				ExpectedConditions.visibilityOfElementLocated(selection)));
     }
 
 	public static void closeDriver() {
