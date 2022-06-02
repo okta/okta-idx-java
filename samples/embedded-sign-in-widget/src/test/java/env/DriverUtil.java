@@ -337,8 +337,9 @@ public class DriverUtil {
 					chromeOptions.addArguments("--headless");
 				}
 				chromeOptions.addArguments("--disable-dev-shm-usage");
-				if (System.getenv("TRAVIS") != null) {
-					chromeOptions.addArguments("--headless", "--verbose");
+				if (System.getenv("TRAVIS") != null || System.getenv("CI") != null) {
+					System.out.println("Adding all chrome driver options for CI");
+					chromeOptions.addArguments("--disable-dev-shm-usage", "--disable-gpu", "--window-size=1600x1200", "--no-sandbox", "--whitelisted-ips", "--disable-extensions", "--headless");
 				}
 				try
 				{

@@ -39,8 +39,9 @@ deploy () {
 }
 
 full_build () {
-    echo "Downloading chromedriver"
-    "${CHROMEDRIVER_DOWNLOAD_SCRIPT}"
+#    We are not running E2E tests by default
+#    echo "Downloading chromedriver"
+#    "${CHROMEDRIVER_DOWNLOAD_SCRIPT}"
     echo "Running mvn install"
     ${MVN_CMD} install -Pci
 }
