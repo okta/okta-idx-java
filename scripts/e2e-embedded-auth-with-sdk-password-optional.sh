@@ -34,7 +34,7 @@ get_vault_secret_key devex/java-idx-sdk-vars password PASSWORD
 
 # Run the tests
 cd ${OKTA_HOME}/${REPO}
-mvn clean install -DskipITs -Pci
+mvn clean install -Pci
 ./src/ci/download_chromedriver.sh
 
 # Rename the features directory to point to password_optional_features
@@ -46,6 +46,6 @@ mvn clean install -P cucumber-it
 
 RETURN_CODE=$?
 if [[ "${RETURN_CODE}" -ne "0" ]]; then
-    echo "E2E tests for embedded-auth-with-sdk failed!" 
+    echo "Password Optional E2E tests for embedded-auth-with-sdk failed!"
     exit 1
 fi
