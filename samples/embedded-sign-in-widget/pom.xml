@@ -94,13 +94,13 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-chrome-driver</artifactId>
-            <version>3.141.59</version>
+            <version>4.1.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>3.141.59</version>
+            <version>4.1.4</version>
             <scope>test</scope>
         </dependency>
 
@@ -161,12 +161,6 @@
             <groupId>com.okta.oidc.tck</groupId>
             <artifactId>okta-oidc-tck</artifactId>
             <version>0.5.8</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy</artifactId>
-            <version>2.5.14</version>
             <scope>test</scope>
         </dependency>
 
