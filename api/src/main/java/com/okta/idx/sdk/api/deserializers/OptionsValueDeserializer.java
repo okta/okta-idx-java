@@ -30,7 +30,7 @@ public class OptionsValueDeserializer extends JsonDeserializer<Object> {
 
         JsonNode node = jsonParser.readValueAsTree();
 
-        if (node.get("form") != null) {
+        if (node.get("form") != null || node.get("type") != null) {
             return jsonParser.getCodec().treeToValue(node, OptionsForm.class);
         } else {
             return jsonParser.getCodec().treeToValue(node, String.class);
