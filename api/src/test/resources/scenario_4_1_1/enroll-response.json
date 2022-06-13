@@ -37,6 +37,33 @@
                   "name": "email",
                   "label": "Email",
                   "required": true
+                },
+                {
+                  "name": "enumAttr",
+                  "type": "string",
+                  "label": "enum",
+                  "required": false,
+                  "options": [
+                    {
+                      "label": "display",
+                      "value": {
+                        "type": "object",
+                        "value": {
+                          "inputType": "radio",
+                          "options": [
+                            {
+                              "label": "true",
+                              "value": "true"
+                            },
+                            {
+                              "label": "false",
+                              "value": "false"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
