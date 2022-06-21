@@ -39,4 +39,19 @@
         <cve>CVE-2022-22968</cve>
     </suppress>
 
+    <!-- Per https://tanzu.vmware.com/security/cve-2020-5408 the below CVE should be 
+         mitigated by our use of Spring Security 5.7 -->
+    <suppress>
+        <notes><![CDATA[ file name: spring-security-crypto-5.7.1.jar ]]></notes>
+        <cve>CVE-2020-5408</cve>
+    </suppress>
+
+    <!-- Per https://tanzu.vmware.com/security/cve-2022-22978 & https://tanzu.vmware.com/security/cve-2022-22976 the below CVEs should be 
+         mitigated by our use of Spring Security 5.7 -->
+    <suppress>
+        <notes><![CDATA[ file name: spring-boot-starter-security-2.7.0.jar ]]></notes>
+        <cve>CVE-2022-22978</cve>
+        <cve>CVE-2022-22976</cve>
+    </suppress>
+
 </suppressions>

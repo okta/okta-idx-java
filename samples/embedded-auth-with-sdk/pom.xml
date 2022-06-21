@@ -32,6 +32,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <checkstyle-maven-plugin.version>3.1.2</checkstyle-maven-plugin.version>
         <spring.boot.version>2.7.0</spring.boot.version>
+        <org.apache.tomcat.embed.version>9.0.64</org.apache.tomcat.embed.version>
         <java.version>1.8</java.version>
         <okta.sdk.api.version>8.2.1</okta.sdk.api.version>
     </properties>
@@ -57,6 +58,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring.boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>${org.apache.tomcat.embed.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <version>${org.apache.tomcat.embed.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
