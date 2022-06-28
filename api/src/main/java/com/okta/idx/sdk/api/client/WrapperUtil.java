@@ -16,6 +16,7 @@
 package com.okta.idx.sdk.api.client;
 
 import com.okta.idx.sdk.api.exception.ProcessingException;
+import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import com.okta.idx.sdk.api.response.ErrorResponse;
@@ -78,5 +79,14 @@ final class WrapperUtil {
             Arrays.stream(idxResponse.getMessages().getValue())
                     .forEach(messageValue -> logger.error(messageValue.getMessage()));
         }
+    }
+
+    static String getStateHandle(FormValue[] formValues) {
+        for (FormValue formValue : formValues) {
+            if ("stateHandle".equals(formValue.name)) {
+                return formValue.value.toString();
+            }
+        }
+        return null;
     }
 }

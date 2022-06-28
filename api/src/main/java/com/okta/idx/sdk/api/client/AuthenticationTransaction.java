@@ -168,7 +168,7 @@ final class AuthenticationTransaction {
         }
 
         return new ProceedContext(clientContext, getStateHandle(), href, skipHref, isIdentifyInOneStep,
-                selectProfileEnrollHref, resendHref, pollInfo, refresh);
+                selectProfileEnrollHref, resendHref, pollInfo, refresh, idxResponse);
     }
 
     RemediationOption getRemediationOption(String name) {
