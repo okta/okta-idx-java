@@ -17,6 +17,8 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.idx.sdk.api.model.IDXClientContext;
 import com.okta.idx.sdk.api.model.PollInfo;
+import com.okta.idx.sdk.api.model.Remediation;
+import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.response.IDXResponse;
 
 /**
@@ -55,6 +57,14 @@ public final class ProceedContext {
     }
 
     String getStateHandle() {
+        Remediation remediation = idxResponse.remediation();
+        if (remediation != null && remediation.remediationOptions() != null && remediation.remediationOptions().length > 0) {
+            RemediationOption remediationOption = remediation.remediationOptions()[0];
+            String remediationStateHandle = WrapperUtil.getStateHandle(remediationOption.form());
+            if (remediationStateHandle != null) {
+                return remediationStateHandle;
+            }
+        }
         return stateHandle;
     }
 
