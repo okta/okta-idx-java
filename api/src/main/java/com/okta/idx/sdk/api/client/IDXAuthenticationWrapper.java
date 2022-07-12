@@ -69,6 +69,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.okta.idx.sdk.api.client.WrapperUtil.getStateHandle;
 import static com.okta.idx.sdk.api.client.WrapperUtil.handleIllegalArgumentException;
 import static com.okta.idx.sdk.api.client.WrapperUtil.handleProcessingException;
 
@@ -202,7 +203,7 @@ public class IDXAuthenticationWrapper {
                 // recover
                 AuthenticationTransaction recoverTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
                     RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                            .withStateHandle(proceedContext.getStateHandle())
+                            .withStateHandle(getStateHandle(proceedContext.getIdxResponse().getCurrentAuthenticator().getValue().getRecover().getValue()))
                             .build();
 
                     return client.recover(recoverRequest, null);
@@ -212,7 +213,7 @@ public class IDXAuthenticationWrapper {
 
                 IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
                         .withIdentifier(username)
-                        .withStateHandle(proceedContext.getStateHandle())
+                        .withStateHandle(getStateHandle(remediationOption.form()))
                         .build();
 
                 // identify user
