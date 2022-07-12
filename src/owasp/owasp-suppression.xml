@@ -54,4 +54,10 @@
         <cve>CVE-2022-22976</cve>
     </suppress>
 
+    <!-- False positive per https://github.com/jeremylong/DependencyCheck/issues/4634 -->
+    <suppress>
+        <notes><![CDATA[ file name: tomcat-embed-core-9.0.64.jar ]]></notes>
+        <cve>CVE-2022-34305</cve>
+    </suppress>
+
 </suppressions>
