@@ -57,6 +57,9 @@ public final class ProceedContext {
     }
 
     String getStateHandle() {
+        if (idxResponse == null) {
+            return stateHandle;
+        }
         Remediation remediation = idxResponse.remediation();
         if (remediation != null && remediation.remediationOptions() != null && remediation.remediationOptions().length > 0) {
             RemediationOption remediationOption = remediation.remediationOptions()[0];
