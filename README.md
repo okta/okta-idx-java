@@ -36,6 +36,7 @@ This library uses semantic versioning and follows Okta's [Library Version Policy
 | ------- | ---------------------------------- |
 | 1.0.0 | :heavy_check_mark: Stable     |
 | 2.0.0 | :heavy_check_mark: Stable     |
+| 3.0.x | :heavy_check_mark: Stable     |
 
 The latest release can always be found on the [releases page][github-releases].
 
