@@ -29,6 +29,9 @@ import env.DriverUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.virtualauthenticator.HasVirtualAuthenticator;
+import org.openqa.selenium.virtualauthenticator.VirtualAuthenticator;
+import org.openqa.selenium.virtualauthenticator.VirtualAuthenticatorOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pages.Page;
@@ -303,6 +306,35 @@ public class SelfServiceRegistration extends CucumberRoot {
 
         driver.manage().window().maximize();
         driver.get(activateURL);
+    }
+
+    //Added for webauthn
+    @Then("^she sees WebAuthn factor to register$")
+    public void she_sees_webauth_factor_to_register() {
+        Assert.assertTrue(verifyPage.webAuthnRadioButton.isDisplayed());
+    }
+
+    @And("^she selects WebAuthn from the list$")
+    public void she_selects_webauth_from_the_list() {
+        verifyPage.webAuthnRadioButton.click();
+    }
+
+    @And("^she inputs the fingerprint$")
+    public void she_inputs_the_fingerprint() {
+        System.out.println("WebAuth-Start");
+        HasVirtualAuthenticator virtualAuthenticatorManager = ((HasVirtualAuthenticator) driver);
+
+        VirtualAuthenticatorOptions options = new VirtualAuthenticatorOptions();
+        options.setIsUserConsenting(true);
+        options.setProtocol(VirtualAuthenticatorOptions.Protocol.U2F);
+        options.setTransport(VirtualAuthenticatorOptions.Transport.USB);
+        VirtualAuthenticator authenticator = virtualAuthenticatorManager.addVirtualAuthenticator(options);
+        authenticator.setUserVerified(true);
+        System.out.println("WebAuth-End");
+
+        registerPage.waitForWebElementDisplayed(verifyPage.proceedButton);
+        verifyPage.proceedButton.click();
+        registerPage.waitForWebElementDisplayed(selectAuthenticatorPage.selectAuthenticatorsForm);
     }
 
     private User createUserWithoutCredentials() {
