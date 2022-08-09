@@ -308,7 +308,6 @@ public class SelfServiceRegistration extends CucumberRoot {
         driver.get(activateURL);
     }
 
-    //Added for webauthn
     @Then("^she sees WebAuthn factor to register$")
     public void she_sees_webauth_factor_to_register() {
         Assert.assertTrue(verifyPage.webAuthnRadioButton.isDisplayed());
@@ -321,7 +320,6 @@ public class SelfServiceRegistration extends CucumberRoot {
 
     @And("^she inputs the fingerprint$")
     public void she_inputs_the_fingerprint() {
-        System.out.println("WebAuth-Start");
         HasVirtualAuthenticator virtualAuthenticatorManager = ((HasVirtualAuthenticator) driver);
 
         VirtualAuthenticatorOptions options = new VirtualAuthenticatorOptions();
@@ -330,7 +328,6 @@ public class SelfServiceRegistration extends CucumberRoot {
         options.setTransport(VirtualAuthenticatorOptions.Transport.USB);
         VirtualAuthenticator authenticator = virtualAuthenticatorManager.addVirtualAuthenticator(options);
         authenticator.setUserVerified(true);
-        System.out.println("WebAuth-End");
 
         registerPage.waitForWebElementDisplayed(verifyPage.proceedButton);
         verifyPage.proceedButton.click();
