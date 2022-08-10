@@ -36,4 +36,7 @@ public class VerifyPage extends Page {
 
     @FindBy(id = "proceed-btn")
     public WebElement proceedButton;
+
+    @FindBy(css = "input[name='authenticator-type'][value='webauthn']")
+    public WebElement webAuthnRadioButton;
 }
