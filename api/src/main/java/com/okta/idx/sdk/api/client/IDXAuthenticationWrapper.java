@@ -243,10 +243,11 @@ public class IDXAuthenticationWrapper {
                 Recover recover = identifyTransaction.getResponse()
                         .getCurrentAuthenticatorEnrollment().getValue().getRecover();
 
+                AuthenticationTransaction finalIdentifyTransaction = identifyTransaction;
                 AuthenticationTransaction recoverTransaction = identifyTransaction.proceed(() -> {
                     // recover password
                     RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                            .withStateHandle(proceedContext.getStateHandle())
+                            .withStateHandle(finalIdentifyTransaction.asAuthenticationResponse().getProceedContext().getStateHandle())
                             .build();
                     return recover.proceed(client, recoverRequest);
                 });
