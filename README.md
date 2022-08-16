@@ -28,7 +28,7 @@ To see this library working in a sample, check out our [Java Samples][java-sampl
 
 ## Release Status
 
-✔️ The current stable major version series is: 2.x
+✔️ The current stable major version series is: 3.x
 
 This library uses semantic versioning and follows Okta's [Library Version Policy][okta-library-versioning].
 
