@@ -82,6 +82,9 @@ final class WrapperUtil {
     }
 
     static String getStateHandle(FormValue[] formValues) {
+        if (formValues == null) {
+            return null;
+        }
         for (FormValue formValue : formValues) {
             if ("stateHandle".equals(formValue.name)) {
                 return formValue.value.toString();
