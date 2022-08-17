@@ -17,6 +17,8 @@ Feature: 10.1 TOTP Support Google Authenticator
     Then the screen changes to receive an input for a code
     When she inputs the correct code from her Google Authenticator App
     And she submits the verify form
+    Then she sees the list of optional factors
+    When she selects "Skip" on authenticators
     Then she is redirected to the Root View
     And the cell for the value of "email" is shown and contains her email for mfa
     And the cell for the value of "name" is shown and contains her first name and last name
@@ -39,6 +41,8 @@ Feature: 10.1 TOTP Support Google Authenticator
     Then the screen changes to receive an input for a code
     When she inputs the correct code from her Google Authenticator App
     And she submits the verify form
+    Then she sees the list of optional factors
+    When she selects "Skip" on authenticators
     Then she is redirected to the Root View
     And the cell for the value of "email" is shown and contains her email for mfa
     And the cell for the value of "name" is shown and contains her first name and last name
@@ -132,3 +136,5 @@ Feature: 10.1 TOTP Support Google Authenticator
     And the cell for the value of "email" is shown and contains her email
     And the cell for the value of "name" is shown and contains Mary E2E-Java
     And an application session is created
+
+    
