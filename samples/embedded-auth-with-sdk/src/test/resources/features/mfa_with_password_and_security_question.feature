@@ -65,6 +65,8 @@ Feature: 10.4 Multi-Factor Authentication with Password and Security Question
     And she selects a predefined Security Question
     And she enters "Okta" as the answer
     And she submits the form
+    Then she sees the list of optional factors
+    When she selects "Skip" on authenticators
     Then she is redirected to the Root View
     And an application session is created
 
@@ -81,6 +83,8 @@ Feature: 10.4 Multi-Factor Authentication with Password and Security Question
     And she selects a custom Security Question
     And she enters "Okta" as the answer
     And she submits the form
+    Then she sees the list of optional factors
+    When she selects "Skip" on authenticators
     Then she is redirected to the Root View
     And an application session is created
 

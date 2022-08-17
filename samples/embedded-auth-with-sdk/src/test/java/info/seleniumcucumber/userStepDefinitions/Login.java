@@ -60,7 +60,8 @@ public class Login extends CucumberRoot {
 	@Then("^she is redirected to the Root View$")
 	public void redirected_to_root_view() {
 		rootPage.waitForWebElementDisplayed(rootPage.profileTable);
-		Assert.assertTrue("Can't access profile information", rootPage.profileTable.isDisplayed());
+		//Assert.assertTrue("Can't access profile information", rootPage.profileTable.isDisplayed());
+		Assert.assertTrue("You have successfully logged in!", rootPage.profileTable.isDisplayed());
 	}
 
 	@And("^the access_token is stored in session$")
