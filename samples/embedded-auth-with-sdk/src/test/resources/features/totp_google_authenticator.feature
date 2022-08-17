@@ -136,3 +136,5 @@ Feature: 10.1 TOTP Support Google Authenticator
     And the cell for the value of "email" is shown and contains her email
     And the cell for the value of "name" is shown and contains Mary E2E-Java
     And an application session is created
+
+    

@@ -87,4 +87,3 @@ Feature: 10.4 Multi-Factor Authentication with Password and Security Question
     When she selects "Skip" on authenticators
     Then she is redirected to the Root View
     And an application session is created
-
