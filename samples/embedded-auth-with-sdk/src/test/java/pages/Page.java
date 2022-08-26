@@ -151,6 +151,30 @@ public class Page {
         return matcher.find() ? matcher.group(1) : null;
     }
 
+    public String fetchActivationLinkFromEmail(String emailContent) {
+        Pattern pattern = Pattern.compile("\\\"push-verify-activation-link\\\" href=\\\"(.*?)\\\"");
+        Matcher matcher = pattern.matcher(emailContent);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    public String fetchLinkFromSMS() {
+        String activationLink = null;
+        int totalRetryCount = getRetryCountDuringVerificationCodeFetching();
+        int tryCounter = 0;
+        while (tryCounter < totalRetryCount && activationLink == null) {
+            waitForNextTry();
+            String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
+            activationLink = StringUtils.substringBetween(sms, "Verify : ", " ");
+            if(activationLink == null) {
+                logger.warn("Attempt {} of {} SMS fetching failed.", tryCounter, totalRetryCount);
+            } else {
+                logger.info("Okta Verify SMS successfully received.");
+            }
+            tryCounter++;
+        }
+        return activationLink;
+    }
+
     int getRetryCountDuringVerificationCodeFetching() {
         int retry = 5;
         try {
