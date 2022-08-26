@@ -151,28 +151,28 @@ public class Page {
         return matcher.find() ? matcher.group(1) : null;
     }
 
-    public String fetchOktaVerifyMagicLinkFromEmail(String emailContent) {
+    public String fetchActivationLinkFromEmail(String emailContent) {
         Pattern pattern = Pattern.compile("\\\"push-verify-activation-link\\\" href=\\\"(.*?)\\\"");
         Matcher matcher = pattern.matcher(emailContent);
         return matcher.find() ? matcher.group(1) : null;
     }
 
-    public String fetchMagicLinkFromSMS() {
-        String magicLink = null;
+    public String fetchLinkFromSMS() {
+        String activationLink = null;
         int totalRetryCount = getRetryCountDuringVerificationCodeFetching();
         int tryCounter = 0;
-        while (tryCounter < totalRetryCount && magicLink == null) {
+        while (tryCounter < totalRetryCount && activationLink == null) {
             waitForNextTry();
             String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
-            magicLink = StringUtils.substringBetween(sms, "Verify : ", " ");
-            if(magicLink == null) {
+            activationLink = StringUtils.substringBetween(sms, "Verify : ", " ");
+            if(activationLink == null) {
                 logger.warn("Attempt {} of {} SMS fetching failed.", tryCounter, totalRetryCount);
             } else {
                 logger.info("Okta Verify SMS successfully received.");
             }
             tryCounter++;
         }
-        return magicLink;
+        return activationLink;
     }
 
     int getRetryCountDuringVerificationCodeFetching() {

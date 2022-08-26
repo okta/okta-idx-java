@@ -48,8 +48,8 @@ public class OktaVerify extends CucumberRoot {
 	private final Logger logger = LoggerFactory.getLogger(OktaVerify.class);
 
 
-	@When("^she selects Okta Verify from the list$")
-	public void She_selects_Okta_Verify_from_the_list() {
+	@When("^she selects okta verify from the list$")
+	public void she_selects_okta_verify_from_the_list() {
 		oktaVerifyPage.oktaVerifyRadioButton.click();
 		selectAuthenticatorPage.proceedButton.click();
 	}
@@ -67,9 +67,9 @@ public class OktaVerify extends CucumberRoot {
 	}
 
 	@Then("^she sees a page to input the phone number$")
-	public void She_sees_a_page_to_input_the_phone_number() {
-		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.textBox);
-		Assert.assertTrue(oktaVerifyPage.textBox.isDisplayed());
+	public void she_sees_a_page_to_input_the_phone_number() {
+		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.phoneOrEmailTextBox);
+		Assert.assertTrue(oktaVerifyPage.phoneOrEmailTextBox.isDisplayed());
 	}
 
 	@And("^she clicks on submit button saying \"Send me the setup link\"$")
@@ -79,7 +79,7 @@ public class OktaVerify extends CucumberRoot {
 	}
 
 	@And("^the screen changes to a waiting screen saying \"We sent an SMS with an Okta Verify setup link. To continue, open the link on your mobile device.\"$")
-	public void the_screen_changes_to_waiting_screen() {
+	public void the_screen_changes_to_waiting_screen_for_sms() {
 		Assert.assertTrue(oktaVerifyPage.waitingScreen.isDisplayed());
 	}
 
@@ -89,67 +89,68 @@ public class OktaVerify extends CucumberRoot {
 	}
 
 	@Then("she sees a page to input the Email")
-	public void she_Sees_A_Page_To_Input_The_Email() {
-		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.textBox);
-		Assert.assertTrue(oktaVerifyPage.textBox.isDisplayed());
+	public void she_sees_a_page_to_input_the_email() {
+		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.phoneOrEmailTextBox);
+		Assert.assertTrue(oktaVerifyPage.phoneOrEmailTextBox.isDisplayed());
 	}
 
 	@And("^she fills out her Email for Okta verify$")
 	public void she_fills_out_her_email_for_okta_verify() {
 		Assert.assertNotNull(Page.getA18NProfile());
 		Assert.assertNotNull(Page.getA18NProfile().getEmailAddress());
-		oktaVerifyPage.textBox.click();
-		oktaVerifyPage.textBox.sendKeys(Page.getA18NProfile().getEmailAddress());
+		oktaVerifyPage.phoneOrEmailTextBox.click();
+		oktaVerifyPage.phoneOrEmailTextBox.sendKeys(Page.getA18NProfile().getEmailAddress());
 	}
 
 	@And("^she inputs a valid phone number for Okta verify$")
 	public void she_inputs_a_valid_phone_number_for_okta_verify() {
 		Assert.assertNotNull(Page.getA18NProfile());
 		Assert.assertNotNull(Page.getA18NProfile().getPhoneNumber());
-		oktaVerifyPage.textBox.click();
-		oktaVerifyPage.textBox.sendKeys(Page.getA18NProfile().getPhoneNumber());
+		oktaVerifyPage.phoneOrEmailTextBox.click();
+		oktaVerifyPage.phoneOrEmailTextBox.sendKeys(Page.getA18NProfile().getPhoneNumber());
 	}
 
 
 	@When("she selects Email option")
-	public void she_Selects_Email_Option() {
+	public void she_selects_email_option() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.emailModeRadioButton);
 		oktaVerifyPage.emailModeRadioButton.click();
 		selectAuthenticatorPage.submitButton.click();
 	}
 	@When("she selects SMS option")
-	public void she_Selects_SMS_Option() {
+	public void she_selects_sms_option() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.smsModeRadioButton);
 		oktaVerifyPage.smsModeRadioButton.click();
 		selectAuthenticatorPage.submitButton.click();
 	}
 
-	@When("she clicks the magic link in her email")
-	public void she_Clicks_The_magic_Link_In_Her_Email() {
+	@When("she clicks on the link in her email")
+	public void she_clicks_on_the_link_in_her_email() {
 		String emailContent = selectAuthenticatorPage.fetchEmailContent();
 		Assert.assertNotNull(emailContent);
-		String magicLink = selectAuthenticatorPage.fetchOktaVerifyMagicLinkFromEmail(emailContent);
+		String activationLink = selectAuthenticatorPage.fetchActivationLinkFromEmail(emailContent);
+		Assert.assertNotNull(activationLink);
 		driver.manage().window().maximize();
-		driver.get(magicLink);
+		driver.get(activationLink);
 	}
 
 	@When("she clicks the link in her text messages from her phone")
-	public void she_Clicks_The_Link_In_Her_Text_Messages_From_Her_Phone() {
-		String magicLink = selectAuthenticatorPage.fetchMagicLinkFromSMS();
-		Assert.assertNotNull(magicLink);
+	public void she_clicks_the_link_in_her_text_messages_from_her_phone() {
+		String activationLink = selectAuthenticatorPage.fetchLinkFromSMS();
+		Assert.assertNotNull(activationLink);
 		driver.manage().window().maximize();
-		driver.get(magicLink);
+		driver.get(activationLink);
 	}
 
 	@Then("she sees the download okta verify screen")
-	public void she_Sees_The_Download_Okta_Verify_Screen() {
+	public void she_sees_the_download_okta_verify_screen() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.oktaVerifyScreen);
 		Assert.assertTrue(oktaVerifyPage.oktaVerifyScreen.isDisplayed());
 	}
 
 
 	@Then("she sees a list of modes to register")
-	public void sheSeesAListOfModesToRegister() {
+	public void she_sees_a_list_of_modes_to_register() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.authenticatorsOption);
 		Assert.assertTrue(oktaVerifyPage.authenticatorsOption.isDisplayed());
 	}

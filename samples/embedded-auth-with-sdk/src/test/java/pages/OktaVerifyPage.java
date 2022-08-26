@@ -41,12 +41,12 @@ public class OktaVerifyPage extends Page {
     public WebElement waitingScreen;
 
     @FindBy(css = "input[type='text'][name='channelValue'][required='required']")
-    public WebElement textBox;
+    public WebElement phoneOrEmailTextBox;
 
     @FindBy(className="okta-verify-desc-text")
     public WebElement oktaVerifyScreen;
 
-    @FindBy(className="font-weight-light")
+    @FindBy(id = "select-factor-ov-form")
     public WebElement authenticatorsOption;
 
 }

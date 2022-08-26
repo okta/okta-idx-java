@@ -18,7 +18,7 @@ Feature: 10.3 Okta Verify Enrollment with SMS and Email
     When she inputs the correct code from her email
     And she submits the verify form
     Then she sees a list of required factors to setup
-    When she selects Okta Verify from the list
+    When she selects okta verify from the list
     And  she sees the option "Can't scan"
     When she clicks on "Can't scan"
     Then she sees a list of modes to register
@@ -49,7 +49,7 @@ Feature: 10.3 Okta Verify Enrollment with SMS and Email
     When she inputs the correct code from her email
     And she submits the verify form
     Then she sees a list of required factors to setup
-    When she selects Okta Verify from the list
+    When she selects okta verify from the list
     And  she sees the option "Can't scan"
     When she clicks on "Can't scan"
     Then she sees a list of modes to register
@@ -58,6 +58,5 @@ Feature: 10.3 Okta Verify Enrollment with SMS and Email
     And she fills out her Email for Okta verify
     And she clicks on submit button saying "Send me the setup link"
     Then the screen changes to a waiting screen saying "We sent an email with an Okta Verify setup link. To continue, open the link on your mobile device."
-    When she clicks the magic link in her email
+    When she clicks on the link in her email
     Then she sees the download okta verify screen
-    
