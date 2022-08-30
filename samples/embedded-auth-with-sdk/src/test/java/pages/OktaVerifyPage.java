@@ -28,7 +28,7 @@ public class OktaVerifyPage extends Page {
     @FindBy(css = "input[type='radio'][name='authenticator-type'][value='okta_verify']")
     public WebElement oktaVerifyRadioButton;
 
-    @FindBy(className="switch-channel-link")
+    @FindBy(className = "switch-channel-link")
     public WebElement optionsLink;
 
     @FindBy(css = "input[type='radio'][name='mode'][value='email'][class='form-check-input']")
@@ -37,16 +37,19 @@ public class OktaVerifyPage extends Page {
     @FindBy(css = "input[type='radio'][name='mode'][value='sms'][class='form-check-input']")
     public WebElement smsModeRadioButton;
 
-    @FindBy(className="text-center")
+    @FindBy(className = "text-center")
     public WebElement waitingScreen;
 
     @FindBy(css = "input[type='text'][name='channelValue'][required='required']")
     public WebElement phoneOrEmailTextBox;
 
-    @FindBy(className="okta-verify-desc-text")
+    @FindBy(className = "okta-verify-desc-text")
     public WebElement oktaVerifyScreen;
 
     @FindBy(id = "select-factor-ov-form")
     public WebElement authenticatorsOption;
+
+    @FindBy(className = "qrcode")
+    public WebElement qrCodeDisplayed;
 
 }
