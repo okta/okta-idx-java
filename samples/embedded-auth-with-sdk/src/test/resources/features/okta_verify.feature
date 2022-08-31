@@ -2,7 +2,7 @@ Feature: 10.3 Okta Verify Enrollment with SMS and Email
 
   @requireA18NProfile
   @requireUserDeletionAfterRegistration
-  Scenario: 10.3.1 Mary signs up for an account and enrolls in Password and clicks a link in a text message to enroll Okta Verify
+  Scenario: 10.3.1 Mary signs up for an account and enrolls in Password and scans QR code to enroll Okta Verify
     Given Mary navigates to the Self Service Registration View
     When she fills out her First Name
     And she fills out her Last Name
