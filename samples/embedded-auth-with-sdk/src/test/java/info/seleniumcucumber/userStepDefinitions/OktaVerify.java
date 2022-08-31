@@ -88,7 +88,7 @@ public class OktaVerify extends CucumberRoot {
 		Assert.assertTrue(oktaVerifyPage.waitingScreen.isDisplayed());
 	}
 
-	@Then("she sees a page to input the Email")
+	@Then("^she sees a page to input the Email$")
 	public void she_sees_a_page_to_input_the_email() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.phoneOrEmailTextBox);
 		Assert.assertTrue(oktaVerifyPage.phoneOrEmailTextBox.isDisplayed());
@@ -111,20 +111,20 @@ public class OktaVerify extends CucumberRoot {
 	}
 
 
-	@When("she selects Email option")
+	@When("^she selects Email option$")
 	public void she_selects_email_option() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.emailModeRadioButton);
 		oktaVerifyPage.emailModeRadioButton.click();
 		selectAuthenticatorPage.submitButton.click();
 	}
-	@When("she selects SMS option")
+	@When("^she selects SMS option$")
 	public void she_selects_sms_option() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.smsModeRadioButton);
 		oktaVerifyPage.smsModeRadioButton.click();
 		selectAuthenticatorPage.submitButton.click();
 	}
 
-	@When("she clicks on the link in her email")
+	@When("^she clicks on the link in her email$")
 	public void she_clicks_on_the_link_in_her_email() {
 		String emailContent = selectAuthenticatorPage.fetchEmailContent();
 		Assert.assertNotNull(emailContent);
@@ -134,7 +134,7 @@ public class OktaVerify extends CucumberRoot {
 		driver.get(activationLink);
 	}
 
-	@When("she clicks the link in her text messages from her phone")
+	@When("^she clicks the link in her text messages from her phone$")
 	public void she_clicks_the_link_in_her_text_messages_from_her_phone() {
 		String activationLink = selectAuthenticatorPage.fetchLinkFromSMS();
 		Assert.assertNotNull(activationLink);
@@ -142,16 +142,22 @@ public class OktaVerify extends CucumberRoot {
 		driver.get(activationLink);
 	}
 
-	@Then("she sees the download okta verify screen")
+	@Then("^she sees the download okta verify screen$")
 	public void she_sees_the_download_okta_verify_screen() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.oktaVerifyScreen);
 		Assert.assertTrue(oktaVerifyPage.oktaVerifyScreen.isDisplayed());
 	}
 
 
-	@Then("she sees a list of modes to register")
+	@Then("^she sees a list of modes to register$")
 	public void she_sees_a_list_of_modes_to_register() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.authenticatorsOption);
 		Assert.assertTrue(oktaVerifyPage.authenticatorsOption.isDisplayed());
+	}
+
+	@Then("^she sees a page with QR code displayed for scanning$")
+	public void she_sees_a_page_with_qr_code_displayed_for_scanning() {
+		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.qrCodeDisplayed);
+		Assert.assertTrue(oktaVerifyPage.qrCodeDisplayed.isDisplayed());
 	}
 }
