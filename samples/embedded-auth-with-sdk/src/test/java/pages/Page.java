@@ -164,7 +164,7 @@ public class Page {
         while (tryCounter < totalRetryCount && activationLink == null) {
             waitForNextTry();
             String sms = Page.getA18NClient().getLatestSmsContent(Page.getA18NProfile());
-            activationLink = StringUtils.substringBetween(sms, "Verify : ", " ");
+            activationLink = sms.split(":",2)[1].trim();
             if(activationLink == null) {
                 logger.warn("Attempt {} of {} SMS fetching failed.", tryCounter, totalRetryCount);
             } else {
