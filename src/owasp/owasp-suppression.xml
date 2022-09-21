@@ -17,27 +17,7 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
-
-    <!-- False positive - https://github.com/jeremylong/DependencyCheck/issues/3623 -->
-    <suppress>
-        <notes><![CDATA[ file name: lang-tag-1.5.jar ]]></notes>
-        <cve>CVE-2020-23171</cve>
-    </suppress>
-
-    <!-- Likely false positives, Sonatype does not report any known vulnerabilites in springboot 2.6.7
-         per https://ossindex.sonatype.org/component/pkg:maven/org.springframework.boot/spring-boot@2.6.7
-         Springboot is used only in sample projects under samples/ and not used inside the SDK itself.-->
-    <suppress>
-        <notes><![CDATA[ file name: spring-boot-2.6.7.jar ]]></notes>
-        <cve>CVE-2013-4152</cve>
-        <cve>CVE-2013-7315</cve>
-        <cve>CVE-2014-0054</cve>
-        <cve>CVE-2014-0054</cve>
-        <cve>CVE-2016-1000027</cve>
-        <cve>CVE-2022-22965</cve>
-        <cve>CVE-2022-22968</cve>
-    </suppress>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
     <!-- Per https://tanzu.vmware.com/security/cve-2020-5408 the below CVE should be 
          mitigated by our use of Spring Security 5.7 -->
@@ -49,9 +29,10 @@
     <!-- Per https://tanzu.vmware.com/security/cve-2022-22978 & https://tanzu.vmware.com/security/cve-2022-22976 the below CVEs should be 
          mitigated by our use of Spring Security 5.7 -->
     <suppress>
-        <notes><![CDATA[ file name: spring-boot-starter-security-2.7.0.jar ]]></notes>
+        <notes><![CDATA[ file name: spring-boot-starter-security-2.7.3.jar ]]></notes>
         <cve>CVE-2022-22978</cve>
         <cve>CVE-2022-22976</cve>
+        <cve>CVE-2016-1000027</cve>
     </suppress>
 
     <!-- False positive per https://github.com/jeremylong/DependencyCheck/issues/4634 -->
