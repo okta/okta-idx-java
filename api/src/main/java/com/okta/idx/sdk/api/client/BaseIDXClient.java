@@ -595,8 +595,8 @@ final class BaseIDXClient implements IDXClient {
         JsonNode errorResponseJson;
 
         if (response.getHeaders().getContentType() != null &&
-                response.getHeaders().getContentType().toString().contains("application/json") ||
-                response.getHeaders().getContentType().toString().contains("application/ion+json")) {
+                (response.getHeaders().getContentType().toString().contains("application/json") ||
+                response.getHeaders().getContentType().toString().contains("application/ion+json"))) {
             errorResponseJson = objectMapper.readTree(response.getBody());
             ErrorResponse errorResponseDetails = objectMapper.convertValue(errorResponseJson, ErrorResponse.class);
             if (errorResponseDetails.getError() == null && errorResponseDetails.getMessages() == null) {
