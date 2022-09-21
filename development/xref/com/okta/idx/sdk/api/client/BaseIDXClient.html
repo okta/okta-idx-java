@@ -603,8 +603,8 @@
 <a class="jxr_linenumber" name="L595" href="#L595">595</a>         JsonNode errorResponseJson;
 <a class="jxr_linenumber" name="L596" href="#L596">596</a> 
 <a class="jxr_linenumber" name="L597" href="#L597">597</a>         <strong class="jxr_keyword">if</strong> (response.getHeaders().getContentType() != <strong class="jxr_keyword">null</strong> &amp;&amp;
-<a class="jxr_linenumber" name="L598" href="#L598">598</a>                 response.getHeaders().getContentType().toString().contains(<span class="jxr_string">"application/json"</span>) ||
-<a class="jxr_linenumber" name="L599" href="#L599">599</a>                 response.getHeaders().getContentType().toString().contains(<span class="jxr_string">"application/ion+json"</span>)) {
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>                 (response.getHeaders().getContentType().toString().contains(<span class="jxr_string">"application/json"</span>) ||
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>                 response.getHeaders().getContentType().toString().contains(<span class="jxr_string">"application/ion+json"</span>))) {
 <a class="jxr_linenumber" name="L600" href="#L600">600</a>             errorResponseJson = objectMapper.readTree(response.getBody());
 <a class="jxr_linenumber" name="L601" href="#L601">601</a>             <a name="ErrorResponse" href="../../../../../../com/okta/idx/sdk/api/response/ErrorResponse.html#ErrorResponse">ErrorResponse</a> errorResponseDetails = objectMapper.convertValue(errorResponseJson, ErrorResponse.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L602" href="#L602">602</a>             <strong class="jxr_keyword">if</strong> (errorResponseDetails.getError() == <strong class="jxr_keyword">null</strong> &amp;&amp; errorResponseDetails.getMessages() == <strong class="jxr_keyword">null</strong>) {
