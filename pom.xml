@@ -40,7 +40,7 @@
         <okta.sdk.previousVersion>3.0.3</okta.sdk.previousVersion>
         <org.apache.tomcat.embed.version>9.0.64</org.apache.tomcat.embed.version>
         <org.jetbrains.kotlin.version>1.6.10</org.jetbrains.kotlin.version>
-        <ch.qos.logback.version>1.4.0</ch.qos.logback.version>
+        <ch.qos.logback.version>1.4.1</ch.qos.logback.version>
         <github.slug>okta/okta-idx-java</github.slug>
     </properties>
 
