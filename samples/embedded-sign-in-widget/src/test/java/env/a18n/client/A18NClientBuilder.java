@@ -13,24 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package pages;
+package env.a18n.client;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
+import java.util.Set;
 
-public class LoginPage extends Page {
+abstract class A18NClientBuilder {
 
-    public LoginPage(WebDriver driver) {
-        super(driver);
-    }
+    public abstract A18NClientBuilder setIssuer(String issuer);
 
-    @FindBy(name = "identifier")
-    public WebElement usernameInput;
+    public abstract A18NClientBuilder setClientId(String clientId);
 
-    @FindBy(name = "credentials.passcode")
-    public WebElement passwordInput;
+    public abstract A18NClientBuilder setClientSecret(String clientSecret);
 
-    @FindBy(css = "input[type=submit][data-type='save']")
-    public WebElement submitButton;
+    public abstract A18NClientBuilder setScopes(Set<String> scopes);
+
+    public abstract A18NClientBuilder setRedirectUri(String redirectUri);
+
+    public abstract A18NClient build();
 }

@@ -13,24 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package pages;
+package env.a18n.client;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
+import env.a18n.client.response.A18NProfile;
 
-public class LoginPage extends Page {
+public interface A18NClient {
 
-    public LoginPage(WebDriver driver) {
-        super(driver);
-    }
+    A18NProfile createProfile();
 
-    @FindBy(name = "identifier")
-    public WebElement usernameInput;
+    void deleteProfile(A18NProfile profile);
 
-    @FindBy(name = "credentials.passcode")
-    public WebElement passwordInput;
+    String getLatestEmailContent(A18NProfile profile);
 
-    @FindBy(css = "input[type=submit][data-type='save']")
-    public WebElement submitButton;
+    String getLatestSmsContent(A18NProfile a18NProfile);
 }

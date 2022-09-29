@@ -29,6 +29,10 @@ export OKTA_IDX_SCOPES="openid email profile offline_access"
 export USERNAME=mary@acme.com
 get_vault_secret_key devex/java-idx-sdk-vars password PASSWORD
 
+export OKTA_CLIENT_ORGURL=https://java-idx-sdk.trexcloud.com
+get_vault_secret_key devex/java-idx-sdk-vars trex_client_token OKTA_CLIENT_TOKEN
+get_vault_secret_key devex/java-idx-sdk-vars a18n_api_key A18N_API_KEY
+
 # Run the tests
 cd ${OKTA_HOME}/${REPO}
 mvn clean install -Pci
