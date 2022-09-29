@@ -66,8 +66,7 @@ public class Login extends CucumberRoot {
 
     @Then("she is redirected to the Root View")
     public void sheIsRedirectedToTheRootView() {
-        rootPage.waitForWebElementDisplayed(rootPage.logoutButton);
-        Assert.assertTrue(rootPage.logoutButton.isDisplayed());
+        rootPage.waitForWebElementDisplayed(rootPage.profileLink);
         Assert.assertTrue(rootPage.profileLink.isDisplayed());
         rootPage.profileLink.click();
     }
@@ -76,6 +75,8 @@ public class Login extends CucumberRoot {
     public void sheSeesATableWithHerProfileInfo() {
         profilePage.waitForWebElementDisplayed(profilePage.claimSubData);
         Assert.assertTrue(profilePage.claimSubData.isDisplayed());
+        rootPage.waitForWebElementDisplayed(rootPage.logoutButton);
+        Assert.assertTrue(rootPage.logoutButton.isDisplayed());
     }
 
     @And("the cell for the value of \"email\" is shown and contains her email")

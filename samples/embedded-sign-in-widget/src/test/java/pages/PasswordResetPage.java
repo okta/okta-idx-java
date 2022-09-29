@@ -31,7 +31,7 @@ public class PasswordResetPage extends Page {
     @FindBy(css = "input[type='text']")
     public WebElement enterEmailBox;
 
-    @FindBy(css = "input[type='submit'][Value = 'Next']")
+    @FindBy(css = "input[data-type='save'][type='submit'][Value = 'Next']")
     public WebElement recoveryFormSubmitButton;
 
     @FindBy(className = "enter-auth-code-instead-link")

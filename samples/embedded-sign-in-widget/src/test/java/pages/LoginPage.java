@@ -31,6 +31,6 @@ public class LoginPage extends Page {
     @FindBy(name = "credentials.passcode")
     public WebElement passwordInput;
 
-    @FindBy(css = "input[type=submit]")
+    @FindBy(css = "input[type=submit][data-type='save']")
     public WebElement submitButton;
 }

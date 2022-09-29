@@ -35,7 +35,6 @@ public class SelfServicePasswordReset extends CucumberRoot {
 
     @When("she clicks on the Forgot Password link")
     public void she_clicks_on_the_forgot_password_link() {
-        loginPage.waitForWebElementDisplayed(loginPage.usernameInput);
         loginPage.waitForWebElementDisplayed(passwordResetPage.forgotPasswordLink);
         Assert.assertTrue(passwordResetPage.forgotPasswordLink.isDisplayed());
         passwordResetPage.forgotPasswordLink.click();
