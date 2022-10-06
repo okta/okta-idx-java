@@ -81,7 +81,7 @@ public class Login extends CucumberRoot {
 
     @And("she submits the Login form and locks the account")
     public void sheSubmitsTheLoginFormAndLocksTheAccount() throws InterruptedException {
-        for(int i=0; i < 15; i++) {
+        for(int i=0; i < 10; i++) {
             loginPage.waitForWebElementDisplayed(loginPage.submitButton);
             Assert.assertTrue(loginPage.submitButton.isDisplayed());
             loginPage.submitButton.click();
