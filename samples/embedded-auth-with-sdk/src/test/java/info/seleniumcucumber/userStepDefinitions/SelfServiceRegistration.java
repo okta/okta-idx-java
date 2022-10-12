@@ -114,6 +114,16 @@ public class SelfServiceRegistration extends CucumberRoot {
     public void she_inputs_the_correct_code_from_her_email() {
         String emailContent = registerPage.fetchEmailContent();
         Assert.assertNotNull(emailContent);
+        String code = registerPage.fetchVerificationCodeFromRegistrationEmail(emailContent);
+        Assert.assertNotNull(code);
+        registerPage.codeInput.click();
+        registerPage.codeInput.sendKeys(code);
+    }
+
+    @When("^she inputs the correct code from email$")
+    public void she_inputs_the_correct_code_from_email() {
+        String emailContent = registerPage.fetchEmailContent();
+        Assert.assertNotNull(emailContent);
         String code = registerPage.fetchCodeFromRegistrationEmail(emailContent);
         Assert.assertNotNull(code);
         registerPage.codeInput.click();

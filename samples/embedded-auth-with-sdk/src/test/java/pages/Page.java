@@ -131,6 +131,12 @@ public class Page {
         return matcher.find() ? matcher.group(1) : null;
     }
 
+    public String fetchVerificationCodeFromRegistrationEmail(String emailContent) {
+        Pattern pattern = Pattern.compile("enter the verification code: (\\d{6})");
+        Matcher matcher = pattern.matcher(emailContent);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
     private void waitForNextTry() {
         try {
             Thread.sleep(getSleepDurationDuringVerificationCodeFetching());
