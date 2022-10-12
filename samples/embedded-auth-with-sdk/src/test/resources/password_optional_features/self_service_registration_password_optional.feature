@@ -11,7 +11,7 @@ Feature: 4.2 Self Service Registration with Email Activation And optional passwo
     And she fills out her Email
     And she submits the registration form
     Then she sees a page to input a code
-    When she inputs the correct code from her email
+    When she inputs the correct code from email
     And she submits the verify form
     Then she sees the list of optional factors
     When she selects "Skip" on authenticators
@@ -29,7 +29,7 @@ Feature: 4.2 Self Service Registration with Email Activation And optional passwo
     And she fills out her Email
     And she submits the registration form
     Then she sees a page to input a code
-    When she inputs the correct code from her email
+    When she inputs the correct code from email
     And she submits the verify form
     Then she sees the list of optional factors
     When she selects Password
