@@ -80,19 +80,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Logging -->
-        <dependency>
-            <!-- Required for any libraries that expect to call the commons logging APIs -->
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        
         <!-- These are the selenium dependencies -->
         <dependency>
             <groupId>io.appium</groupId>
