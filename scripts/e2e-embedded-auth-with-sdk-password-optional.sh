@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-setup_service java 1.8.322
+setup_service java 17.0.1
 setup_service google-chrome-stable 89.0.4389.72-1
 setup_service maven 3.5.4
 
