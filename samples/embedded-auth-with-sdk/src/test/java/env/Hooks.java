@@ -148,6 +148,20 @@ public class Hooks {
 		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
 	}
 
+	@Before("@requireWebAuthnRequiredGroupsForUser")
+	public void assignWebAuthnRequiredBeforeScenario(Scenario scenario) {
+		Assert.assertNotNull(Page.getUser());
+		List<String> groups = new ArrayList<>();
+		groups.add("WebAuthn Required");
+
+		List<Group> groupList = client.listGroups()
+				.stream()
+				.filter(group -> groups.contains(group.getProfile().getName()))
+				.collect(Collectors.toList());
+		Assert.assertFalse(groupList.isEmpty());
+		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
+	}
+
 	@Before("@requirePasswordOptionalGroupForUser")
 	public void assignPasswordOptionalGroupBeforeScenario(Scenario scenario) {
 		Assert.assertNotNull(Page.getUser());
