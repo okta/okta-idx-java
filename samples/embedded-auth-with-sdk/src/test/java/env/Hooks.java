@@ -254,6 +254,28 @@ public class Hooks {
 
 	}
 
+	public void assignWebAuthnGroup() {
+		if (Page.getA18NProfile() != null) {
+			logger.info("Searching for a user to be added to WebAuthn Required group: " + Page.getA18NProfile().getEmailAddress());
+			Optional<User> userToAdd = client.listUsers(Page.getA18NProfile().getEmailAddress(), null, null, null, null)
+					.stream().filter(x -> x.getProfile().getEmail().equals(Page.getA18NProfile().getEmailAddress())).findFirst();
+			if (userToAdd.isPresent()) {
+				List<String> groups = new ArrayList<>();
+				groups.add("WebAuthn Required");
+				List<Group> groupList = client.listGroups()
+						.stream()
+						.filter(group -> groups.contains(group.getProfile().getName()))
+						.collect(Collectors.toList());
+				Assert.assertFalse(groupList.isEmpty());
+				groupList.forEach(group -> userToAdd.get().addToGroup(group.getId()));
+
+				logger.info("User added to WebAuthn Required group: " + userToAdd.get().getProfile().getEmail());
+			} else {
+				logger.warn("Fail to find a user: " + Page.getA18NProfile().getEmailAddress());
+			}
+		}
+	}
+
 	private boolean existsElement(String id) {
 		try {
 			driver.findElement(By.id(id));

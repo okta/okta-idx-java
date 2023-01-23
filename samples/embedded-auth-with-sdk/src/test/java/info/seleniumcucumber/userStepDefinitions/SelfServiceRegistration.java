@@ -344,6 +344,25 @@ public class SelfServiceRegistration extends CucumberRoot {
         registerPage.waitForWebElementDisplayed(selectAuthenticatorPage.selectAuthenticatorsForm);
     }
 
+    @Then("^she clicks the logout button$")
+    public void she_clicks_the_logout_button() {
+        Assert.assertTrue(registerPage.logoutButton.isDisplayed());
+        registerPage.logoutButton.click();
+    }
+    @And("she inputs the fingerprint to verify")
+    public void she_inputs_the_fingerprint_to_verify() {
+        HasVirtualAuthenticator virtualAuthenticatorManager = ((HasVirtualAuthenticator) driver);
+
+        VirtualAuthenticatorOptions options = new VirtualAuthenticatorOptions();
+        options.setIsUserConsenting(true);
+        options.setProtocol(VirtualAuthenticatorOptions.Protocol.U2F);
+        options.setTransport(VirtualAuthenticatorOptions.Transport.USB);
+        VirtualAuthenticator authenticator = virtualAuthenticatorManager.addVirtualAuthenticator(options);
+        authenticator.setUserVerified(true);
+        registerPage.waitForWebElementDisplayed(verifyPage.proceedButton);
+        verifyPage.proceedButton.click();
+    }
+
     private User createUserWithoutCredentials() {
         // Create a user without credentials in "STAGED" state
         Assert.assertNotNull(Page.getA18NProfile());
