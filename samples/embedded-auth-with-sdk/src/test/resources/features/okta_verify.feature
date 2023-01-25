@@ -81,3 +81,16 @@ Feature: 10.3 Okta Verify Enrollment with SMS and Email
     Then the screen changes to a waiting screen saying "We sent an email with an Okta Verify setup link. To continue, open the link on your mobile device."
     When she clicks on the link in her email
     Then she sees the download okta verify screen
+
+  @requireA18NProfile
+  @requireExistingUser
+  @requireMFAGroupsForUser
+  @requireTOTPGroupForUser
+  Scenario: 10.3.4 Mary signs in an account and enrolls in Password and scans QR code to enroll Okta Verify
+    Given Mary navigates to the Basic Login View
+    When she fills in her correct username for mfa
+    And she fills in her correct password for mfa
+    And she submits the Login form
+    Then she is presented with an option to select Okta Verify
+    When she selects okta verify
+    Then she sees a page with QR code displayed for scanning

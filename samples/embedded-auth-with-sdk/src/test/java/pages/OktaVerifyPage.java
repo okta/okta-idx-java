@@ -52,4 +52,7 @@ public class OktaVerifyPage extends Page {
     @FindBy(className = "qrcode")
     public WebElement qrCodeDisplayed;
 
+    @FindBy(css = "input[type='radio'][name='authenticator-type'][value='otp']")
+    public WebElement oktaVerifyOption;
+
 }
