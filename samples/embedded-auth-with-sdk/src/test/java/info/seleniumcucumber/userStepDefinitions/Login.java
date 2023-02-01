@@ -23,6 +23,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import env.CucumberRoot;
 import env.DriverUtil;
+import env.Hooks;
 
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
@@ -38,6 +39,7 @@ public class Login extends CucumberRoot {
 	private LoginPage loginPage = new LoginPage(driver);
 	private ForgotPasswordPage forgotPasswordPage = new ForgotPasswordPage(driver);
 	private User user;
+	private Hooks hooks = new Hooks();
 
 	@When("^she fills in her correct username$")
 	public void enter_correct_username() {
@@ -162,6 +164,22 @@ public class Login extends CucumberRoot {
 		loginPage.waitForWebElementDisplayed(loginPage.forgotPasswordLink);
 		Assert.assertTrue(loginPage.forgotPasswordLink.isDisplayed());
 		loginPage.forgotPasswordLink.click();
+	}
+
+	@When("^she fills in her correct username for WebAuthn$")
+	public void enter_correct_username_for_webauthn() {
+		Assert.assertNotNull(Page.getA18NProfile());
+		Assert.assertNotNull(Page.getA18NProfile().getEmailAddress());
+		loginPage.waitForWebElementDisplayed(loginPage.usernameInput);
+		loginPage.usernameInput.click();
+		loginPage.usernameInput.sendKeys(Page.getA18NProfile().getEmailAddress());
+		hooks.assignWebAuthnGroup();
+	}
+
+	@And("^she fills in her correct password for WebAuthn$")
+	public void enter_correct_password_for_webauthn() {
+		loginPage.passwordInput.click();
+		loginPage.passwordInput.sendKeys("QwErTy@123");
 	}
 
 	@Then("^she is redirected to the Self Service Password Reset View$")

@@ -24,3 +24,13 @@ Feature: 4.3 Self Service Registration with Email Activation And optional WebAut
     Then she sees the list of optional factors
     When she selects "Skip" on authenticators
     And an application session is created
+    Then she clicks the logout button
+    Given Mary navigates to the Basic Login View
+    When she fills in her correct username for WebAuthn
+    And she fills in her correct password for WebAuthn
+    And she submits the Login form
+    Then she sees the list of optional factors
+    And she selects WebAuthn from the list
+    And she inputs the fingerprint to verify
+    Then she is redirected to the Root View
+    And an application session is created
