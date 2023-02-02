@@ -52,6 +52,7 @@ public class Hooks {
 	protected WebDriver driver = DriverUtil.getDefaultDriver();
 	protected ClientBuilder builder = Clients.builder();
 	protected Client client = builder.build();
+	private final String WEBAUTHN_GROUP_NAME="WebAuthn Required";
 
 	@Before
 	public void beforeScenario(){
@@ -152,7 +153,7 @@ public class Hooks {
 	public void assignWebAuthnRequiredBeforeScenario(Scenario scenario) {
 		Assert.assertNotNull(Page.getUser());
 		List<String> groups = new ArrayList<>();
-		groups.add("WebAuthn Required");
+		groups.add(WEBAUTHN_GROUP_NAME);
 
 		List<Group> groupList = client.listGroups()
 				.stream()
@@ -161,6 +162,7 @@ public class Hooks {
 		Assert.assertFalse(groupList.isEmpty());
 		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
 	}
+
 	public void assignWebAuthnGroup() {
 		if (Page.getA18NProfile() != null) {
 			logger.info("Searching for a user to be added to WebAuthn Required group: " + Page.getA18NProfile().getEmailAddress());
@@ -168,7 +170,8 @@ public class Hooks {
 					.stream().filter(x -> x.getProfile().getEmail().equals(Page.getA18NProfile().getEmailAddress())).findFirst();
 			if (userToAdd.isPresent()) {
 				List<String> groups = new ArrayList<>();
-				groups.add("WebAuthn Required");
+				groups.add(WEBAUTHN_GROUP_NAME);
+
 				List<Group> groupList = client.listGroups()
 						.stream()
 						.filter(group -> groups.contains(group.getProfile().getName()))
