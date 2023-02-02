@@ -84,4 +84,7 @@ public class RegisterPage extends Page {
 
     @FindBy(className = "alert-danger")
     public WebElement alertDanger;
+
+    @FindBy(id = "logout-btn")
+    public WebElement logoutButton;
 }
