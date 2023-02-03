@@ -117,6 +117,7 @@ public class OktaVerify extends CucumberRoot {
 		oktaVerifyPage.emailModeRadioButton.click();
 		selectAuthenticatorPage.submitButton.click();
 	}
+
 	@When("^she selects SMS option$")
 	public void she_selects_sms_option() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.smsModeRadioButton);
@@ -159,5 +160,17 @@ public class OktaVerify extends CucumberRoot {
 	public void she_sees_a_page_with_qr_code_displayed_for_scanning() {
 		oktaVerifyPage.waitForWebElementDisplayed(oktaVerifyPage.qrCodeDisplayed);
 		Assert.assertTrue(oktaVerifyPage.qrCodeDisplayed.isDisplayed());
+	}
+
+	@Then("^she is presented with an option to select Okta Verify$")
+	public void she_is_presented_with_an_option_to_select_okta_verify() {
+		Assert.assertTrue(selectAuthenticatorPage.selectAuthenticatorsForm.isDisplayed());
+		Assert.assertTrue(oktaVerifyPage.oktaVerifyOption.isDisplayed());
+	}
+
+	@When("^she selects okta verify$")
+	public void she_selects_okta_verify() {
+		oktaVerifyPage.oktaVerifyOption.click();
+		selectAuthenticatorPage.proceedButton.click();
 	}
 }

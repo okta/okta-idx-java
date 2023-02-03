@@ -211,6 +211,17 @@ public class Hooks {
 		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
 	}
 
+	@Before("@requireOktaVerifyRequiredGroupsForUser")
+	public void assignOktaVerifyRequiredBeforeScenario(Scenario scenario) {
+		Assert.assertNotNull(Page.getUser());
+		List<Group> groupList = client.listGroups()
+				.stream()
+				.filter(group -> group.getProfile().getName().equals("Okta Verify Required"))
+				.collect(Collectors.toList());
+		Assert.assertFalse(groupList.isEmpty());
+		groupList.forEach(group -> Page.getUser().addToGroup(group.getId()));
+	}
+
 	@Before("@requireEnrolledGoogleQR")
 	public void enrollTotpUserFactor() {
 		Assert.assertNotNull(Page.getA18NProfile());
