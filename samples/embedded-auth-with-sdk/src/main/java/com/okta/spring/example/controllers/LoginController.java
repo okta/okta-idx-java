@@ -23,6 +23,7 @@ import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.AuthenticationOptions;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.ContextualData;
+import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.FormValue;
 import com.okta.idx.sdk.api.model.QrCode;
 import com.okta.idx.sdk.api.model.UserProfile;
@@ -561,11 +562,13 @@ public class LoginController {
      * Handle new user registration functionality.
      *
      * @param userProfileAttributes string array for user profile attributes from register form
+     * @param password the password (optional)
      * @param session the session
      * @return the enroll authenticators view.
      */
     @PostMapping("/register")
     public ModelAndView register(final @RequestParam(value = "userProfileAttribute[]") String[] userProfileAttributes,
+                                 final @RequestParam(value = "password", required = false) char[] password,
                                  final HttpSession session) {
         logger.info(":: Register ::");
 
@@ -612,8 +615,11 @@ public class LoginController {
 
         ProceedContext proceedContext = newUserRegistrationResponse.getProceedContext();
 
+        Credentials credentials = new Credentials();
+        credentials.setPasscode(password);
+
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.register(proceedContext, userProfile);
+                idxAuthenticationWrapper.register(proceedContext, userProfile, credentials);
 
         if (responseHandler.needsToShowErrors(authenticationResponse)) {
             ModelAndView modelAndView = new ModelAndView("register");

@@ -73,6 +73,7 @@ This project includes:
   thymeleaf-extras-java8time under The Apache Software License, Version 2.0
   thymeleaf-extras-springsecurity5 under The Apache Software License, Version 2.0
   thymeleaf-spring5 under The Apache Software License, Version 2.0
+  tomcat-annotations-api under Apache License, Version 2.0
   tomcat-embed-core under Apache License, Version 2.0
   tomcat-embed-el under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0

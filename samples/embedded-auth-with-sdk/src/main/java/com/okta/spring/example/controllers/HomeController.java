@@ -283,6 +283,10 @@ public class HomeController {
                     .filter(x -> x.getName().equals("userProfile"))
                     .findFirst();
 
+        Optional<FormValue> credentialsFormValue = authenticationResponse.getFormValues()
+                .stream()
+                .filter(x -> x.getName().equals("credentials"))
+                .findFirst();
 
         if (!userProfileFormValue.isPresent()) {
             return displayErrorPage();
@@ -293,6 +297,10 @@ public class HomeController {
 
         if (!CollectionUtils.isEmpty(userProfileAttributes)) {
             modelAndView.addObject("userProfileAttributes", userProfileAttributes);
+        }
+
+        if (credentialsFormValue.isPresent()) {
+            modelAndView.addObject("credentialsRequired", true);
         }
 
         return modelAndView;
