@@ -20,6 +20,7 @@ import com.okta.commons.http.*
 import com.okta.idx.sdk.api.config.ClientConfiguration
 import com.okta.idx.sdk.api.model.AuthenticationOptions
 import com.okta.idx.sdk.api.model.AuthenticationStatus
+import com.okta.idx.sdk.api.model.Credentials
 import com.okta.idx.sdk.api.model.IDXClientContext
 import com.okta.idx.sdk.api.model.Idp
 import com.okta.idx.sdk.api.model.PollInfo
@@ -107,7 +108,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "enroll/new", "enroll-profile-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile(), null)
         assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
         assertThat(authenticationResponse.getProceedContext().getClientContext().state,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
@@ -142,7 +143,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "enroll/new", "enroll-profile-error-response", 400, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile(), null)
         assertThat(authenticationResponse.getAuthenticators(), nullValue())
         assertThat(authenticationResponse.getAuthenticationStatus(), nullValue())
         assertThat(authenticationResponse.getErrors(), notNullValue())
@@ -922,7 +923,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "enroll/new", scenario + "/enroll-new-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile(), null)
         assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
         assertThat(authenticationResponse.getProceedContext().getClientContext().state,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
@@ -1031,7 +1032,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "enroll/new", scenario + "/enroll-new-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile(), null)
         assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
         assertThat(authenticationResponse.getProceedContext().getClientContext().state,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
@@ -1163,8 +1164,10 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "introspect", scenario + "/enroll-response", 200, MediaType.APPLICATION_JSON)
         setMockResponse(requestExecutor, "enroll/new", scenario + "/enroll-new-response", 200, mediaTypeAppIonJson)
 
+        Credentials credentials = new Credentials()
+        credentials.setPasscode("dummy".toCharArray())
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile(), credentials)
         assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
         assertThat(authenticationResponse.getProceedContext().getClientContext().state,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
@@ -1726,7 +1729,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "enroll/new", scenario + "/enroll-new-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse =
-                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+                idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile(), null)
         assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
         assertThat(authenticationResponse.getProceedContext().getClientContext().state,
                 equalTo(newUserRegistrationResponse.getProceedContext().getClientContext().state))
@@ -1888,7 +1891,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "enroll/new", "enroll-profile-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper
-                .register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+                .register(newUserRegistrationResponse.getProceedContext(), getUserProfile(), null)
 
         assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
         assertThat(authenticationResponse.getProceedContext().getClientContext().state,
@@ -1973,7 +1976,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "enroll/new", "enroll-profile-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper
-                .register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+                .register(newUserRegistrationResponse.getProceedContext(), getUserProfile(), null)
 
         assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
         assertThat(authenticationResponse.getProceedContext().getClientContext().state,
@@ -2066,7 +2069,7 @@ class IDXAuthenticationWrapperTest {
         setMockResponse(requestExecutor, "enroll/new", "enroll-profile-response", 200, mediaTypeAppIonJson)
 
         AuthenticationResponse authenticationResponse = idxAuthenticationWrapper
-                .register(newUserRegistrationResponse.getProceedContext(), getUserProfile())
+                .register(newUserRegistrationResponse.getProceedContext(), getUserProfile(), null)
 
         assertThat(authenticationResponse.getProceedContext().getClientContext(), notNullValue())
         assertThat(authenticationResponse.getProceedContext().getClientContext().state,

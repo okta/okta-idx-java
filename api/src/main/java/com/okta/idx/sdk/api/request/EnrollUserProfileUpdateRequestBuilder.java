@@ -15,6 +15,7 @@
  */
 package com.okta.idx.sdk.api.request;
 
+import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.UserProfile;
 
 public class EnrollUserProfileUpdateRequestBuilder {
@@ -22,6 +23,7 @@ public class EnrollUserProfileUpdateRequestBuilder {
     private String stateHandle;
     private UserProfile userProfile;
 
+    private Credentials credentials;
     public static EnrollUserProfileUpdateRequestBuilder builder() {
         return new EnrollUserProfileUpdateRequestBuilder();
     }
@@ -36,7 +38,11 @@ public class EnrollUserProfileUpdateRequestBuilder {
         return this;
     }
 
+    public EnrollUserProfileUpdateRequestBuilder withCredentials(Credentials credentials) {
+        this.credentials = credentials;
+        return this;
+    }
     public EnrollUserProfileUpdateRequest build() {
-        return new EnrollUserProfileUpdateRequest(stateHandle, userProfile);
+        return new EnrollUserProfileUpdateRequest(stateHandle, userProfile, credentials);
     }
 }

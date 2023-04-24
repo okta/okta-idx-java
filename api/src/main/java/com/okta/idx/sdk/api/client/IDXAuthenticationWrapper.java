@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.okta.idx.sdk.api.client.WrapperUtil.getStateHandle;
 import static com.okta.idx.sdk.api.client.WrapperUtil.handleIllegalArgumentException;
@@ -266,15 +267,18 @@ public class IDXAuthenticationWrapper {
      *
      * @param proceedContext the ProceedContext
      * @param userProfile the user profile
+     * @param credentials the password (optional)
      * @return the Authentication response
      */
     public AuthenticationResponse register(ProceedContext proceedContext,
-                                           UserProfile userProfile) {
+                                           UserProfile userProfile,
+                                           Credentials credentials) {
         try {
             AuthenticationTransaction enrollTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
                 EnrollUserProfileUpdateRequest enrollUserProfileUpdateRequest =
                         EnrollUserProfileUpdateRequestBuilder.builder()
                                 .withUserProfile(userProfile)
+                                .withCredentials(credentials)
                                 .withStateHandle(proceedContext.getStateHandle())
                                 .build();
                 return client.enrollUpdateUserProfile(enrollUserProfileUpdateRequest, proceedContext.getHref());
@@ -711,7 +715,14 @@ public class IDXAuthenticationWrapper {
                     .filter(x -> "userProfile".equals(x.getName()))
                     .collect(Collectors.toList());
 
-            newUserRegistrationResponse.setFormValues(enrollProfileFormValues);
+            List<FormValue> credentialFormValues = Arrays.stream(enrollProfileRemediationOption.form())
+                    .filter(x -> "credentials".equals(x.getName()))
+                    .collect(Collectors.toList());
+
+            List<FormValue> formValues = Stream.concat(enrollProfileFormValues.stream(), credentialFormValues.stream())
+                    .collect(Collectors.toList());
+
+            newUserRegistrationResponse.setFormValues(formValues);
             newUserRegistrationResponse.setProceedContext(enrollTransaction.createProceedContext());
             return newUserRegistrationResponse;
         } catch (ProcessingException e) {

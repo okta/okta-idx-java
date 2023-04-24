@@ -17,6 +17,7 @@ package com.okta.idx.sdk.api.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.okta.idx.sdk.api.model.Credentials;
 import com.okta.idx.sdk.api.model.UserProfile;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -25,8 +26,10 @@ public class EnrollUserProfileUpdateRequest extends BaseRequest {
 
     private UserProfile userProfile;
 
-    EnrollUserProfileUpdateRequest(String stateHandle, UserProfile userProfile) {
+    private Credentials credentials;
+    EnrollUserProfileUpdateRequest(String stateHandle, UserProfile userProfile, Credentials credentials) {
         this.stateHandle = stateHandle;
         this.userProfile = userProfile;
+        this.credentials = credentials;
     }
 }
