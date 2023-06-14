@@ -34,7 +34,7 @@
     <inceptionYear>2020</inceptionYear>
 
     <properties>
-        <jackson.version>2.13.4</jackson.version>
+        <jackson.version>2.15.2</jackson.version>
         <snakeyaml.version>1.33</snakeyaml.version>
         <okta.commons.version>1.3.1</okta.commons.version>
         <okta.sdk.previousVersion>3.0.3</okta.sdk.previousVersion>
