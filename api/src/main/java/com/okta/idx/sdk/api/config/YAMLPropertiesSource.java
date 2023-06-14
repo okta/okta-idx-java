@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.LoaderOptions;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +50,7 @@ public class YAMLPropertiesSource implements PropertiesSource {
             // check to see if file exists
             if (in != null) { // if we have a yaml file.
                 if (Classes.isAvailable("org.yaml.snakeyaml.Yaml")) {
-                    Yaml yaml = new Yaml(new SafeConstructor());
+                    Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
                     Map config = yaml.load(in);
                     return getFlattenedMap(config);
                 } else {
