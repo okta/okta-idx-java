@@ -17,6 +17,7 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
+import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
 import com.okta.idx.sdk.api.model.CurrentAuthenticatorEnrollment;
@@ -309,7 +310,13 @@ final class AuthenticationTransaction {
             return;
         }
         Arrays.stream(idxResponse.getMessages().getValue())
-                .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
+                .forEach(msg -> {
+                    String message = msg.getMessage();
+                    if (msg.getI18NMessage() != null && Strings.hasText(msg.getI18NMessage().getKey())) {
+                        message += ", " + msg.getI18NMessage();
+                    }
+                    authenticationResponse.addError(message);
+                });
     }
 
     private void fillOutAuthenticators(AuthenticationResponse authenticationResponse) {

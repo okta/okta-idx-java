@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-Present, Okta, Inc.
+ * Copyright (c) 2023-Present, Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,35 +15,27 @@
  */
 package com.okta.idx.sdk.api.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import java.util.List;
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class MessageValue {
+public class I18NMessage {
 
-    private String message;
+    private String key;
 
-    @JsonAlias("i18n")
-    private I18NMessage i18NMessage;
-    @JsonAlias("class")
-    private String value;
+    private List<String> params;
 
-    public String getMessage() {
-        return message;
+    public String getKey() {
+        return key;
     }
 
-    public I18NMessage getI18NMessage() {
-        return i18NMessage;
-    }
-
-    public String getValue() {
-        return value;
+    public List<String> getParams() {
+        return params;
     }
 
     @Override
     public String toString() {
-        return "message='" + message + '\'' +
-                ", i18n=" + i18NMessage +
-                ", value='" + value + '\'';
+        return "key='" + key + '\'' + ", params=" + params;
     }
 }

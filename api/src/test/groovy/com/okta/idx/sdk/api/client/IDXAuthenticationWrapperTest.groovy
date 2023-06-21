@@ -689,7 +689,8 @@ class IDXAuthenticationWrapperTest {
                 new AuthenticationOptions("mary@unknown.com", "superSecret".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
-        assertThat(authenticationResponse.getErrors(), hasItem("There is no account with the Username mary@unknown.com."))
+        assertThat(authenticationResponse.getErrors(),
+                hasItem("There is no account with the Username mary@unknown.com., key='idx.unknown.user', params=[]"))
         assertThat(authenticationResponse.getAuthenticationStatus(),
                 is(AuthenticationStatus.UNKNOWN)
         )
@@ -877,7 +878,8 @@ class IDXAuthenticationWrapperTest {
                 new AuthenticationOptions("Mary@unknown.com", "superSecret".toCharArray()), beginResponse.proceedContext
         )
         assertThat(authenticationResponse, notNullValue())
-        assertThat(authenticationResponse.getErrors(), hasItem("There is no account with the Username Mary@unknown.com."))
+        assertThat(authenticationResponse.getErrors(),
+                hasItem("There is no account with the Username Mary@unknown.com., key='idx.unknown.user', params=[]"))
         assertThat(authenticationResponse.getAuthenticators(), nullValue())
     }
 
