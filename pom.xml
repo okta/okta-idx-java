@@ -36,8 +36,8 @@
     <properties>
         <jackson.version>2.15.2</jackson.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <okta.commons.version>1.3.1</okta.commons.version>
-        <okta.sdk.previousVersion>3.0.3</okta.sdk.previousVersion>
+        <okta.commons.version>1.3.4</okta.commons.version>
+        <okta.sdk.previousVersion>3.0.4</okta.sdk.previousVersion>
         <org.apache.tomcat.embed.version>9.0.76</org.apache.tomcat.embed.version>
         <org.jetbrains.kotlin.version>1.6.10</org.jetbrains.kotlin.version>
         <github.slug>okta/okta-idx-java</github.slug>
@@ -252,6 +252,7 @@
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
+                    <version>8.3.1</version>
                     <configuration>
                         <!-- no js is used in this project -->
                         <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
