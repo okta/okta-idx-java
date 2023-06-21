@@ -25,7 +25,7 @@
 
     <groupId>com.okta.idx.sdk</groupId>
     <artifactId>okta-idx-java-root</artifactId>
-    <version>3.0.6-SNAPSHOT</version>
+    <version>3.0.6</version>
     <packaging>pom</packaging>
 
     <name>Okta IDX Java SDK</name>
@@ -339,4 +339,8 @@
             </build>
         </profile>
     </profiles>
+
+  <scm>
+    <tag>okta-idx-java-root-3.0.6</tag>
+  </scm>
 </project>
