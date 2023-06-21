@@ -102,6 +102,7 @@ class BaseIDXClientTest {
         assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
         assertThat(httpHeaders.getFirst("Accept"), is("application/json"))
         assertThat(httpHeaders.getFirst(HttpHeaders.USER_AGENT), notNullValue())
+        assertThat(httpHeaders.get("Connection"), is("close"))
 
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getCodeVerifier(), notNullValue())
