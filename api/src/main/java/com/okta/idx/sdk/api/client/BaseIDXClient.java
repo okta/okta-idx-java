@@ -647,6 +647,7 @@ final class BaseIDXClient implements IDXClient {
 
         // value would look like (for e.g.): okta-idx-java/3.0.0-SNAPSHOT java/1.8.0_322 Mac OS X/12.3.1
         httpHeaders.add(HttpHeaders.USER_AGENT, userAgentValue);
+        httpHeaders.add("Connection", "close");
         return httpHeaders;
     }
 }
