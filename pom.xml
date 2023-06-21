@@ -39,7 +39,7 @@
         <okta.commons.version>1.3.4</okta.commons.version>
         <okta.sdk.previousVersion>3.0.4</okta.sdk.previousVersion>
         <org.apache.tomcat.embed.version>9.0.76</org.apache.tomcat.embed.version>
-        <org.jetbrains.kotlin.version>1.6.10</org.jetbrains.kotlin.version>
+        <org.jetbrains.kotlin.version>1.9.0-RC</org.jetbrains.kotlin.version>
         <github.slug>okta/okta-idx-java</github.slug>
     </properties>
 
@@ -118,6 +118,16 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib</artifactId>
                 <version>${org.jetbrains.kotlin.version}</version>
+            </dependency>
+            <dependency>
+                 <groupId>org.jetbrains.kotlin</groupId>
+                 <artifactId>kotlin-stdlib-jdk7</artifactId>
+                 <version>${org.jetbrains.kotlin.version}</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.jetbrains.kotlin</groupId>
+                 <artifactId>kotlin-stdlib-jdk8</artifactId>
+                 <version>${org.jetbrains.kotlin.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
