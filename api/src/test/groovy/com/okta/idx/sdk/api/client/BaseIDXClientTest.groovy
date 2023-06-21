@@ -98,11 +98,11 @@ class BaseIDXClientTest {
 
         def httpHeaders = argumentCaptor.getValue().getHeaders()
 
-        assertThat(httpHeaders.size(), is(3))
+        assertThat(httpHeaders.size(), is(4))
         assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
         assertThat(httpHeaders.getFirst("Accept"), is("application/json"))
         assertThat(httpHeaders.getFirst(HttpHeaders.USER_AGENT), notNullValue())
-        assertThat(httpHeaders.get("Connection"), is("close"))
+        assertThat(httpHeaders.getFirst("Connection"), is("close"))
 
         assertThat(idxClientContext, notNullValue())
         assertThat(idxClientContext.getCodeVerifier(), notNullValue())
@@ -136,7 +136,7 @@ class BaseIDXClientTest {
         verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
 
         def httpHeaders = argumentCaptor.getValue().getHeaders()
-        assertThat(httpHeaders.size(), is(6))
+        assertThat(httpHeaders.size(), is(7))
         assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
         assertThat(httpHeaders.getFirst("Accept"), is("application/json"))
         assertThat(httpHeaders.getFirst(HttpHeaders.USER_AGENT), notNullValue())
@@ -182,7 +182,7 @@ class BaseIDXClientTest {
         verify(requestExecutor, times(1)).executeRequest(argumentCaptor.capture())
 
         def httpHeaders = argumentCaptor.getValue().getHeaders()
-        assertThat(httpHeaders.size(), is(4))
+        assertThat(httpHeaders.size(), is(5))
         assertThat(httpHeaders.getFirst("Content-Type"), is("application/x-www-form-urlencoded"))
         assertThat(httpHeaders.getFirst("Accept"), is("application/json"))
         assertThat(httpHeaders.getFirst(HttpHeaders.USER_AGENT), notNullValue())
