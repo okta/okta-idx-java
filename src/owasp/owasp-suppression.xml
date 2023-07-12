@@ -30,22 +30,13 @@
          mitigated by our use of Spring Security 5.7 -->
     <suppress>
         <notes><![CDATA[ file name: spring-boot-starter-security-2.7.3.jar ]]></notes>
-        <cve>CVE-2022-22978</cve>
-        <cve>CVE-2022-22976</cve>
         <cve>CVE-2016-1000027</cve>
     </suppress>
 
-    <!-- False positive per https://github.com/jeremylong/DependencyCheck/issues/4634 -->
+    <!-- False positive, see https://github.com/jeremylong/DependencyCheck/issues/5779 -->
     <suppress>
-        <notes><![CDATA[ file name: tomcat-embed-core-9.0.64.jar ]]></notes>
-        <cve>CVE-2022-34305</cve>
-    </suppress>
-
-    <!-- False positive, see https://github.com/jeremylong/DependencyCheck/issues/4839 -->
-    <suppress base="true">
-        <notes><![CDATA[ FP per issue #4839 ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
-        <cve>CVE-2022-38752</cve>
+        <notes><![CDATA[ file name: jackson-databind-2.15.2.jar]]></notes>
+        <cve>CVE-2023-35116</cve>
     </suppress>
   
 </suppressions>
