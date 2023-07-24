@@ -248,6 +248,8 @@ final class BaseIDXClient implements IDXClient {
 
         IDXResponse idxResponse;
 
+        Assert.notNull(href, "href cannot be null");
+
         try {
             Request request = new DefaultRequest(
                 HttpMethod.POST,
