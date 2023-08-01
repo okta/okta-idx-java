@@ -27,13 +27,16 @@ import com.okta.idx.sdk.api.request.IdentifyRequest;
 import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.response.IDXResponse;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class RemediationOption {
+public class RemediationOption implements Serializable {
+
+    private static final long serialVersionUID = 5993815534655202495L;
 
     /**
      * Ion spec rel member based around the (form structure)[https://ionspec.org/#form-structure] rules

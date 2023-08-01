@@ -15,8 +15,11 @@
  */
 package com.okta.idx.sdk.api.request;
 
-public class BaseRequest {
+import java.io.Serializable;
+
+public class BaseRequest implements Serializable {
+
+    private static final long serialVersionUID = 4349037324612536710L;
 
     protected String stateHandle;
-
 }

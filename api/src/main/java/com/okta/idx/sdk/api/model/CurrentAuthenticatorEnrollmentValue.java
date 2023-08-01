@@ -17,9 +17,12 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class CurrentAuthenticatorEnrollmentValue {
+import java.io.Serializable;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class CurrentAuthenticatorEnrollmentValue implements Serializable {
+
+    private static final long serialVersionUID = -8196383336794761838L;
     private Recover recover;
 
     private String type;

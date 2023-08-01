@@ -17,11 +17,13 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Cancel {
+public class Cancel implements Serializable {
 
+    private static final long serialVersionUID = -4805637361065070915L;
     /**
      * Ion spec rel member based around the (form structure)[https://ionspec.org/#form-structure] rules
      */

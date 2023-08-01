@@ -15,7 +15,11 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public class Idp {
+import java.io.Serializable;
+
+public class Idp implements Serializable {
+
+    private static final long serialVersionUID = 4427668248060645377L;
 
     public Idp(String type, String href) {
         this.type = type;

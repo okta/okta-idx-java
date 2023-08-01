@@ -18,9 +18,12 @@ package com.okta.idx.sdk.api.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.okta.idx.sdk.webauthn.User;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ActivationData {
+import java.io.Serializable;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class ActivationData implements Serializable {
+
+    private static final long serialVersionUID = 8635600094524470051L;
     private User user;
     private String challenge;
 

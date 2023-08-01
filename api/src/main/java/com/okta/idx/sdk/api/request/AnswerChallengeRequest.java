@@ -18,8 +18,13 @@ package com.okta.idx.sdk.api.request;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.okta.idx.sdk.api.model.Credentials;
 
+import java.io.Serializable;
+import java.util.Set;
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AnswerChallengeRequest extends BaseRequest {
+public class AnswerChallengeRequest extends BaseRequest implements Serializable {
+
+    private static final long serialVersionUID = 5132114128662705378L;
 
     public Credentials credentials;
 

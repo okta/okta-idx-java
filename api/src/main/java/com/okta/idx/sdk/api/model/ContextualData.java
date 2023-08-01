@@ -17,9 +17,12 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ContextualData {
+import java.io.Serializable;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class ContextualData implements Serializable {
+
+    private static final long serialVersionUID = -8922607300607832245L;
     private QrCode qrcode;
     private String sharedSecret;
     private ActivationData activationData;

@@ -17,8 +17,12 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import java.io.Serializable;
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class QrCode {
+public class QrCode implements Serializable {
+
+    private static final long serialVersionUID = -8665724302975365679L;
     private String method;
     private String href;
     private String type;

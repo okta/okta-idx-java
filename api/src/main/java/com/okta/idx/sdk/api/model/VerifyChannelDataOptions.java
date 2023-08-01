@@ -15,7 +15,11 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public class VerifyChannelDataOptions {
+import java.io.Serializable;
+
+public class VerifyChannelDataOptions implements Serializable {
+
+    private static final long serialVersionUID = 5421628053012689812L;
 
     public VerifyChannelDataOptions(String channelName, String value) {
         this.channelName = channelName;

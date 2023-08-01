@@ -15,10 +15,12 @@
  */
 package com.okta.idx.sdk.api.model;
 
+import java.io.Serializable;
 import java.time.Duration;
 
-public class PollInfo {
+public class PollInfo implements Serializable {
 
+    private static final long serialVersionUID = 2117736146706017782L;
     private String href;
 
     private Duration refresh;

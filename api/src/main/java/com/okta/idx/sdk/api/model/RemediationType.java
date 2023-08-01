@@ -15,7 +15,11 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public class RemediationType {
+import java.io.Serializable;
+
+public class RemediationType implements Serializable {
+
+    private static final long serialVersionUID = -5914711927029427942L;
 
     public static final String IDENTIFY = "identify";
 

@@ -17,9 +17,12 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class OptionsForm {
+import java.io.Serializable;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class OptionsForm implements Serializable {
+
+    private static final long serialVersionUID = -8548716359241412997L;
     private OptionsFormVal form;
 
     public OptionsFormVal getForm() {

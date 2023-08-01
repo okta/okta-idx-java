@@ -15,7 +15,11 @@
  */
 package com.okta.idx.sdk.api.model;
 
-public class VerifyAuthenticatorOptions {
+import java.io.Serializable;
+
+public class VerifyAuthenticatorOptions implements Serializable {
+
+    private static final long serialVersionUID = -4912382787581593420L;
 
     public VerifyAuthenticatorOptions(String code) {
         this.code = code;
