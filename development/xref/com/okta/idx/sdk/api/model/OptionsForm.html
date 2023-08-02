@@ -25,15 +25,18 @@
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> com.fasterxml.jackson.annotation.JsonAutoDetect;
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="OptionsForm" href="../../../../../../com/okta/idx/sdk/api/model/OptionsForm.html#OptionsForm">OptionsForm</a> {
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>  
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>      <strong class="jxr_keyword">private</strong> <a name="OptionsFormVal" href="../../../../../../com/okta/idx/sdk/api/model/OptionsFormVal.html#OptionsFormVal">OptionsFormVal</a> form;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> java.io.Serializable;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="OptionsForm" href="../../../../../../com/okta/idx/sdk/api/model/OptionsForm.html#OptionsForm">OptionsForm</a> <strong class="jxr_keyword">implements</strong> Serializable {
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>      <strong class="jxr_keyword">public</strong> <a name="OptionsFormVal" href="../../../../../../com/okta/idx/sdk/api/model/OptionsFormVal.html#OptionsFormVal">OptionsFormVal</a> getForm() {
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>          <strong class="jxr_keyword">return</strong> form;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>      }
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  }
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> serialVersionUID = -8548716359241412997L;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>      <strong class="jxr_keyword">private</strong> <a name="OptionsFormVal" href="../../../../../../com/okta/idx/sdk/api/model/OptionsFormVal.html#OptionsFormVal">OptionsFormVal</a> form;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>      <strong class="jxr_keyword">public</strong> <a name="OptionsFormVal" href="../../../../../../com/okta/idx/sdk/api/model/OptionsFormVal.html#OptionsFormVal">OptionsFormVal</a> getForm() {
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>          <strong class="jxr_keyword">return</strong> form;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>      }
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2020&#x2013;2023 <a href="http://developer.okta.com/">Okta</a>. All rights reserved.</div>
