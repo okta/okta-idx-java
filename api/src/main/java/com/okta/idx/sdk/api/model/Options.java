@@ -19,9 +19,12 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.okta.idx.sdk.api.deserializers.OptionsValueDeserializer;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Options {
+import java.io.Serializable;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class Options implements Serializable {
+
+    private static final long serialVersionUID = -336868731800413422L;
     private String label;
 
     @JsonDeserialize(using = OptionsValueDeserializer.class)

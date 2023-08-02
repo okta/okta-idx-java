@@ -15,10 +15,12 @@
  */
 package com.okta.idx.sdk.api.model;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class AuthenticationOptions {
+public class AuthenticationOptions implements Serializable {
 
+    private static final long serialVersionUID = -3884153710554509205L;
     private String username;
 
     private char[] password;

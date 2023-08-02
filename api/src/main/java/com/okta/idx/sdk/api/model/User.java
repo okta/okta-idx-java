@@ -17,9 +17,12 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class User {
+import java.io.Serializable;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class User implements Serializable {
+
+    private static final long serialVersionUID = -884459259809016797L;
     private String type;
 
     private UserValue value;

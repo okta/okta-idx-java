@@ -17,6 +17,7 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -24,8 +25,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AuthenticatorEnrollments implements Iterable<AuthenticatorEnrollment> {
+public class AuthenticatorEnrollments implements Iterable<AuthenticatorEnrollment>, Serializable {
 
+    private static final long serialVersionUID = 1299561010501396979L;
     private String type;
 
     private AuthenticatorEnrollment[] value;

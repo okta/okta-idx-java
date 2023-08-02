@@ -17,11 +17,13 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Authenticators {
+public class Authenticators implements Serializable {
 
+    private static final long serialVersionUID = 744814615143068628L;
     private String type;
 
     private AuthenticatorsValue[] value;

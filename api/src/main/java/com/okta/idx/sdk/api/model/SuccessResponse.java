@@ -21,12 +21,14 @@ import com.okta.idx.sdk.api.client.IDXClient;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.response.TokenResponse;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Optional;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class SuccessResponse {
+public class SuccessResponse implements Serializable {
 
+    private static final long serialVersionUID = -618863469033853075L;
     /**
      * Ion spec rel member based around the (form structure)[https://ionspec.org/#form-structure] rules
      */

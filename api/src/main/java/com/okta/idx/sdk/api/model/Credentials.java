@@ -17,8 +17,12 @@ package com.okta.idx.sdk.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import java.io.Serializable;
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Credentials {
+public class Credentials implements Serializable {
+
+    private static final long serialVersionUID = 7101812795808047082L;
 
     public char[] passcode;
 

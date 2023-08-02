@@ -21,11 +21,13 @@ import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.request.RecoverRequest;
 import com.okta.idx.sdk.api.response.IDXResponse;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Recover {
+public class Recover implements Serializable {
 
+    private static final long serialVersionUID = -4132909683378754087L;
     private String[] rel;
 
     private String name;
