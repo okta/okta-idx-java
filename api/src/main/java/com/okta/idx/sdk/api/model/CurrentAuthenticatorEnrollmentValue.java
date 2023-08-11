@@ -33,6 +33,10 @@ public class CurrentAuthenticatorEnrollmentValue implements Serializable {
 
     private String displayName;
 
+    private MethodType[] methods;
+
+    private Settings settings;
+
     private RemediationOption resend;
 
     private RemediationOption poll;
