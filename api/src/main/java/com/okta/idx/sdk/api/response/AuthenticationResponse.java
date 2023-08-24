@@ -36,7 +36,7 @@ public class AuthenticationResponse {
 
     private ProceedContext proceedContext;
 
-    private AuthenticationStatus authenticationStatus;
+    private AuthenticationStatus authenticationStatus = AuthenticationStatus.UNKNOWN;
 
     private final List<String> errors = new LinkedList<>();
 
