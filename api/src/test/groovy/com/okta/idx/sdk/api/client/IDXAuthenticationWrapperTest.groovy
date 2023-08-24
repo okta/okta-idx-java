@@ -145,7 +145,7 @@ class IDXAuthenticationWrapperTest {
         AuthenticationResponse authenticationResponse =
                 idxAuthenticationWrapper.register(newUserRegistrationResponse.getProceedContext(), getUserProfile(), null)
         assertThat(authenticationResponse.getAuthenticators(), nullValue())
-        assertThat(authenticationResponse.getAuthenticationStatus(), nullValue())
+        assertThat(authenticationResponse.getAuthenticationStatus(), is(AuthenticationStatus.UNKNOWN))
         assertThat(authenticationResponse.getErrors(), notNullValue())
         assertThat(authenticationResponse.getErrors(), hasItems(
                 "Provided value for property 'Email' does not match required pattern",
