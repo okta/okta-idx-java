@@ -18,7 +18,8 @@ package com.okta.idx.sdk.api.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FormValue implements Serializable {
@@ -37,7 +38,7 @@ public class FormValue implements Serializable {
     public boolean required;
 
     /**
-     * A user friendly name that could be used for a UI
+     * A user-friendly name that could be used for a UI
      */
     public String label;
 
@@ -58,7 +59,7 @@ public class FormValue implements Serializable {
 
     private OptionsFormVal form;
 
-    public Options[] options;
+    public List<Options> options = new ArrayList<>();
 
     /**
      * Should this form value be visible in a UI
@@ -76,7 +77,7 @@ public class FormValue implements Serializable {
     public Messages messages;
 
     public String relatesTo() {
-        return Arrays.stream(options).findFirst().get().getRelatesTo();
+        return options.stream().findFirst().get().getRelatesTo();
     }
 
     /**
@@ -93,11 +94,8 @@ public class FormValue implements Serializable {
      *
      * @return {@link Options} array
      */
-    public Options[] options() {
-        if (options == null) {
-            return new Options[0];
-        }
-        return Arrays.copyOf(this.options, this.options.length);
+    public List<Options> options() {
+        return this.options;
     }
 
     public String getName() {

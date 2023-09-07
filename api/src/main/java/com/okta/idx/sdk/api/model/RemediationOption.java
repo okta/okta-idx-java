@@ -28,10 +28,7 @@ import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.response.IDXResponse;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class RemediationOption implements Serializable {
@@ -63,7 +60,7 @@ public class RemediationOption implements Serializable {
      */
     private String href;
 
-    private FormValue[] value;
+    private List<FormValue> value;
 
     /**
      * Accepts Header for this remediation option.
@@ -105,8 +102,8 @@ public class RemediationOption implements Serializable {
      *
      * @return array an array of FormValue
      */
-    public FormValue[] form() {
-        return value != null ? Arrays.copyOf(value, value.length) : null;
+    public List<FormValue> form() {
+        return value;
     }
 
     public String getName() {
@@ -138,18 +135,18 @@ public class RemediationOption implements Serializable {
 
         Map<String, String> authenticatorOptionsMap = new HashMap<>();
 
-        FormValue[] formValues = this.form();
+        List<FormValue> formValues = this.form();
 
-        Optional<FormValue> formValueOptional = Arrays.stream(formValues)
+        Optional<FormValue> formValueOptional = formValues.stream()
             .filter(x -> "authenticator".equals(x.getName()))
             .findFirst();
 
         if (formValueOptional.isPresent()) {
-            Options[] options = formValueOptional.get().options();
+            List<Options> options = formValueOptional.get().options();
 
             for (Options option : options) {
                 String key = null, val = null;
-                FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
+                List<FormValue> optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
                 for (FormValue formValue : optionFormValues) {
                     if (formValue.getName().equals("methodType")) {
                         key = String.valueOf(formValue.getValue());

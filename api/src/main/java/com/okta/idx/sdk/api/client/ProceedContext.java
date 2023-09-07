@@ -23,7 +23,6 @@ import com.okta.idx.sdk.api.response.IDXResponse;
 
 /**
  * An opaque to the developer object that's expected to be given back on the next request.
- *
  * We use this internally to know the current state of the authentication flow.
  */
 public final class ProceedContext {
@@ -61,8 +60,8 @@ public final class ProceedContext {
             return stateHandle;
         }
         Remediation remediation = idxResponse.remediation();
-        if (remediation != null && remediation.remediationOptions() != null && remediation.remediationOptions().length > 0) {
-            RemediationOption remediationOption = remediation.remediationOptions()[0];
+        if (remediation != null && remediation.remediationOptions() != null && remediation.remediationOptions().size() > 0) {
+            RemediationOption remediationOption = remediation.remediationOptions().get(0);
             String remediationStateHandle = WrapperUtil.getStateHandle(remediationOption.form());
             if (remediationStateHandle != null) {
                 return remediationStateHandle;

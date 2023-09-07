@@ -62,7 +62,6 @@ import com.okta.idx.sdk.api.response.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -711,11 +710,11 @@ public class IDXAuthenticationWrapper {
             RemediationOption enrollProfileRemediationOption =
                     enrollTransaction.getRemediationOption(RemediationType.ENROLL_PROFILE);
 
-            List<FormValue> enrollProfileFormValues = Arrays.stream(enrollProfileRemediationOption.form())
+            List<FormValue> enrollProfileFormValues = enrollProfileRemediationOption.form().stream()
                     .filter(x -> "userProfile".equals(x.getName()))
                     .collect(Collectors.toList());
 
-            List<FormValue> credentialFormValues = Arrays.stream(enrollProfileRemediationOption.form())
+            List<FormValue> credentialFormValues = enrollProfileRemediationOption.form().stream()
                     .filter(x -> "credentials".equals(x.getName()))
                     .collect(Collectors.toList());
 

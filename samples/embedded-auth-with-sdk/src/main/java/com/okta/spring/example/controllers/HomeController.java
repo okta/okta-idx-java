@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -293,7 +292,7 @@ public class HomeController {
         }
 
         List<FormValue> userProfileAttributes =
-                new LinkedList<>(Arrays.asList(userProfileFormValue.get().form().getValue()));
+                new LinkedList<>(userProfileFormValue.get().form().getValue());
 
         if (!CollectionUtils.isEmpty(userProfileAttributes)) {
             modelAndView.addObject("userProfileAttributes", userProfileAttributes);

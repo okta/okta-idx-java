@@ -23,6 +23,7 @@ import com.okta.idx.sdk.api.response.TokenResponse;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -50,9 +51,9 @@ public class SuccessResponse implements Serializable {
     private String href;
 
     /**
-     * Array of form values
+     * List of form values
      */
-    private FormValue[] value;
+    private List<FormValue> value;
 
     /**
      * Accepts Header
@@ -75,15 +76,15 @@ public class SuccessResponse implements Serializable {
         return href;
     }
 
-    public FormValue[] getValue() {
-        return Arrays.copyOf(this.value, this.value.length);
+    public List<FormValue> getValue() {
+        return this.value;
     }
 
     public String getAccepts() {
         return accepts;
     }
 
-    public FormValue[] form() {
+    public List<FormValue> form() {
         return getValue();
     }
 
@@ -92,7 +93,7 @@ public class SuccessResponse implements Serializable {
      * @return grant_type
      */
     private String parseGrantType() {
-        Optional<FormValue> grantTypeForm = Arrays.stream(this.value)
+        Optional<FormValue> grantTypeForm = this.value.stream()
             .filter(x -> "grant_type".equals(x.getName()))
             .findAny();
         Assert.isTrue(grantTypeForm.isPresent());
@@ -105,7 +106,7 @@ public class SuccessResponse implements Serializable {
      */
     private String parseInteractionCode() {
         String interactionCodeLookupKey = this.parseGrantType();
-        Optional<FormValue> interactionCodeForm = Arrays.stream(this.value)
+        Optional<FormValue> interactionCodeForm = this.value.stream()
             .filter(x -> interactionCodeLookupKey.equals(x.getName()))
             .findAny();
         Assert.isTrue(interactionCodeForm.isPresent());

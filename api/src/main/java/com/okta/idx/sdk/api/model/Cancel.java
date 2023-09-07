@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Cancel implements Serializable {
@@ -44,7 +45,7 @@ public class Cancel implements Serializable {
      */
     private String method;
 
-    private FormValue[] value;
+    private List<FormValue> value;
 
     /**
      * Accepts Header for this remediation option.
@@ -67,8 +68,8 @@ public class Cancel implements Serializable {
         return method;
     }
 
-    public FormValue[] getValue() {
-        return Arrays.copyOf(this.value, this.value.length);
+    public List<FormValue> getValue() {
+        return this.value;
     }
 
     public String getAccepts() {

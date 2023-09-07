@@ -23,6 +23,7 @@ import com.okta.idx.sdk.api.response.IDXResponse;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Recover implements Serializable {
@@ -40,7 +41,7 @@ public class Recover implements Serializable {
 
     private String accepts;
 
-    private FormValue[] value;
+    private List<FormValue> value;
 
     public String[] getRel() {
         return Arrays.copyOf(this.rel, this.rel.length);
@@ -66,8 +67,8 @@ public class Recover implements Serializable {
         return accepts;
     }
 
-    public FormValue[] getValue() {
-        return Arrays.copyOf(this.value, this.value.length);
+    public List<FormValue> getValue() {
+        return this.value;
     }
 
     public IDXResponse proceed(IDXClient client, RecoverRequest request) throws IllegalStateException, IllegalArgumentException, ProcessingException {

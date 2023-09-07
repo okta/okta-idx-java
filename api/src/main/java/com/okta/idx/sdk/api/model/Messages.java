@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.okta.commons.lang.Strings;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Messages implements Serializable {
@@ -28,18 +28,18 @@ public class Messages implements Serializable {
 
     private String type;
 
-    private MessageValue[] value;
+    private List<MessageValue> value;
 
     public String getType() {
         return type;
     }
 
-    public MessageValue[] getValue() {
-        return Arrays.copyOf(value, value.length);
+    public List<MessageValue> getValue() {
+        return this.value;
     }
 
     public boolean hasErrorValue() {
-        return Arrays.stream(value)
+        return value.stream()
             .map(MessageValue::getValue)
             .anyMatch(val -> Strings.hasText(val) && "ERROR".equals(val));
     }
