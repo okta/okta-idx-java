@@ -18,7 +18,6 @@ package com.okta.idx.sdk.api.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -30,28 +29,22 @@ public class AuthenticatorEnrollments implements Iterable<AuthenticatorEnrollmen
     private static final long serialVersionUID = 1299561010501396979L;
     private String type;
 
-    private AuthenticatorEnrollment[] value;
+    private List<AuthenticatorEnrollment> value;
 
     public String getType() {
         return type;
     }
 
-    public AuthenticatorEnrollment[] getValue() {
-        return Arrays.copyOf(this.value, this.value.length);
+    public List<AuthenticatorEnrollment> getValue() {
+        return this.value;
     }
 
     public List<AuthenticatorEnrollment> getValues() {
-        if (value != null) {
-            return Arrays.asList(value);
-        }
-        return Collections.emptyList();
+        return value != null ? value : Collections.emptyList();
     }
 
     public Stream<AuthenticatorEnrollment> stream() {
-        if (value == null) {
-            return Stream.empty();
-        }
-        return Arrays.stream(getValue());
+        return value != null ? getValue().stream() : Stream.empty();
     }
 
     @Override

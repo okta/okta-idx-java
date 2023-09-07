@@ -18,7 +18,7 @@ package com.okta.idx.sdk.api.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuthenticatorsValue implements Serializable {
@@ -32,7 +32,7 @@ public class AuthenticatorsValue implements Serializable {
 
     private String displayName;
 
-    private MethodType[] methods;
+    private List<MethodType> methods;
 
     public String getType() {
         return type;
@@ -50,7 +50,7 @@ public class AuthenticatorsValue implements Serializable {
         return displayName;
     }
 
-    public MethodType[] getMethods() {
-        return Arrays.copyOf(methods, methods.length);
+    public List<MethodType> getMethods() {
+        return methods;
     }
 }

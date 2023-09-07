@@ -17,6 +17,7 @@ package com.okta.idx.sdk.api.client;
 
 import com.okta.commons.http.Response;
 import com.okta.commons.lang.Assert;
+import com.okta.commons.lang.Collections;
 import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.exception.ProcessingException;
 import com.okta.idx.sdk.api.model.AuthenticationStatus;
@@ -40,14 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 final class AuthenticationTransaction {
@@ -126,9 +120,9 @@ final class AuthenticationTransaction {
             return null;
         }
 
-        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
-        String href = remediationOptions[0].getHref();
-        String refresh = remediationOptions[0].getRefresh();
+        List<RemediationOption> remediationOptions = idxResponse.remediation().remediationOptions();
+        String href = remediationOptions.get(0).getHref();
+        String refresh = remediationOptions.get(0).getRefresh();
 
         String skipHref = null;
         Optional<RemediationOption> skipOptional = getOptionalRemediationOption(RemediationType.SKIP);
@@ -182,7 +176,7 @@ final class AuthenticationTransaction {
         if (idxResponse == null || idxResponse.remediation() == null) {
             return Optional.empty();
         }
-        return Arrays.stream(idxResponse.remediation().remediationOptions())
+        return idxResponse.remediation().remediationOptions().stream()
                 .filter(x -> name.equals(x.getName()))
                 .findFirst();
     }
@@ -237,8 +231,8 @@ final class AuthenticationTransaction {
         }
 
         String firstRemediation = "";
-        if (idxResponse.remediation() != null && idxResponse.remediation().remediationOptions().length > 0) {
-            firstRemediation = idxResponse.remediation().remediationOptions()[0].getName();
+        if (idxResponse.remediation() != null && idxResponse.remediation().remediationOptions().size() > 0) {
+            firstRemediation = idxResponse.remediation().remediationOptions().get(0).getName();
         }
 
         switch (firstRemediation) {
@@ -296,9 +290,9 @@ final class AuthenticationTransaction {
         if (!remediationOptionOptional.isPresent()) {
             return false;
         }
-        FormValue[] formValues = remediationOptionOptional.get().form();
+        List<FormValue> formValues = remediationOptionOptional.get().form();
 
-        Optional<FormValue> credentialsFormValueOptional = Arrays.stream(formValues)
+        Optional<FormValue> credentialsFormValueOptional = formValues.stream()
                 .filter(x -> "credentials".equals(x.getName()))
                 .findFirst();
 
@@ -309,7 +303,7 @@ final class AuthenticationTransaction {
         if (idxResponse == null || idxResponse.getMessages() == null) {
             return;
         }
-        Arrays.stream(idxResponse.getMessages().getValue())
+        idxResponse.getMessages().getValue().stream()
                 .forEach(msg -> {
                     String message = msg.getMessage();
                     if (msg.getI18NMessage() != null && Strings.hasText(msg.getI18NMessage().getKey())) {
@@ -323,10 +317,10 @@ final class AuthenticationTransaction {
         if (idxResponse == null || idxResponse.remediation() == null) {
             return;
         }
-        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
-        if (remediationOptions.length > 0) {
+        List<RemediationOption> remediationOptions = idxResponse.remediation().remediationOptions();
+        if (!Collections.isEmpty(remediationOptions)) {
             // We only care about the first remediation.
-            fillOutAuthenticators(remediationOptions[0], authenticationResponse);
+            fillOutAuthenticators(remediationOptions.get(0), authenticationResponse);
         }
     }
 
@@ -337,9 +331,9 @@ final class AuthenticationTransaction {
 
         List<Idp> idpList = new LinkedList<>();
 
-        RemediationOption[] remediationOptions = this.getResponse().remediation().remediationOptions();
+        List<RemediationOption> remediationOptions = this.getResponse().remediation().remediationOptions();
 
-        List<RemediationOption> remediationOptionList = Arrays.stream(remediationOptions)
+        List<RemediationOption> remediationOptionList = remediationOptions.stream()
                 .filter(x -> "redirect-idps".equals(x.getName()) || "redirect-idp".equals(x.getName()))
                 .collect(Collectors.toList());
 
@@ -352,14 +346,14 @@ final class AuthenticationTransaction {
 
     private void fillOutAuthenticators(RemediationOption remediationOption, AuthenticationResponse authenticationResponse) {
         if (remediationOption != null) {
-            FormValue[] formValues = remediationOption.form();
+            List<FormValue> formValues = remediationOption.form();
             if (formValues != null) {
-                Optional<FormValue> formValueOptional = Arrays.stream(formValues)
+                Optional<FormValue> formValueOptional = formValues.stream()
                         .filter(x -> "authenticator".equals(x.getName()))
                         .findFirst();
 
                 if (formValueOptional.isPresent()) {
-                    Options[] options = formValueOptional.get().options();
+                    List<Options> options = formValueOptional.get().options();
 
                     List<Authenticator> authenticators = getAuthenticators(options);
                     if (authenticators == null) {
@@ -368,15 +362,15 @@ final class AuthenticationTransaction {
 
                     authenticationResponse.setAuthenticators(authenticators);
                 } else {
-                    formValueOptional = Arrays.stream(formValues)
+                    formValueOptional = formValues.stream()
                             .filter(x -> "credentials".equals(x.getName()))
                             .findFirst();
 
                     if (formValueOptional.isPresent()) {
-                        Options[] options = formValueOptional.get().options();
+                        List<Options> options = formValueOptional.get().options();
 
                         if (options != null) {
-                            boolean isSecQnAuth = Arrays.stream(options).anyMatch(x -> "Choose a security question".equals(x.getLabel()));
+                            boolean isSecQnAuth = options.stream().anyMatch(x -> "Choose a security question".equals(x.getLabel()));
 
                             if (isSecQnAuth) {
                                 List<SecurityQuestion> securityQuestions = getSecurityQuestions(options);
@@ -391,18 +385,18 @@ final class AuthenticationTransaction {
         }
     }
 
-    private List<SecurityQuestion> getSecurityQuestions(Options[] options) {
-        if (options == null || options.length == 0) {
+    private List<SecurityQuestion> getSecurityQuestions(List<Options> options) {
+        if (Collections.isEmpty(options)) {
             return null;
         }
 
         List<SecurityQuestion> securityQuestions = new ArrayList<>();
 
         for (Options option : options) {
-            FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
+            List<FormValue> optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
             for (FormValue formValue : optionFormValues) {
                 if (formValue.options() != null) {
-                    Arrays.stream(formValue.options()).forEach(e -> securityQuestions.add(new SecurityQuestion(e.getLabel(), String.valueOf(e.getValue()))));
+                    formValue.options().stream().forEach(e -> securityQuestions.add(new SecurityQuestion(e.getLabel(), String.valueOf(e.getValue()))));
                 }
             }
         }
@@ -410,8 +404,8 @@ final class AuthenticationTransaction {
         return securityQuestions;
     }
 
-    private List<Authenticator> getAuthenticators(Options[] options) {
-        if (options == null || options.length == 0) {
+    private List<Authenticator> getAuthenticators(List<Options> options) {
+        if (Collections.isEmpty(options)) {
             return null;
         }
         List<Authenticator> authenticators = new ArrayList<>();
@@ -425,13 +419,13 @@ final class AuthenticationTransaction {
             boolean isChannelFactor = false;
             Map<String, String> nestedMethods = new LinkedHashMap<>();
 
-            FormValue[] optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
+            List<FormValue> optionFormValues = ((OptionsForm) option.getValue()).getForm().getValue();
             for (FormValue formValue : optionFormValues) {
                 if (formValue.getName().equals("methodType")) {
                     authenticatorType = String.valueOf(formValue.getValue());
                     // parse value from children
-                    Options[] nestedOptions = formValue.options();
-                    if (nestedOptions.length > 0) {
+                    List<Options> nestedOptions = formValue.options();
+                    if (nestedOptions.size() > 0) {
                         for (Options children : nestedOptions) {
                             nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
                             authenticatorType = String.valueOf(option.getLabel()).toLowerCase(Locale.ROOT);
@@ -444,8 +438,8 @@ final class AuthenticationTransaction {
                     authenticatorType = String.valueOf(option.getLabel())
                             .toLowerCase(Locale.ROOT).replaceAll(" ", "_");
                     isChannelFactor = true;
-                    Options[] nestedOptions = formValue.options();
-                    if (nestedOptions.length > 0) {
+                    List<Options> nestedOptions = formValue.options();
+                    if (nestedOptions.size() > 0) {
                         for (Options children : nestedOptions) {
                             nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
                         }
@@ -490,8 +484,8 @@ final class AuthenticationTransaction {
             if (formValue.getName().equals("methodType")) {
                 authenticatorType = String.valueOf(formValue.getValue());
                 // parse value from children
-                Options[] nestedOptions = formValue.options();
-                if (nestedOptions.length > 0) {
+                List<Options> nestedOptions = formValue.options();
+                if (nestedOptions.size() > 0) {
                     for (Options children : nestedOptions) {
                         nestedMethods.put(String.valueOf(children.getValue()), String.valueOf(children.getLabel()));
                         authenticatorType = label.toLowerCase(Locale.ROOT);

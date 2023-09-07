@@ -18,15 +18,15 @@ package com.okta.idx.sdk.api.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class OptionsFormVal implements Serializable {
 
     private static final long serialVersionUID = 374542383850536763L;
-    private FormValue[] value;
+    private List<FormValue> value;
 
-    public FormValue[] getValue() {
-        return Arrays.copyOf(value, value.length);
+    public List<FormValue> getValue() {
+        return value;
     }
 }

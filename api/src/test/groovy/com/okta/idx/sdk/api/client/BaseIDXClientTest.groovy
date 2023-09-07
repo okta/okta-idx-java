@@ -61,6 +61,7 @@ import java.util.stream.Collectors
 import static com.okta.idx.sdk.api.util.ClientUtil.normalizedIssuerUri
 
 import static org.hamcrest.Matchers.arrayWithSize
+import static org.hamcrest.Matchers.hasSize
 import static org.hamcrest.Matchers.is
 import static org.mockito.Mockito.any
 import static org.mockito.Mockito.mock
@@ -928,7 +929,7 @@ class BaseIDXClientTest {
                 .findFirst()
         FormValue enrollAuthenticatorForm = enrollAuthenticatorFormOptional.get()
         assertThat(enrollAuthenticatorForm, notNullValue())
-        assertThat(enrollAuthenticatorForm.options(), arrayWithSize(2))
+        assertThat(enrollAuthenticatorForm.options(), hasSize(2))
 
         Options[] enrollmentAuthenticatorOptions = enrollAuthenticatorForm.options()
         Optional<Options> chooseSecQnOptionOptional = Arrays.stream(enrollmentAuthenticatorOptions)
@@ -936,11 +937,11 @@ class BaseIDXClientTest {
                 .findFirst()
         Options chooseSecQnOption = chooseSecQnOptionOptional.get()
         assertThat(chooseSecQnOption, notNullValue())
-        assertThat(chooseSecQnOption.value.form.value, arrayWithSize(2))
+        assertThat(chooseSecQnOption.value.form.value, hasSize(2))
         assertThat(chooseSecQnOption.value.form.value[0].name, is("questionKey"))
         assertThat(chooseSecQnOption.value.form.value[0].label, is("Choose a security question"))
         assertThat(chooseSecQnOption.value.form.value[0].required, equalTo(true))
-        assertThat(chooseSecQnOption.value.form.value[0].options, arrayWithSize(19)) // default sec qn list
+        assertThat(chooseSecQnOption.value.form.value[0].options, hasSize(19)) // default sec qn list
         assertThat(chooseSecQnOption.value.form.value[1].name, is("answer"))
         assertThat(chooseSecQnOption.value.form.value[1].label, is("Answer"))
         assertThat(chooseSecQnOption.value.form.value[1].required, equalTo(true))
@@ -959,7 +960,7 @@ class BaseIDXClientTest {
         assertThat(createOwnSecQnOption.value.form.value[2].name, is("answer"))
         assertThat(createOwnSecQnOption.value.form.value[2].label, equalTo("Answer"))
         assertThat(createOwnSecQnOption.value.form.value[2].required, equalTo(true))
-        assertThat(createOwnSecQnOption.value.form.value, arrayWithSize(3))
+        assertThat(createOwnSecQnOption.value.form.value, hasSize(3))
     }
 
     @Test

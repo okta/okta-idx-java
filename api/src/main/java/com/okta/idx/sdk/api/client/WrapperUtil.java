@@ -24,7 +24,7 @@ import com.okta.idx.sdk.api.response.IDXResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 final class WrapperUtil {
@@ -51,7 +51,7 @@ final class WrapperUtil {
         ErrorResponse errorResponse = e.getErrorResponse();
         if (errorResponse != null) {
             if (errorResponse.getMessages() != null) {
-                Arrays.stream(errorResponse.getMessages().getValue())
+                errorResponse.getMessages().getValue().stream()
                         .forEach(msg -> authenticationResponse.addError(msg.getMessage()));
             } else {
                 authenticationResponse.addError(errorResponse.getError() + ":" + errorResponse.getErrorDescription());
@@ -65,8 +65,8 @@ final class WrapperUtil {
 
     static void printRemediationOptions(IDXResponse idxResponse) {
         if (idxResponse != null && idxResponse.remediation() != null) {
-            RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions();
-            logger.debug("Remediation options: {}", Arrays.stream(remediationOptions)
+            List<RemediationOption> remediationOptions = idxResponse.remediation().remediationOptions();
+            logger.debug("Remediation options: {}", remediationOptions.stream()
                     .map(RemediationOption::getName)
                     .collect(Collectors.toList()));
         } else {
@@ -76,12 +76,12 @@ final class WrapperUtil {
 
     static void printMessage(IDXResponse idxResponse) {
         if(idxResponse != null && idxResponse.getMessages() != null && idxResponse.getMessages().hasErrorValue()) {
-            Arrays.stream(idxResponse.getMessages().getValue())
+            idxResponse.getMessages().getValue().stream()
                     .forEach(messageValue -> logger.error(messageValue.getMessage()));
         }
     }
 
-    static String getStateHandle(FormValue[] formValues) {
+    static String getStateHandle(List<FormValue> formValues) {
         if (formValues == null) {
             return null;
         }

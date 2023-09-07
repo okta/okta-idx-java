@@ -18,7 +18,7 @@ package com.okta.idx.sdk.api.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Remediation implements Serializable {
@@ -29,22 +29,22 @@ public class Remediation implements Serializable {
      */
     private String type;
 
-    private RemediationOption[] value;
+    private List<RemediationOption> value;
 
     /**
      * The list of remediation options available to continue the flow based on `remediation.value`
      *
-     * @return array array of RemediationOptions objects
+     * @return list of RemediationOptions objects
      */
-    public RemediationOption[] remediationOptions() {
-        return Arrays.copyOf(value, value.length);
+    public List<RemediationOption> remediationOptions() {
+        return value;
     }
 
     public String getType() {
         return type;
     }
 
-    public RemediationOption[] getValue() {
-        return Arrays.copyOf(value, value.length);
+    public List<RemediationOption> getValue() {
+        return value;
     }
 }
