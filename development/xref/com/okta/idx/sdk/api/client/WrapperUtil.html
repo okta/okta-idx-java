@@ -32,7 +32,7 @@
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> org.slf4j.Logger;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> org.slf4j.LoggerFactory;
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.Arrays;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.List;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.stream.Collectors;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a name="WrapperUtil" href="../../../../../../com/okta/idx/sdk/api/client/WrapperUtil.html#WrapperUtil">WrapperUtil</a> {
@@ -59,7 +59,7 @@
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>          <a name="ErrorResponse" href="../../../../../../com/okta/idx/sdk/api/response/ErrorResponse.html#ErrorResponse">ErrorResponse</a> errorResponse = e.getErrorResponse();
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>          <strong class="jxr_keyword">if</strong> (errorResponse != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>              <strong class="jxr_keyword">if</strong> (errorResponse.getMessages() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>                  Arrays.stream(errorResponse.getMessages().getValue())
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>                  errorResponse.getMessages().getValue().stream()
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>                          .forEach(msg -&gt; authenticationResponse.addError(msg.getMessage()));
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>              } <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>                  authenticationResponse.addError(errorResponse.getError() + <span class="jxr_string">":"</span> + errorResponse.getErrorDescription());
@@ -73,8 +73,8 @@
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> printRemediationOptions(<a name="IDXResponse" href="../../../../../../com/okta/idx/sdk/api/response/IDXResponse.html#IDXResponse">IDXResponse</a> idxResponse) {
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>          <strong class="jxr_keyword">if</strong> (idxResponse != <strong class="jxr_keyword">null</strong> &amp;&amp; idxResponse.remediation() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>              <a name="RemediationOption" href="../../../../../../com/okta/idx/sdk/api/model/RemediationOption.html#RemediationOption">RemediationOption</a>[] remediationOptions = idxResponse.remediation().remediationOptions();
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>              logger.debug(<span class="jxr_string">"Remediation options: {}"</span>, Arrays.stream(remediationOptions)
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>              List&lt;RemediationOption&gt; remediationOptions = idxResponse.remediation().remediationOptions();
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>              logger.debug(<span class="jxr_string">"Remediation options: {}"</span>, remediationOptions.stream()
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>                      .map(RemediationOption::getName)
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>                      .collect(Collectors.toList()));
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>          } <strong class="jxr_keyword">else</strong> {
@@ -84,12 +84,12 @@
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> printMessage(<a name="IDXResponse" href="../../../../../../com/okta/idx/sdk/api/response/IDXResponse.html#IDXResponse">IDXResponse</a> idxResponse) {
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>          <strong class="jxr_keyword">if</strong>(idxResponse != <strong class="jxr_keyword">null</strong> &amp;&amp; idxResponse.getMessages() != <strong class="jxr_keyword">null</strong> &amp;&amp; idxResponse.getMessages().hasErrorValue()) {
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>              Arrays.stream(idxResponse.getMessages().getValue())
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>              idxResponse.getMessages().getValue().stream()
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>                      .forEach(messageValue -&gt; logger.error(messageValue.getMessage()));
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>          }
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>      }
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>      <strong class="jxr_keyword">static</strong> String getStateHandle(<a name="FormValue" href="../../../../../../com/okta/idx/sdk/api/model/FormValue.html#FormValue">FormValue</a>[] formValues) {
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>      <strong class="jxr_keyword">static</strong> String getStateHandle(List&lt;FormValue&gt; formValues) {
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>          <strong class="jxr_keyword">if</strong> (formValues == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>              <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>          }
