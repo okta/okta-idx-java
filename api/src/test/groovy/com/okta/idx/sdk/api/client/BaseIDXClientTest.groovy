@@ -1198,11 +1198,11 @@ class BaseIDXClientTest {
 
         // supply only the "required" attributes
         UserProfile up = new UserProfile()
-        up.addAttribute("lastName", "Coder")
-        up.addAttribute("firstName", "Joe")
+        up.setLastName("Coder")
+        up.setFirstName("Joe")
         Random randomGenerator = new Random()
         int randomInt = randomGenerator.nextInt(1000)
-        up.addAttribute("email", "joe.coder" + randomInt + "@example.com")
+        up.setEmail("joe.coder" + randomInt + "@example.com")
         up.addAttribute("age", "40")
         up.addAttribute("sex", "Male")
 

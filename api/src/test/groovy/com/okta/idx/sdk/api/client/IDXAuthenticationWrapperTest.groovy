@@ -2176,9 +2176,9 @@ class IDXAuthenticationWrapperTest {
 
     static UserProfile getUserProfile() {
         UserProfile userProfile = new UserProfile()
-        userProfile.addAttribute("lastName", "Last")
-        userProfile.addAttribute("firstName", "First")
-        userProfile.addAttribute("email", "email@test.com")
+        userProfile.setLastName("Last")
+        userProfile.setFirstName("First")
+        userProfile.setEmail("email@test.com")
         return userProfile
     }
 
