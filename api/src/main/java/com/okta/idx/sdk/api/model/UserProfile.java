@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.okta.commons.lang.Assert;
 import com.okta.idx.sdk.api.serializers.UserProfileSerializer;
 
 import java.util.LinkedHashMap;
@@ -29,7 +30,7 @@ import java.util.Map;
 public class UserProfile {
 
     @JsonIgnore
-    private Map<String, Object> fields = new LinkedHashMap<>();
+    private final Map<String, Object> fields = new LinkedHashMap<>();
 
     public Map<String, Object> getFields() {
         return fields;
@@ -42,5 +43,20 @@ public class UserProfile {
 
     public void addAttribute(String key, Object value) {
         this.getFields().put(key, value);
+    }
+
+    public void setFirstName(String firstName) {
+        Assert.hasText(firstName, "firstName cannot be empty");
+        addAttribute("firstName", firstName);
+    }
+
+    public void setLastName(String lastName) {
+        Assert.hasText(lastName, "lastName cannot be empty");
+        addAttribute("lastName", lastName);
+    }
+
+    public void setEmail(String email) {
+        Assert.hasText(email, "email cannot be empty");
+        addAttribute("email", email);
     }
 }
