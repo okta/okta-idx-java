@@ -594,10 +594,7 @@ public class LoginController {
 
         UserProfile userProfile = new UserProfile();
 
-        Optional<FormValue> userProfileFormValue = newUserRegistrationResponse.getFormValues()
-                    .stream()
-                    .filter(x -> x.getName().equals("userProfile"))
-                    .findFirst();
+        Optional<FormValue> userProfileFormValue = newUserRegistrationResponse.getUserProfileForm();
 
         if (!userProfileFormValue.isPresent()) {
             ModelAndView modelAndView = new ModelAndView("register");

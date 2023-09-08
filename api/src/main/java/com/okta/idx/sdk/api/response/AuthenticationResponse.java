@@ -29,6 +29,7 @@ import com.okta.idx.sdk.webauthn.WebAuthnParams;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class AuthenticationResponse {
 
@@ -57,6 +58,13 @@ public class AuthenticationResponse {
     private CurrentAuthenticatorEnrollment currentAuthenticatorEnrollment;
 
     private User user;
+
+    public Optional<FormValue> getUserProfileForm() {
+        return getFormValues()
+                .stream()
+                .filter(x -> x.getName().equals("userProfile"))
+                .findFirst();
+    }
 
     public TokenResponse getTokenResponse() {
         return tokenResponse;
