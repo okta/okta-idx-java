@@ -121,7 +121,7 @@ public class RemediationOption implements Serializable {
     }
 
     public Duration getRefresh() {
-        return Duration.of(refresh.getSeconds(), ChronoUnit.MILLIS);
+        return refresh != null ? Duration.of(refresh.getSeconds(), ChronoUnit.MILLIS) : null;
     }
 
     /**

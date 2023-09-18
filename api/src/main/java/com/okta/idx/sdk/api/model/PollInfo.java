@@ -40,7 +40,7 @@ public class PollInfo implements Serializable {
     }
 
     public Duration getRefresh() {
-        return Duration.of(refresh.getSeconds(), ChronoUnit.MILLIS);
+        return refresh;
     }
 
     public void setRefresh(Duration refresh) {
