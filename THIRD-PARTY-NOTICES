@@ -26,6 +26,7 @@ This project includes:
   jackson-databind under The Apache Software License, Version 2.0
   Jackson-module-parameter-names under The Apache Software License, Version 2.0
   Jakarta Annotations API under EPL 2.0 or GPL2 w/ CPE
+  Javassist under MPL 1.1 or LGPL 2.1 or Apache License 2.0
   javax.annotation API under CDDL + GPLv2 with classpath exception
   JCIP Annotations under Apache License under Apache License, Version 2.0
   JSON Small and Fast Parser under The Apache Software License, Version 2.0
@@ -36,6 +37,7 @@ This project includes:
   Nimbus JOSE+JWT under The Apache Software License, Version 2.0
   Nimbus LangTag under The Apache Software License, Version 2.0
   OAuth 2.0 SDK with OpenID Connect extensions under Apache License, version 2.0
+  OGNL - Object Graph Navigation Library under The Apache Software License, Version 2.0
   Okio under The Apache Software License, Version 2.0
   Okta Commons :: Config Check under The Apache License, Version 2.0
   Okta Commons :: HTTP :: API under The Apache License, Version 2.0
