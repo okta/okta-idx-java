@@ -17,7 +17,6 @@ package com.okta.idx.sdk.api.model;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 public class PollInfo implements Serializable {
 
