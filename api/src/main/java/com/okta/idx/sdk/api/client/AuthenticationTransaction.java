@@ -122,7 +122,7 @@ final class AuthenticationTransaction {
 
         List<RemediationOption> remediationOptions = idxResponse.remediation().remediationOptions();
         String href = remediationOptions.get(0).getHref();
-        String refresh = remediationOptions.get(0).getRefresh();
+        Duration refresh = remediationOptions.get(0).getRefresh();
 
         String skipHref = null;
         Optional<RemediationOption> skipOptional = getOptionalRemediationOption(RemediationType.SKIP);
@@ -149,7 +149,7 @@ final class AuthenticationTransaction {
             }
             if (idxResponse.getCurrentAuthenticatorEnrollment().getValue().getPoll() != null) {
                 RemediationOption pollRemediationOption = idxResponse.getCurrentAuthenticatorEnrollment().getValue().getPoll();
-                pollInfo = new PollInfo(pollRemediationOption.getHref(), Duration.ofMillis(Long.parseLong(pollRemediationOption.getRefresh())));
+                pollInfo = new PollInfo(pollRemediationOption.getHref(), pollRemediationOption.getRefresh());
             }
         } else if (idxResponse.getCurrentAuthenticator() != null &&
                 idxResponse.getCurrentAuthenticator().getValue() != null) {
@@ -158,7 +158,7 @@ final class AuthenticationTransaction {
             }
             if (idxResponse.getCurrentAuthenticator().getValue().getPoll() != null) {
                 RemediationOption pollRemediationOption = idxResponse.getCurrentAuthenticator().getValue().getPoll();
-                pollInfo = new PollInfo(pollRemediationOption.getHref(), Duration.ofMillis(Long.parseLong(pollRemediationOption.getRefresh())));
+                pollInfo = new PollInfo(pollRemediationOption.getHref(), pollRemediationOption.getRefresh());
             }
         }
 

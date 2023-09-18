@@ -28,6 +28,8 @@ import com.okta.idx.sdk.api.request.SkipAuthenticatorEnrollmentRequest;
 import com.okta.idx.sdk.api.response.IDXResponse;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -70,7 +72,7 @@ public class RemediationOption implements Serializable {
     /**
      * Refresh value for this remediation option.
      */
-    private String refresh;
+    private Duration refresh;
 
     /**
      * Allow you to continue the remediation with this option.
@@ -118,8 +120,8 @@ public class RemediationOption implements Serializable {
         return href;
     }
 
-    public String getRefresh() {
-        return refresh;
+    public Duration getRefresh() {
+        return Duration.of(refresh.getSeconds(), ChronoUnit.MILLIS);
     }
 
     /**

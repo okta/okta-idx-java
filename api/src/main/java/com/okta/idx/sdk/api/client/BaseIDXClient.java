@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.okta.commons.http.DefaultRequest;
 import com.okta.commons.http.HttpException;
 import com.okta.commons.http.HttpHeaders;
@@ -81,6 +82,7 @@ final class BaseIDXClient implements IDXClient {
         this.objectMapper = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .registerModule(new JavaTimeModule())
             .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         HttpClientConfiguration httpClientConfiguration = new HttpClientConfiguration();

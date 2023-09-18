@@ -21,6 +21,9 @@ import com.okta.idx.sdk.api.model.Remediation;
 import com.okta.idx.sdk.api.model.RemediationOption;
 import com.okta.idx.sdk.api.response.IDXResponse;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 /**
  * An opaque to the developer object that's expected to be given back on the next request.
  * We use this internally to know the current state of the authentication flow.
@@ -34,11 +37,11 @@ public final class ProceedContext {
     private final String selectProfileEnrollHref;
     private final String resendHref;
     private final PollInfo pollInfo;
-    private final String refresh;
+    private final Duration refresh;
     private final IDXResponse idxResponse;
 
     ProceedContext(IDXClientContext clientContext, String stateHandle, String href, String skipHref, boolean isIdentifyInOneStep,
-                   String selectProfileEnrollHref, String resendHref, PollInfo pollInfo, String refresh, IDXResponse idxResponse) {
+                   String selectProfileEnrollHref, String resendHref, PollInfo pollInfo, Duration refresh, IDXResponse idxResponse) {
         this.clientContext = clientContext;
         this.stateHandle = stateHandle;
         this.href = href;
@@ -94,8 +97,8 @@ public final class ProceedContext {
         return pollInfo;
     }
 
-    public String getRefresh() {
-        return refresh;
+    public Duration getRefresh() {
+        return Duration.of(refresh.getSeconds(), ChronoUnit.MILLIS);
     }
 
     /**

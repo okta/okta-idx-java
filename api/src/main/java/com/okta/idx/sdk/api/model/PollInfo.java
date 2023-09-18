@@ -17,6 +17,7 @@ package com.okta.idx.sdk.api.model;
 
 import java.io.Serializable;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 public class PollInfo implements Serializable {
 
@@ -39,7 +40,7 @@ public class PollInfo implements Serializable {
     }
 
     public Duration getRefresh() {
-        return refresh;
+        return Duration.of(refresh.getSeconds(), ChronoUnit.MILLIS);
     }
 
     public void setRefresh(Duration refresh) {
