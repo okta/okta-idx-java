@@ -79,11 +79,13 @@
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.value;
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>      }
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>      <strong class="jxr_keyword">public</strong> <a name="IDXResponse" href="../../../../../../com/okta/idx/sdk/api/response/IDXResponse.html#IDXResponse">IDXResponse</a> proceed(<a name="IDXClient" href="../../../../../../com/okta/idx/sdk/api/client/IDXClient.html#IDXClient">IDXClient</a> client, <a name="RecoverRequest" href="../../../../../../com/okta/idx/sdk/api/request/RecoverRequest.html#RecoverRequest">RecoverRequest</a> request) <strong class="jxr_keyword">throws</strong> IllegalStateException, IllegalArgumentException, <a name="ProcessingException" href="../../../../../../com/okta/idx/sdk/api/exception/ProcessingException.html#ProcessingException">ProcessingException</a> {
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>          <strong class="jxr_keyword">return</strong> client.recover(request, getHref());
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>      }
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  }
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>      <strong class="jxr_keyword">public</strong> List&lt;FormValue&gt; formValues() { <strong class="jxr_keyword">return</strong> getValue(); }
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>      <strong class="jxr_keyword">public</strong> <a name="IDXResponse" href="../../../../../../com/okta/idx/sdk/api/response/IDXResponse.html#IDXResponse">IDXResponse</a> proceed(<a name="IDXClient" href="../../../../../../com/okta/idx/sdk/api/client/IDXClient.html#IDXClient">IDXClient</a> client, <a name="RecoverRequest" href="../../../../../../com/okta/idx/sdk/api/request/RecoverRequest.html#RecoverRequest">RecoverRequest</a> request) <strong class="jxr_keyword">throws</strong> IllegalStateException, IllegalArgumentException, <a name="ProcessingException" href="../../../../../../com/okta/idx/sdk/api/exception/ProcessingException.html#ProcessingException">ProcessingException</a> {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>          <strong class="jxr_keyword">return</strong> client.recover(request, getHref());
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>      }
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2020&#x2013;2023 <a href="http://developer.okta.com/">Okta</a>. All rights reserved.</div>
