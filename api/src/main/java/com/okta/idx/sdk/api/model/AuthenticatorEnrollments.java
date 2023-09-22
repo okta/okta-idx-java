@@ -43,6 +43,8 @@ public class AuthenticatorEnrollments implements Iterable<AuthenticatorEnrollmen
         return value != null ? value : Collections.emptyList();
     }
 
+    public List<AuthenticatorEnrollment> authenticatorEnrollments() { return getValues(); }
+
     public Stream<AuthenticatorEnrollment> stream() {
         return value != null ? getValue().stream() : Stream.empty();
     }

@@ -29,4 +29,6 @@ public class OptionsFormVal implements Serializable {
     public List<FormValue> getValue() {
         return value;
     }
+
+    public List<FormValue> formValues() { return getValue(); }
 }

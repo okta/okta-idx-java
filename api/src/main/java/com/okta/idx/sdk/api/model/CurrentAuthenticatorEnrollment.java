@@ -28,4 +28,8 @@ public class CurrentAuthenticatorEnrollment implements Serializable {
     public CurrentAuthenticatorEnrollmentValue getValue() {
         return value;
     }
+
+    public CurrentAuthenticatorEnrollmentValue value() {
+        return getValue();
+    }
 }

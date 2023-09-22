@@ -38,4 +38,6 @@ public class SecurityQuestion implements Serializable {
     public String getValue() {
         return value;
     }
+
+    public String value() { return getValue(); }
 }

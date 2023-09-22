@@ -45,4 +45,6 @@ public class VerifyChannelDataOptions implements Serializable {
     public void setValue(String value) {
         this.value = value;
     }
+
+    public String value() { return getValue(); }
 }

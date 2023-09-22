@@ -71,6 +71,8 @@ public class Recover implements Serializable {
         return this.value;
     }
 
+    public List<FormValue> formValues() { return getValue(); }
+
     public IDXResponse proceed(IDXClient client, RecoverRequest request) throws IllegalStateException, IllegalArgumentException, ProcessingException {
         return client.recover(request, getHref());
     }

@@ -36,6 +36,8 @@ public enum AuthenticatorType {
 
     public String getValue() { return this.value; }
 
+    public String value() { return getValue(); }
+
     public static AuthenticatorType get(String authenticatorType) {
         return reverseLookupMap.get(authenticatorType);
     }

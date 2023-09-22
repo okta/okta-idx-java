@@ -43,6 +43,8 @@ public class MessageValue implements Serializable {
         return value;
     }
 
+    public String value() { return getValue(); }
+
     @Override
     public String toString() {
         return "message='" + message + '\'' +

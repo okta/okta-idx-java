@@ -117,4 +117,6 @@ public class FormValue implements Serializable {
     public String getLabel() {
         return label;
     }
+
+    public Object value() { return getValue(); }
 }

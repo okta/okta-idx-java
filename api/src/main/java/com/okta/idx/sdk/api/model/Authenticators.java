@@ -35,4 +35,6 @@ public class Authenticators implements Serializable {
     public AuthenticatorsValue[] getValue() {
         return Arrays.copyOf(value, value.length);
     }
+
+    public AuthenticatorsValue[] authenticators() { return getValue(); }
 }

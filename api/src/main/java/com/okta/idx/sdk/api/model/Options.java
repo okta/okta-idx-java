@@ -40,6 +40,8 @@ public class Options implements Serializable {
         return value;
     }
 
+    public Object value() { return getValue(); }
+
     public String getRelatesTo() {
         return relatesTo;
     }

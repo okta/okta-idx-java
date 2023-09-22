@@ -34,4 +34,6 @@ public class App implements Serializable {
     public AppValue getValue() {
         return value;
     }
+
+    public AppValue value() { return getValue(); }
 }
