@@ -34,4 +34,6 @@ public class User implements Serializable {
     public UserValue getValue() {
         return value;
     }
+
+    public UserValue value() { return getValue(); }
 }

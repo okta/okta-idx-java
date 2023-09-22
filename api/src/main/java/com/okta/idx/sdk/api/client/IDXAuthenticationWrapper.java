@@ -203,7 +203,7 @@ public class IDXAuthenticationWrapper {
                 // recover
                 AuthenticationTransaction recoverTransaction = AuthenticationTransaction.proceed(client, proceedContext, () -> {
                     RecoverRequest recoverRequest = RecoverRequestBuilder.builder()
-                            .withStateHandle(getStateHandle(proceedContext.getIdxResponse().getCurrentAuthenticator().getValue().getRecover().getValue()))
+                            .withStateHandle(getStateHandle(proceedContext.getIdxResponse().getCurrentAuthenticator().value().getRecover().formValues()))
                             .build();
 
                     return client.recover(recoverRequest, null);
@@ -241,7 +241,7 @@ public class IDXAuthenticationWrapper {
                 }
 
                 Recover recover = identifyTransaction.getResponse()
-                        .getCurrentAuthenticatorEnrollment().getValue().getRecover();
+                        .getCurrentAuthenticatorEnrollment().value().getRecover();
 
                 AuthenticationTransaction finalIdentifyTransaction = identifyTransaction;
                 AuthenticationTransaction recoverTransaction = identifyTransaction.proceed(() -> {
@@ -459,14 +459,14 @@ public class IDXAuthenticationWrapper {
                     .withStateHandle(proceedContext.getStateHandle());
 
             if("phoneNumber".equals(verifyChannelDataOptions.getChannelName())) {
-                builder.withPhoneNumber(verifyChannelDataOptions.getValue());
+                builder.withPhoneNumber(verifyChannelDataOptions.value());
             }
             if("email".equals(verifyChannelDataOptions.getChannelName())) {
-                builder.withEmail(verifyChannelDataOptions.getValue());
+                builder.withEmail(verifyChannelDataOptions.value());
             }
             if("totp".equals(verifyChannelDataOptions.getChannelName())) {
                 Credentials credentials = new Credentials();
-                credentials.setTotp(verifyChannelDataOptions.getValue());
+                credentials.setTotp(verifyChannelDataOptions.value());
                 builder.withCredentials(credentials);
             }
 

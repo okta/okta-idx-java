@@ -38,6 +38,8 @@ public class Messages implements Serializable {
         return this.value;
     }
 
+    public List<MessageValue> values() { return getValue(); }
+
     public boolean hasErrorValue() {
         return value.stream()
             .map(MessageValue::getValue)

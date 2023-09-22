@@ -72,6 +72,10 @@ public class Cancel implements Serializable {
         return this.value;
     }
 
+    public List<FormValue> formValues() {
+        return getValue();
+    }
+
     public String getAccepts() {
         return accepts;
     }
