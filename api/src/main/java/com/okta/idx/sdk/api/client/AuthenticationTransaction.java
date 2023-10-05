@@ -468,7 +468,7 @@ final class AuthenticationTransaction {
     }
 
     private List<Authenticator> getAuthenticators(FormValue parent) {
-        if (parent == null) {
+        if ( (parent == null) || (parent.form() == null) ) {
             return null;
         }
         List<Authenticator> authenticators = new ArrayList<>();
