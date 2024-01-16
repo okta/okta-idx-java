@@ -134,6 +134,11 @@
                 <artifactId>kotlin-stdlib-common</artifactId>
                 <version>${org.jetbrains.kotlin.version}</version>
             </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.4.14</version>
+            </dependency>
 
             <!-- ITs -->
             <dependency>
