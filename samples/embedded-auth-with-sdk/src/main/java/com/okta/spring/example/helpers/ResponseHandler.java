@@ -307,6 +307,7 @@ public final class ResponseHandler {
 
     /**
      * Return the view for verify form.
+     * @param enrollResponse the enrollment response
      * @return the view for verifyForm.
      */
     public ModelAndView verifyWebauthn(AuthenticationResponse enrollResponse) {
