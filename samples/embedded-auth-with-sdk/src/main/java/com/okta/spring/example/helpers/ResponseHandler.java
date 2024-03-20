@@ -17,6 +17,8 @@ package com.okta.spring.example.helpers;
 
 import com.okta.idx.sdk.api.client.Authenticator;
 import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollment;
+import com.okta.idx.sdk.api.model.AuthenticatorEnrollments;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.okta.idx.sdk.api.model.AuthenticationStatus.SKIP_COMPLETE;
 
@@ -102,7 +105,23 @@ public final class ResponseHandler {
                 return selectAuthenticatorForm(response, "Select Authenticator", session);
             case AWAITING_AUTHENTICATOR_ENROLLMENT:
             case AWAITING_AUTHENTICATOR_VERIFICATION:
-                return verifyForm(response);
+                // If webauthn, webAuthParams is present, otherwise
+                // currentAuthenticatorEnrollment
+                if (null != response.getWebAuthnParams().getCurrentAuthenticator()) {
+                    if (response.getWebAuthnParams().getCurrentAuthenticator().getValue().getDisplayName()
+                            .equals("Security Key or Biometric")) {
+
+                        AuthenticatorEnrollments authenticatorEnrollments = response.getAuthenticatorEnrollments();
+                        Optional<AuthenticatorEnrollment> authenticatorOptional = authenticatorEnrollments.stream()
+                                .filter(auth -> auth.getKey().equals("webauthn")).findFirst();
+                        String credentialID = authenticatorOptional.get().getCredentialId();
+
+                        response.getWebAuthnParams().setWebauthnCredentialId(credentialID);
+                        return verifyWebauthn(response);
+                    }
+                } else {
+                    return verifyForm();
+                }
             case AWAITING_AUTHENTICATOR_ENROLLMENT_SELECTION:
                 return selectAuthenticatorForm(response, "Enroll Authenticator", session);
             case AWAITING_POLL_ENROLLMENT:
@@ -283,6 +302,21 @@ public final class ResponseHandler {
     private ModelAndView registerPasswordForm(String title) {
         ModelAndView modelAndView = new ModelAndView("register-password");
         modelAndView.addObject("title", title);
+        return modelAndView;
+    }
+
+    /**
+     * Return the view for verify form.
+     * @param enrollResponse the enrollment response
+     * @return the view for verifyForm.
+     */
+    public ModelAndView verifyWebauthn(AuthenticationResponse enrollResponse) {
+        String webauthnCredentialId = enrollResponse.getWebAuthnParams().getWebauthnCredentialId();
+        ModelAndView modelAndView = new ModelAndView("verify-webauthn-authenticator");
+        modelAndView.addObject("title", "Select WebAuthn Authenticator");
+        modelAndView.addObject("webauthnCredentialId", webauthnCredentialId);
+        modelAndView.addObject("challengeData", enrollResponse.getWebAuthnParams().getCurrentAuthenticator().getValue()
+                .getContextualData().getChallengeData());
         return modelAndView;
     }
 
