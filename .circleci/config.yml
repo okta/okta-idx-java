@@ -46,5 +46,3 @@ workflows:
           name: "Scan with Semgrep"
           context:
             - static-analysis
-          requires:
-            - jdk17
