@@ -47,14 +47,10 @@ jobs:
           additional-arguments: "--maven-aggregate-project"
 
 workflows:
-  build_and_test:
+   "Circle CI Tests":
     jobs:
       - jdk8
       - jdk11
-      - jdk17
-  # See OKTA-624788
-  semgrep:
-    jobs:
       - jdk17
       - general-platform-helpers/job-semgrep-scan:
           name: "Scan with Semgrep"
