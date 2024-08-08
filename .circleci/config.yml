@@ -42,9 +42,15 @@ workflows:
   # See OKTA-624788
   semgrep:
     jobs:
-      - general-platform-helpers/job-semgrep-prepare:
-          name: semgrep-prepare
       - general-platform-helpers/job-semgrep-scan:
           name: "Scan with Semgrep"
+          context:
+            - static-analysis
           requires:
-            - semgrep-prepare
+            - jdk17
+      - snyk-scan:
+          name: execute-snyk
+          requires:
+            - jdk17
+          context:
+            - static-analysis
