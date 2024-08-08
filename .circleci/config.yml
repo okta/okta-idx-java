@@ -55,6 +55,7 @@ workflows:
   # See OKTA-624788
   semgrep:
     jobs:
+      - jdk17
       - general-platform-helpers/job-semgrep-scan:
           name: "Scan with Semgrep"
           context:
