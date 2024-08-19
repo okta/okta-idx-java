@@ -21,7 +21,7 @@ For information on how to build your app with this sample, please take a look at
 
 ## Prerequisites
 
-- [JDK 8][jdk-8] or later
+- [JDK 17][jdk-17] or later
 - [Apache Maven][apache-maven] 3.6.x or later
 
 ## Installation & Running The App
@@ -54,5 +54,5 @@ Now navigate to http://localhost:8080 in your browser.
 
 If you see a home page that prompts you to login, then things are working!
 
-[jdk-8]: https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html
+[jdk-17]: https://www.oracle.com/java/technologies/downloads/#java17
 [apache-maven]: https://maven.apache.org/download.cgi

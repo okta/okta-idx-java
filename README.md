@@ -50,7 +50,7 @@ If you run into problems using the SDK, you can
 
 ### Prerequisites
 
-- [JDK 8][jdk-8] or [JDK 11][jdk-11]
+- [JDK 17][jdk-17] or later
 - [Apache Maven][apache-maven] 3.6.x or later
 
 To use this SDK, you will need to include the following dependencies:
@@ -324,8 +324,7 @@ We are happy to accept contributions and PRs! Please see the [contribution guide
 [github-issues]: https://github.com/okta/okta-idx-java/issues
 [github-releases]: https://github.com/okta/okta-idx-java/releases
 [okta-library-versioning]: https://developer.okta.com/code/library-versions
-[jdk-8]: https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html
-[jdk-11]: https://www.oracle.com/java/technologies/javase-jdk11-downloads.html
+[jdk-17]: https://www.oracle.com/java/technologies/downloads/#java17
 [java-samples]: https://github.com/okta/okta-idx-java/tree/master/samples
 [apache-maven]: https://maven.apache.org/download.cgi
 [okta-identity-engine]: https://developer.okta.com/docs/guides/oie-intro/
