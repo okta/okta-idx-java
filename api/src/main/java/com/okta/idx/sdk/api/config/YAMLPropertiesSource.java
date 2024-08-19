@@ -46,15 +46,16 @@ public class YAMLPropertiesSource implements PropertiesSource {
     @SuppressWarnings("unchecked")
     public Map<String, String> getProperties() {
         try {
-            InputStream in = resource.getInputStream();
-            // check to see if file exists
-            if (in != null) { // if we have a yaml file.
-                if (Classes.isAvailable("org.yaml.snakeyaml.Yaml")) {
-                    Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
-                    Map config = yaml.load(in);
-                    return getFlattenedMap(config);
-                } else {
-                    log.warn("YAML not found in classpath, add 'org.yaml.snakeyaml' to support YAML configuration");
+            try (InputStream in = resource.getInputStream()) {
+                // check to see if file exists
+                if (in != null) { // if we have a yaml file.
+                    if (Classes.isAvailable("org.yaml.snakeyaml.Yaml")) {
+                        Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
+                        Map config = yaml.load(in);
+                        return getFlattenedMap(config);
+                    } else {
+                        log.warn("YAML not found in classpath, add 'org.yaml.snakeyaml' to support YAML configuration");
+                    }
                 }
             }
         } catch (IOException e) {
