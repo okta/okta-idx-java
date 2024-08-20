@@ -50,7 +50,7 @@ public enum AuthenticatorType {
     static Map<String, AuthenticatorType> reverseLookupMap = new HashMap<>();
 
     static {
-        AuthenticatorType[] values = AuthenticatorType.values();
+        AuthenticatorType[] values = values();
 
         for (AuthenticatorType val : values) {
             reverseLookupMap.put(val.getValue(), val);

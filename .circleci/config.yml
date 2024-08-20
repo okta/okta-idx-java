@@ -11,21 +11,7 @@ aliases:
     - run: ./mvnw clean install -Pci
 
 jobs:
-  
-  jdk8:
-    docker:
-      - image: cimg/openjdk:8.0.402
-    environment:
-        JVM_OPTS: -Xmx3200m
-    steps: *build_steps
-  
-  jdk11:
-    docker:
-      - image: cimg/openjdk:11.0.22
-    environment:
-        JVM_OPTS: -Xmx3200m
-    steps: *build_steps
-          
+
   jdk17:
     docker:
       - image: cimg/openjdk:17.0.11
@@ -49,8 +35,6 @@ jobs:
 workflows:
    "Circle CI Tests":
     jobs:
-      - jdk8
-      - jdk11
       - jdk17
       - general-platform-helpers/job-semgrep-scan:
           name: "Scan with Semgrep"
