@@ -27,7 +27,7 @@ To see this library working in a sample, check out our [Java Samples][java-sampl
 
 ## Release Status
 
-✔️ The current stable major version series is: 3.x
+✔️ The current stable major version series is: 4.x
 
 This library uses semantic versioning and follows Okta's [Library Version Policy][okta-library-versioning].
 
@@ -36,6 +36,7 @@ This library uses semantic versioning and follows Okta's [Library Version Policy
 | 1.0.0 | :heavy_check_mark: Stable     |
 | 2.0.0 | :heavy_check_mark: Stable     |
 | 3.0.x | :heavy_check_mark: Stable     |
+| 4.0.x | :heavy_check_mark: Stable     |
 
 The latest release can always be found on the [releases page][github-releases].
 
@@ -50,7 +51,7 @@ If you run into problems using the SDK, you can
 
 ### Prerequisites
 
-- [JDK 17][jdk-17] or later
+- [JDK 17][jdk-17] or later (for 4.0.x versions, earlier SDK versions should work with pre JDK 17) 
 - [Apache Maven][apache-maven] 3.6.x or later
 
 To use this SDK, you will need to include the following dependencies:
