@@ -20,12 +20,12 @@
     <parent>
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
-        <version>24</version>
+        <version>33</version>
     </parent>
 
     <groupId>com.okta.idx.sdk</groupId>
     <artifactId>okta-idx-java-root</artifactId>
-    <version>3.0.8-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Okta IDX Java SDK</name>
@@ -34,7 +34,7 @@
     <inceptionYear>2020</inceptionYear>
 
     <properties>
-        <jackson.version>2.15.2</jackson.version>
+        <jackson.version>2.17.2</jackson.version>
         <snakeyaml.version>2.2</snakeyaml.version>
         <okta.commons.version>1.3.5</okta.commons.version>
         <okta.sdk.previousVersion>3.0.7</okta.sdk.previousVersion>
@@ -235,17 +235,6 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-pmd-plugin</artifactId>
-                    <configuration>
-                        <rulesets>
-                            <!-- starting from maven 3.3.1 -->
-                            <!--suppress UnresolvedMavenProperty -->
-                            <ruleset>${maven.multiModuleProjectDirectory}/src/pmd/ruleset.xml</ruleset>
-                        </rulesets>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <executions>
@@ -272,7 +261,7 @@
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>9.2.0</version>
+                    <version>10.0.3</version>
                     <configuration>
                         <!-- no js is used in this project -->
                         <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
@@ -310,7 +299,7 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <version>0.15.4</version>
+                <version>0.22.0</version>
                 <configuration>
                     <oldVersion>
                         <dependency>

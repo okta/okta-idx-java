@@ -11,38 +11,38 @@ aliases:
     - run: ./mvnw clean install -Pci
 
 jobs:
-  
-  jdk8:
-    docker:
-      - image: cimg/openjdk:8.0.322
-    environment:
-        JVM_OPTS: -Xmx3200m
-    steps: *build_steps
-  
-  jdk11:
-    docker:
-      - image: cimg/openjdk:11.0.13
-    environment:
-        JVM_OPTS: -Xmx3200m
-    steps: *build_steps
-          
+
   jdk17:
     docker:
-      - image: cimg/openjdk:17.0.4
+      - image: cimg/openjdk:17.0.11
     environment:
         JVM_OPTS: -Xmx3200m
     steps: *build_steps
 
+  snyk-scan:
+    docker:
+      - image: cimg/openjdk:17.0.11
+    steps:
+      - checkout
+      - run: ./mvnw clean install -Pci -Dlicense.skip=true -Dmaven.test.skip.exec=true
+      - general-platform-helpers/step-load-dependencies
+      - general-platform-helpers/step-run-snyk-monitor:
+          scan-all-projects: false
+          skip-unresolved: false
+          run-on-non-main: true
+          additional-arguments: "--maven-aggregate-project"
+
 workflows:
-  build_and_test:
+   "Circle CI Tests":
     jobs:
-      - jdk8
-      - jdk11
       - jdk17
-  # See OKTA-624788
-  semgrep:
-    jobs:
       - general-platform-helpers/job-semgrep-scan:
           name: "Scan with Semgrep"
+          context:
+            - static-analysis
+      - snyk-scan:
+          name: execute-snyk
+          requires:
+            - jdk17
           context:
             - static-analysis
