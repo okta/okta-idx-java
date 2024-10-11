@@ -18,7 +18,7 @@ package com.okta.spring.example.helpers;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.RequestContext;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import java.util.UUID;
 
 public final class Util {
