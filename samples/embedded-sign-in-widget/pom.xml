@@ -55,6 +55,11 @@
             <version>${okta.springboot.starter.version}</version>
         </dependency>
         <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>2.5.2</version>
+        </dependency>
+        <dependency>
             <groupId>com.okta.idx.sdk</groupId>
             <artifactId>okta-idx-java-api</artifactId>
         </dependency>
