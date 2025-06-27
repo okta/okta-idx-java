@@ -125,6 +125,23 @@ public class Page {
         return email;
     }
 
+    public String fetchSpecificEmailContent(String mailBody) {
+        String email = null;
+        int totalRetryCount = getRetryCountDuringVerificationCodeFetching();
+        int tryCounter = 0;
+        while(tryCounter < totalRetryCount && !(email != null && email.contains(mailBody))) {
+            waitForNextTry();
+            email = Page.getA18NClient().getLatestEmailContent(Page.getA18NProfile());
+            if(email != null && email.contains(mailBody)) {
+                logger.info("Verification email successfully received.");
+            } else {
+                logger.warn("Attempt {} of {} email fetching failed.", tryCounter, totalRetryCount);
+            }
+            tryCounter++;
+        }
+        return email;
+    }
+
     public String fetchCodeFromRegistrationEmail(String emailContent) {
         Pattern pattern = Pattern.compile("To verify manually, enter this code: (\\d{6})");
         Matcher matcher = pattern.matcher(emailContent);
@@ -147,6 +164,12 @@ public class Page {
 
     public String fetchMagicLinkFromEmail(String emailContent) {
         Pattern pattern = Pattern.compile("\\\"email-authentication-button\\\" href=\\\"(.*?)\\\"");
+        Matcher matcher = pattern.matcher(emailContent);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    public String fetchUnlockMagicLinkFromEmail(String emailContent) {
+        Pattern pattern = Pattern.compile("\\\"unlock-account-link\\\" href=\\\"(.*?)\\\"");
         Matcher matcher = pattern.matcher(emailContent);
         return matcher.find() ? matcher.group(1) : null;
     }
@@ -199,5 +222,12 @@ public class Page {
         }
 
         return value;
+    }
+    public void waitForOneSec() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            logger.error("Exception occurred", e);
+        }
     }
 }
