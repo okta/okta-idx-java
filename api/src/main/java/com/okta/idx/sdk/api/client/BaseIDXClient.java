@@ -63,6 +63,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -300,6 +302,41 @@ final class BaseIDXClient implements IDXClient {
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
 
+            idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
+
+        } catch (IOException | HttpException e) {
+            throw new ProcessingException(e);
+        }
+
+        return idxResponse;
+    }
+
+    public IDXResponse challenge(ChallengeRequest challengeRequest, String href, String preferredLanguage) throws ProcessingException {
+        IDXResponse idxResponse;
+
+        try {
+            HttpHeaders headers = getHttpHeaders(false);
+
+            if (preferredLanguage != null) {
+                headers.put("Accept-Language", Collections.singletonList(preferredLanguage));
+            }
+
+            Request request = new DefaultRequest(
+                    HttpMethod.POST,
+                    href,
+                    null,
+                    headers,
+                    new ByteArrayInputStream(objectMapper.writeValueAsBytes(challengeRequest)),
+                    -1L
+            );
+
+            Response response = requestExecutor.executeRequest(request);
+
+            if (response.getHttpStatus() != 200) {
+                handleErrorResponse(request, response);
+            }
+
+            JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
 
         } catch (IOException | HttpException e) {

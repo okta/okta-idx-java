@@ -48,6 +48,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -202,7 +203,7 @@ public class LoginController {
 
         if ("okta_verify".equals(authenticatorType)) {
             ModelAndView modelAndView;
-
+            String systemLocale = Locale.getDefault().toLanguageTag();
             Optional<Authenticator> authenticatorOptional = authenticators.stream()
                     .filter(auth -> auth.getType().equals(authenticatorType)).findFirst();
             Assert.isTrue(authenticatorOptional.isPresent(), "Authenticator not found");
@@ -212,6 +213,8 @@ public class LoginController {
                     .filter(x -> "QRCODE".equals(x.getLabel())).findFirst();
             Assert.isTrue(factorOptional.isPresent(), "Authenticator not found");
 
+
+            proceedContext.setPreferredLanguage(systemLocale);
             authenticationResponse = idxAuthenticationWrapper.selectFactor(proceedContext, factorOptional.get());
             Util.setProceedContextForPoll(session, authenticationResponse.getProceedContext());
 

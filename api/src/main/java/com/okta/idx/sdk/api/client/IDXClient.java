@@ -48,6 +48,8 @@ public interface IDXClient {
 
     IDXResponse challenge(ChallengeRequest challengeRequest, String href) throws ProcessingException;
 
+    IDXResponse challenge(ChallengeRequest challengeRequest, String href, String preferredLanguage) throws ProcessingException;
+
     IDXResponse answerChallenge(AnswerChallengeRequest answerChallengeRequest, String href) throws ProcessingException;
 
     IDXResponse cancel(String stateHandle) throws ProcessingException;

@@ -39,9 +39,10 @@ public final class ProceedContext {
     private final PollInfo pollInfo;
     private final Duration refresh;
     private final IDXResponse idxResponse;
+    private final String preferredLanguage;
 
     ProceedContext(IDXClientContext clientContext, String stateHandle, String href, String skipHref, boolean isIdentifyInOneStep,
-                   String selectProfileEnrollHref, String resendHref, PollInfo pollInfo, Duration refresh, IDXResponse idxResponse) {
+                   String selectProfileEnrollHref, String resendHref, PollInfo pollInfo, Duration refresh, IDXResponse idxResponse, String preferredLanguage) {
         this.clientContext = clientContext;
         this.stateHandle = stateHandle;
         this.href = href;
@@ -52,6 +53,7 @@ public final class ProceedContext {
         this.pollInfo = pollInfo;
         this.refresh = refresh;
         this.idxResponse = idxResponse;
+        this.preferredLanguage = preferredLanguage;
     }
 
     public IDXClientContext getClientContext() {
@@ -113,4 +115,8 @@ public final class ProceedContext {
     IDXResponse getIdxResponse() {
         return idxResponse;
     }
+
+    public String getPreferredLanguage() {return preferredLanguage; }
+
+    public void setPreferredLanguage(String preferredLanguage) { this.preferredLanguage = preferredLanguage;}
 }

@@ -349,7 +349,7 @@ public class IDXAuthenticationWrapper {
                         .withStateHandle(proceedContext.getStateHandle())
                         .withAuthenticator(authenticator)
                         .build();
-                return client.challenge(request, proceedContext.getHref());
+                return client.challenge(request, proceedContext.getHref(), proceedContext.getPreferredLanguage());
             }).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
