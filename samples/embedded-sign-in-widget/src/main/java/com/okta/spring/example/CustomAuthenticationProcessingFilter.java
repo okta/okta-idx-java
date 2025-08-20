@@ -39,8 +39,11 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResp
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.UrlUtils;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -53,11 +56,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
+
+
 @SuppressWarnings("PMD")
 public class CustomAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
-    private final AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository =
-            new HttpSessionOAuth2AuthorizationRequestRepository();
+    private final AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository = new HttpSessionOAuth2AuthorizationRequestRepository();
 
     private ClientRegistrationRepository clientRegistrationRepository;
 
@@ -139,10 +143,21 @@ public class CustomAuthenticationProcessingFilter extends AbstractAuthentication
                 oauth2User, authenticationResult.getAuthorities(),
                 authenticationResult.getClientRegistration().getRegistrationId());
         oauth2Authentication.setDetails(authenticationDetails);
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(oauth2Authentication);
+        SecurityContextHolder.setContext(context);
+        request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+        request.getSession().setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
         return oauth2Authentication;
     }
 
     public void setClientRegistrationRepository(final ClientRegistrationRepository clientRegistrationRepository) {
         this.clientRegistrationRepository = clientRegistrationRepository;
+    }
+
+    public AuthorizationRequestRepository getAuthorizationRequestRepository() {
+        return this.authorizationRequestRepository;
     }
 }
