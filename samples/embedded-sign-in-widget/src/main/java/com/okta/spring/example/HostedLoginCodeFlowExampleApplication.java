@@ -36,6 +36,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 import java.util.HashSet;
 
+
 /**
  * This example renders a self-hosted login page (hosted within this application). You can use a standard login with less
  * code (if you don't need to customize the login page) see the 'basic' example at the root of this repository.

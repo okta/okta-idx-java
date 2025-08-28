@@ -27,6 +27,10 @@ import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationF
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
+
+//import org.springframework.security.oauth2.client.web.*;
+//import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+
 @Configuration
 public class OAuth2SecurityConfigurerAdapter {
 
@@ -41,18 +45,26 @@ public class OAuth2SecurityConfigurerAdapter {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+        CustomAuthenticationProcessingFilter customAuthenticationProcessingFilter = customAuthenticationProcessingFilter(http);;
+
         http
                 .exceptionHandling(ex -> ex.accessDeniedHandler((req, res, e) -> res.sendRedirect("/403")))
                 .addFilterBefore(customAuthenticationProcessingFilter(http), OAuth2LoginAuthenticationFilter.class)
                 .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/logout").permitAll()
-                        .requestMatchers("/home").permitAll()
-                        .requestMatchers("/hello").permitAll()
+                        .requestMatchers("/", "/custom-login", "/magic-link/callback", "/css/**", "/logout").permitAll()
                         .anyRequest().authenticated()
                 )
                 .logout((logout) -> logout.logoutSuccessUrl("/"))
                 .oauth2Client(Customizer.withDefaults())
-                .oauth2Login(r -> r.redirectionEndpoint(re -> re.baseUri("/authorization-code/callback*")));
+                //.oauth2Login(r -> r.redirectionEndpoint(re -> re.baseUri("/authorization-code/callback*")));
+                .oauth2Login(r -> r
+                    .redirectionEndpoint(re -> re
+                        .baseUri("/authorization-code/callback*")
+                    )
+                    .authorizationEndpoint(authorization -> authorization
+                        .authorizationRequestRepository(customAuthenticationProcessingFilter.getAuthorizationRequestRepository())
+                    )
+                );
 
         return http.build();
     }
