@@ -86,10 +86,26 @@ public class RemediationOption implements Serializable {
      * @throws ProcessingException when the proceed operation encountered an execution/processing error.
      */
     public IDXResponse proceed(IDXClient client, Object request) throws IllegalStateException, IllegalArgumentException, ProcessingException {
+        return proceed(client, request, null);
+    }
+
+    /**
+     * Allow you to continue the remediation with this option.
+     *
+     * @param client the {@link IDXClient} instance
+     * @param request the request to Okta Identity Engine
+     * @param acceptLanguage the {@code Accept-Language} header value to be sent to the Okta Identity Engine. This is used for localization.
+     * @return IDXResponse the response from Okta Identity Engine
+     *
+     * @throws IllegalArgumentException MUST throw this exception when provided data does not contain all required data for the proceed call.
+     * @throws IllegalStateException MUST throw this exception when proceed is called with an invalid/unsupported request type.
+     * @throws ProcessingException when the proceed operation encountered an execution/processing error.
+     */
+    public IDXResponse proceed(IDXClient client, Object request, String acceptLanguage) throws IllegalStateException, IllegalArgumentException, ProcessingException {
         Assert.notNull(request, "request cannot be null");
 
         if (request instanceof IdentifyRequest) return client.identify((IdentifyRequest) request, href);
-        else if (request instanceof ChallengeRequest) return client.challenge((ChallengeRequest) request, href);
+        else if (request instanceof ChallengeRequest) return client.challenge((ChallengeRequest) request, href, acceptLanguage);
         else if (request instanceof AnswerChallengeRequest)
             return client.answerChallenge((AnswerChallengeRequest) request, href);
         else if (request instanceof EnrollRequest) return client.enroll((EnrollRequest) request, href);

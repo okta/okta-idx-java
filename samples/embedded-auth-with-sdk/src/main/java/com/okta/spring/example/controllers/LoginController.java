@@ -214,7 +214,7 @@ public class LoginController {
             Assert.isTrue(factorOptional.isPresent(), "Authenticator not found");
 
 
-            proceedContext.setPreferredLanguage(systemLocale);
+            proceedContext.setAcceptLanguage(systemLocale);
             authenticationResponse = idxAuthenticationWrapper.selectFactor(proceedContext, factorOptional.get());
             Util.setProceedContextForPoll(session, authenticationResponse.getProceedContext());
 
