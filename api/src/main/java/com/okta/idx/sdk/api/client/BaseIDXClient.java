@@ -63,9 +63,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.okta.idx.sdk.api.client.ProceedContext.ACCEPT_LANGUAGE;
 import static com.okta.idx.sdk.api.util.ClientUtil.normalizedIssuerUri;
 
 final class BaseIDXClient implements IDXClient {
@@ -280,17 +282,28 @@ final class BaseIDXClient implements IDXClient {
 
     @Override
     public IDXResponse challenge(ChallengeRequest challengeRequest, String href) throws ProcessingException {
+        return challenge(challengeRequest, href, null);
+    }
 
+    @Override
+    public IDXResponse challenge(ChallengeRequest challengeRequest, String href, String acceptLanguage) throws ProcessingException {
         IDXResponse idxResponse;
 
         try {
+            HttpHeaders headers = getHttpHeaders(false);
+
+            if (acceptLanguage != null) {
+                headers.put(ACCEPT_LANGUAGE, Collections.singletonList(acceptLanguage));
+            }
+
             Request request = new DefaultRequest(
-                HttpMethod.POST,
-                href,
-                null,
-                getHttpHeaders(false),
-                new ByteArrayInputStream(objectMapper.writeValueAsBytes(challengeRequest)),
-                -1L);
+                    HttpMethod.POST,
+                    href,
+                    null,
+                    headers,
+                    new ByteArrayInputStream(objectMapper.writeValueAsBytes(challengeRequest)),
+                    -1L
+            );
 
             Response response = requestExecutor.executeRequest(request);
 
@@ -299,7 +312,6 @@ final class BaseIDXClient implements IDXClient {
             }
 
             JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
-
             idxResponse = objectMapper.convertValue(responseJsonNode, IDXResponse.class);
 
         } catch (IOException | HttpException e) {

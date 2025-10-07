@@ -488,6 +488,88 @@ class EndToEndIT {
         wireMockServer.resetAll()
     }
 
+    @Test
+    void testChallengeWithAcceptLanguageHeader() {
+
+        // interact
+        wireMockServer.stubFor(post(urlPathEqualTo("/oauth2/v1/interact"))
+                .withHeader("Content-Type", containing(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.SC_OK)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("interact-response.json")))
+
+        IDXClientContext idxClientContext = idxClient.interact()
+        wireMockServer.resetAll()
+
+        // introspect
+        wireMockServer.stubFor(post(urlPathEqualTo("/idp/idx/introspect"))
+                .withHeader("Content-Type", containing("application/ion+json;okta-version=1.0.0"))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.SC_OK)
+                        .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
+                        .withBodyFile("introspect-response.json")))
+
+        IDXResponse idxResponse = idxClient.introspect(idxClientContext)
+        wireMockServer.resetAll()
+
+        // identify
+        wireMockServer.stubFor(post(urlPathEqualTo("/idp/idx/identify"))
+                .withHeader("Content-Type", containing("application/ion+json;okta-version=1.0.0"))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.SC_OK)
+                        .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
+                        .withBodyFile("identify-response.json")))
+
+        IdentifyRequest identifyRequest = IdentifyRequestBuilder.builder()
+                .withIdentifier("test@example.com")
+                .withRememberMe(false)
+                .withStateHandle("stateHandle")
+                .build()
+        idxResponse = idxResponse.remediation().remediationOptions().first().proceed(idxClient, identifyRequest)
+        wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/identify"))
+                .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0"))
+                .withoutHeader("Accept-Language"))
+        wireMockServer.resetAll()
+
+        // get remediation options to go to the next step
+        RemediationOption[] remediationOptions = idxResponse.remediation().remediationOptions()
+        Optional<RemediationOption> remediationOptionsOptional = Arrays.stream(remediationOptions)
+                .filter({ x -> ("select-authenticator-authenticate" == x.getName()) })
+                .findFirst()
+        RemediationOption remediationOption = remediationOptionsOptional.get()
+
+        // get authenticator options
+        Map<String, String> authenticatorOptionsMap = remediationOption.getAuthenticatorOptions()
+
+        // select password authenticator challenge
+        wireMockServer.stubFor(post(urlPathEqualTo("/idp/idx/challenge"))
+                .withHeader("Content-Type", containing("application/ion+json;okta-version=1.0.0"))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.SC_OK)
+                        .withHeader("Content-Type", "application/ion+json;okta-version=1.0.0")
+                        .withBodyFile("password-authenticator-challenge-response.json")))
+
+        Authenticator passwordAuthenticator = new Authenticator()
+        passwordAuthenticator.setId(authenticatorOptionsMap.get("password"))
+        passwordAuthenticator.setMethodType("password")
+
+        ChallengeRequest passwordAuthenticatorChallengeRequest = ChallengeRequestBuilder.builder()
+                .withStateHandle("stateHandle")
+                .withAuthenticator(passwordAuthenticator)
+                .build()
+
+        String acceptLanguage = "fr-FR"
+        idxResponse = remediationOption.proceed(idxClient, passwordAuthenticatorChallengeRequest, acceptLanguage)
+
+        assertThat(idxResponse, notNullValue())
+
+        wireMockServer.verify(postRequestedFor(urlEqualTo("/idp/idx/challenge"))
+                .withHeader("Content-Type", equalTo("application/ion+json;okta-version=1.0.0"))
+                .withHeader("Accept-Language", equalTo(acceptLanguage)))
+        wireMockServer.resetAll()
+    }
+
     @AfterClass
     void cleanUp() {
         wireMockServer.shutdown()

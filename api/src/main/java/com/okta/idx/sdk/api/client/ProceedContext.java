@@ -23,6 +23,8 @@ import com.okta.idx.sdk.api.response.IDXResponse;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * An opaque to the developer object that's expected to be given back on the next request.
@@ -39,6 +41,12 @@ public final class ProceedContext {
     private final PollInfo pollInfo;
     private final Duration refresh;
     private final IDXResponse idxResponse;
+    public static final String ACCEPT_LANGUAGE = "Accept-Language";
+
+    /**
+     * store key value pairs of header name -> header value
+     */
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
     ProceedContext(IDXClientContext clientContext, String stateHandle, String href, String skipHref, boolean isIdentifyInOneStep,
                    String selectProfileEnrollHref, String resendHref, PollInfo pollInfo, Duration refresh, IDXResponse idxResponse) {
@@ -104,6 +112,7 @@ public final class ProceedContext {
     /**
      * Identifier first flow is one where just the identifier (email) is sufficient to start
      * the flow (i.e. password is not required at the start of flow).
+     *
      * @return true if identifier first flow, false otherwise
      */
     public boolean isIdentifierFirstFlow() {
@@ -112,5 +121,13 @@ public final class ProceedContext {
 
     IDXResponse getIdxResponse() {
         return idxResponse;
+    }
+
+    public String getAcceptLanguage() {
+        return headers.get(ACCEPT_LANGUAGE);
+    }
+
+    public void setAcceptLanguage(String acceptLanguage) {
+        headers.put(ACCEPT_LANGUAGE, acceptLanguage);
     }
 }

@@ -161,7 +161,7 @@ public class IDXAuthenticationWrapper {
                 return identifyResponse;
             }
 
-            AuthenticationTransaction passwordTransaction = selectPasswordOrEmailAuthenticatorIfNeeded(identifyTransaction);
+            AuthenticationTransaction passwordTransaction = selectPasswordOrEmailAuthenticatorIfNeeded(identifyTransaction, proceedContext.getAcceptLanguage());
             if (Strings.isEmpty(authenticationOptions.getPassword())) {
                 return passwordTransaction.asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_VERIFICATION);
             }
@@ -178,7 +178,7 @@ public class IDXAuthenticationWrapper {
                                 .build();
 
                 return passwordTransaction.getRemediationOption(RemediationType.CHALLENGE_AUTHENTICATOR)
-                        .proceed(client, passwordAuthenticatorAnswerChallengeRequest);
+                        .proceed(client, passwordAuthenticatorAnswerChallengeRequest, proceedContext.getAcceptLanguage());
             });
             return answerTransaction.asAuthenticationResponse();
         } catch (ProcessingException e) {
@@ -218,7 +218,7 @@ public class IDXAuthenticationWrapper {
 
                 // identify user
                 return recoverTransaction.proceed(() ->
-                        remediationOption.proceed(client, identifyRequest)
+                        remediationOption.proceed(client, identifyRequest, proceedContext.getAcceptLanguage())
                 ).asAuthenticationResponse(AuthenticationStatus.AWAITING_AUTHENTICATOR_SELECTION);
             } else {
                 // identify user
@@ -237,7 +237,7 @@ public class IDXAuthenticationWrapper {
 
                 // Check if instead of password, user is being prompted for list of authenticators to select
                 if (identifyResponse.getCurrentAuthenticatorEnrollment() == null) {
-                    identifyTransaction = selectPasswordOrEmailAuthenticatorIfNeeded(identifyTransaction);
+                    identifyTransaction = selectPasswordOrEmailAuthenticatorIfNeeded(identifyTransaction, proceedContext.getAcceptLanguage());
                 }
 
                 Recover recover = identifyTransaction.getResponse()
@@ -349,7 +349,7 @@ public class IDXAuthenticationWrapper {
                         .withStateHandle(proceedContext.getStateHandle())
                         .withAuthenticator(authenticator)
                         .build();
-                return client.challenge(request, proceedContext.getHref());
+                return client.challenge(request, proceedContext.getHref(), proceedContext.getAcceptLanguage());
             }).asAuthenticationResponse();
         } catch (ProcessingException e) {
             return handleProcessingException(e);
@@ -734,7 +734,7 @@ public class IDXAuthenticationWrapper {
     // If app sign-on policy is set to "any 1 factor", the next remediation after identify is
     // select-authenticator-authenticate
     // Check if that's the case, and proceed to select password authenticator
-    private AuthenticationTransaction selectPasswordOrEmailAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction)
+    private AuthenticationTransaction selectPasswordOrEmailAuthenticatorIfNeeded(AuthenticationTransaction authenticationTransaction, String acceptLanguage)
             throws ProcessingException {
         // If remediation contains challenge-authenticator for passcode, we don't need to check SELECT_AUTHENTICATOR_AUTHENTICATE
         Optional<RemediationOption> challengeRemediationOptionOptional =
@@ -769,7 +769,7 @@ public class IDXAuthenticationWrapper {
                 .build();
 
         return authenticationTransaction.proceed(() ->
-                remediationOptionOptional.get().proceed(client, selectAuthenticatorRequest)
+                remediationOptionOptional.get().proceed(client, selectAuthenticatorRequest, acceptLanguage)
         );
     }
 
