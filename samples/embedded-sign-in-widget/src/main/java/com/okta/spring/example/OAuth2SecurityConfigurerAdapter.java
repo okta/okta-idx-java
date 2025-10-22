@@ -27,10 +27,6 @@ import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationF
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
-
-//import org.springframework.security.oauth2.client.web.*;
-//import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
-
 @Configuration
 public class OAuth2SecurityConfigurerAdapter {
 
@@ -45,7 +41,7 @@ public class OAuth2SecurityConfigurerAdapter {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        CustomAuthenticationProcessingFilter customAuthenticationProcessingFilter = customAuthenticationProcessingFilter(http);;
+        CustomAuthenticationProcessingFilter customAuthenticationProcessingFilter = customAuthenticationProcessingFilter(http);
 
         http
                 .exceptionHandling(ex -> ex.accessDeniedHandler((req, res, e) -> res.sendRedirect("/403")))
