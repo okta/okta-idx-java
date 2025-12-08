@@ -24,13 +24,13 @@ export CI=true
 export OKTA_IDX_ISSUER=https://java-idx-sdk-idfirst.okta.com/oauth2/default
 export OKTA_IDX_REDIRECTURI=http://localhost:8080/authorization-code/callback
 export OKTA_IDX_CLIENTID=0oarqdgy46BqaBlFo696
-get_vault_secret_key devex/java-idx-sdk-vars trex_client_secret_password_optional OKTA_IDX_CLIENTSECRET
+get_terminus_secret devex/java-idx-sdk-vars trex_client_secret_password_optional OKTA_IDX_CLIENTSECRET
 export OKTA_CLIENT_ORGURL=https://java-idx-sdk-idfirst.okta.com
-get_vault_secret_key devex/java-idx-sdk-vars trex_client_token_password_optional OKTA_CLIENT_TOKEN
-get_vault_secret_key devex/java-idx-sdk-vars a18n_api_key A18N_API_KEY
+get_terminus_secret devex/java-idx-sdk-vars trex_client_token_password_optional OKTA_CLIENT_TOKEN
+get_terminus_secret devex/java-idx-sdk-vars a18n_api_key A18N_API_KEY
 export OKTA_IDX_SCOPES="openid email profile offline_access"
 export USERNAME=mary@acme.com
-get_vault_secret_key devex/java-idx-sdk-vars password PASSWORD
+get_terminus_secret devex/java-idx-sdk-vars password PASSWORD
 
 # Run the tests
 cd ${OKTA_HOME}/${REPO}
