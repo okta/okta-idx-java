@@ -45,7 +45,7 @@ public class OAuth2SecurityConfigurerAdapter {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        CustomAuthenticationProcessingFilter customAuthenticationProcessingFilter = customAuthenticationProcessingFilter(http);;
+        CustomAuthenticationProcessingFilter customAuthenticationProcessingFilter = customAuthenticationProcessingFilter(http);
 
         http
                 .exceptionHandling(ex -> ex.accessDeniedHandler((req, res, e) -> res.sendRedirect("/403")))
