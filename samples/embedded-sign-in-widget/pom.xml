@@ -32,12 +32,20 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.boot.version>3.3.7</spring.boot.version>
         <okta.springboot.starter.version>3.0.7</okta.springboot.starter.version>
+        <spring-security.version>6.5.9</spring-security.version>
         <java.version>1.8</java.version>
         <okta.sdk.api.version>8.2.2</okta.sdk.api.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-bom</artifactId>
+                <version>${spring-security.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -110,7 +118,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
-            <version>6.4.4</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
