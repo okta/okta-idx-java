@@ -55,4 +55,7 @@ public class PasswordResetPage extends Page {
     @FindBy(className = "okta-form-subtitle")
     public WebElement emailVerificationWaitingScreen;
 
+    @FindBy(xpath = "//h2[text()= 'Reset your password']")
+    public static WebElement resetPasswordPage;
+
 }

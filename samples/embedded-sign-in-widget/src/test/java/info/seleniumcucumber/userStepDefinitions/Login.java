@@ -25,6 +25,7 @@ import io.cucumber.java.en.When;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 import pages.LoginPage;
+import pages.Page;
 import pages.ProfilePage;
 import pages.RootPage;
 
@@ -34,6 +35,7 @@ public class Login extends CucumberRoot {
     protected RootPage rootPage = new RootPage(driver);
     protected LoginPage loginPage = new LoginPage(driver);
     protected ProfilePage profilePage = new ProfilePage(driver);
+    protected Page page = new Page(driver);
 
     @Given("Mary navigates to the Embedded Widget View")
     public void maryNavigatesToTheEmbeddedWidgetView() {
@@ -58,10 +60,33 @@ public class Login extends CucumberRoot {
         loginPage.passwordInput.sendKeys(PASSWORD);
     }
 
+    @And("she fills in her account password")
+    public void she_fills_in_her_account_password() {
+        Assert.assertTrue(loginPage.passwordInput.isDisplayed());
+        loginPage.passwordInput.click();
+        loginPage.passwordInput.sendKeys("Abcd1234");
+    }
+
+    @And("^she fills in her incorrect password$")
+    public void enter_incorrect_password() {
+        loginPage.passwordInput.click();
+        loginPage.passwordInput.sendKeys("invalid123");
+    }
+
     @And("she submits the Login form")
     public void sheSubmitsTheLoginForm() {
         Assert.assertTrue(loginPage.submitButton.isDisplayed());
         loginPage.submitButton.click();
+    }
+
+    @And("she submits the Login form and locks the account")
+    public void sheSubmitsTheLoginFormAndLocksTheAccount() throws InterruptedException {
+        for(int i=0; i < 10; i++) {
+            loginPage.waitForWebElementDisplayed(loginPage.submitButton);
+            Assert.assertTrue(loginPage.submitButton.isDisplayed());
+            loginPage.submitButton.click();
+            page.waitForOneSec();
+        }
     }
 
     @Then("she is redirected to the Root View")
