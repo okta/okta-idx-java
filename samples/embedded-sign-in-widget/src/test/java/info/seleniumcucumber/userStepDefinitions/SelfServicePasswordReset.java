@@ -40,10 +40,10 @@ public class SelfServicePasswordReset extends CucumberRoot {
         passwordResetPage.forgotPasswordLink.click();
     }
 
-    @Then("^she sees the page to input the email address$")
-    public void she_sees_the_page_to_input_the_email_address() {
-        loginPage.waitForWebElementDisplayed(passwordResetPage.enterEmailBox);
-        Assert.assertTrue(passwordResetPage.enterEmailBox.isDisplayed());
+    @Then("^she sees the password reset page$")
+    public void she_sees_the_password_reset_page() {
+        loginPage.waitForWebElementDisplayed(passwordResetPage.resetPasswordPage);
+        Assert.assertTrue(passwordResetPage.resetPasswordPage.isDisplayed());
     }
 
     @And("^she submits the recovery form$")
@@ -104,7 +104,6 @@ public class SelfServicePasswordReset extends CucumberRoot {
     public void she_submits_the_password_reset_form() {
         passwordResetPage.resetPasswordSubmitButton.click();
     }
-
 
     @When("she inputs her correct email address")
     public void she_inputs_her_correct_email_address() {
