@@ -15,13 +15,34 @@
  */
 package com.okta.spring.example.helpers;
 
+import com.okta.commons.lang.Strings;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.RequestContext;
+import com.okta.spring.example.http.CurrentDeviceToken;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.time.Duration;
 import java.util.UUID;
 
 public final class Util {
+
+    /**
+     * Name of the cookie this sample uses to persist a device token across requests from the
+     * same browser, so the same {@code X-Device-Token} value is sent on every request instead
+     * of a new one every time.
+     */
+    public static final String DEVICE_TOKEN_COOKIE_NAME = "okta-sample-device-token";
+
+    /**
+     * Lifetime, in days, of the persisted device token cookie. Mirrors the ~2 year
+     * lifetime of Okta's own device (DT) cookie.
+     */
+    private static final int DEVICE_TOKEN_COOKIE_MAX_AGE_DAYS = 730;
 
     /**
      * removeProceedContextFromSession.
@@ -77,16 +98,68 @@ public final class Util {
     }
 
     /**
-     * Construct RequestContext object with random `X-Device-Token` header value.
+     * Resolves the device token for the current request: reuses the value already persisted in
+     * {@link #DEVICE_TOKEN_COOKIE_NAME} if the browser already has one, otherwise mints a new one
+     * and persists it for future requests. Called once per request by {@code DeviceTokenFilter},
+     * which publishes the result via {@code CurrentDeviceToken} for the rest of the request.
+     *
+     * @param request the servlet request, checked for an existing device token cookie
+     * @param response the servlet response, used to persist a newly generated device token
+     * @return the device token to use for this request
+     */
+    public static String resolveDeviceToken(final HttpServletRequest request, final HttpServletResponse response) {
+        final String existing = readDeviceTokenCookie(request);
+        return Strings.hasText(existing) ? existing : generateAndPersistDeviceToken(response);
+    }
+
+    private static String readDeviceTokenCookie(final HttpServletRequest request) {
+        final Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (final Cookie cookie : cookies) {
+            if (DEVICE_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Generates a new device token and persists it in a long-lived cookie so subsequent requests
+     * from the same browser reuse it, mirroring the ~2 year lifetime of Okta's own device (DT) cookie.
+     *
+     * @param response the servlet response to set the cookie on
+     * @return the newly generated device token
+     */
+    private static String generateAndPersistDeviceToken(final HttpServletResponse response) {
+        // generate random str 32 char long
+        final UUID randomUUID = UUID.randomUUID();
+        final String deviceToken = randomUUID.toString().replaceAll("-", "");
+
+        final ResponseCookie cookie = ResponseCookie.from(DEVICE_TOKEN_COOKIE_NAME, deviceToken)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(Duration.ofDays(DEVICE_TOKEN_COOKIE_MAX_AGE_DAYS))
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return deviceToken;
+    }
+
+    /**
+     * Construct a RequestContext carrying the current request's device token (see
+     * {@link #resolveDeviceToken}) as the {@code X-Device-Token} header.
      *
      * @return request context object
      */
     public static RequestContext constructRequestContext() {
         final RequestContext requestContext = new RequestContext();
-        // generate random str 32 char long
-        final UUID randomUUID = UUID.randomUUID();
-        final String randomString = randomUUID.toString().replaceAll("-", "");
-        requestContext.setDeviceToken(randomString);
+        final String deviceToken = CurrentDeviceToken.get();
+        if (Strings.hasText(deviceToken)) {
+            requestContext.setDeviceToken(deviceToken);
+        }
         return requestContext;
     }
 }
