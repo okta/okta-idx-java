@@ -65,6 +65,21 @@
         <dependency>
             <groupId>com.okta.idx.sdk</groupId>
             <artifactId>okta-idx-java-api</artifactId>
+            <exclusions>
+                <!-- excluded so this sample can register its own RequestExecutorFactory
+                     (CookieAwareRequestExecutorFactory) as the sole ServiceLoader provider;
+                     okta-http-okhttp's own OkHttpRequestExecutor hardcodes CookieJar.NO_COOKIES
+                     with no way to override it. -->
+                <exclusion>
+                    <groupId>com.okta.commons</groupId>
+                    <artifactId>okta-http-okhttp</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
